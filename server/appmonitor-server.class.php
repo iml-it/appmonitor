@@ -395,8 +395,9 @@ class appmonitorserver {
                 . '.divhost{float: left; padding: 0.5em; border: 1px solid #ccc; margin: 0 1em 1em 0; border-radius: 0.5em;}'
                 . '.footer{border-top: 5px solid #33c; margin-top: 20em; padding: 0.2em 1em; background: #333; color:#888;position: fixed; bottom: 0;width: 100%; }'
                 . '.result0{background:#efe !important;}'
-                . '.result1{background:#fff8d0 !important;}'
-                . '.result2{background:#fdd !important;}'
+                . '.result1{background:#f0f0f0 !important;}'
+                . '.result2{background:#fff8d0 !important;}'
+                . '.result3{background:#fdd !important;}'
                 
                 // warnings and error messages
                 . '.divwarning{background:#fff0c0 !important; margin: 0 0 2em; padding: 1em;}'

@@ -1,9 +1,9 @@
 <?php
 
 define("RESULT_OK", 0);
-define("RESULT_WARNING", 1);
-define("RESULT_ERROR", 2);
-define("RESULT_UNKNOWN", 255);
+define("RESULT_UNKNOWN", 1);
+define("RESULT_WARNING", 2);
+define("RESULT_ERROR", 3);
 /** 
  * APPMONITOR CLIENT CHECKS<br>
  * <br>
