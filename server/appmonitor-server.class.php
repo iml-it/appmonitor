@@ -278,7 +278,7 @@ class appmonitorserver {
                         || !array_key_exists("checks", $aEntries)
                         || !count($aEntries["checks"])
                 ) {
-                    $sReturn.='<tr class="result2">'
+                    $sReturn.='<tr class="result3">'
                             . '<td>?</td>'
                             . '<td>?</td>'
                             . '<td>' . date("Y-m-d H:i:s", $aEntries["meta"]["ts"]) . ' (' . (date("U") - $aEntries["meta"]["ts"]) . '&nbsp;s)</td>'
@@ -346,6 +346,9 @@ class appmonitorserver {
         $sId = 'divdebug';
         $sHtml.='<div class="outsegment" id="' . $sId . '">'
                 . '<h2>Debug</h2>'
+                . '<h3>config</h3>'
+                . '<pre>' . print_r($this->_urls, true) . '</pre>'
+                . '<h3>client data</h3>'
                 . '<pre>' . print_r($this->_data, true) . '</pre>'
                 . '</div>';
         return $sHtml;
@@ -381,21 +384,22 @@ class appmonitorserver {
                 . '<style>'
                 . 'body{background:#f8f8f8; color:#223; font-family:"arial"; margin: 0; font-size: 90%;}'
                 . 'a{color:#67c;}'
-                . 'h1{color:#68c; margin: 0 0.5em 0 0; float: left;}'
-                . 'h2{padding-top: 5em; color:#46a;}'
+                . 'h1{color:#ace; color: rgba(255,255,255,0.3); margin: 0 0.5em 0 0; float: left;}'
+                . 'h2{padding-top: 5em; color:#657;}'
+                . 'pre{background:#eee;}'
                 . 'table.dataTable tbody tr:hover{background:#f0f4ff;}'
                 . '.divtop{position: fixed; top: 0; z-index: 1000; width: 100%; padding: 0; }'
-                . '.divtopheader{background:#222; color:#888; width: 100%; padding: 1em; opacity:1; }'
-                . '.divtopnavi{background:#888; color:#111; width: 100%; padding: 0.5em 1em 0.3em ; opacity:0.9; }'
+                . '.divtopheader, .divtopnavi,  .footer{background:#aaa; background:linear-gradient(110deg,#779,#878,#779,#ba9,#abc,#fff); color:#eee;}'
+                . '.divtopheader{background1:#234; background1: linear-gradient(20deg, #325, #222, #325, #568, #ace, #fff) repeat scroll 0 0 rgba(0, 0, 0, 0); color:#333; width: 100%; padding: 0.3em 1em 1em; opacity:1; }'
+                . '.divtopnavi{width: 100%; padding: 0.5em 1em 0.3em ; opacity:0.8; border-top: 0px solid #fca;}'
                 . '.divtopnavi a{color:#fff; text-decoration:none;padding: 0.3em; margin-right: 0.3em; border-radius: 0.5em 0.5em 0 0;}'
-                . '.divtopnavi a:hover{background:#999;}'
+                . '.divtopnavi a:hover{background:#999;background:rgba(0,0,0,0.2);}'
                 . '.divtopnavi a.active{background:#fff; color:#338;}'
                 . '.divmain{margin: 0 3%;}'
                 . '.divsourceinfo{background:#ddd; padding: 1em; }'
                 . '.divhost{float: left; padding: 0.5em; border: 1px solid #ccc; margin: 0 1em 1em 0; border-radius: 0.5em;}'
-                . '.footer{border-top: 5px solid #33c; margin-top: 20em; padding: 0.2em 1em; background: #333; color:#888;position: fixed; bottom: 0;width: 100%; }'
+                . '.footer{border-top: 1px solid #38c; margin-top: 20em; padding: 0.2em 1em; position: fixed; bottom: 0;width: 100%; }'
                 . '.result0{background:#efe !important;}'
-                . '.result1{background:#f0f0f0 !important;}'
                 . '.result2{background:#fff8d0 !important;}'
                 . '.result3{background:#fdd !important;}'
                 

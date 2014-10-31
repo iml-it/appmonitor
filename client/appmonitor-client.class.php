@@ -237,17 +237,17 @@ class appmonitor {
             if ($bHighlight) {
                 $aMsg=array(
                     0=>"OK",
-                    1=>"WARNING",
-                    2=>"ERROR",
-                    255=>"UNKNOWN"
+                    1=>"UNKNOWN",
+                    2=>"WARNING",
+                    3=>"ERROR"
                 );
                 foreach(array_keys($aMsg) as $iCode){
                     $sOut = preg_replace('/(\"result\":\ '.$iCode.')/', '$1 <span class="result'.$iCode.'"> &lt;--- '.$aMsg[$iCode].' </span>', $sOut);
                 }
                 
-                $sOut = preg_replace('/:\ \"(.*)\"/U', ': "<span style="color:#66e;">$1</span>"', $sOut);
-                $sOut = preg_replace('/:\ ([0-9]*)/', ': <span style="color:#3a3; font-weight: bold;">$1</span>', $sOut);
-                $sOut = preg_replace('/\"(.*)\":/U', '"<span style="color:#e90;">$1</span>":', $sOut);
+                $sOut = preg_replace('/:\ \"(.*)\"/U', ': "<span style="color:#22a;">$1</span>"', $sOut);
+                $sOut = preg_replace('/:\ ([0-9]*)/', ': <span style="color:#2a2; font-weight: bold;">$1</span>', $sOut);
+                $sOut = preg_replace('/\"(.*)\":/U', '"<span style="color:#840;">$1</span>":', $sOut);
 
                 $sOut = preg_replace('/([{\[])/', '$1<blockquote>', $sOut);
                 $sOut = preg_replace('/([}\]])/', '</blockquote>$1', $sOut);
@@ -257,15 +257,17 @@ class appmonitor {
                 
                 $sOut = '<!DOCTYPE html><html><head>'
                 . '<style>'
-                . 'body{background:#282830; color:#9ac; font-family: verdana,arial;}'
-                . 'blockquote{background:rgba(215,180,255,0.03); border-left: 5px solid #222; margin-top: 0; padding: 0; ;}'
-                . 'blockquote blockquote:hover{border-color: #345; }'
+                        
+                . 'body{background:#e0e8f8; color:#235; font-family: verdana,arial;}'
+                . 'blockquote{background:rgba(0,0,0,0.03); margin: 0 1em 0 3em; padding: 0; border-radius: 1em; border-top-left-radius: 0;}'
+                . 'blockquote blockquote:hover{; }'
                 . 'blockquote blockquote blockquote:hover{border-color: #808;}'
-                . 'pre{background:#222; padding: 1em; border-radius: 1em;}'
-                . '.result0{background:#080; border-right: 1em solid #0f0;}'
-                . '.result1{background:#860; border-right: 1em solid #fc0;}'
-                . '.result2{background:#800; border-right: 1em solid #f00;}'
-                . '.result255{background:#666; border-right: 1em solid #ccc;}'
+                . 'pre{background:rgba(0,0,0,0.05); padding: 1em; border-radius: 1em;}'
+                . '.result0{background:#aca; border-right: 0em solid #080;}'
+                . '.result1{background:#666; border-right: 0em solid #ccc;}'
+                . '.result2{background:#fc9; border-right: 0em solid #860;}'
+                . '.result3{background:#800; border-right: 0em solid #f00;}'
+
                 . '</style>'
                 . '<title>'.__CLASS__.'</title>'
                 . '</head><body>'
