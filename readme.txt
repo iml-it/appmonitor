@@ -136,9 +136,9 @@ $oMonitor->addCheck(
 parameters:
 - result (integer)
   0   = OK
-  1   = Warning
-  2   = Error
-  255 = unknown
+  1   = unknown
+  2   = Warning
+  3   = Error
 - value (string)
 
 
