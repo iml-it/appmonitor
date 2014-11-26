@@ -1,7 +1,7 @@
 <?php
 /*
  * this is a sample file for the appmonitor client
- * copy the sample file to index.php and modify it as needed (see ../readme.txt).
+ * copy the sample file to index.php and modify it as needed (see ../readme.md).
  */
 
 require_once('appmonitor-client.class.php');

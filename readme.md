@@ -1,23 +1,19 @@
 
-# APPMONITOR #
+# APPMONITOR - proof of concept#
 
-	
 University Berne
 IML - Institute for medical education
 
+https://github.com/iml-it/appmonitor
 
-The appmonitor consists of 2 parts
+- - -
+
+The appmonitor is a monitoring tool that consists of 2 parts
 - client installation - this makes necessary checks for a website and responds
   JSON data
 - server - it collects all JSON data and presents an overview over all checks
   and websites
 
-The server uses 
-- a cache class that stores serialized data as file
-  http://www.axel-hahn.de/projects/php/ahcache/
-- jquery and datatables plugin
-  http://jquery.com/
-  http://datatables.net/
 
 
 # REQUIREMENTS #
@@ -31,13 +27,22 @@ This app ships a php client.
 You can implement the client in other languages. You need to create scripts
 that makes the wanted checks and sends a result as JSON in a given structure.
 
-see section NON-PHP CLIENTS.
+(*) You can implement the client in other languages. The only thing you need to
+know is to send a JSON response. See section NON-PHP CLIENTS below.
 
 
 ## SERVER ##
 
 - php5.3
 - php5-curl
+
+The server uses 
+
+- [ahCache] (http://www.axel-hahn.de/projects/php/ahcache/) class to store 
+   serialized data as file (included)
+- [jquery] (http://jquery.com/)
+- [datatables plugin] (http://datatables.net/) - both will be loaded from CDN
+
 
 
 # INSTALLATION #
@@ -58,34 +63,41 @@ The webgui that fetches all client checks and renders a website.
 1. Below a document root of the monitoring server create a directory 
    [webroot]/appmonitor/
 2. copy all files of [package]/server/ into [webroot]/appmonitor/
-3. copy [webroot]/appmonitor/appmonitor-server-config-sample.json
-   to [webroot]/appmonitor/appmonitor-server-config.json
-4. open appmonitor-server-config.json and verify the url for the
-   appmonitor client: 
-
-		{
-		  "urls":[
-		    "http://localhost/appmonitor/"
-		    ]
-		}
-
-5. verify the installation with your browser
+3. In the ./appmonitor/ directory the apache user needs write access to
+   save a config file.
+4. verify the installation with your browser
    http://[your-website]/appmonitor/server.php
+5. You get a welcome message and a link to the setup page.
+   In the setup page enter an url to a client check, i.e.
+   http://[your-website]/appmonitor/
+
+The last step creates a config file 
+[webroot]/appmonitor/appmonitor-server-config.json that looks like that
+
+    {
+      "urls":[
+        "http://localhost/appmonitor/"
+        ]
+    }
 
 Remarks:
 - The filenames of client and server are unique. You can put the files for 
   client and server into the same directory too.
 - the server creates a cache directory below webroot
   [webroot]/~cache/
+  to change it see the file cache.class_config.php
 - The steps use the subdir ./appmonitor/ - but you can put all files
   into any directory/ subdirectory.
 
 
-# CHECKS ON CLIENT SIDE #
 
+# CHECKS ON CLIENT SIDE WITH PHP CLIENT #
 
+Remark:
+You can implement the client in other languages. The only thing you need to
+know is to send a JSON response. See section NON-PHP CLIENTS below.
 
-in the index.php of a client you can add several checks with the class that
+In the index.php of a client you can add several checks with the class that
 was initialized on top of the file.
 
 The class has a render method that generates the json for you.
@@ -95,11 +107,11 @@ as many checks you want.
 The syntax is
 
 	$oMonitor->addCheck(
-        array(
-            "name" => "[short name of the check]",
-            "description" => "[an a bit longer description]",
-            "check" => [Array for the check],
-        )
+	array(
+		"name" => "[short name of the check]",
+		"description" => "[an a bit longer description]",
+		"check" => [Array for the check],
+	)
 	);
 
 The check contains 2 keys:
@@ -158,7 +170,7 @@ yet.
 This check verifies if a given string exists in the reponse body of a given url.
 
 	$oMonitor->addCheck(
-        array(
+           array(
             "name" => "HttpContent 1",
             "description" => "check string hello in my url",
             "check" => array(

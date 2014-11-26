@@ -15,8 +15,9 @@
  * <br>
  * --- HISTORY:<br>
  * 2014-10-24  0.5  axel.hahn@iml.unibe.ch<br>
+ * 2014-11-21  0.6  axel.hahn@iml.unibe.ch  removed meta::ts <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.5
+ * @version 0.6
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -77,7 +78,6 @@ class appmonitor {
             "host" => false,
             "website" => false,
             "ttl" => false,
-            "ts" => (int) date("U"),
             "result" => false
         );
 
@@ -245,8 +245,8 @@ class appmonitor {
                     $sOut = preg_replace('/(\"result\":\ '.$iCode.')/', '$1 <span class="result'.$iCode.'"> &lt;--- '.$aMsg[$iCode].' </span>', $sOut);
                 }
                 
-                $sOut = preg_replace('/:\ \"(.*)\"/U', ': "<span style="color:#22a;">$1</span>"', $sOut);
-                $sOut = preg_replace('/:\ ([0-9]*)/', ': <span style="color:#2a2; font-weight: bold;">$1</span>', $sOut);
+                $sOut = preg_replace('/:\ \"(.*)\"/U', ': "<span style="color:#66e;">$1</span>"', $sOut);
+                $sOut = preg_replace('/:\ ([0-9]*)/', ': <span style="color:#3a3; font-weight: bold;">$1</span>', $sOut);
                 $sOut = preg_replace('/\"(.*)\":/U', '"<span style="color:#840;">$1</span>":', $sOut);
 
                 $sOut = preg_replace('/([{\[])/', '$1<blockquote>', $sOut);
@@ -259,7 +259,7 @@ class appmonitor {
                 . '<style>'
                         
                 . 'body{background:#e0e8f8; color:#235; font-family: verdana,arial;}'
-                . 'blockquote{background:rgba(0,0,0,0.03); margin: 0 1em 0 3em; padding: 0; border-radius: 1em; border-top-left-radius: 0;}'
+                . 'blockquote{background:rgba(0,0,0,0.03); border-left: 0px solid rgba(0,0,0,0.06); margin: 0 0 0 3em; padding: 0; border-radius: 1em; border-top-left-radius: 0;}'
                 . 'blockquote blockquote:hover{; }'
                 . 'blockquote blockquote blockquote:hover{border-color: #808;}'
                 . 'pre{background:rgba(0,0,0,0.05); padding: 1em; border-radius: 1em;}'
