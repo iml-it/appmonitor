@@ -156,7 +156,7 @@ parameters:
 
 - result (integer)  
   0   = OK  
-  1 = unknown  
+  1   = unknown  
   2   = Warning  
   3   = Error  
 - value (string)
@@ -243,7 +243,6 @@ returns JSON answers with the conventions described below.
         "host": "[string: name of the computer]", 
         "website": "[string: domain (and maybe path) of the webapp]", 
         "ttl": [integer: ttl for the server gui], 
-        "ts": [integer: unix timestamp], 
         "result": [integer: 0..3]
     }, 
     "checks": [
@@ -282,9 +281,6 @@ The meta key has these subkeys
   Time to live value in seconds. The server GUI respects this value and does
   not ask the appmonitor client more often. A goof value for beginning is
   60 or 300 (1 min/ 5 min)
-  
-- "ts": [integer: unix timestamp]
-  unix timestamp of the request. Maybe it is obsolet.
   
 - "result": [integer: 0..3]
   Result code of all checks of the webapp.
