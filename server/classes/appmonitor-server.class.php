@@ -703,7 +703,7 @@ class appmonitorserver {
                 . '<script type="text/javascript" src="datatables/media/js/jquery.js"></script>' . "\n"
                 . '<script type="text/javascript" src="datatables/media/js/jquery.dataTables.min.js"></script>' . "\n"
                 . '<script type="text/javascript" src="javascript/functions.js"></script>' . "\n"
-                . '<link href="datatables/media/css/jquery.dataTables.css" rel="stylesheet"/>'
+                . '<link href="datatables/media/css/jquery.dataTables.min.css" rel="stylesheet"/>'
                 . '<link href="themes/default.css" rel="stylesheet"/>'
                 . '</head>' . "\n"
                 . '<body>' . "\n"
