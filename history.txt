@@ -1,0 +1,12 @@
+
+HISTORY
+
+
+v0.07  2014-11-28
+	- added: font for icons
+	- restructured: files for server webgui 
+	  jquery, datatable and font will be loaded as local ressources
+	- added: language specific texts come from a language file
+
+v0.06  2014-11-27
+	- first public version on Github

@@ -2,7 +2,7 @@
 # APPMONITOR - proof of concept#
 
 University Berne
-IML - Institute for medical education
+IML - Institute of Medical Education
 
 https://github.com/iml-it/appmonitor
 
@@ -41,7 +41,8 @@ The server uses
 - [ahCache] (http://www.axel-hahn.de/projects/php/ahcache/) class to store 
    serialized data as file (included)
 - [jquery] (http://jquery.com/)
-- [datatables plugin] (http://datatables.net/) - both will be loaded from CDN
+- [datatables plugin] (http://datatables.net/)
+- [font-awesome] (http://fortawesome.github.io/Font-Awesome/)
 
 
 
@@ -55,6 +56,7 @@ The client part of the monitoring.
 3) copy [webroot]/appmonitor/index-sample.php to [webroot]/appmonitor/index.php
 4) verify the installation with your browser
    http://[your-website]/appmonitor/
+   You should see some JSON output
 
 ## SERVER ##
 
@@ -62,17 +64,18 @@ The webgui that fetches all client checks and renders a website.
 
 1. Below a document root of the monitoring server create a directory 
    [webroot]/appmonitor/
-2. copy all files of [package]/server/ into [webroot]/appmonitor/
-3. In the ./appmonitor/ directory the apache user needs write access to
-   save a config file.
+2. copy all files of [package]/server/ to [webroot]/appmonitor/server/
+3. In the ./appmonitor/server/config/ directory the apache user needs write 
+   access to save a config file.
 4. verify the installation with your browser
-   http://[your-website]/appmonitor/server.php
+   http://[your-website]/appmonitor/server/server.php
 5. You get a welcome message and a link to the setup page.
    In the setup page enter an url to a client check, i.e.
    http://[your-website]/appmonitor/
 
 The last step creates a config file 
-[webroot]/appmonitor/appmonitor-server-config.json that looks like that
+[webroot]/appmonitor/server/config/appmonitor-server-config.json that looks 
+like that
 
     {
       "urls":[
@@ -81,13 +84,11 @@ The last step creates a config file
     }
 
 Remarks:
-- The filenames of client and server are unique. You can put the files for 
-  client and server into the same directory too.
 - the server creates a cache directory below webroot
   [webroot]/~cache/
   to change it see the file cache.class_config.php
 - The steps use the subdir ./appmonitor/ - but you can put all files
-  into any directory/ subdirectory.
+  of a client and of the server into any directory/ subdirectory.
 
 
 

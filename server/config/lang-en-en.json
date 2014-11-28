@@ -1,0 +1,62 @@
+{
+    "Reload": "Reload",
+    "Reload-hint": "Reload the page",
+    
+    "Webs": "Webs",
+    "Webs-header": "Monitor :: Webs",
+    
+    
+    "Checks": "Checks",
+    "Checks-header": "Overview with all Checks",
+    
+    "Setup": "Setup",
+    "Setup-client-list": "List of existing Clients",
+    "Setup-add-client": "Add client url",
+    "Setup-add-client-pretext": "Enter an appmonitor client url to add a new monitor:",
+    
+    "Debug": "Debug",
+    "Debug-config": "config",
+    "Debug-urls": "urls",
+    "Debug-clientdata": "client data",
+    
+
+    "generated-at": "generated at %s",
+
+    "Host": "Host", 
+    "Website": "Website", 
+    "Timestamp": "Timestamp", 
+    "TTL": "TTL", 
+    "Check": "Check", 
+    "Description": "Description", 
+    "Result": "Result", 
+    "Output": "Output",
+    "Url": "Url", 
+
+
+    "Result-checks": "Checks",
+    "Resulttype-0": "OK",
+    "Resulttype-1": "unknown",
+    "Resulttype-2": "warning",
+    "Resulttype-3": "error",
+
+
+    "btn-addUrl": "add",
+    "btn-back": "back",
+    
+    "btn-deleteUrl": "delete",
+    "btn-deleteUrl-confirm": "Are you sure that you want to delete the url\\n\\n%s\\n\\n?",
+    
+    
+    "msgErr-nocheck": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>To add an url to check go to the <a href=#divsetup>Setup</a><br><br>Remark: You also can edit the config file %s.</p>",
+    "msgErr-nodata": "ERROR: Sorry, no response from any website. See Tab <a href=#divall>Overview</a> for details.",
+    "msgErr-missedchecks": "ERROR: <strong>%d</strong> check(s) failed. The view is incomplete. See Tab <a href=#divall>Checks</a> for details.",
+    
+    "msgErr-Http-request-failed": "Http Request to appmonitor failed.",
+    
+    "msgErr-Url-not-added-no-appmonitor": "URL not added: %s - it does not seems to be an app monitor url.",
+    "msgErr-Url-was-added-already": "Skip. URL was added already: %s.",
+    "msgErr-Url-not-removed-it-does-not-exist": "URL cannot be removed - it doees not exist in the config: %s.",
+    "msgOK-Url-was-removed": "URL was removed: %s",
+    
+    "lastentry": "This is just a Dummy entry without comma at the end of line"
+}

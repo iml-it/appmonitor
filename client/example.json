@@ -1,0 +1,33 @@
+{
+    "meta": {
+        "host": "my-computer", 
+	"website": "localhost", 
+	"ttl": 300, 
+	"result": 1
+    }, "checks": [
+        {
+            "name": "simple ok", 
+	    "description": "Very simple test", 
+	    "result": 0, 
+	    "value": "The appmonitor client is reachable."
+        },
+        {
+            "name": "simple unknown", 
+	    "description": "a dummy test with unknown status", 
+	    "result": 1, 
+	    "value": "any message"
+        },
+        {
+            "name": "simple warning", 
+	    "description": "a dummy warning", 
+	    "result": 2, 
+	    "value": "warning message"
+        },
+        {
+            "name": "dummy error", 
+	    "description": "a dummy error test", 
+	    "result": 3, 
+	    "value": "ERROR: the error message was not found"
+        } 
+    ] 
+}
