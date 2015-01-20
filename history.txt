@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.08  2015-01-20
+	- fixed: some html code; icons
+	- added: demo mode for server script
+	- added: nagios plugin
 
 v0.07  2014-11-28
 	- added: font for icons

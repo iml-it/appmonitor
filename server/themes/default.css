@@ -30,7 +30,15 @@ table.dataTable tbody tr:hover{background:rgba(255,255,255,0.2); }
     background-color: #aaa;background-color:rgba(0,200,0,0.3);
 }
 .divmain{margin: 0 3% 5em;}.divsourceinfo{background:#ddd; padding: 1em; }
-.divlog{background: #fec; position: fixed; top: 1em; right: 2em; z-index: 1000; border: 0px solid rgba(0,0,0,0.2); padding: 0;}
+#divmodal{
+    position: fixed; height: 100%; width: 100%; top:0; left:0;
+    background: #ccc; background: rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+.divlog{}
+.divdialog{background: #fff; position: absolute; margin-top: 20%; margin-left: 30%; z-index: 1000; 
+border: 2px solid rgba(0,0,0,0.4); border-radius: 1em; box-shadow: 0 0 1em #888;
+padding: 1em;}
 .divlog div{padding: 0.5em;}
 .divlogok{background:#afa; }
 .divloginfo{background:#fff8d0; }
@@ -60,6 +68,7 @@ table.dataTable tbody tr:hover{background:rgba(255,255,255,0.2); }
 .btnadd{color:#383; background-color:#ada; background: linear-gradient(-45deg,#ada,#afa,#ada);}
 .btndel{color:#833; background-color:#faa; background: linear-gradient(-45deg,#d88,#ebb,#d88);}
 .divhost .btndel{margin-top: -0.4em;}
+.divdialog .btn{position: absolute; right: 1em;}
 
 .divok{margin: 0 0 2em; padding: 1em;}
 .divwarning{background:#fff0c0 !important; margin: 0 0 2em; padding: 1em;}
