@@ -28,7 +28,7 @@
 // GET DATA
 // ----------------------------------------------------------------------
 
-    require_once('../classes/appmonitor-server.class.php');
+    require_once(dirname(__DIR__).'/classes/appmonitor-server.class.php');
     $oMonitor = new appmonitorserver();
 
     $aData=$oMonitor->getMonitoringData();

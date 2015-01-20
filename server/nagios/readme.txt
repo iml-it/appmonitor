@@ -50,3 +50,17 @@ define service {
     use                             generic-service,graphed-service
 }
 (...)
+
+--- set a directory for caching
+
+edit /var/www/appmonitor/server/classes/cache.class_config.php
+and enable 
+(...)
+$this->_sCacheDir="/tmp/ahcache";
+(...)
+
+background: http requests cache below webroot by default; calling the CLI
+does not know the DOCUMENT_ROOT of a webserver.
+
+Ensure that the cache is accessible by nagios and webserver user 
+(www-data, wwwrun)
