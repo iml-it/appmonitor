@@ -20,7 +20,7 @@
  * --------------------------------------------------------------------------------<br>
  * <br>
  * --- HISTORY:<br>
- * 2015-01-12  0.8  axel.hahn@iml.unibe.ch   fixed icons, nagios check<br>
+ * 2015-01-20  0.8  axel.hahn@iml.unibe.ch   fixed icons, nagios check<br>
  * 2014-11-27  0.7  axel.hahn@iml.unibe.ch   added icons, lang texts, ...<br>
  * 2014-11-21  0.6  axel.hahn@iml.unibe.ch   added setup functions<br>
  * 2014-10-24  0.5  axel.hahn@iml.unibe.ch<br>
@@ -63,12 +63,11 @@ class appmonitorserver {
     private $_sLang = 'en-en'; // default language
     private $_aLang = array(); // language texts
     private $_bDebug = false;  // show debug tab?
-    private $_bIsDemo = true;  // set true to disallow changing config in webgui
+    private $_bIsDemo = false; // set true to disallow changing config in webgui
 
     /**
      * constructor
      */
-
     public function __construct() {
         $this->_loadLangTexts();
         $this->_loadConfig();
@@ -176,7 +175,10 @@ class appmonitorserver {
             }
         }
         if ($sOut){
-            $sOut.='<a href="#" class="reload" onclick="reloadPage()">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a>';
+            $sOut='<div id="divmodal"><div class="divdialog">'
+                    . $sOut
+                    . '<br><a href="#" class="btn " onclick="reloadPage()">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a><br><br>'
+                    . '</a></div>';
         }
         return $sOut;
     }
@@ -384,10 +386,15 @@ class appmonitorserver {
         }
         return false;
     }
-    
+
+    /**
+     * switch demo mode on off
+     * TODO: check how switch demo mode and handle parameters
+     * @param type $bBool
+     * @return type
+     */
     public function setDemoMode($bBool=true) {
-        $this->_bIsDemo=$bBool;
-        return true;
+        return $this->_bIsDemo=$bBool;
     }
 
     // ----------------------------------------------------------------------
@@ -617,6 +624,11 @@ class appmonitorserver {
         return $sHtml;
     }
 
+    /**
+     * get all client data and final result as array
+     * @param   string  $sHost  filter by given hostname
+     * @return  array
+     */
     public function getMonitoringData($sHost = false) {
 
         $aReturn = array();
