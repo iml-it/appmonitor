@@ -170,19 +170,19 @@ yet.
 
 This check verifies if a given string exists in the reponse body of a given url.
 
-	$oMonitor->addCheck(
-           array(
+    $oMonitor->addCheck(
+        array(
             "name" => "HttpContent 1",
             "description" => "check string hello in my url",
             "check" => array(
                 "function" => "HttpContent",
                 "params" => array(
                     "url" => "http://[server]/[path]/",
-                    "value" => "hello",
+                    "contains" => "hello",
                 ),
             ),
         )
-	);
+    );
 
 
 parameters:
@@ -195,19 +195,34 @@ parameters:
 
 verify a database connection with mysqli_connect function.
 
-	mysqli_connect(
-	  $aParams["server"], 
-	  $aParams["user"], 
-	  $aParams["password"], 
-	  $aParams["db"]
-	);
+    // example: parse a myasl connect string
+    require_once '../config/inc_config.php';
+    $aDb=parse_url($aCfg['databases']['writer']);
+    $aDb['path']=str_replace('/', '', $aDb['path']);
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "Mysql Master",
+            "description" => "Connect mysql db master ".$aDb['host']." - " . $aDb['path'],
+            "check" => array(
+                "function" => "MysqlConnect",
+                "params" => array(
+                  "server"   => $aDb['host'],
+                  "user"     => $aDb['user'],
+                  "password" => $aDb['pass'],
+                  "db"       => $aDb['path'],
+                ),
+            ),
+        )
+    );
 
 parameters:
 
-- "server" 
-- "user" 
-- "password"
-- "db" 
+- "server"   - hostname/ ip of mysql server
+- "user"     - mysql username
+- "password" - password
+- "db"       - database to connect
+
 
 ## checkSqliteConnect ##
 
@@ -220,17 +235,29 @@ parameters:
 - "db" (string) full path of the sqlite database file
 
 
-## checkListeningIp ##
+## checkPortTcp ##
 
 Check if the local server is listening to a given port number.
 
-Remark: 
-this check is based on netstat command and works unix based systems only 
-(so far).
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "Port local SSH",
+            "description" => "check port 22",
+            "check" => array(
+                "function" => "PortTcp",
+                "params" => array(
+                    "port" => 22,
+                ),
+            ),
+        )
+    );
 
 parameters:
 
 - "port" (integer) port to check
+- "host" (string)  optional: hostname to connect to; if unavailable 127.0.0.1
+  will be tested
 
 
 # NON-PHP CLIENTS #
@@ -239,7 +266,7 @@ If you dont use php on your webserver you can create your own client that
 returns JSON answers with the conventions described below.
 
 
-	{
+    {
     "meta": {
         "host": "[string: name of the computer]", 
         "website": "[string: domain (and maybe path) of the webapp]", 
@@ -261,7 +288,7 @@ returns JSON answers with the conventions described below.
             "value": "[string: result in words]" 
         }
     ] 
-	}
+    }
 
 The response has 2 keys:
 

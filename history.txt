@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.09  2015-04-08
+	- added: php-client: port check with socket connection
+
 v0.08  2015-01-20
 	- fixed: some html code; icons
 	- added: demo mode for server script

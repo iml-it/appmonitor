@@ -20,8 +20,9 @@ define("RESULT_ERROR", 3);
  * <br>
  * --- HISTORY:<br>
  * 2014-10-24  0.5  axel.hahn@iml.unibe.ch<br>
+ * 2015-04-08  0.9  axel.hahn@iml.unibe.ch  added sochket test: checkPortTcp<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.5
+ * @version 0.9
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -283,7 +284,43 @@ class appmonitorcheck {
         }
     }
 
+    
     /**
+     * check if system is listening to a given port
+     * @param array $aParams
+     * array(
+     *     "port" 
+     *     "host"  (optional: 127.0.0.1 is default)
+     * )
+     * @return boolean
+     */
+    private function checkPortTcp($aParams) {
+        $this->_checkArrayKeys($aParams, "port");
+        
+        $sHost=array_key_exists('host',$aParams)?$aParams['host']:'127.0.0.1';
+        $iPort=(int)$aParams['port'];
+        
+        // from http://php.net/manual/de/sockets.examples.php
+        
+        $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        if ($socket === false) {
+            $this->_setReturn(RESULT_UNKNOWN, "ERROR: $sHost:$iPort was not checked. socket_create() failed: " . socket_strerror(socket_last_error()));
+            return false;
+        }
+        
+        $result = socket_connect($socket, $sHost, $iPort);
+        if ($result === false) {
+            $this->_setReturn(RESULT_ERROR, "ERROR: $sHost:$iPort failed. " . socket_strerror(socket_last_error($socket)));
+            socket_close($socket);
+            return false;
+        } else {
+            $this->_setReturn(RESULT_OK, "OK: $sHost:$iPort was connected.");
+            socket_close($socket);
+            return true;
+        }
+    }    
+    /**
+     * DEPRECATED - use checkPortTcp instead
      * check if system is listening to a given port
      * @param array $aParams
      * array(
