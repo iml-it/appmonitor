@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.10  2015-11-10
+	- added: php-client: public method getResults() to get the output data
+      as an array
+
 v0.09  2015-04-08
 	- added: php-client: port check with socket connection
 

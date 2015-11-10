@@ -163,7 +163,7 @@ class appmonitor {
     // ----------------------------------------------------------------------
     // getter
     // ----------------------------------------------------------------------
-
+    
     /**
      * list all available check functions. This is a helper class you cann call
      * to get an overview overbuilt in functions. You get a flat array with
@@ -197,7 +197,7 @@ class appmonitor {
 
         if (count($aErrors)) {
             echo "<h1>Errors detected</h1><ol><li>" . implode("<li>", $aErrors) . "</ol><hr>";
-            echo "<pre>" . print_r($this->_generateOutputArray(), true) . "</pre><hr>";
+            echo "<pre>" . print_r($this->getResults(), true) . "</pre><hr>";
             die("ABORT");
         }
     }
@@ -210,7 +210,7 @@ class appmonitor {
      * get full array for response with metadata and Checks
      * @return type
      */
-    private function _generateOutputArray() {
+    public function getResults() {
         return array(
             "meta" => $this->_aMeta,
             "checks" => $this->_aChecks,
@@ -231,9 +231,9 @@ class appmonitor {
 	}
         if (!$bPretty) {
             $bHighlight=false;
-            $sOut = json_encode($this->_generateOutputArray());
+            $sOut = json_encode($this->getResults());
         } else {
-            $sOut = json_encode($this->_generateOutputArray(), JSON_PRETTY_PRINT);
+            $sOut = json_encode($this->getResults(), JSON_PRETTY_PRINT);
             if ($bHighlight) {
                 $aMsg=array(
                     0=>"OK",
