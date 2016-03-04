@@ -25,7 +25,7 @@
  * 2014-11-21  0.6  axel.hahn@iml.unibe.ch   added setup functions<br>
  * 2014-10-24  0.5  axel.hahn@iml.unibe.ch<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.8
+ * @version 0.09
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -41,7 +41,7 @@ class appmonitorserver {
     var $_iTtlOnError = 3;
     var $_sConfigfile = "appmonitor-server-config.json";
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.08";
+    var $_sTitle = "Appmonitor Server GUI v0.09";
     protected $_aMessages = array();
     private $_aIco = array(
         'title' => '<i class="fa fa-th"></i>',
@@ -802,8 +802,9 @@ class appmonitorserver {
                 . '<body>' . "\n"
                 . '<div class="divtop">'
                 . '<div class="divtopheader">'
+                . '<span style="float: right">'.sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '</span>'
                 . '<h1>' . $this->_aIco['title'] . ' ' . $sTitle . '</h1>'
-                . sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '<br>'
+                . '<br>'
                 . '</div>'
                 . '<div class="divtopnavi">'
                 . $sNavi
