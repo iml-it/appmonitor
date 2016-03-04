@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.11  2016-03-04
+	- server: to make the theming easier: base css class and a default.css
+      
 v0.10  2015-11-10
 	- added: php-client: public method getResults() to get the output data
       as an array

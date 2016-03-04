@@ -41,7 +41,7 @@ class appmonitorserver {
     var $_iTtlOnError = 3;
     var $_sConfigfile = "appmonitor-server-config.json";
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.09";
+    var $_sTitle = "Appmonitor Server GUI v0.11";
     protected $_aMessages = array();
     private $_aIco = array(
         'title' => '<i class="fa fa-th"></i>',
