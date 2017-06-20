@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.12  2017-06-20
+    - server: use POST instead of GET
+
 v0.11  2016-03-04
 	- server: to make the theming easier: base css class and a default.css
       

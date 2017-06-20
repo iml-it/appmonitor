@@ -20,12 +20,13 @@
  * --------------------------------------------------------------------------------<br>
  * <br>
  * --- HISTORY:<br>
- * 2015-01-20  0.8  axel.hahn@iml.unibe.ch   fixed icons, nagios check<br>
- * 2014-11-27  0.7  axel.hahn@iml.unibe.ch   added icons, lang texts, ...<br>
- * 2014-11-21  0.6  axel.hahn@iml.unibe.ch   added setup functions<br>
- * 2014-10-24  0.5  axel.hahn@iml.unibe.ch<br>
+ * 2017-06-20  0.12  axel.hahn@iml.unibe.ch   use POST instead of GET<br>
+ * 2015-01-20  0.8   axel.hahn@iml.unibe.ch   fixed icons, nagios check<br>
+ * 2014-11-27  0.7   axel.hahn@iml.unibe.ch   added icons, lang texts, ...<br>
+ * 2014-11-21  0.6   axel.hahn@iml.unibe.ch   added setup functions<br>
+ * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.09
+ * @version 0.12
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -41,7 +42,7 @@ class appmonitorserver {
     var $_iTtlOnError = 3;
     var $_sConfigfile = "appmonitor-server-config.json";
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.11";
+    var $_sTitle = "Appmonitor Server GUI v0.12";
     protected $_aMessages = array();
     private $_aIco = array(
         'title' => '<i class="fa fa-th"></i>',
@@ -177,7 +178,7 @@ class appmonitorserver {
         if ($sOut){
             $sOut='<div id="divmodal"><div class="divdialog">'
                     . $sOut
-                    . '<br><a href="#" class="btn " onclick="reloadPage()">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a><br><br>'
+                    . '<br><a href="#" class="btn " onclick="location.href=\'?\';">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a><br><br>'
                     . '</a></div>';
         }
         return $sOut;
@@ -237,16 +238,16 @@ class appmonitorserver {
      * helper function: handle url parameters
      */
     private function _handleParams() {
-        // echo "<br><br><br><br><br><br>" . print_r($_POST, true); //print_r($_SERVER,true);
-        $sAction = (array_key_exists("action", $_GET)) ? $_GET["action"] : '';
+        // echo "<br><br><br><br><br><br>POST: " . print_r($_POST, true); //print_r($_SERVER,true);
+        $sAction = (array_key_exists("action", $_POST)) ? $_POST["action"] : '';
         switch ($sAction) {
             case "addurl":
-                $this->_actionAddUrl($_GET["url"]);
+                $this->_actionAddUrl($_POST["url"]);
 
                 break;
 
             case "deleteurl":
-                $this->_actionDeleteUrl($_GET["url"]);
+                $this->_actionDeleteUrl($_POST["url"]);
 
                 break;
             default:
@@ -555,7 +556,7 @@ class appmonitorserver {
      */
     private function _generateSetup() {
         $sReturn = '';
-        $sFormOpenTag = '<form action="?" method="GET">';
+        $sFormOpenTag = '<form action="?" method="POST">';
         $sReturn .='<h3>' . $this->_tr('Setup-client-list') . '</h3>';
         foreach ($this->_data as $sKey => $aData) {
             $iResult = array_key_exists("result", $aData["result"]) ? $aData["result"]["result"] : 3;
