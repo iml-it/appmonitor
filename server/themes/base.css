@@ -1,4 +1,3 @@
-@import url("../font-awesome/css/font-awesome.min.css");
 
 body{background:#fff; color:#555; font-family:"arial"; margin: 0; font-size: 1em;}
 a{color:#67c;}
@@ -25,9 +24,11 @@ table.dataTable tbody tr:hover{background:rgba(255,255,255,0.2); }
 .divtopnavi{width: 100%; padding: 1em 1em 0.7em ; opacity:0.8; border-top: 0px solid #fca;}
 .divtopnavi a{color:#fff; text-decoration:none;padding: 0.7em 0.7em 0.7em; margin-right: 0.3em; border-radius: 0.5em 0.5em 0 0;transition: all ease 0.5s;}
 .divtopnavi a:hover{background-color: #999;background-color:rgba(0,0,0,0.2);}
-.divtopnavi a.active{background-color:#eee; color:#444;}
+.divtopnavi a.active{background-color:#eee; background-color:rgba(255,255,255,0.8); color:#444;}
 .divtopnavi a.reload{
-    background-color: #aaa;
+    background-color: #394;
+	border-radius: 0.2em;
+	padding: 0.4em;
 }
 .divmain{margin: 0 3% 5em;}.divsourceinfo{background:#ddd; padding: 1em; }
 #divmodal{

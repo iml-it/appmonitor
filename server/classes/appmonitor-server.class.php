@@ -26,7 +26,7 @@
  * 2014-11-21  0.6   axel.hahn@iml.unibe.ch   added setup functions<br>
  * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.12
+ * @version 0.13
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver {
     var $_iTtlOnError = 3;
     var $_sConfigfile = "appmonitor-server-config.json";
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.12";
+    var $_sTitle = "Appmonitor Server GUI v0.13";
     protected $_aMessages = array();
     private $_aIco = array(
         'title' => '<i class="fa fa-th"></i>',
@@ -768,6 +768,8 @@ class appmonitorserver {
      * @return string
      */
     public function renderHtml() {
+        require_once 'cdnorlocal.class.php';
+        $oCdn=new axelhahn\cdnorlocal();
         $sHtml = $this->renderHtmlContent();
         $sNavi = '';
         $sTitle = $this->_sTitle;
@@ -790,20 +792,22 @@ class appmonitorserver {
             $sNavi.='<a href="#' . $sId . '"  class="debug" >' . $this->_aIco["debug"] . ' ' . $this->_tr('Debug') . '</a>';
         }
 
+	$sTheme=( array_key_exists('theme', $this->_aCfg) && $this->_aCfg['theme'] ) ? $this->_aCfg['theme'] : 'default';
         $sHtml = '<!DOCTYPE html>' . "\n"
                 . '<html>' . "\n"
                 . '<head>' . "\n"
                 . '<title>' . $sTitle . '</title>'
-                . '<script type="text/javascript" src="datatables/media/js/jquery.js"></script>' . "\n"
-                . '<script type="text/javascript" src="datatables/media/js/jquery.dataTables.min.js"></script>' . "\n"
-                . '<script type="text/javascript" src="javascript/functions.js"></script>' . "\n"
-                . '<link href="datatables/media/css/jquery.dataTables.min.css" rel="stylesheet"/>'
-                . '<link href="themes/default.css" rel="stylesheet"/>'
+                . $oCdn->getHtmlInclude("jquery/3.2.1/jquery.min.js")
+                . $oCdn->getHtmlInclude("datatables/1.10.16/js/jquery.dataTables.min.js")
+                . $oCdn->getHtmlInclude("datatables/1.10.16/css/jquery.dataTables.min.css")
+                . $oCdn->getHtmlInclude("font-awesome/4.7.0/css/font-awesome.css")
+                . '<script src="javascript/functions.js"></script>'
+                . '<link href="themes/'.$sTheme.'.css" rel="stylesheet"/>'
                 . '</head>' . "\n"
                 . '<body>' . "\n"
                 . '<div class="divtop">'
                 . '<div class="divtopheader">'
-                . '<span style="float: right">'.sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '</span>'
+                . '<span style="float: right; margin-right: 1.5em;">'.sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '</span>'
                 . '<h1>' . $this->_aIco['title'] . ' ' . $sTitle . '</h1>'
                 . '<br>'
                 . '</div>'
@@ -825,7 +829,9 @@ class appmonitorserver {
                 . '} else {'
                 . ' showDiv( "#' . $sFirstDiv . '" ) ; '
                 . '}'
-                . '$("a[href*=#]").click(function() { showDiv( this.hash ) } ); '
+                
+                . '$("a[href^=\'#\']").click(function() { showDiv( this.hash ) } ); '
+                
                 . '/* window.setTimeout("updateContent()", 5000); */'
                 . '} );'
                 . '</script>' . "\n"

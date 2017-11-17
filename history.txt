@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.13  2017-11-17
+    - server: use cdnjs and upgrade vendor libs jquery + datatables + fontawesome
+    - started theme support
+
 v0.12  2017-06-20
     - server: use POST instead of GET
 

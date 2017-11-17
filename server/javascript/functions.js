@@ -15,14 +15,13 @@ function reloadPage() {
 /**
  * switch the visible output div
  * @param {string} sDiv
- * @param {link object} oLink
  * @returns {undefined}
  */
 function showDiv(sDiv) {
     $(".outsegment").hide();
     $(sDiv).fadeIn(300);
     $(".divtopnavi a").removeClass("active");
-    $("a[href*=" + sDiv + "]").addClass("active");
+    $("a[href='" + sDiv + "']").addClass("active");
 }
 
 
