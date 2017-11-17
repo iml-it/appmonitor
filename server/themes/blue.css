@@ -1,0 +1,12 @@
+@import url("base.css");
+
+h2{color:#67a;}
+h3{color:#89c;}
+
+.divtopheader, .divtopnavi,  .footer{
+    background:#124; 
+    color:#eee;
+}
+.divtopheader{
+    color:#678; 
+}

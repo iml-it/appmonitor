@@ -1,4 +1,5 @@
 {
+    "theme": "default",
     "urls":[
         "http://localhost/appmonitor/"
     ]
