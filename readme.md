@@ -21,7 +21,7 @@ The appmonitor is a monitoring tool that consists of 2 parts
 
 ## CLIENT ##
 
-- php5 (*)
+- php5/ php7 (*)
 
 This app ships a php client.
 You can implement the client in other languages. You need to create scripts
@@ -33,13 +33,16 @@ know is to send a JSON response. See section NON-PHP CLIENTS below.
 
 ## SERVER ##
 
-- php5.3
-- php5-curl
+- php5.3, php7
+- php-curl
 
 The server uses 
 
-- [ahCache] (http://www.axel-hahn.de/projects/php/ahcache/) class to store 
+- [ahCache] (https://www.axel-hahn.de/docs/ahcache/index.htm) class to store 
    serialized data as file (included)
+- [cdnorlocal] (https://www.axel-hahn.de/docs/cdnorlocal/index.htm)
+
+... and loads from CDNJS (but could be stored locally too):
 - [jquery] (http://jquery.com/)
 - [datatables plugin] (http://datatables.net/)
 - [font-awesome] (http://fortawesome.github.io/Font-Awesome/)
