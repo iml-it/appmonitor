@@ -18,11 +18,12 @@
     "Debug-config": "config",
     "Debug-urls": "urls",
     "Debug-clientdata": "client data",
-    
 
     "generated-at": "generated at %s",
 
+    "Appstatus": "Status of application",
     "Host": "Host", 
+    "Hosts": "Hosts", 
     "Website": "Website", 
     "Timestamp": "Timestamp", 
     "TTL": "TTL", 
@@ -55,7 +56,9 @@
     "msgErr-missedchecks": "ERROR: <strong>%d</strong> check(s) failed. The view is incomplete. See Tab <a href=#divall>Checks</a> for details.",
     "msgErr-demosite": "This is a demo website. Changing the config is not possible here.",
     
-    "msgErr-Http-request-failed": "Http Request to appmonitor failed.",
+    "msgErr-Http-request-failed": "Http Request to appmonitor failed: host or service is unreachable.",
+    "msgErr-Http-error": "Http Response sent an error <pre>%s</pre>.",
+    "msgErr-Http-no-jsondata": "Server response does not contain json data.",
     
     "msgErr-Url-not-added-no-appmonitor": "URL not added: %s - it does not seems to be an app monitor url.",
     "msgErr-Url-was-added-already": "Skip. URL was added already: %s.",

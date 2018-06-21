@@ -20,6 +20,7 @@
  * --------------------------------------------------------------------------------<br>
  * <br>
  * --- HISTORY:<br>
+ * 2018-06-21  0.14  axel.hahn@iml.unibe.ch   use multicurl with parrallel requests; fetch http header; added tiles<br>
  * 2017-06-20  0.12  axel.hahn@iml.unibe.ch   use POST instead of GET<br>
  * 2015-01-20  0.8   axel.hahn@iml.unibe.ch   fixed icons, nagios check<br>
  * 2014-11-27  0.7   axel.hahn@iml.unibe.ch   added icons, lang texts, ...<br>
@@ -39,16 +40,18 @@ class appmonitorserver {
     var $_aCfg = array();
     var $_urls = array();
     var $_iTtl = 60;
-    var $_iTtlOnError = 3;
+    var $_iTtlOnError = 20;
     var $_sConfigfile = "appmonitor-server-config.json";
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.13";
+    var $_sTitle = "Appmonitor Server GUI v0.14";
     protected $_aMessages = array();
     private $_aIco = array(
         'title' => '<i class="fa fa-th"></i>',
         'welcome' => '<i class="fa fa-flag-o" style="font-size: 500%;float: left; margin: 0 1em 10em 0;"></i>',
         'reload' => '<i class="fa fa-refresh"></i>',
         'webs' => '<i class="fa fa-globe"></i>',
+        'host' => '<i class="fa fa-hdd-o"></i>',
+        'check' => '<i class="fa fa-check"></i>',
         'checks' => '<i class="fa fa-navicon"></i>',
         'setup' => '<i class="fa fa-wrench"></i>',
         'debug' => '<i class="fa fa-bug"></i>',
@@ -65,6 +68,17 @@ class appmonitorserver {
     private $_aLang = array(); // language texts
     private $_bDebug = false;  // show debug tab?
     private $_bIsDemo = false; // set true to disallow changing config in webgui
+    private static $curl_opts = array(
+        CURLOPT_HEADER => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 5,
+        CURLOPT_FAILONERROR => 1,
+        CURLOPT_SSL_VERIFYHOST => 0,
+        CURLOPT_SSL_VERIFYPEER => 0,
+            // CURLMOPT_MAXCONNECTS => 10
+    );
+    
+    protected $_aCounter=false;
 
     /**
      * constructor
@@ -168,15 +182,15 @@ class appmonitorserver {
         $sOut = '';
         if (count($this->_aMessages)) {
             foreach ($this->_aMessages as $aLogentry) {
-                $sOut.='<div class="divlog' . $aLogentry["level"] . '">'
+                $sOut .= '<div class="divlog' . $aLogentry["level"] . '">'
                         . $this->_aIco[$aLogentry["level"]] . ' '
                         . $aLogentry["message"]
                         . ' (' . $aLogentry["level"] . ')'
                         . '</div>';
             }
         }
-        if ($sOut){
-            $sOut='<div id="divmodal"><div class="divdialog">'
+        if ($sOut) {
+            $sOut = '<div id="divmodal"><div class="divdialog">'
                     . $sOut
                     . '<br><a href="#" class="btn " onclick="location.href=\'?\';">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a><br><br>'
                     . '</a></div>';
@@ -256,6 +270,103 @@ class appmonitorserver {
     }
 
     /**
+     * generate array with http status values from a string
+     * 
+     * @param string $sHttpHeader
+     * @return array
+     */
+    protected function _getHttpStatusArray($sHttpHeader){
+        if(!$sHttpHeader){
+            return false;
+        }
+        $aHeader=array();
+        foreach(explode("\r\n",$sHttpHeader) as $sLine){
+            preg_match_all('#^(.*)\:(.*)$#U', $sLine, $aMatches);
+            $sKey=isset($aMatches[1][0]) ? $aMatches[1][0] : '_status';
+            $sValue=isset($aMatches[2][0]) ? $aMatches[2][0] : $sLine;
+            $aHeader[$sKey]=$sValue;
+            if($sKey==='_status'){
+                preg_match_all('#HTTP.*([0-9][0-9][0-9])#', $sValue, $aMatches);
+                $aHeader['_statuscode']=isset($aMatches[1][0]) ? $aMatches[1][0] : false;
+            }
+        }
+        return $aHeader;
+    }
+    
+    protected function _getHttpStatus($sHttpHeader){
+        $aHeader=$this->_getHttpStatusArray($sHttpHeader);
+        return isset($aHeader['_statuscode']) ? $aHeader['_statuscode'] : false;
+    }
+    
+    /**
+     * helper function for multi_curl_exec
+     * hint from kempo19b
+     * http://php.net/manual/en/function.curl-multi-select.php
+     * 
+     * @param handle  $mh             multicurl master handle
+     * @param boolean $still_running  
+     * @return type
+     */
+    private function full_curl_multi_exec($mh, &$still_running) {
+        do {
+            $rv = curl_multi_exec($mh, $still_running);
+        } while ($rv == CURLM_CALL_MULTI_PERFORM);
+        return $rv;
+    }
+
+    protected function _multipleHttpGet($aUrls) {
+        $aResult = array();
+
+        // prepare curl object
+        $master = curl_multi_init();
+
+        // requires php>=5.5:
+        if (function_exists('curl_multi_setopt')) {
+            // force parallel requests
+            curl_multi_setopt($master, CURLMOPT_PIPELINING, 0);
+            // curl_multi_setopt($master, CURLMOPT_MAXCONNECTS, 50);
+        }
+
+        $curl_arr = array();
+        foreach ($aUrls as $sKey => $sUrl) {
+            $curl_arr[$sKey] = curl_init($sUrl);
+            curl_setopt_array($curl_arr[$sKey], self::$curl_opts);
+            /*
+              if (array_key_exists('userpwd', $aData)) {
+              curl_setopt($curl_arr[$i], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+              curl_setopt($curl_arr[$i], CURLOPT_USERPWD, $aData['userpwd']);
+              }
+             */
+            curl_multi_add_handle($master, $curl_arr[$sKey]);
+        }
+
+        // make all requests
+        self::full_curl_multi_exec($master, $running);
+        do {
+            curl_multi_select($master);
+            self::full_curl_multi_exec($master, $running);
+            while ($info = curl_multi_info_read($master)) {
+                
+            }
+        } while ($running);
+
+        // get results
+        foreach ($aUrls as $sKey => $sUrl) {
+            $aTmp = explode("\r\n\r\n", curl_multi_getcontent($curl_arr[$sKey]), 2);
+            // echo $sResponse . '<pre>'.print_r($aTmp, 1).'</pre>'; die();
+            $aResult[$sKey] = array(
+                'url' => $sUrl,
+                'response_header' => $aTmp[0],
+                'response_body' => count($aTmp) > 1 ? $aTmp[1] : false,
+            );
+            curl_multi_remove_handle($master, $curl_arr[$sKey]);
+        }
+        curl_multi_close($master);
+
+        return $aResult;
+    }
+
+    /**
      * make an http get request and return the response body
      * @param string $url
      * @return string
@@ -317,11 +428,23 @@ class appmonitorserver {
         require_once 'cache.class.php';
 
         $this->_data = array();
+        $aUrls = array();
         foreach ($this->_urls as $sKey => $sUrl) {
             $oCache = new AhCache("appmonitor-server", $sUrl);
             if ($oCache->isExpired()) {
-                // Cache existiert nicht oder ist veraltet 
-                $aClientData = json_decode($this->_httpGet($sUrl), true);
+                // Cache does not exist or is expired
+                $aUrls[$sKey] = $sUrl;
+            } else {
+                // age is below ttl ... read from Cache 
+                $this->_data[$sKey] = $oCache->read();
+                $this->_data[$sKey]["result"]["fromcache"] = true;
+            }
+        }
+        // fetch all non cached items
+        if (count($aUrls)) {
+            $aAllHttpdata = $this->_multipleHttpGet($aUrls);
+            foreach ($aAllHttpdata as $sKey => $aResult) {
+                $aClientData = json_decode($aResult['response_body'], true);
                 $iTtl = $this->_iTtl;
                 if (!is_array($aClientData)) {
                     $iTtl = $this->_iTtlOnError;
@@ -333,20 +456,31 @@ class appmonitorserver {
                         $iTtl = (int) $aClientData["meta"]["ttl"];
                     }
                 }
-                // fix missing values
+                // detect error
+                $iHttpStatus=$this->_getHttpStatus($aResult['response_header']);
+                $sError=!$aResult['response_header'] ? $this->_tr('msgErr-Http-request-failed')
+                            : ((!$iHttpStatus || $iHttpStatus<200 || $iHttpStatus>299) ? sprint_f($this->_tr('msgErr-Http-error'), $aResult['response_header'])
+                                : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
+                                )
+                            ;
+
+                // add more metadata
                 $aClientData["result"] = $this->_generateResultArray($aClientData);
                 $aClientData["result"]["ttl"] = $iTtl;
-                $aClientData["result"]["url"] = $sUrl;
-
+                $aClientData["result"]["url"] = $aResult['url'];
+                $aClientData["result"]["header"] = $aResult['response_header'];
+                $aClientData["result"]["headerarray"] = $this->_getHttpStatusArray($aResult['response_header']);
+                $aClientData["result"]["httpstatus"] = $iHttpStatus;
+                $aClientData["result"]["error"] = $sError;
+                    
+                
                 // write cache
+                $oCache = new AhCache("appmonitor-server", $aResult['url']);
                 $oCache->write($aClientData, $iTtl);
+
                 $aClientData["result"]["fromcache"] = false;
-            } else {
-                // age is below ttl ... read from Cache 
-                $aClientData = $oCache->read();
-                $aClientData["result"]["fromcache"] = true;
+                $this->_data[$sKey] = $aClientData;
             }
-            $this->_data[$sKey] = $aClientData;
         }
         return true;
     }
@@ -364,25 +498,29 @@ class appmonitorserver {
     // setter
     // ----------------------------------------------------------------------
 
+    protected function _generateUrlKey($sUrl){
+        return md5($sUrl);
+    }
     /**
      * add appmonitor url
      * @param string $sUrl
      * @return boolean
      */
     public function addUrl($sUrl) {
-        $this->_urls[md5($sUrl)] = $sUrl;
-        // $this->_urls[$sUrl] = $sUrl;
+        $sKey=$this->_generateUrlKey($sUrl);
+        $this->_urls[$sKey] = $sUrl;
         return true;
     }
-    
+
     /**
      * remove appmonitor url
      * @param string $sUrl
      * @return boolean
      */
     public function removeUrl($sUrl) {
-        if (array_key_exists(md5($sUrl), $this->_urls)) {
-            unset($this->_urls[md5($sUrl)]);
+        $sKey=$this->_generateUrlKey($sUrl);
+        if (array_key_exists($sKey, $this->_urls)) {
+            unset($this->_urls[$sKey]);
             return true;
         }
         return false;
@@ -394,8 +532,8 @@ class appmonitorserver {
      * @param type $bBool
      * @return type
      */
-    public function setDemoMode($bBool=true) {
-        return $this->_bIsDemo=$bBool;
+    public function setDemoMode($bBool = true) {
+        return $this->_bIsDemo = $bBool;
     }
 
     // ----------------------------------------------------------------------
@@ -430,9 +568,92 @@ class appmonitorserver {
     private function _generateTableHead($aHeaditems) {
         $sReturn = '';
         foreach ($aHeaditems as $sKey) {
-            $sReturn.='<th>' . $sKey . '</th>';
+            $sReturn .= '<th>' . $sKey . '</th>';
         }
         return '<thead><tr>' . $sReturn . '</tr></thead>';
+    }
+    
+    protected function _getCounter() {
+        $iCountApps=0;
+        $iCountChecks=0;
+        $aResults=array(0,0,0,0);
+        $aCheckResults=array(0,0,0,0);
+        $aServers=array();
+        foreach ($this->_data as $sKey => $aEntries) {
+            $iCountApps++;// count of webapps
+            $aResults[$aEntries['result']['result']]++;// counter by result of app
+            if (isset($aEntries['result']['host']) && $aEntries['result']['host']){
+                $aServers[$aEntries['result']['host']]=true;// helper array to count hosts
+            }
+
+            // count of checks
+            if(isset($this->_data[$sKey]["result"]["summary"])){
+                $aChecks = $this->_data[$sKey]["result"]["summary"];
+                $iCountChecks+=$aChecks["total"];
+                for ($i=0; $i<4; $i++){
+                    $aCheckResults[$i]+=$aChecks[$i];
+                }
+            }
+        }
+        return array(
+            'apps'=>$iCountApps,
+            'hosts'=>count($aServers),
+            'appresults'=>$aResults,
+            'checks'=>$iCountChecks,
+            'checks'=>$iCountChecks,
+            'checkresults'=>$aCheckResults
+        );
+    }
+    
+    protected function _getTile($iCount, $sIcon='', $sLabel='', $sMore='') {
+        return '<div class="tile">'
+            . ($sIcon ? '<span class="icon">'.$sIcon.'</span>' : '' )
+            . '<div class="count">'.$iCount.'</div>'
+            . ($sLabel ? '<div class="label">'.$sLabel.'</div>' : '' )
+            . ($sMore ? '<div class="more">'.$sMore .'</div>' : '' )
+        . '</div>';
+    }
+    
+    protected function _generateHostTiles($sKey) {
+        $aHostdata=$this->_data[$sKey]['result'];
+        $sReturn='';
+        // $sReturn.='<pre>'.print_r($aHostdata, 1).'</pre>';
+        
+        $sMoreChecks='';
+        for($i=0; $i<4; $i++){
+            // $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+            $sMoreChecks.=($aHostdata['summary'][$i] ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+        }
+        
+        $sReturn.=''
+                // .$this->_getTile($aCounter['hosts'], '', $this->_aIco['host'].' '.$this->_tr('Hosts'))
+                // .$this->_getTile($aCounter['apps'], '', $this->_aIco['webs'].' '.$this->_tr('Webs'), $sMoreHosts)
+                .$this->_getTile('<span class="result'.$aHostdata['result'].'">'.$this->_tr('Resulttype-'.$aHostdata['result']).'</span>', '', $this->_tr('Appstatus'))
+                .$this->_getTile($aHostdata['host'], '', $this->_aIco['host'].' '.$this->_tr('Host'))
+                .$this->_getTile($aHostdata['summary']['total'], '', $this->_aIco['check'].' '.$this->_tr('Checks'), $sMoreChecks)
+                .'<div style="clear: both;"></div>'
+                ;
+        return $sReturn;
+    }
+    protected function _generateWebTiles() {
+        $sReturn='';
+        $aCounter=$this->_getCounter();
+        // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
+        
+        $sMoreHosts='';
+        $sMoreChecks='';
+        for($i=0; $i<4; $i++){
+            $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+            $sMoreChecks.=($aCounter['checkresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['checkresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+        }
+        
+        $sReturn.=''
+                .$this->_getTile($aCounter['hosts'], '', $this->_aIco['host'].' '.$this->_tr('Hosts'))
+                .$this->_getTile($aCounter['apps'], '', $this->_aIco['webs'].' '.$this->_tr('Webs'), $sMoreHosts)
+                .$this->_getTile($aCounter['checks'], '', $this->_aIco['check'].' '.$this->_tr('Checks'), $sMoreChecks)
+                .'<div style="clear: both;"></div>'
+                ;
+        return $sReturn;
     }
 
     /**
@@ -445,24 +666,33 @@ class appmonitorserver {
         if (!count($this->_data)) {
             return '<div class="divok">' . $this->_aIco["welcome"] . ' ' . sprintf($this->_tr('msgErr-nocheck-welcome'), $this->_getConfigDir() . '/' . $this->_sConfigfile) . '</div>';
         }
+        // echo '<pre>'.print_r($this->_data, 1).'</pre>';
         foreach ($this->_data as $sKey => $aEntries) {
-            if (array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
-            ) {
-                $sReturn.='<div class="divhost result' . $aEntries["result"]["result"] . '" '
-                        . 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )">'
-                        . '<a href="#divweb' . $sKey . '">' . $aEntries["result"]["website"] . '</a><br>'
-                        . $aEntries["result"]["host"] . '<br>'
-                        . $this->_renderBadgesForWebsite($sKey, true)
-                        . '</div>';
-            } else {
+            $bHasData=true;
+            if(!$aEntries['result']['httpstatus']){
+                $bHasData=false;
                 $iMiss++;
             }
+            $sReturn .= '<div '
+                            . 'class="divhost result' . $aEntries["result"]["result"] . '" '
+                            . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
+                    . '>'
+                        
+                        . ($bHasData 
+                                ? '<a href="#divweb' . $sKey . '">' . $aEntries["result"]["website"].'</a><br>'
+                                    . $this->_aIco['host'] .' '. $aEntries["result"]["host"] . ' '. $this->_renderBadgesForWebsite($sKey, true)
+                                : '<span title="'.$aEntries['result']['url']."\n".$aEntries['result']['error'].'">'
+                                        .$this->_aIco['error'] .' '. parse_url($aEntries['result']['url'], PHP_URL_HOST) .'<br>'
+                                  .'</span>'
+                            )
+                        . '<br>'
+                    . '</div>';
         }
         if (!$sReturn) {
             return '<div class="diverror">' . $this->_aIco["error"] . ' ' . sprintf($this->_tr('msgErr-nodata'), $this->_getConfigDir() . '/' . $this->_sConfigfile) . '</div>';
         }
         if ($iMiss > 0) {
-            $sReturn = '<div class="diverror">' . $this->_aIco["error"] . ' ' . sprintf($this->_tr('msgErr-missedchecks'), $iMiss) . '</div>' . $sReturn;
+            // $sReturn = '<div class="diverror">' . $this->_aIco["error"] . ' ' . sprintf($this->_tr('msgErr-missedchecks'), $iMiss) . '</div>' . $sReturn;
         }
         return $sReturn . '<div style="clear;"><br><br></div>';
     }
@@ -480,7 +710,7 @@ class appmonitorserver {
         }
 
         $sTableClass = $sHost ? "datatablehost" : "datatable";
-        $sReturn.=$sHost ? $this->_generateTableHead(array(
+        $sReturn .= $sHost ? $this->_generateTableHead(array(
                     $this->_tr('Timestamp'),
                     $this->_tr('TTL'),
                     $this->_tr('Check'),
@@ -497,7 +727,7 @@ class appmonitorserver {
                     $this->_tr('Result'),
                     $this->_tr('Output'),
         ));
-        $sReturn.='<tbody>';
+        $sReturn .= '<tbody>';
 
         foreach ($this->_data as $sKey => $aEntries) {
 
@@ -509,14 +739,17 @@ class appmonitorserver {
             ) {
 
                 if (
-                        !array_key_exists("result", $aEntries)
+                        $aEntries["result"]["error"]
+                        
+                        // !array_key_exists("result", $aEntries)
                         /*
                           || !array_key_exists("host", $aEntries["meta"])
                           || !array_key_exists("host", $aEntries["website"])
                          * 
-                         */ || !array_key_exists("checks", $aEntries) || !count($aEntries["checks"])
+                         */
+                        // || !array_key_exists("checks", $aEntries) || !count($aEntries["checks"])
                 ) {
-                    $sReturn.='<tr class="result3">'
+                    $sReturn .= '<tr class="result3">'
                             . '<td>?</td>'
                             . '<td>?</td>'
                             . '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (' . (date("U") - $aEntries["result"]["ts"]) . '&nbsp;s)</td>'
@@ -524,17 +757,16 @@ class appmonitorserver {
                             . '<td>' . $aEntries["result"]["url"] . '</td>'
                             . '<td>?</td>'
                             . '<td>?</td>'
-                            . '<td>' . $this->_tr('msgErr-Http-request-failed') . '</td>'
+                            . '<td>' . $aEntries["result"]["error"] . '</td>'
                             . '</tr>';
                 } else {
                     foreach ($aEntries["checks"] as $aCheck) {
-                        $sReturn.='<tr class="result' . $aCheck["result"] . '">';
+                        $sReturn .= '<tr class="result' . $aCheck["result"] . '">';
                         if (!$sHost) {
-                            $sReturn.='<td>' . $aEntries["result"]["host"] . '</td>'
+                            $sReturn .= '<td>' . $aEntries["result"]["host"] . '</td>'
                                     . '<td>' . $aEntries["result"]["website"] . '</td>';
                         }
-                        $sReturn.=
-                                // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
+                        $sReturn .= // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
                                 '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (' . (date("U") - $aEntries["result"]["ts"]) . '&nbsp;s)</td>'
                                 . '<td>' . $aEntries["result"]["ttl"] . '</td>'
                                 . '<td>' . $aCheck["name"] . '</td>'
@@ -557,14 +789,14 @@ class appmonitorserver {
     private function _generateSetup() {
         $sReturn = '';
         $sFormOpenTag = '<form action="?" method="POST">';
-        $sReturn .='<h3>' . $this->_tr('Setup-client-list') . '</h3>';
+        $sReturn .= '<h3>' . $this->_tr('Setup-client-list') . '</h3>';
         foreach ($this->_data as $sKey => $aData) {
             $iResult = array_key_exists("result", $aData["result"]) ? $aData["result"]["result"] : 3;
             $sWebsite = array_key_exists("website", $aData["result"]) ? $aData["result"]["website"] : '-';
             $sHost = array_key_exists("host", $aData["result"]) ? $aData["result"]["host"] : '-';
             $sUrl = $aData["result"]["url"];
 
-            $sReturn.='<div class="divhost result' . $iResult . '" style="float: none; ">'
+            $sReturn .= '<div class="divhost result' . $iResult . '" style="float: none; ">'
                     . '<div style="float: right">'
                     . $sFormOpenTag
                     . '<input type="hidden" name="action" value="deleteurl">'
@@ -585,8 +817,8 @@ class appmonitorserver {
                     . '</a>'
                     . '</div>';
         }
-        $sReturn .='<br><br><h3>' . $this->_tr('Setup-add-client') . '</h3>';
-        $sReturn.='<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
+        $sReturn .= '<br><br><h3>' . $this->_tr('Setup-add-client') . '</h3>';
+        $sReturn .= '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
                 . $sFormOpenTag
                 . '<input type="hidden" name="action" value="addurl">'
                 . '<input type="text" class="inputtext" name="url" size="70" value="" '
@@ -612,13 +844,14 @@ class appmonitorserver {
             return false;
         }
         $aEntries = $this->_data[$sKey]["result"]["summary"];
-        $sHtml = $this->_tr('Result-checks') . ': <strong>' . $aEntries["total"] . '</strong> ';
+        // $sHtml = $this->_tr('Result-checks') . ': <strong>' . $aEntries["total"] . '</strong> ';
+        $sHtml = '';
         for ($i = 3; $i >= 0; $i--) {
             $sKey = $i;
             if ($aEntries[$sKey] > 0) {
-                $sHtml.=' <span class="badge result' . $i . '" title="' . $aEntries[$sKey] . ' x ' . $this->getResultValue($i) . '">' . $aEntries[$sKey] . '</span> ';
+                $sHtml .= ' <span class="badge result' . $i . '" title="' . $aEntries[$sKey] . ' x ' . $this->getResultValue($i) . '">' . $aEntries[$sKey] . '</span> ';
                 if (!$bShort) {
-                    $sHtml.=$this->_tr('Resulttype-' . $i) . ' ';
+                    $sHtml .= $this->_tr('Resulttype-' . $i) . ' ';
                 }
             }
         }
@@ -637,7 +870,7 @@ class appmonitorserver {
         $aMessages = array();
         $aResults = array();
 
-        if (!count($this->_data)) {
+        if (!count($this->_data) || true) {
             $this->_getClientData();
         }
 
@@ -677,7 +910,7 @@ class appmonitorserver {
                         if (!array_key_exists($key, $aResults)) {
                             $aResults[$key] = 0;
                         }
-                        $aResults[$key]+=$value;
+                        $aResults[$key] += $value;
                     }
                 }
             }
@@ -690,13 +923,13 @@ class appmonitorserver {
     }
 
     /**
-    * returns a readable result by given integer; i.e. 0=OK, 1=unknown, ...
-    * @return string
-    */
-    public function getResultValue($i){
+     * returns a readable result by given integer; i.e. 0=OK, 1=unknown, ...
+     * @return string
+     */
+    public function getResultValue($i) {
         return $this->_tr('Resulttype-' . $i);
     }
-    
+
     /**
      * render html output of monitoring output (data only)
      * @return string
@@ -709,26 +942,45 @@ class appmonitorserver {
 
         // ----- boxes with all websites
         $sId = 'divwebs';
-        $sHtml.='<div class="outsegment" id="' . $sId . '">'
+        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                 . '<h2>' . $this->_aIco["webs"] . ' ' . $this->_tr('Webs-header') . '</h2>'
+                . $this->_generateWebTiles()
                 . $this->_generateWeblist()
                 . '</div>';
 
         // ----- one table per checked client
         foreach ($this->_data as $sKey => $aEntries) {
             $sId = 'divweb' . $sKey;
+            if(!isset($aEntries["result"]["website"])){
+                // echo '<pre>'.print_r($aEntries, 1).'</pre>'; 
+            }
             if (array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
             ) {
-                $sHtml.='<div class="outsegment" id="' . $sId . '">'
-                        . '<h2>' . $this->_aIco["webs"] . ' ' . $aEntries["result"]["website"] . ' (on ' . $aEntries["result"]["host"] . ')</h2>'
+                $sHtml .= '<div class="outsegment" id="' . $sId . '">'
+                        . '<h2>' . $this->_aIco["webs"] . ' ' . $aEntries["result"]["website"] . '</h2>'
+                        /*
                         . '<div class="divhost result' . $aEntries["result"]["result"] . '" style="float: none;">'
                         . '<a href="#divwebs" class="btn">' . $this->_aIco['back'] . ' ' . $this->_tr('btn-back') . '</a> '
-                        . $this->_renderBadgesForWebsite($sKey)
-                        . '</div><br>';
+                        . $this->_renderBadgesForWebsite($sKey) .'<br>'
+                        . '</div>'
+                         * 
+                         */
+                        . $this->_generateHostTiles($sKey)
+                        . '<a href="#divwebs" class="btn">' . $this->_aIco['back'] . ' ' . $this->_tr('btn-back') . '</a> '
+                        . '<br><br><br>'
+                        ;
                 if (array_key_exists("host", $aEntries["result"])) {
-                    $sHtml.=$this->_generateMonitorTable($aEntries["result"]["host"]);
+                    
+                    $sHtml .= ''
+                            // TODO: create tabs
+                            . $this->_generateMonitorTable($aEntries["result"]["host"])
+                            // TODO: Info page for people that get notifications
+                            // TODO: Info page status changes
+                            // .'DEBUG: <pre>'.print_r($aEntries, 1).'</pre>'
+                            ;
+
                 }
-                $sHtml.='</div>';
+                $sHtml .= '</div>';
             }
         }
 
@@ -742,7 +994,7 @@ class appmonitorserver {
 
         // ----- settings page
         $sId = 'divsetup';
-        $sHtml.='<div class="outsegment" id="' . $sId . '">'
+        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                 . '<h2>' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</h2>'
                 . $this->_generateSetup()
                 . '</div>';
@@ -750,7 +1002,7 @@ class appmonitorserver {
         // ----- debug tab
         if ($this->_bDebug) {
             $sId = 'divdebug';
-            $sHtml.='<div class="outsegment" id="' . $sId . '">'
+            $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                     . '<h2>' . $this->_aIco["debug"] . ' ' . $this->_tr('Debug') . '</h2>'
                     . '<h3>' . $this->_tr('Debug-config') . '</h3>'
                     . '<pre>' . print_r($this->_aCfg, true) . '</pre>'
@@ -769,30 +1021,30 @@ class appmonitorserver {
      */
     public function renderHtml() {
         require_once 'cdnorlocal.class.php';
-        $oCdn=new axelhahn\cdnorlocal();
+        $oCdn = new axelhahn\cdnorlocal();
         $sHtml = $this->renderHtmlContent();
         $sNavi = '';
         $sTitle = $this->_sTitle;
 
 
-        $sNavi.='<a href="#" class="reload" onclick="reloadPage()">' . $this->_aIco["reload"] . ' ' . $this->_tr('Reload') . '</a>';
+        $sNavi .= '<a href="#" class="reload" onclick="reloadPage()">' . $this->_aIco["reload"] . ' ' . $this->_tr('Reload') . '</a>';
 
         $sId = 'divwebs';
         $sFirstDiv = $sId;
-        $sNavi.='<a href="#' . $sId . '" class="webs" >' . $this->_aIco["webs"] . ' ' . $this->_tr('Webs') . '</a>';
+        $sNavi .= '<a href="#' . $sId . '" class="webs" >' . $this->_aIco["webs"] . ' ' . $this->_tr('Webs') . '</a>';
 
         $sId = 'divall';
-        $sNavi.= '<a href="#' . $sId . '" class="checks" >' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks') . '</a>';
+        $sNavi .= '<a href="#' . $sId . '" class="checks" >' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks') . '</a>';
 
         $sId = 'divsetup';
-        $sNavi.='<a href="#' . $sId . '" class="setup" >' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</a>';
+        $sNavi .= '<a href="#' . $sId . '" class="setup" >' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</a>';
 
         if ($this->_bDebug) {
             $sId = 'divdebug';
-            $sNavi.='<a href="#' . $sId . '"  class="debug" >' . $this->_aIco["debug"] . ' ' . $this->_tr('Debug') . '</a>';
+            $sNavi .= '<a href="#' . $sId . '"  class="debug" >' . $this->_aIco["debug"] . ' ' . $this->_tr('Debug') . '</a>';
         }
 
-	$sTheme=( array_key_exists('theme', $this->_aCfg) && $this->_aCfg['theme'] ) ? $this->_aCfg['theme'] : 'default';
+        $sTheme = ( array_key_exists('theme', $this->_aCfg) && $this->_aCfg['theme'] ) ? $this->_aCfg['theme'] : 'default';
         $sHtml = '<!DOCTYPE html>' . "\n"
                 . '<html>' . "\n"
                 . '<head>' . "\n"
@@ -802,12 +1054,12 @@ class appmonitorserver {
                 . $oCdn->getHtmlInclude("datatables/1.10.16/css/jquery.dataTables.min.css")
                 . $oCdn->getHtmlInclude("font-awesome/4.7.0/css/font-awesome.css")
                 . '<script src="javascript/functions.js"></script>'
-                . '<link href="themes/'.$sTheme.'.css" rel="stylesheet"/>'
+                . '<link href="themes/' . $sTheme . '.css" rel="stylesheet"/>'
                 . '</head>' . "\n"
                 . '<body>' . "\n"
                 . '<div class="divtop">'
                 . '<div class="divtopheader">'
-                . '<span style="float: right; margin-right: 1.5em;">'.sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '</span>'
+                . '<span style="float: right; margin-right: 1.5em;">' . sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '</span>'
                 . '<h1>' . $this->_aIco['title'] . ' ' . $sTitle . '</h1>'
                 . '<br>'
                 . '</div>'
@@ -829,9 +1081,7 @@ class appmonitorserver {
                 . '} else {'
                 . ' showDiv( "#' . $sFirstDiv . '" ) ; '
                 . '}'
-                
                 . '$("a[href^=\'#\']").click(function() { showDiv( this.hash ) } ); '
-                
                 . '/* window.setTimeout("updateContent()", 5000); */'
                 . '} );'
                 . '</script>' . "\n"
