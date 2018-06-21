@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.14  2018-06-21
+    - use multicurl with parrallel requests
+    - fetch http header
+    - added tiles
+
 v0.13  2017-11-17
     - server: use cdnjs and upgrade vendor libs jquery + datatables + fontawesome
     - started theme support
