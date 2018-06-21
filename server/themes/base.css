@@ -56,7 +56,7 @@ padding: 1em;}
 
 .outsegment{min-height: 40em;}
 
-.divhost{float: left; padding: 0.5em; border: 1px solid rgba(0,0,0,0.15); margin: 0 1em 1em 0; }
+.divhost{float: left; padding: 0.5em; border: 0px solid rgba(0,0,0,0.15); margin: 0 1em 1em 0; }
 
 .result0{background:#efe !important;    background: linear-gradient(#dfd,#bdb)!important;}
 .result1{background:#eee !important;    background: linear-gradient(#eee,#ddd)!important;}

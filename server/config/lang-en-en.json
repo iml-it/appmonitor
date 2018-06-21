@@ -33,6 +33,7 @@
     "Output": "Output",
     "Url": "Url", 
 
+    "unknown": "unknown",
 
     "Result-checks": "Checks",
     "Resulttype-total": "Total",
@@ -45,6 +46,7 @@
     "btn-addUrl": "add",
     "btn-back": "back",
     "btn-close": "close",
+    "btn-details": "details",
     
     "btn-deleteUrl": "delete",
     "btn-deleteUrl-confirm": "Are you sure that you want to delete the url\\n\\n%s\\n\\n?",

@@ -629,7 +629,7 @@ class appmonitorserver {
                 // .$this->_getTile($aCounter['hosts'], '', $this->_aIco['host'].' '.$this->_tr('Hosts'))
                 // .$this->_getTile($aCounter['apps'], '', $this->_aIco['webs'].' '.$this->_tr('Webs'), $sMoreHosts)
                 .$this->_getTile('<span class="result'.$aHostdata['result'].'">'.$this->_tr('Resulttype-'.$aHostdata['result']).'</span>', '', $this->_tr('Appstatus'))
-                .$this->_getTile($aHostdata['host'], '', $this->_aIco['host'].' '.$this->_tr('Host'))
+                // .$this->_getTile($aHostdata['host'], '', $this->_aIco['host'].' '.$this->_tr('Host'))
                 .$this->_getTile($aHostdata['summary']['total'], '', $this->_aIco['check'].' '.$this->_tr('Checks'), $sMoreChecks)
                 .'<div style="clear: both;"></div>'
                 ;
@@ -792,42 +792,50 @@ class appmonitorserver {
         $sReturn .= '<h3>' . $this->_tr('Setup-client-list') . '</h3>';
         foreach ($this->_data as $sKey => $aData) {
             $iResult = array_key_exists("result", $aData["result"]) ? $aData["result"]["result"] : 3;
-            $sWebsite = array_key_exists("website", $aData["result"]) ? $aData["result"]["website"] : '-';
-            $sHost = array_key_exists("host", $aData["result"]) ? $aData["result"]["host"] : '-';
             $sUrl = $aData["result"]["url"];
+            $sWebsite = array_key_exists("website", $aData["result"]) ? $aData["result"]["website"] : $this->_tr('unknown') . ' ('.$sUrl.')';
+            $sHost = array_key_exists("host", $aData["result"]) ? $aData["result"]["host"] : $this->_tr('unknown');
 
+            $sIdDetails='setupdetail'.md5($sKey);
             $sReturn .= '<div class="divhost result' . $iResult . '" style="float: none; ">'
-                    . '<div style="float: right">'
+                    . '<div style="float: right;">'
                     . $sFormOpenTag
-                    . '<input type="hidden" name="action" value="deleteurl">'
-                    . '<input type="hidden" name="url" value="' . $sUrl . '">'
-                    . '<input type="submit" class="btn btndel" '
-                    . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
-                    . 'value="' . $this->_tr('btn-deleteUrl') . '">'
-                    //. '<a href="#" class="btn btndel"><i class="fa fa-minus"></i> delete</a>'
+                        . '<input type="hidden" name="action" value="deleteurl">'
+                        . '<input type="hidden" name="url" value="' . $sUrl . '">'
+                        . '<input type="submit" class="btn btndel" '
+                            . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
+                            . 'value="' . $this->_tr('btn-deleteUrl') . '">'
+                        //. '<a href="#" class="btn btndel"><i class="fa fa-minus"></i> delete</a>'
                     . '</form>'
                     . '</div>'
+                    
+                        . '<button class="btn" onclick="$(\'#'.$sIdDetails.'\').toggle(); return false;">'.$this->_tr('btn-details').'</button>'
                     . ' ' . $this->_aIco['webs'] . ' ' . $this->_tr('Website') . ' '
-                    . $sWebsite
-                    . ' | ' . $this->_tr('Host') . ' '
-                    . $sHost
-                    . ' | ' . $this->_tr('Url') . ' '
-                    . '<a href="' . $sUrl . '" target="_blank">'
-                    . $sUrl
-                    . '</a>'
+                        . $sWebsite
+                        . '... ' 
+                        . $this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $sHost.' '
+                        
+                        . '<div id="'.$sIdDetails.'" style="display: none;">'
+                            . $this->_tr('Url') . ' '
+                            . '<a href="' . $sUrl . '" target="_blank">'
+                                    . $sUrl
+                            . '</a><br>'
+                            . '<pre>'.($aData['result']['header'] ? $aData['result']['header'] : $aData['result']['error']).'</pre>'
+                            // . '<pre>'.print_r($aData, 1).'</pre>'
+                        .'</div>'
                     . '</div>';
         }
         $sReturn .= '<br><br><h3>' . $this->_tr('Setup-add-client') . '</h3>';
         $sReturn .= '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
                 . $sFormOpenTag
-                . '<input type="hidden" name="action" value="addurl">'
-                . '<input type="text" class="inputtext" name="url" size="70" value="" '
-                . 'placeholder="http://[domain]/appmonitor/client/" '
-                . 'pattern="http.*://..*" '
-                . 'required="required" '
-                . '>'
-                // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
-                . '<input type="submit" class="btn btnadd" value="' . $this->_tr('btn-addUrl') . '">'
+                    . '<input type="hidden" name="action" value="addurl">'
+                    . '<input type="text" class="inputtext" name="url" size="70" value="" '
+                    . 'placeholder="http://[domain]/appmonitor/client/" '
+                    . 'pattern="http.*://..*" '
+                    . 'required="required" '
+                    . '>'
+                    // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
+                    . '<input type="submit" class="btn btnadd" value="' . $this->_tr('btn-addUrl') . '">'
                 . '</form><br>';
         return $sReturn;
     }
@@ -971,7 +979,7 @@ class appmonitorserver {
                         ;
                 if (array_key_exists("host", $aEntries["result"])) {
                     
-                    $sHtml .= ''
+                    $sHtml .= '<h3>'.$this->_tr('Checks').'</h3>'
                             // TODO: create tabs
                             . $this->_generateMonitorTable($aEntries["result"]["host"])
                             // TODO: Info page for people that get notifications
