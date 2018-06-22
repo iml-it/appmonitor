@@ -1,0 +1,11 @@
+{
+    "theme": "default",
+    "lang": "en-en",
+    "debug": false,
+    "notification":{
+        "email":{
+        }
+    },
+    "urls": {
+    }
+}

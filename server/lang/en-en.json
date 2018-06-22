@@ -52,7 +52,7 @@
     "btn-deleteUrl-confirm": "Are you sure that you want to delete the url\\n\\n%s\\n\\n?",
     
     
-    "msgErr-nocheck-welcome": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>To add an url to check go to the <a href=#divsetup>Setup</a><br><br>Remark: You also can edit the config file %s.</p>",
+    "msgErr-nocheck-welcome": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>To add an url to check go to the Setup.</p>",
     "msgErr-nocheck": "No check was defined yet.",
     "msgErr-nodata": "ERROR: Sorry, no response from any website. See Tab <a href=#divall>Overview</a> for details.",
     "msgErr-missedchecks": "ERROR: <strong>%d</strong> check(s) failed. The view is incomplete. See Tab <a href=#divall>Checks</a> for details.",

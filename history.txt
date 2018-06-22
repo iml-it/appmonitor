@@ -1,6 +1,15 @@
 
 HISTORY
 
+v0.15  2018-06-22
+    - split appmonitor-server.class.php into a interactive and non interactive class
+    - moved lang file to an own subdirectory
+    - changed config strategy: load a default and user cusotoms
+    - added config values: debug, lang
+    - added [appdir]/tmp to store cached files (instead of webroot)
+    - added .htaccess in [appdir]/tmp/ and [appdir]/config
+    - added readme in server directory with docs for server part
+
 v0.14  2018-06-21
     - use multicurl with parrallel requests
     - fetch http header

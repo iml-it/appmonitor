@@ -20,6 +20,7 @@
  * --------------------------------------------------------------------------------<br>
  * <br>
  * --- HISTORY:<br>
+ * 2018-06-22  0.15  axel.hahn@iml.unibe.ch   split server class<br>
  * 2018-06-21  0.14  axel.hahn@iml.unibe.ch   use multicurl with parrallel requests; fetch http header; added tiles<br>
  * 2017-06-20  0.12  axel.hahn@iml.unibe.ch   use POST instead of GET<br>
  * 2015-01-20  0.8   axel.hahn@iml.unibe.ch   fixed icons, nagios check<br>
@@ -27,7 +28,7 @@
  * 2014-11-21  0.6   axel.hahn@iml.unibe.ch   added setup functions<br>
  * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.13
+ * @version 0.15
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,32 +43,9 @@ class appmonitorserver {
     var $_iTtl = 60;
     var $_iTtlOnError = 20;
     var $_sConfigfile = "appmonitor-server-config.json";
-    var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.14";
     protected $_aMessages = array();
-    private $_aIco = array(
-        'title' => '<i class="fa fa-th"></i>',
-        'welcome' => '<i class="fa fa-flag-o" style="font-size: 500%;float: left; margin: 0 1em 10em 0;"></i>',
-        'reload' => '<i class="fa fa-refresh"></i>',
-        'webs' => '<i class="fa fa-globe"></i>',
-        'host' => '<i class="fa fa-hdd-o"></i>',
-        'check' => '<i class="fa fa-check"></i>',
-        'checks' => '<i class="fa fa-navicon"></i>',
-        'setup' => '<i class="fa fa-wrench"></i>',
-        'debug' => '<i class="fa fa-bug"></i>',
-        'ok' => '<i class="fa fa-check"></i>',
-        'info' => '<i class="fa fa-info"></i>',
-        'warning' => '<i class="fa fa-warning"></i>',
-        'error' => '<i class="fa fa-flash"></i>',
-        'back' => '<i class="fa fa-level-up"></i>',
-        'add' => '',
-        'del' => '',
-        'close' => '',
-    );
-    private $_sLang = 'en-en'; // default language
-    private $_aLang = array(); // language texts
-    private $_bDebug = false;  // show debug tab?
-    private $_bIsDemo = false; // set true to disallow changing config in webgui
+    protected $_aLang = array(); // language texts
+    protected $_bIsDemo = false; // set true to disallow changing config in webgui
     private static $curl_opts = array(
         CURLOPT_HEADER => true,
         CURLOPT_RETURNTRANSFER => true,
@@ -84,8 +62,8 @@ class appmonitorserver {
      * constructor
      */
     public function __construct() {
-        $this->_loadLangTexts();
         $this->_loadConfig();
+        $this->_loadLangTexts();
         $this->_handleParams();
     }
 
@@ -97,17 +75,17 @@ class appmonitorserver {
      * return config dir ... it is one dir up and "config"
      * @return type
      */
-    private function _getConfigDir() {
+    protected function _getConfigDir() {
         return dirname(__DIR__) . '/config';
     }
 
     /**
      * load language texts
      */
-    private function _loadLangTexts() {
-        $sCfgFile = $this->_getConfigDir() . '/lang-' . $this->_sLang . '.json';
+    protected function _loadLangTexts() {
+        $sCfgFile = dirname(__DIR__) . '/lang/' . $this->_aCfg['lang'] . '.json';
         if (!file_exists($sCfgFile)) {
-            // die("no lang file " . $sCfgFile);
+            die("no lang file " . $sCfgFile);
         } else {
             $this->_aLang = json_decode(file_get_contents($sCfgFile), true);
         }
@@ -116,13 +94,24 @@ class appmonitorserver {
     /**
      * load config and get all urls to fetch
      */
-    private function _loadConfig() {
+    protected function _loadConfig() {
+        $aUserdata=array();
+        $aDefaults=array();
+        $this->_urls = array();
+        
+        $this->_aCfg=array(); // reset current config array
+        
         $sCfgFile = $this->_getConfigDir() . '/' . $this->_sConfigfile;
-        if (!file_exists($sCfgFile)) {
-            // die(sprintf($this->_aMsg['noconfig'], basename($sCfgFile), dirname($sCfgFile)));
+        $sCfgDefaultsFile = str_replace('.json', '-defaults.json', $sCfgFile);
+        if (!file_exists($sCfgDefaultsFile)) {
+            die("ERROR: default config file is not readable: [$sCfgDefaultsFile].");
         } else {
-            $this->_urls = array();
-            $this->_aCfg = json_decode(file_get_contents($sCfgFile), true);
+            $aDefaults=json_decode(file_get_contents($sCfgDefaultsFile), true);
+            if (file_exists($sCfgFile)) {
+                $aUserdata=json_decode(file_get_contents($sCfgFile), true);
+            }
+            $this->_aCfg = array_merge($aDefaults, $aUserdata);
+            
             if (is_array($this->_aCfg) && array_key_exists("urls", $this->_aCfg)) {
                 // add urls
                 foreach ($this->_aCfg["urls"] as $sUrl) {
@@ -136,7 +125,7 @@ class appmonitorserver {
      * save the current config
      * @return type
      */
-    private function _saveConfig() {
+    protected function _saveConfig() {
         if ($this->_bIsDemo) {
             $this->_addLog($this->_tr('msgErr-demosite'), "error");
             return false;
@@ -160,7 +149,7 @@ class appmonitorserver {
      * @param type $sLevel
      * @return boolean
      */
-    private function _addLog($sMessage, $sLevel = "info") {
+    protected function _addLog($sMessage, $sLevel = "info") {
         $this->_aMessages[] = array(
             'time' => microtime(true),
             'message' => $sMessage,
@@ -174,36 +163,13 @@ class appmonitorserver {
         return true;
     }
 
-    /**
-     * get all messages as html output
-     * @return string
-     */
-    private function _renderLogs() {
-        $sOut = '';
-        if (count($this->_aMessages)) {
-            foreach ($this->_aMessages as $aLogentry) {
-                $sOut .= '<div class="divlog' . $aLogentry["level"] . '">'
-                        . $this->_aIco[$aLogentry["level"]] . ' '
-                        . $aLogentry["message"]
-                        . ' (' . $aLogentry["level"] . ')'
-                        . '</div>';
-            }
-        }
-        if ($sOut) {
-            $sOut = '<div id="divmodal"><div class="divdialog">'
-                    . $sOut
-                    . '<br><a href="#" class="btn " onclick="location.href=\'?\';">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a><br><br>'
-                    . '</a></div>';
-        }
-        return $sOut;
-    }
 
     /**
      * setup action: add a new url and save the config
      * @param string $sUrl
      * @param bool   $bPreviewOnly
      */
-    private function _actionAddUrl($sUrl, $bPreviewOnly = true) {
+    protected function _actionAddUrl($sUrl, $bPreviewOnly = true) {
         if ($sUrl) {
             if (!array_key_exists("urls", $this->_aCfg) || ($key = array_search($sUrl, $this->_aCfg["urls"])) === false) {
 
@@ -232,7 +198,7 @@ class appmonitorserver {
      * delete an url to fetch and trigger to save the new config file
      * @param type $sUrl
      */
-    private function _actionDeleteUrl($sUrl) {
+    protected function _actionDeleteUrl($sUrl) {
         if ($sUrl) {
             if (($key = array_search($sUrl, $this->_aCfg["urls"])) !== false) {
                 unset($this->_aCfg["urls"][$key]);
@@ -251,7 +217,7 @@ class appmonitorserver {
     /**
      * helper function: handle url parameters
      */
-    private function _handleParams() {
+    protected function _handleParams() {
         // echo "<br><br><br><br><br><br>POST: " . print_r($_POST, true); //print_r($_SERVER,true);
         $sAction = (array_key_exists("action", $_POST)) ? $_POST["action"] : '';
         switch ($sAction) {
@@ -307,7 +273,7 @@ class appmonitorserver {
      * @param boolean $still_running  
      * @return type
      */
-    private function full_curl_multi_exec($mh, &$still_running) {
+    protected function full_curl_multi_exec($mh, &$still_running) {
         do {
             $rv = curl_multi_exec($mh, $still_running);
         } while ($rv == CURLM_CALL_MULTI_PERFORM);
@@ -371,7 +337,7 @@ class appmonitorserver {
      * @param string $url
      * @return string
      */
-    private function _httpGet($url, $iTimeout = 5) {
+    protected function _httpGet($url, $iTimeout = 5) {
         if (!function_exists("curl_init")) {
             return file_get_contents($sUrl);
         }
@@ -389,7 +355,7 @@ class appmonitorserver {
      * "result" with whole summary
      * @param type $aClientdata
      */
-    private function _generateResultArray($aClientData) {
+    protected function _generateResultArray($aClientData) {
         $aReturn = array();
         $aReturn["ts"] = date("U");
         $aReturn["result"] = 3; // set error as default
@@ -424,7 +390,7 @@ class appmonitorserver {
      * get all client data; it fetches all given urls
      * @return boolean
      */
-    private function _getClientData() {
+    protected function _getClientData() {
         require_once 'cache.class.php';
 
         $this->_data = array();
@@ -490,7 +456,7 @@ class appmonitorserver {
      * @param string $sWord
      * @return string
      */
-    private function _tr($sWord) {
+    protected function _tr($sWord) {
         return (array_key_exists($sWord, $this->_aLang)) ? $this->_aLang[$sWord] : $sWord . ' (undefined in ' . $this->_sLang . ')';
     }
 
@@ -545,7 +511,7 @@ class appmonitorserver {
      * @param int $iSec  seconds
      * @return string
      */
-    private function _hrTime($iSec) {
+    protected function _hrTime($iSec) {
         $sReturn = '';
         $sReturn = $iSec . " sec";
         if ($iSec > 60) {
@@ -560,18 +526,6 @@ class appmonitorserver {
         return ' (' . $sReturn . ' ago)';
     }
 
-    /**
-     * helper: generate html code for table header
-     * @param array  $aHeaditems  items in header colums
-     * @return string
-     */
-    private function _generateTableHead($aHeaditems) {
-        $sReturn = '';
-        foreach ($aHeaditems as $sKey) {
-            $sReturn .= '<th>' . $sKey . '</th>';
-        }
-        return '<thead><tr>' . $sReturn . '</tr></thead>';
-    }
     
     protected function _getCounter() {
         $iCountApps=0;
@@ -605,267 +559,6 @@ class appmonitorserver {
         );
     }
     
-    protected function _getTile($iCount, $sIcon='', $sLabel='', $sMore='') {
-        return '<div class="tile">'
-            . ($sIcon ? '<span class="icon">'.$sIcon.'</span>' : '' )
-            . '<div class="count">'.$iCount.'</div>'
-            . ($sLabel ? '<div class="label">'.$sLabel.'</div>' : '' )
-            . ($sMore ? '<div class="more">'.$sMore .'</div>' : '' )
-        . '</div>';
-    }
-    
-    protected function _generateHostTiles($sKey) {
-        $aHostdata=$this->_data[$sKey]['result'];
-        $sReturn='';
-        // $sReturn.='<pre>'.print_r($aHostdata, 1).'</pre>';
-        
-        $sMoreChecks='';
-        for($i=0; $i<4; $i++){
-            // $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-            $sMoreChecks.=($aHostdata['summary'][$i] ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-        }
-        
-        $sReturn.=''
-                // .$this->_getTile($aCounter['hosts'], '', $this->_aIco['host'].' '.$this->_tr('Hosts'))
-                // .$this->_getTile($aCounter['apps'], '', $this->_aIco['webs'].' '.$this->_tr('Webs'), $sMoreHosts)
-                .$this->_getTile('<span class="result'.$aHostdata['result'].'">'.$this->_tr('Resulttype-'.$aHostdata['result']).'</span>', '', $this->_tr('Appstatus'))
-                // .$this->_getTile($aHostdata['host'], '', $this->_aIco['host'].' '.$this->_tr('Host'))
-                .$this->_getTile($aHostdata['summary']['total'], '', $this->_aIco['check'].' '.$this->_tr('Checks'), $sMoreChecks)
-                .'<div style="clear: both;"></div>'
-                ;
-        return $sReturn;
-    }
-    protected function _generateWebTiles() {
-        $sReturn='';
-        $aCounter=$this->_getCounter();
-        // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
-        
-        $sMoreHosts='';
-        $sMoreChecks='';
-        for($i=0; $i<4; $i++){
-            $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-            $sMoreChecks.=($aCounter['checkresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['checkresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-        }
-        
-        $sReturn.=''
-                .$this->_getTile($aCounter['hosts'], '', $this->_aIco['host'].' '.$this->_tr('Hosts'))
-                .$this->_getTile($aCounter['apps'], '', $this->_aIco['webs'].' '.$this->_tr('Webs'), $sMoreHosts)
-                .$this->_getTile($aCounter['checks'], '', $this->_aIco['check'].' '.$this->_tr('Checks'), $sMoreChecks)
-                .'<div style="clear: both;"></div>'
-                ;
-        return $sReturn;
-    }
-
-    /**
-     * helper: generate list of websites with colored boxes based on site status
-     * @return string
-     */
-    private function _generateWeblist() {
-        $sReturn = '';
-        $iMiss = 0;
-        if (!count($this->_data)) {
-            return '<div class="divok">' . $this->_aIco["welcome"] . ' ' . sprintf($this->_tr('msgErr-nocheck-welcome'), $this->_getConfigDir() . '/' . $this->_sConfigfile) . '</div>';
-        }
-        // echo '<pre>'.print_r($this->_data, 1).'</pre>';
-        foreach ($this->_data as $sKey => $aEntries) {
-            $bHasData=true;
-            if(!$aEntries['result']['httpstatus']){
-                $bHasData=false;
-                $iMiss++;
-            }
-            $sReturn .= '<div '
-                            . 'class="divhost result' . $aEntries["result"]["result"] . '" '
-                            . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
-                    . '>'
-                        
-                        . ($bHasData 
-                                ? '<a href="#divweb' . $sKey . '">' . $aEntries["result"]["website"].'</a><br>'
-                                    . $this->_aIco['host'] .' '. $aEntries["result"]["host"] . ' '. $this->_renderBadgesForWebsite($sKey, true)
-                                : '<span title="'.$aEntries['result']['url']."\n".$aEntries['result']['error'].'">'
-                                        .$this->_aIco['error'] .' '. parse_url($aEntries['result']['url'], PHP_URL_HOST) .'<br>'
-                                  .'</span>'
-                            )
-                        . '<br>'
-                    . '</div>';
-        }
-        if (!$sReturn) {
-            return '<div class="diverror">' . $this->_aIco["error"] . ' ' . sprintf($this->_tr('msgErr-nodata'), $this->_getConfigDir() . '/' . $this->_sConfigfile) . '</div>';
-        }
-        if ($iMiss > 0) {
-            // $sReturn = '<div class="diverror">' . $this->_aIco["error"] . ' ' . sprintf($this->_tr('msgErr-missedchecks'), $iMiss) . '</div>' . $sReturn;
-        }
-        return $sReturn . '<div style="clear;"><br><br></div>';
-    }
-
-    /**
-     * helper: generate html code with all checks.
-     * if a hast is given it renders the data for this host only
-     * @param  string  $sHost  optional hostname (as filter); default: all hosts
-     * @return string
-     */
-    private function _generateMonitorTable($sHost = false) {
-        $sReturn = '';
-        if (!count($this->_data)) {
-            return '<div class="divok">' . $this->_aIco["welcome"] . ' ' . sprintf($this->_tr('msgErr-nocheck-welcome'), $this->_getConfigDir() . '/' . $this->_sConfigfile) . '</div>';
-        }
-
-        $sTableClass = $sHost ? "datatablehost" : "datatable";
-        $sReturn .= $sHost ? $this->_generateTableHead(array(
-                    $this->_tr('Timestamp'),
-                    $this->_tr('TTL'),
-                    $this->_tr('Check'),
-                    $this->_tr('Description'),
-                    $this->_tr('Result'),
-                    $this->_tr('Output'),
-                )) : $this->_generateTableHead(array(
-                    $this->_tr('Host'),
-                    $this->_tr('Website'),
-                    $this->_tr('Timestamp'),
-                    $this->_tr('TTL'),
-                    $this->_tr('Check'),
-                    $this->_tr('Description'),
-                    $this->_tr('Result'),
-                    $this->_tr('Output'),
-        ));
-        $sReturn .= '<tbody>';
-
-        foreach ($this->_data as $sKey => $aEntries) {
-
-            // filter if a host was given
-            if (!$sHost ||
-                    (
-                    array_key_exists("result", $aEntries) && array_key_exists("host", $aEntries["result"]) && $sHost == $aEntries["result"]["host"]
-                    )
-            ) {
-
-                if (
-                        $aEntries["result"]["error"]
-                        
-                        // !array_key_exists("result", $aEntries)
-                        /*
-                          || !array_key_exists("host", $aEntries["meta"])
-                          || !array_key_exists("host", $aEntries["website"])
-                         * 
-                         */
-                        // || !array_key_exists("checks", $aEntries) || !count($aEntries["checks"])
-                ) {
-                    $sReturn .= '<tr class="result3">'
-                            . '<td>?</td>'
-                            . '<td>?</td>'
-                            . '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (' . (date("U") - $aEntries["result"]["ts"]) . '&nbsp;s)</td>'
-                            . '<td>' . $aEntries["result"]["ttl"] . '</td>'
-                            . '<td>' . $aEntries["result"]["url"] . '</td>'
-                            . '<td>?</td>'
-                            . '<td>?</td>'
-                            . '<td>' . $aEntries["result"]["error"] . '</td>'
-                            . '</tr>';
-                } else {
-                    foreach ($aEntries["checks"] as $aCheck) {
-                        $sReturn .= '<tr class="result' . $aCheck["result"] . '">';
-                        if (!$sHost) {
-                            $sReturn .= '<td>' . $aEntries["result"]["host"] . '</td>'
-                                    . '<td>' . $aEntries["result"]["website"] . '</td>';
-                        }
-                        $sReturn .= // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
-                                '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (' . (date("U") - $aEntries["result"]["ts"]) . '&nbsp;s)</td>'
-                                . '<td>' . $aEntries["result"]["ttl"] . '</td>'
-                                . '<td>' . $aCheck["name"] . '</td>'
-                                . '<td>' . $aCheck["description"] . '</td>'
-                                . '<td>' . $aCheck["result"] . '</td>'
-                                . '<td>' . $aCheck["value"] . '</td>'
-                                . '</tr>';
-                    }
-                }
-            }
-        }
-        $sReturn.='</tbody>';
-        return '<table class="' . $sTableClass . '">' . $sReturn . '</table>';
-    }
-
-    /**
-     * get html code for setup page
-     * @return string
-     */
-    private function _generateSetup() {
-        $sReturn = '';
-        $sFormOpenTag = '<form action="?" method="POST">';
-        $sReturn .= '<h3>' . $this->_tr('Setup-client-list') . '</h3>';
-        foreach ($this->_data as $sKey => $aData) {
-            $iResult = array_key_exists("result", $aData["result"]) ? $aData["result"]["result"] : 3;
-            $sUrl = $aData["result"]["url"];
-            $sWebsite = array_key_exists("website", $aData["result"]) ? $aData["result"]["website"] : $this->_tr('unknown') . ' ('.$sUrl.')';
-            $sHost = array_key_exists("host", $aData["result"]) ? $aData["result"]["host"] : $this->_tr('unknown');
-
-            $sIdDetails='setupdetail'.md5($sKey);
-            $sReturn .= '<div class="divhost result' . $iResult . '" style="float: none; ">'
-                    . '<div style="float: right;">'
-                    . $sFormOpenTag
-                        . '<input type="hidden" name="action" value="deleteurl">'
-                        . '<input type="hidden" name="url" value="' . $sUrl . '">'
-                        . '<input type="submit" class="btn btndel" '
-                            . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
-                            . 'value="' . $this->_tr('btn-deleteUrl') . '">'
-                        //. '<a href="#" class="btn btndel"><i class="fa fa-minus"></i> delete</a>'
-                    . '</form>'
-                    . '</div>'
-                    
-                        . '<button class="btn" onclick="$(\'#'.$sIdDetails.'\').toggle(); return false;">'.$this->_tr('btn-details').'</button>'
-                    . ' ' . $this->_aIco['webs'] . ' ' . $this->_tr('Website') . ' '
-                        . $sWebsite
-                        . '... ' 
-                        . $this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $sHost.' '
-                        
-                        . '<div id="'.$sIdDetails.'" style="display: none;">'
-                            . $this->_tr('Url') . ' '
-                            . '<a href="' . $sUrl . '" target="_blank">'
-                                    . $sUrl
-                            . '</a><br>'
-                            . '<pre>'.($aData['result']['header'] ? $aData['result']['header'] : $aData['result']['error']).'</pre>'
-                            // . '<pre>'.print_r($aData, 1).'</pre>'
-                        .'</div>'
-                    . '</div>';
-        }
-        $sReturn .= '<br><br><h3>' . $this->_tr('Setup-add-client') . '</h3>';
-        $sReturn .= '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
-                . $sFormOpenTag
-                    . '<input type="hidden" name="action" value="addurl">'
-                    . '<input type="text" class="inputtext" name="url" size="70" value="" '
-                    . 'placeholder="http://[domain]/appmonitor/client/" '
-                    . 'pattern="http.*://..*" '
-                    . 'required="required" '
-                    . '>'
-                    // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
-                    . '<input type="submit" class="btn btnadd" value="' . $this->_tr('btn-addUrl') . '">'
-                . '</form><br>';
-        return $sReturn;
-    }
-
-    /**
-     * gt html code for badged list with errors, warnings, unknown, ok
-     * @param string $sKey    key of the check (hashed url)
-     * @param bool   $bShort  display type short (counter only) or long (with texts)
-     * @return string|boolean
-     */
-    private function _renderBadgesForWebsite($sKey, $bShort = false) {
-        $iResult = $this->_data[$sKey]["result"]["result"];
-        if (!array_key_exists("summary", $this->_data[$sKey]["result"])) {
-            return false;
-        }
-        $aEntries = $this->_data[$sKey]["result"]["summary"];
-        // $sHtml = $this->_tr('Result-checks') . ': <strong>' . $aEntries["total"] . '</strong> ';
-        $sHtml = '';
-        for ($i = 3; $i >= 0; $i--) {
-            $sKey = $i;
-            if ($aEntries[$sKey] > 0) {
-                $sHtml .= ' <span class="badge result' . $i . '" title="' . $aEntries[$sKey] . ' x ' . $this->getResultValue($i) . '">' . $aEntries[$sKey] . '</span> ';
-                if (!$bShort) {
-                    $sHtml .= $this->_tr('Resulttype-' . $i) . ' ';
-                }
-            }
-        }
-        return $sHtml;
-    }
-
     /**
      * get all client data and final result as array
      * @param   string  $sHost  filter by given hostname
@@ -930,172 +623,5 @@ class appmonitorserver {
         );
     }
 
-    /**
-     * returns a readable result by given integer; i.e. 0=OK, 1=unknown, ...
-     * @return string
-     */
-    public function getResultValue($i) {
-        return $this->_tr('Resulttype-' . $i);
-    }
-
-    /**
-     * render html output of monitoring output (data only)
-     * @return string
-     */
-    public function renderHtmlContent() {
-        if (!count($this->_data)) {
-            $this->_getClientData();
-        }
-        $sHtml = '';
-
-        // ----- boxes with all websites
-        $sId = 'divwebs';
-        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                . '<h2>' . $this->_aIco["webs"] . ' ' . $this->_tr('Webs-header') . '</h2>'
-                . $this->_generateWebTiles()
-                . $this->_generateWeblist()
-                . '</div>';
-
-        // ----- one table per checked client
-        foreach ($this->_data as $sKey => $aEntries) {
-            $sId = 'divweb' . $sKey;
-            if(!isset($aEntries["result"]["website"])){
-                // echo '<pre>'.print_r($aEntries, 1).'</pre>'; 
-            }
-            if (array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
-            ) {
-                $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                        . '<h2>' . $this->_aIco["webs"] . ' ' . $aEntries["result"]["website"] . '</h2>'
-                        /*
-                        . '<div class="divhost result' . $aEntries["result"]["result"] . '" style="float: none;">'
-                        . '<a href="#divwebs" class="btn">' . $this->_aIco['back'] . ' ' . $this->_tr('btn-back') . '</a> '
-                        . $this->_renderBadgesForWebsite($sKey) .'<br>'
-                        . '</div>'
-                         * 
-                         */
-                        . $this->_generateHostTiles($sKey)
-                        . '<a href="#divwebs" class="btn">' . $this->_aIco['back'] . ' ' . $this->_tr('btn-back') . '</a> '
-                        . '<br><br><br>'
-                        ;
-                if (array_key_exists("host", $aEntries["result"])) {
-                    
-                    $sHtml .= '<h3>'.$this->_tr('Checks').'</h3>'
-                            // TODO: create tabs
-                            . $this->_generateMonitorTable($aEntries["result"]["host"])
-                            // TODO: Info page for people that get notifications
-                            // TODO: Info page status changes
-                            // .'DEBUG: <pre>'.print_r($aEntries, 1).'</pre>'
-                            ;
-
-                }
-                $sHtml .= '</div>';
-            }
-        }
-
-        // ----- table with all checks from all clients
-        $sId = 'divall';
-        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                . '<h2>' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks-header') . '</h2>'
-                . $this->_generateMonitorTable()
-                . '</div>';
-
-
-        // ----- settings page
-        $sId = 'divsetup';
-        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                . '<h2>' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</h2>'
-                . $this->_generateSetup()
-                . '</div>';
-
-        // ----- debug tab
-        if ($this->_bDebug) {
-            $sId = 'divdebug';
-            $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                    . '<h2>' . $this->_aIco["debug"] . ' ' . $this->_tr('Debug') . '</h2>'
-                    . '<h3>' . $this->_tr('Debug-config') . '</h3>'
-                    . '<pre>' . print_r($this->_aCfg, true) . '</pre>'
-                    . '<h3>' . $this->_tr('Debug-urls') . '</h3>'
-                    . '<pre>' . print_r($this->_urls, true) . '</pre>'
-                    . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
-                    . '<pre>' . print_r($this->_data, true) . '</pre>'
-                    . '</div>';
-        }
-        return $sHtml;
-    }
-
-    /**
-     * render html output of monitoring output (whole page)
-     * @return string
-     */
-    public function renderHtml() {
-        require_once 'cdnorlocal.class.php';
-        $oCdn = new axelhahn\cdnorlocal();
-        $sHtml = $this->renderHtmlContent();
-        $sNavi = '';
-        $sTitle = $this->_sTitle;
-
-
-        $sNavi .= '<a href="#" class="reload" onclick="reloadPage()">' . $this->_aIco["reload"] . ' ' . $this->_tr('Reload') . '</a>';
-
-        $sId = 'divwebs';
-        $sFirstDiv = $sId;
-        $sNavi .= '<a href="#' . $sId . '" class="webs" >' . $this->_aIco["webs"] . ' ' . $this->_tr('Webs') . '</a>';
-
-        $sId = 'divall';
-        $sNavi .= '<a href="#' . $sId . '" class="checks" >' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks') . '</a>';
-
-        $sId = 'divsetup';
-        $sNavi .= '<a href="#' . $sId . '" class="setup" >' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</a>';
-
-        if ($this->_bDebug) {
-            $sId = 'divdebug';
-            $sNavi .= '<a href="#' . $sId . '"  class="debug" >' . $this->_aIco["debug"] . ' ' . $this->_tr('Debug') . '</a>';
-        }
-
-        $sTheme = ( array_key_exists('theme', $this->_aCfg) && $this->_aCfg['theme'] ) ? $this->_aCfg['theme'] : 'default';
-        $sHtml = '<!DOCTYPE html>' . "\n"
-                . '<html>' . "\n"
-                . '<head>' . "\n"
-                . '<title>' . $sTitle . '</title>'
-                . $oCdn->getHtmlInclude("jquery/3.2.1/jquery.min.js")
-                . $oCdn->getHtmlInclude("datatables/1.10.16/js/jquery.dataTables.min.js")
-                . $oCdn->getHtmlInclude("datatables/1.10.16/css/jquery.dataTables.min.css")
-                . $oCdn->getHtmlInclude("font-awesome/4.7.0/css/font-awesome.css")
-                . '<script src="javascript/functions.js"></script>'
-                . '<link href="themes/' . $sTheme . '.css" rel="stylesheet"/>'
-                . '</head>' . "\n"
-                . '<body>' . "\n"
-                . '<div class="divtop">'
-                . '<div class="divtopheader">'
-                . '<span style="float: right; margin-right: 1.5em;">' . sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '</span>'
-                . '<h1>' . $this->_aIco['title'] . ' ' . $sTitle . '</h1>'
-                . '<br>'
-                . '</div>'
-                . '<div class="divtopnavi">'
-                . $sNavi
-                . '</div>'
-                . '</div>'
-                . '<div class="divlog">' . $this->_renderLogs() . '</div>'
-                . '<div class="divmain">'
-                . '' . $sHtml . "\n"
-                . '</div>'
-                . '<div class="footer"><a href="' . $this->_sProjectUrl . '" target="_blank">' . $this->_sProjectUrl . '</a></div>'
-                . '<script>'
-                . '$(document).ready(function() {'
-                . ' $(\'.datatable\').dataTable( { "order": [[ 6, "desc" ]] } ); '
-                . ' $(\'.datatablehost\').dataTable( { "order": [[ 4, "desc" ]] } ); '
-                . 'if (document.location.hash) {'
-                . ' showDiv( document.location.hash ) ; '
-                . '} else {'
-                . ' showDiv( "#' . $sFirstDiv . '" ) ; '
-                . '}'
-                . '$("a[href^=\'#\']").click(function() { showDiv( this.hash ) } ); '
-                . '/* window.setTimeout("updateContent()", 5000); */'
-                . '} );'
-                . '</script>' . "\n"
-                . '</body></html>';
-
-        return $sHtml;
-    }
-
+    
 }

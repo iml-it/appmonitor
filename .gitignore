@@ -1,2 +1,5 @@
 nbproject
 /server/config/appmonitor-server-config.json
+/server/tmp/ahcache/
+/server/service.php
+/server/classes/tinyservice.class.php

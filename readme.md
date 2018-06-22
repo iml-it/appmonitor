@@ -1,5 +1,5 @@
 
-# APPMONITOR - proof of concept#
+# APPMONITOR #
 
 University Berne
 IML - Institute of Medical Education
@@ -33,7 +33,7 @@ know is to send a JSON response. See section NON-PHP CLIENTS below.
 
 ## SERVER ##
 
-- php5.3, php7
+- php7 (runs on php5 but is not suppoorted)
 - php-curl
 
 The server uses 
@@ -169,7 +169,7 @@ parameters:
 You can use the simple check to verify anything that has no pre defined function
 yet.
 
-## HTTPCONTENT##
+## HTTPCONTENT ##
 
 This check verifies if a given string exists in the reponse body of a given url.
 
@@ -332,14 +332,11 @@ The meta key has these subkeys
 - "host": [string: name of the computer] 
   This is the hostname. The server GUI for the monitoring can group by server. 
   If you host several websites then these have the same "host".
-
-- "website": [string: domain (and maybe path) of the webapp]
-
+- "website": [string: domain (and maybe path) of the webapp
 - "ttl": [integer: ttl for the server gui]
   Time to live value in seconds. The server GUI respects this value and does
   not ask the appmonitor client more often. A goof value for beginning is
   60 or 300 (1 min/ 5 min)
-  
 - "result": [integer: 0..3]
   Result code of all checks of the webapp.
   0 - OK
@@ -363,17 +360,14 @@ Each check must have these keys:
 - "name": [string: short name of the test N]
   This string is for you - make it unique to identify it in the server GUI.
   i.e. "Mysql-db ABC"
-  
 - "description": [string: a description what the test N is verifying]
   This string is for you - you see the description in the server GUI
   i.e. "Check mysql-db ABC on the server db01"
-
 - "result": [integer: 0..3]
   result code of the check. The values are the same like the result in the 
   meta section.
   Based on the result code the server GUI renders the item for the check
   (i.e. green if OK, red on error)
-
 - "value": [string: result in words]
   A human readable text of the result of the ckeck
   i.e. 

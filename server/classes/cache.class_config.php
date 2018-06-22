@@ -4,7 +4,7 @@
  */
 
 // set a custom cache direcory
-// $this->_sCacheDir="/tmp/ahcache";
+$this->_sCacheDir=__DIR__ . "/../tmp/ahcache";
 
 // if you have a large number of items to cache:
 // you can limit the files per cache subdir in an indirect way
