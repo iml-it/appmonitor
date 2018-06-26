@@ -1,5 +1,7 @@
 <?php
-
+require_once 'cache.class.php';
+require_once 'lang.class.php';
+require_once 'notificationhandler.class.php';
 /**
  * APPMONITOR SERVER<br>
  * <br>
@@ -43,8 +45,10 @@ class appmonitorserver {
     var $_iTtl = 60;
     var $_iTtlOnError = 20;
     var $_sConfigfile = "appmonitor-server-config.json";
+    
     protected $_aMessages = array();
-    protected $_aLang = array(); // language texts
+    protected $oLang = false;
+
     protected $_bIsDemo = false; // set true to disallow changing config in webgui
     private static $curl_opts = array(
         CURLOPT_HEADER => true,
@@ -62,8 +66,9 @@ class appmonitorserver {
      * constructor
      */
     public function __construct() {
-        $this->_loadConfig();
+        $this->loadConfig();
         $this->_loadLangTexts();
+        $this->oNotifcation=new notificationhandler($this->_aCfg['lang']);
         $this->_handleParams();
     }
 
@@ -83,18 +88,13 @@ class appmonitorserver {
      * load language texts
      */
     protected function _loadLangTexts() {
-        $sCfgFile = dirname(__DIR__) . '/lang/' . $this->_aCfg['lang'] . '.json';
-        if (!file_exists($sCfgFile)) {
-            die("no lang file " . $sCfgFile);
-        } else {
-            $this->_aLang = json_decode(file_get_contents($sCfgFile), true);
-        }
+        return $this->oLang = new lang($this->_aCfg['lang']);
     }
 
     /**
-     * load config and get all urls to fetch
+     * (re) load config and get all urls to fetch
      */
-    protected function _loadConfig() {
+    public function loadConfig() {
         $aUserdata=array();
         $aDefaults=array();
         $this->_urls = array();
@@ -144,7 +144,8 @@ class appmonitorserver {
     }
 
     /**
-     * add a logging message
+     * add a logging message to display in web gui in a message box
+     * 
      * @param type $sMessage
      * @param type $sLevel
      * @return boolean
@@ -186,7 +187,7 @@ class appmonitorserver {
                     $this->_addLog("URL was added: " . $sUrl, "ok");
                     $this->_aCfg["urls"][] = $sUrl;
                     $this->_saveConfig();
-                    $this->_loadConfig();
+                    $this->loadConfig();
                 }
             } else {
                 $this->_addLog(sprintf($this->_tr('msgErr-Url-was-added-already'), $sUrl));
@@ -201,12 +202,13 @@ class appmonitorserver {
     protected function _actionDeleteUrl($sUrl) {
         if ($sUrl) {
             if (($key = array_search($sUrl, $this->_aCfg["urls"])) !== false) {
+                $sAppId=$this->_aCfg["urls"][$key];
                 unset($this->_aCfg["urls"][$key]);
                 $this->_saveConfig();
-                require_once 'cache.class.php';
                 $oCache = new AhCache("appmonitor-server", $sUrl);
                 $oCache->delete();
-                $this->_loadConfig();
+                $this->loadConfig();
+                $this->oNotifcation->deleteApp($sAppId);
                 $this->_addLog(sprintf($this->_tr('msgOK-Url-was-removed'), $sUrl), "ok");
             } else {
                 $this->_addLog(sprintf($this->_tr('msgErr-Url-not-removed-it-does-not-exist'), $sUrl), "error");
@@ -391,8 +393,6 @@ class appmonitorserver {
      * @return boolean
      */
     protected function _getClientData() {
-        require_once 'cache.class.php';
-
         $this->_data = array();
         $aUrls = array();
         foreach ($this->_urls as $sKey => $sUrl) {
@@ -446,6 +446,9 @@ class appmonitorserver {
 
                 $aClientData["result"]["fromcache"] = false;
                 $this->_data[$sKey] = $aClientData;
+                
+                $this->oNotifcation->setApp($sKey, $aClientData);
+                $this->oNotifcation->notify();
             }
         }
         return true;
@@ -457,7 +460,7 @@ class appmonitorserver {
      * @return string
      */
     protected function _tr($sWord) {
-        return (array_key_exists($sWord, $this->_aLang)) ? $this->_aLang[$sWord] : $sWord . ' (undefined in ' . $this->_sLang . ')';
+        return $this->oLang->tr($sWord, array('gui'));
     }
 
     // ----------------------------------------------------------------------

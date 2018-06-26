@@ -82,3 +82,33 @@ Remarks:
 - _tmpdir_ must be writable for apache user and service.php (cli)
 - _notification_ will be used in a future release
 - _urls_ is a flat list of urls
+
+# NOTIFICATION #
+
+## Message texts ##
+
+The sent messages are language dependent texts.
+In the language file they are defined in the subkey "notifications".
+- changetype-[N].logmessage
+- changetype-[N].email.message
+- email.subject
+
+[N] is an integer value between 0..3 (for change type)
+
+These texts can contain placeholders.
+
+| Placeholder          | Description                                          |
+|---                   |---                                                   |
+| _\_\_APPID___        | id of application                                    |
+| _\_\_CHANGE___       | one of new\|no change\|change\|deleted (1)           |
+| _\_\_DELTA-TIME___   | delta since last state change i.e. NN min (HH h) (2) |
+| _\_\_HEADER___       | Http response header (maybe for an email message)    |
+| _\_\_LAST-RESULT___  | result of last check; see RESULT (2)                 |
+| _\_\_LAST-TIME___    | time of last check; see TIME (2)                     |
+| _\_\_RESULT___       | one of OK\|Unknown\|Warning\|Error (1)               |
+| _\_\_TIME___         | time of current check in YYYY-MM-DD hh:mm:ss         | 
+| _\_\_URL___          | url of web application check                         |
+
+Remarks:
+- (1) this depends on the set appmonitor server language. The values are these of the English version.
+- (2) It requires that a saved state with another status for this url. Value is "-" if there is no state change logged yet

@@ -38,7 +38,14 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.15";
+    var $_sTitle = "Appmonitor Server GUI v0.16";
+    
+    /**
+     * html code for icons in the web gui
+     * https://fontawesome.com/v4.7.0/icons/
+     * 
+     * @var array
+     */
     private $_aIco = array(
         'title' => '<i class="fa fa-th"></i>',
         'welcome' => '<i class="fa fa-flag-o" style="font-size: 500%;float: left; margin: 0 1em 10em 0;"></i>',
@@ -47,6 +54,7 @@ class appmonitorserver_gui extends appmonitorserver{
         'host' => '<i class="fa fa-hdd-o"></i>',
         'check' => '<i class="fa fa-check"></i>',
         'checks' => '<i class="fa fa-navicon"></i>',
+        'notifications' => '<i class="fa fa-bell-o"></i>',
         'setup' => '<i class="fa fa-wrench"></i>',
         'debug' => '<i class="fa fa-bug"></i>',
         'ok' => '<i class="fa fa-check"></i>',
@@ -150,6 +158,11 @@ class appmonitorserver_gui extends appmonitorserver{
         return '<thead><tr>' . $sReturn . '</tr></thead>';
     }
     
+    /**
+     * helper function for overview of all web apps
+     * 
+     * @return type
+     */
     protected function _getCounter() {
         $iCountApps=0;
         $iCountChecks=0;
@@ -182,6 +195,15 @@ class appmonitorserver_gui extends appmonitorserver{
         );
     }
     
+    /**
+     * get html code for a tile
+     * 
+     * @param integer  $iCount  big counter
+     * @param string   $sIcon   icon before label
+     * @param string   $sLabel  label
+     * @param string   $sMore   more text below a horizontal line
+     * @return string
+     */
     protected function _getTile($iCount, $sIcon='', $sLabel='', $sMore='') {
         return '<div class="tile">'
             . ($sIcon ? '<span class="icon">'.$sIcon.'</span>' : '' )
@@ -191,27 +213,38 @@ class appmonitorserver_gui extends appmonitorserver{
         . '</div>';
     }
     
-    protected function _generateHostTiles($sKey) {
+    /**
+     * get html code for tiles of a single webapp
+     * 
+     * @param string  $sKey  webapp id
+     * @return string
+     */
+    protected function _generateWebappTiles($sKey) {
         $aHostdata=$this->_data[$sKey]['result'];
+        $this->oNotifcation->setApp($sKey);
+        $aLast=$this->oNotifcation->getAppLastResult(); 
+        $sSince=$aLast && (int)$aLast['result']['ts'] ? $this->_tr('since') . ' '.date("Y-m-d H:i", $aLast['result']['ts']) : '';
         $sReturn='';
         // $sReturn.='<pre>'.print_r($aHostdata, 1).'</pre>';
         
         $sMoreChecks='';
         for($i=0; $i<4; $i++){
             // $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-            $sMoreChecks.=($aHostdata['summary'][$i] ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+            $sMoreChecks.=(isset($aHostdata['summary'][$i]) ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
         }
         
         $sReturn.=''
-                // .$this->_getTile($aCounter['hosts'], '', $this->_aIco['host'].' '.$this->_tr('Hosts'))
-                // .$this->_getTile($aCounter['apps'], '', $this->_aIco['webs'].' '.$this->_tr('Webs'), $sMoreHosts)
-                .$this->_getTile('<span class="result'.$aHostdata['result'].'">'.$this->_tr('Resulttype-'.$aHostdata['result']).'</span>', '', $this->_tr('Appstatus'))
-                // .$this->_getTile($aHostdata['host'], '', $this->_aIco['host'].' '.$this->_tr('Host'))
-                .$this->_getTile($aHostdata['summary']['total'], '', $this->_aIco['check'].' '.$this->_tr('Checks'), $sMoreChecks)
+                .(isset($aHostdata['result'])           ? $this->_getTile('<span class="result'.$aHostdata['result'].'">'.$this->_tr('Resulttype-'.$aHostdata['result']).'</span>', '', $this->_tr('Appstatus'), $sSince) : '')
+                .(isset($aHostdata['summary']['total']) ? $this->_getTile($aHostdata['summary']['total'], '', $this->_aIco['check'].' '.$this->_tr('Checks'), $sMoreChecks): '')
                 .'<div style="clear: both;"></div>'
                 ;
         return $sReturn;
     }
+    /**
+     * get html code for tiles of a webapp overview with all applications
+     * 
+     * @return string
+     */
     protected function _generateWebTiles() {
         $sReturn='';
         $aCounter=$this->_getCounter();
@@ -232,6 +265,11 @@ class appmonitorserver_gui extends appmonitorserver{
                 ;
         return $sReturn;
     }
+    
+    /**
+     * get html code to show a welcome message if no webapp was setup so far.
+     * @return string
+     */
     private function _showWelcomeMessage() {
         return '<div>' 
             . $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome') 
@@ -261,7 +299,8 @@ class appmonitorserver_gui extends appmonitorserver{
             }
             $sReturn .= '<div '
                             . 'class="divhost result' . $aEntries["result"]["result"] . '" '
-                            . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
+                            // . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
+                            . 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"'
                     . '>'
                         
                         . ($bHasData 
@@ -286,6 +325,7 @@ class appmonitorserver_gui extends appmonitorserver{
     /**
      * helper: generate html code with all checks.
      * if a hast is given it renders the data for this host only
+     * 
      * @param  string  $sHost  optional hostname (as filter); default: all hosts
      * @return string
      */
@@ -368,6 +408,39 @@ class appmonitorserver_gui extends appmonitorserver{
         return '<table class="' . $sTableClass . '">' . $sReturn . '</table>';
     }
 
+    /**
+     * get html code for notification log page
+     * @return string
+     */
+    protected function _generateNoftificationlog(){
+        $aLogs=$this->oNotifcation->getLogdata();
+        rsort($aLogs);
+        
+        
+        $sReturn = $this->_generateTableHead(array(
+                    $this->_tr('Timestamp'),
+                    $this->_tr('Change'),
+                    $this->_tr('Result'),
+                    $this->_tr('Message')
+                ))."\n";
+        $sReturn .= '<tbody>';
+        foreach ($aLogs as $aLogentry) {
+            $sReturn .= '<tr class="result' . $aLogentry['status'] . '">'
+                . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
+                . '<td>' . $this->_tr('changetype-'.$aLogentry['changetype']) . '</td>'
+                . '<td>' . $this->_tr('Resulttype-'.$aLogentry['status']) . '</td>'
+                . '<td>' . $aLogentry['message'] . '</td>'
+            . '</tr>';
+        }
+        $sReturn.='</tbody>'."\n";
+        
+        $sReturn='<table class="datatableXYZ">' ."\n" . $sReturn . '</table>';
+        
+        // $sReturn.='<pre>'. htmlentities($sReturn).'</pre>';
+        return $sReturn;
+        
+    }
+    
     /**
      * get html code for setup page
      * @return string
@@ -547,10 +620,17 @@ class appmonitorserver_gui extends appmonitorserver{
             if(!isset($aEntries["result"]["website"])){
                 // echo '<pre>'.print_r($aEntries, 1).'</pre>'; 
             }
-            if (array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
+            if (true ||
+                    array_key_exists("result", $aEntries) 
+                    && array_key_exists("result", $aEntries["result"]) 
+                    && array_key_exists("website", $aEntries["result"]) 
+                    && array_key_exists("host", $aEntries["result"])
             ) {
                 $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                        . '<h2>' . $this->_aIco["webs"] . ' ' . $aEntries["result"]["website"] . '</h2>'
+                        . '<h2>' . $this->_aIco["webs"] . ' <a href="#divwebs">' . $this->_tr('Webs-header').'</a>'
+                            . ' > ' . ' ' 
+                            . (isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : '?')
+                        . '</h2>'
                         /*
                         . '<div class="divhost result' . $aEntries["result"]["result"] . '" style="float: none;">'
                         . '<a href="#divwebs" class="btn">' . $this->_aIco['back'] . ' ' . $this->_tr('btn-back') . '</a> '
@@ -558,9 +638,9 @@ class appmonitorserver_gui extends appmonitorserver{
                         . '</div>'
                          * 
                          */
-                        . $this->_generateHostTiles($sKey)
-                        . '<a href="#divwebs" class="btn">' . $this->_aIco['back'] . ' ' . $this->_tr('btn-back') . '</a> '
-                        . '<br><br><br>'
+                        . $this->_generateWebappTiles($sKey)
+                        // . '<br><a href="#divwebs" class="btn">' . $this->_aIco['back'] . ' ' . $this->_tr('btn-back') . '</a> '
+                        // . '<br><br><br>'
                         ;
                 if (array_key_exists("host", $aEntries["result"])) {
                     
@@ -573,7 +653,12 @@ class appmonitorserver_gui extends appmonitorserver{
                             ;
 
                 }
-                $sHtml .= '</div>';
+                $sHtml .= '<h3>'.$this->_tr('Http-details').'</h3>'
+                        . ($aEntries['result']['error']      ? $this->_tr('Error-message'). ': ' . $aEntries['result']['error'].'<br>': '')
+                        . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status'). ': <strong>' . $aEntries['result']['httpstatus'].'</strong><br>': '')
+                        . ($aEntries['result']['header']     ? $this->_tr('Http-header'). ': <pre>' . $aEntries['result']['header'].'</pre>': '')
+                        // . '<pre>'.print_r($aEntries["result"], 1).'</pre>'
+                        . '</div>';
             }
         }
 
@@ -584,6 +669,12 @@ class appmonitorserver_gui extends appmonitorserver{
                 . $this->_generateMonitorTable()
                 . '</div>';
 
+        // ----- notifications page
+        $sId = 'divnotifications';
+        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
+                . '<h2>' . $this->_aIco["notifications"] . ' ' . $this->_tr('Notifications-header') . '</h2>'
+                . $this->_generateNoftificationlog()
+                . '</div>';
 
         // ----- settings page
         $sId = 'divsetup';
@@ -603,6 +694,8 @@ class appmonitorserver_gui extends appmonitorserver{
                     . '<pre>' . print_r($this->_urls, true) . '</pre>'
                     . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
                     . '<pre>' . print_r($this->_data, true) . '</pre>'
+                    . '<h3>' . $this->_tr('Debug-notificationlog') . '</h3>'
+                    . '<pre>' . print_r($this->oNotifcation->getLogdata(), true) . '</pre>'
                     . '</div>';
         }
         return $sHtml;
@@ -628,6 +721,9 @@ class appmonitorserver_gui extends appmonitorserver{
 
         $sId = 'divall';
         $sNavi .= '<a href="#' . $sId . '" class="checks" >' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks') . '</a>';
+
+        $sId = 'divnotifications';
+        $sNavi .= '<a href="#' . $sId . '" class="checks" >' . $this->_aIco["notifications"] . ' ' . $this->_tr('Notifications') . '</a>';
 
         $sId = 'divsetup';
         $sNavi .= '<a href="#' . $sId . '" class="setup" >' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</a>';

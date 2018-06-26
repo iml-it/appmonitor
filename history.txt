@@ -1,6 +1,12 @@
 
 HISTORY
 
+v0.16  2018-06-26
+    - added service script to run in a loop
+    - added notification class: detects changes of app status
+    - added tab notification to see the logs
+    - lang file with keys and subkeys (for several classes and modules)
+
 v0.15  2018-06-22
     - split appmonitor-server.class.php into a interactive and non interactive class
     - moved lang file to an own subdirectory

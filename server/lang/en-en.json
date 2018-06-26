@@ -1,71 +1,113 @@
 {
-    "Reload": "Reload",
-    "Reload-hint": "Reload the page",
-    
-    "Webs": "Webs",
-    "Webs-header": "Monitor :: Webs",
-    
-    
-    "Checks": "Checks",
-    "Checks-header": "Overview with all Checks",
-    
-    "Setup": "Setup",
-    "Setup-client-list": "List of existing Clients",
-    "Setup-add-client": "Add client url",
-    "Setup-add-client-pretext": "Enter an appmonitor client url to add a new monitor:",
-    
-    "Debug": "Debug",
-    "Debug-config": "config",
-    "Debug-urls": "urls",
-    "Debug-clientdata": "client data",
+    "gui":{
+        "Reload": "Reload",
+        "Reload-hint": "Reload the page",
 
-    "generated-at": "generated at %s",
+        "Webs": "Webs",
+        "Webs-header": "Monitor :: Webs",
 
-    "Appstatus": "Status of application",
-    "Host": "Host", 
-    "Hosts": "Hosts", 
-    "Website": "Website", 
-    "Timestamp": "Timestamp", 
-    "TTL": "TTL", 
-    "Check": "Check", 
-    "Description": "Description", 
-    "Result": "Result", 
-    "Output": "Output",
-    "Url": "Url", 
 
-    "unknown": "unknown",
+        "Checks": "Checks",
+        "Checks-header": "Overview with all Checks",
 
-    "Result-checks": "Checks",
-    "Resulttype-total": "Total",
+        "Notifications": "Notifications",
+        "Notifications-header": "List of last sent notifications",
+
+        "Setup": "Setup",
+        "Setup-client-list": "List of existing Clients",
+        "Setup-add-client": "Add client url",
+        "Setup-add-client-pretext": "Enter an appmonitor client url to add a new monitor:",
+
+        "Debug": "Debug",
+        "Debug-config": "Config",
+        "Debug-urls": "Urls",
+        "Debug-clientdata": "Client data",
+        "Debug-notificationlog": "Notification history Log",
+
+        "generated-at": "generated at %s",
+
+        "Appstatus": "Status of application",
+        "Host": "Host", 
+        "Hosts": "Hosts", 
+        "Website": "Website", 
+        "Timestamp": "Timestamp", 
+        "TTL": "TTL", 
+        "Check": "Check", 
+        "Description": "Description", 
+        "Result": "Result", 
+        "Output": "Output",
+        "Url": "Url", 
+
+        "Error-message": "error message",
+        "Http-details": "Http details of the last app monitor request",
+        "Http-status": "Http status",
+        "Http-header": "Http response header",
+        
+        "Change": "Change", 
+        "Message": "Message", 
+
+        "since": "since",
+        "unknown": "unknown",
+
+        "Result-checks": "Checks",
+        "Resulttype-total": "Total",
+
+        "btn-addUrl": "add",
+        "btn-back": "back",
+        "btn-close": "close",
+        "btn-details": "details",
+
+        "btn-deleteUrl": "delete",
+        "btn-deleteUrl-confirm": "Are you sure that you want to delete the url\\n\\n%s\\n\\n?",
+
+
+        "msgErr-nocheck-welcome": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>To add an url to check go to the Setup.</p>",
+        "msgErr-nocheck": "No check was defined yet.",
+        "msgErr-nodata": "ERROR: Sorry, no response from any website. See Tab <a href=#divall>Overview</a> for details.",
+        "msgErr-missedchecks": "ERROR: <strong>%d</strong> check(s) failed. The view is incomplete. See Tab <a href=#divall>Checks</a> for details.",
+        "msgErr-demosite": "This is a demo website. Changing the config is not possible here.",
+
+        "msgErr-Http-request-failed": "Http Request to appmonitor failed: host or service is unreachable.",
+        "msgErr-Http-error": "Http Response sent an error <pre>%s</pre>.",
+        "msgErr-Http-no-jsondata": "Server response does not contain json data.",
+
+        "msgErr-Url-not-added-no-appmonitor": "URL not added: %s - it does not seems to be an app monitor url.",
+        "msgErr-Url-was-added-already": "Skip. URL was added already: %s.",
+        "msgErr-Url-not-removed-it-does-not-exist": "URL cannot be removed - it doees not exist in the config: %s.",
+        "msgOK-Url-was-removed": "URL was removed: %s",
+    
+        "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
+    },
+    "notifications":{
+        
+        
+        "changetype-0.logmessage":    "Webapp has no change: __URL__.",
+        "changetype-0.email.message": "Webapp has no change: __URL__.",
+        
+        "changetype-1.logmessage":    "Webapp was added to the appmonitor: __URL__.",
+        "changetype-1.email.message": "Webapp was added to the appmonitor: __URL__.",
+        
+        "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.",
+        "changetype-2.email.message": "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.",
+        
+        "changetype-3.logmessage":    "Webapp was deleted from appmonitor: __URL__.",
+        "changetype-3.email.message": "Webapp was deleted from appmonitor: __URL__.",
+        
+        "email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__.",
+        
+        
+        "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
+    },
+
+    "changetype-0": "no change",
+    "changetype-1": "new",
+    "changetype-2": "change",
+    "changetype-3": "deleted",
+    
     "Resulttype-0": "OK",
     "Resulttype-1": "Unknown",
     "Resulttype-2": "Warning",
     "Resulttype-3": "Error",
-
-
-    "btn-addUrl": "add",
-    "btn-back": "back",
-    "btn-close": "close",
-    "btn-details": "details",
     
-    "btn-deleteUrl": "delete",
-    "btn-deleteUrl-confirm": "Are you sure that you want to delete the url\\n\\n%s\\n\\n?",
-    
-    
-    "msgErr-nocheck-welcome": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>To add an url to check go to the Setup.</p>",
-    "msgErr-nocheck": "No check was defined yet.",
-    "msgErr-nodata": "ERROR: Sorry, no response from any website. See Tab <a href=#divall>Overview</a> for details.",
-    "msgErr-missedchecks": "ERROR: <strong>%d</strong> check(s) failed. The view is incomplete. See Tab <a href=#divall>Checks</a> for details.",
-    "msgErr-demosite": "This is a demo website. Changing the config is not possible here.",
-    
-    "msgErr-Http-request-failed": "Http Request to appmonitor failed: host or service is unreachable.",
-    "msgErr-Http-error": "Http Response sent an error <pre>%s</pre>.",
-    "msgErr-Http-no-jsondata": "Server response does not contain json data.",
-    
-    "msgErr-Url-not-added-no-appmonitor": "URL not added: %s - it does not seems to be an app monitor url.",
-    "msgErr-Url-was-added-already": "Skip. URL was added already: %s.",
-    "msgErr-Url-not-removed-it-does-not-exist": "URL cannot be removed - it doees not exist in the config: %s.",
-    "msgOK-Url-was-removed": "URL was removed: %s",
-    
-    "lastentry": "This is just a Dummy entry without comma at the end of line"
+    "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
 }
