@@ -68,7 +68,10 @@ class appmonitorserver {
     public function __construct() {
         $this->loadConfig();
         $this->_loadLangTexts();
-        $this->oNotifcation=new notificationhandler($this->_aCfg['lang']);
+        $this->oNotifcation=new notificationhandler(array(
+            'lang' => $this->_aCfg['lang'],
+            'notifications' => $this->_aCfg['notifications']
+        ));
         $this->_handleParams();
     }
 
@@ -187,7 +190,7 @@ class appmonitorserver {
                     $this->_addLog("URL was added: " . $sUrl, "ok");
                     $this->_aCfg["urls"][] = $sUrl;
                     $this->_saveConfig();
-                    $this->loadConfig();
+                    // $this->loadConfig();
                 }
             } else {
                 $this->_addLog(sprintf($this->_tr('msgErr-Url-was-added-already'), $sUrl));
@@ -202,13 +205,14 @@ class appmonitorserver {
     protected function _actionDeleteUrl($sUrl) {
         if ($sUrl) {
             if (($key = array_search($sUrl, $this->_aCfg["urls"])) !== false) {
-                $sAppId=$this->_aCfg["urls"][$key];
-                unset($this->_aCfg["urls"][$key]);
-                $this->_saveConfig();
+                $sAppId=$this->_generateUrlKey($sUrl);
+                $this->oNotifcation->deleteApp($sAppId);
+                
                 $oCache = new AhCache("appmonitor-server", $sUrl);
                 $oCache->delete();
+                unset($this->_aCfg["urls"][$key]);
+                $this->_saveConfig();
                 $this->loadConfig();
-                $this->oNotifcation->deleteApp($sAppId);
                 $this->_addLog(sprintf($this->_tr('msgOK-Url-was-removed'), $sUrl), "ok");
             } else {
                 $this->_addLog(sprintf($this->_tr('msgErr-Url-not-removed-it-does-not-exist'), $sUrl), "error");

@@ -106,7 +106,7 @@ These texts can contain placeholders.
 | _\_\_LAST-RESULT___  | result of last check; see RESULT (2)                 |
 | _\_\_LAST-TIME___    | time of last check; see TIME (2)                     |
 | _\_\_RESULT___       | one of OK\|Unknown\|Warning\|Error (1)               |
-| _\_\_TIME___         | time of current check in YYYY-MM-DD hh:mm:ss         | 
+| _\_\_TIME___         | current time YYYY-MM-DD hh:mm:ss                     | 
 | _\_\_URL___          | url of web application check                         |
 
 Remarks:

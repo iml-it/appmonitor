@@ -1,5 +1,8 @@
 
 HISTORY
+v0.17  2018-06-27
+    - fix datatable on notification page
+    - first lines for email and slack notification
 
 v0.16  2018-06-26
     - added service script to run in a loop

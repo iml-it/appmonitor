@@ -1,8 +1,7 @@
 
 # APPMONITOR #
 
-University Berne
-IML - Institute of Medical Education
+OPEN SOURCE from University Berne :: IML - Institute of Medical Education
 
 https://github.com/iml-it/appmonitor
 
@@ -14,6 +13,11 @@ The appmonitor is a monitoring tool that consists of 2 parts
 - server - it collects all JSON data and presents an overview over all checks
   and websites
 
+
+# FEATURES #
+
+- Checks are done on application server. From the point of view of the application with its credentials and permissions.
+- Monitor server mainly just adds urls. This is easy to maintain for a sysadmin.
 
 
 # REQUIREMENTS #
@@ -301,7 +305,16 @@ returns JSON answers with the conventions described below.
         "host": "[string: name of the computer]", 
         "website": "[string: domain (and maybe path) of the webapp]", 
         "ttl": [integer: ttl for the server gui], 
-        "result": [integer: 0..3]
+        "result": [integer: 0..3],
+        "notifications": {
+            "email":{
+                "email1@example.com",
+                "email2@example.com",
+            },
+            "slack":{
+                "channelname#1",
+                "channelname#N"
+            }
     }, 
     "checks": [
         {

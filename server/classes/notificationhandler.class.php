@@ -23,7 +23,7 @@ define("RESULT_ERROR", 3);
 class notificationhandler {
 
     protected $_sCacheIdPrefix="notificationhandler";
-    protected $_iMaxLogentries=10;
+    protected $_iMaxLogentries=25;
     
     /**
      * logdata for detected changes and sent notifications
@@ -37,42 +37,43 @@ class notificationhandler {
      */
     protected $oLang = false;
     
+    protected $_aNotificationOptions=false;
+    
     // ------------------------------------------------------------------
     // data of the current app 
     // ------------------------------------------------------------------
     protected $_sAppId=false;
+    protected $_iAppResultChange=false;
     protected $_aAppResult=false;
     protected $_aAppLastResult=false;
 
-
-    /*
-    private $_aChangetypes=array(
-        CHANGETYPE_NOCHANGE => array('label'=>'no change', 'message'=>'Webapp has no change: __URL__.'),
-        CHANGETYPE_NEW      => array('label'=>'new',       'message'=>'Webapp was added to the appmonitor: __URL__.'),
-        CHANGETYPE_CHANGE   => array('label'=>'changed',   'message'=>'Status of __URL__ has changed from __OLDSTATUS__ to __NEWSTATUS__.'),
-        CHANGETYPE_DELETE   => array('label'=>'deleted',   'message'=>'Webapp was deleted from appmonitor: __URL__.'),
-    );
-    
-    private $_aResults=array(
-        RESULT_OK      => array('label'=>'OK'),
-        RESULT_UNKNOWN => array('label'=>'unknown'),
-        RESULT_WARNING => array('label'=>'warning'),
-        RESULT_ERROR   => array('label'=>'error'),
-    );
-     */
-    
     // ----------------------------------------------------------------------
     // __construct
     // ----------------------------------------------------------------------
 
-    public function __construct($sLang) {
-        $this->_loadLangTexts($sLang);
+    public function __construct($aOptions=array()) {
+        if(isset($aOptions['lang'])){
+            $this->_loadLangTexts($aOptions['lang']);
+        }
+        
+        $this->_aNotificationOptions = isset($aOptions['notifications']) ? $aOptions['notifications'] : false;
+        
         return true;
     }
     // ----------------------------------------------------------------------
     // private functions - handle languages texts
     // ----------------------------------------------------------------------
 
+    protected function _initMessenger($aOptions){
+        if (!isset($aOptions['notifications'])){
+            return false;
+        }
+        
+        $this->_oMessenger = isset($aOptions['notifications'])
+                ? new messenger($aOptions['notifications'])
+                : false;
+    }
+    
     /**
      * load language texts
      */
@@ -134,14 +135,17 @@ class notificationhandler {
         }
         
         if(!$this->_aAppLastResult || !is_array($this->_aAppLastResult)){
-            return CHANGETYPE_NEW;
+            $this->_iAppResultChange=CHANGETYPE_NEW;
         } else {
-            if($this->_aAppLastResult['result']['result']!==$this->_aAppResult['result']['result']){
-                return CHANGETYPE_CHANGE;
+            if(isset($this->_aAppLastResult['result']['result']) && isset($this->_aAppResult['result']['result'])
+                && $this->_aAppLastResult['result']['result']!==$this->_aAppResult['result']['result']
+            ){
+                $this->_iAppResultChange=CHANGETYPE_CHANGE;
             } else {
-                return CHANGETYPE_NOCHANGE;
+                $this->_iAppResultChange=CHANGETYPE_NOCHANGE;
             }
         }
+        return $this->_iAppResultChange;
     }
     
     
@@ -154,6 +158,7 @@ class notificationhandler {
     public function setApp($sAppId, $aData=false){
         $this->_sAppId=$sAppId;
         $this->_aAppResult=$aData;
+        $this->_iAppResultChange=false;
         $this->_aAppLastResult=$this->getAppLastResult();
         return true;
     }
@@ -169,8 +174,8 @@ class notificationhandler {
         }
         
         $iChangetype=$this->_detectChangetype(); 
-        $iResult=$this->_aAppResult['result']['result'];
-        $sLogMessage=$this->_generateMessage('changetype-'.$iChangetype.'.logmessage');
+        // $iResult=$this->_aAppResult['result']['result'];
+        // $sLogMessage=$this->_generateMessage('changetype-'.$iChangetype.'.logmessage');
         
         switch ($iChangetype) {
             case CHANGETYPE_NOCHANGE:
@@ -180,9 +185,9 @@ class notificationhandler {
             case CHANGETYPE_NEW:
             case CHANGETYPE_CHANGE:
                 $this->_saveAppResult();
-                $this->addLogitem(CHANGETYPE_CHANGE, $iResult, $this->_sAppId, $sLogMessage);
+                // $this->addLogitem($iChangetype, $iResult, $this->_sAppId, $sLogMessage);
                 // TODO: trigger notification
-                
+                $this->sendAllNotifications($iChangetype);
                 break;
 
             default:
@@ -202,14 +207,20 @@ class notificationhandler {
         
     }
     
+    /**
+     * delete application
+     * @param string  $sAppId  app id
+     * @return boolean
+     */
     public function deleteApp($sAppId){
         $this->setApp($sAppId, array());
-        $aLastData=$this->getAppLastResult();
-        // TODO: trigger notification
-
-        $sLogMessage=$this->_generateMessage('changetype-'.CHANGETYPE_DELETE.'.logmessage');
+        $this->_iAppResultChange=CHANGETYPE_DELETE;
+        // $sLogMessage=$this->_generateMessage('changetype-'.CHANGETYPE_DELETE.'.logmessage', CHANGETYPE_DELETE);
+        // $this->addLogitem(CHANGETYPE_DELETE, RESULT_UNKNOWN, $sAppId, $sLogMessage);
+        
+        // trigger notification
+        $this->sendAllNotifications();
         $this->_deleteAppLastResult();
-        $this->addLogitem(CHANGETYPE_DELETE, 0, $sAppId, $sLogMessage);
         return true;
     }
 
@@ -344,7 +355,6 @@ class notificationhandler {
      * @return integer
      */
     protected function _generateMessage($sMessageId){
-        $iChangetype=$this->_detectChangetype();        
         $sTemplate=$this->_tr($sMessageId);
         
         /*
@@ -352,8 +362,8 @@ class notificationhandler {
                 (
                     [ts] => 1529672793
                     [result] => 3
-                    [ttl] => 20
-                    [url] => http://aum-cba02.unibe.ch/appmonitor/
+                    [ttl] => 300
+                    [url] => http://example.com/appmonitor/
                     [header] => 
                     [headerarray] => 
                     [httpstatus] => 
@@ -362,27 +372,170 @@ class notificationhandler {
                 )
 
          */
-        $bIsNew= is_array($this->_aAppLastResult) && count($this->_aAppLastResult);
+        $sMiss='-';
         $aReplace=array(
-            '__URL__'            => $this->_aAppResult['result']['url'],
-            '__TIME__'           => date("Y-m-d H:i:s", $this->_aAppResult['result']['ts']),
-            '__CHANGE__'         => $this->_tr('changetype-'. $iChangetype),
-            '__RESULT__'         => $this->_tr('Resulttype-'. $this->_aAppResult['result']['result']),
-            
             '__APPID__'          => $this->_sAppId,
-            '__HEADER__'         => $this->_aAppResult['result']['header'],
+            '__CHANGE__'         => $this->_tr('changetype-'. $this->_iAppResultChange),
+            '__TIME__'           => date("Y-m-d H:i:s", (time())),
+            '__URL__'            => isset($this->_aAppResult['result']['url']) ? $this->_aAppResult['result']['url'] 
+                                        : (isset($this->_aAppLastResult['result']['url']) ? $this->_aAppLastResult['result']['url'] : $sMiss),
+            '__RESULT__'         => isset($this->_aAppResult['result']['result']) ? $this->_tr('Resulttype-'. $this->_aAppResult['result']['result']) : $sMiss,
             
-            '__LAST-TIME__'      => $bIsNew ? '-' : date("Y-m-d H:i:s", $this->_aAppLastResult['result']['ts']),
-            '__LAST-RESULT__'    => $bIsNew ? '-' : $this->_tr('Resulttype-'. $this->_aAppLastResult['result']['result']),
-            '__DELTA-TIME__'     => $bIsNew ? '-' : round(($this->_aAppResult['result']['ts'] - $this->_aAppLastResult['result']['ts'])/ 60)." min (".round(($this->_aAppResult['result']['ts'] - $this->_aAppLastResult['result']['ts'])/ 60/60)." h)",
+            '__HEADER__'         => isset($this->_aAppResult['result']['header']) ? $this->_aAppResult['result']['header'] : $sMiss,
+            
+            '__LAST-TIME__'      => isset($this->_aAppLastResult['result']['ts']) ? date("Y-m-d H:i:s", $this->_aAppLastResult['result']['ts']) : $sMiss,
+            '__LAST-RESULT__'    => isset($this->_aAppLastResult['result']['result']) ? $this->_tr('Resulttype-'. $this->_aAppLastResult['result']['result']) : $sMiss,
+            '__DELTA-TIME__'     => isset($this->_aAppLastResult['result']['ts']) ? 
+                    round((time() - $this->_aAppLastResult['result']['ts'])/ 60)." min "
+                    . "(".round((time() - $this->_aAppLastResult['result']['ts'])/ 60/60*4)/4 ." h)"
+                    : $sMiss
+                    ,
             
         );
-        
-        // echo "DEBUG: type $iChangetype -  sTemplate = $sTemplate\n";
-        // if($aData['result'][''])
         $sReturn = $this->_makeReplace($aReplace, $sTemplate);
-        // echo "DEBUG: returns: $sReturn\n";
         return $sReturn;
+    }
+    
+    /**
+     * write log entry and send notifications
+     * @return boolean
+     */
+    protected function sendAllNotifications(){
+        if($this->_iAppResultChange===false){
+            die("ERROR: " .__METHOD__ ." no change was detected - or app was not initialized.");
+            return false;
+        }
+
+        // write entry in message log
+        $sLogMessage=$this->_generateMessage('changetype-'.$this->_iAppResultChange.'.logmessage');
+        
+        // set result: 
+        // - use current result, if it existst
+        // - use RESULT_UNKNOWN if action was delete or result does not exist
+        $iResult=($this->_iAppResultChange==CHANGETYPE_DELETE) ? RESULT_UNKNOWN 
+                : (isset($this->_aAppResult['result']['result']) ? $this->_aAppResult['result']['result'] : RESULT_UNKNOWN)
+                ;
+        // TODO: activate
+        $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage);
+        
+        $this->_sendEmailNotifications();
+        $this->_sendSlackNotifications();
+        return true;
+    }
+
+    /**
+     * get notification data of an app
+     * taken from check result meta -> notifications
+     */
+    public function getAppNotificationdata(){
+        $aMergeMeta=isset($this->_aAppLastResult['meta']['notifications']) ? $this->_aAppLastResult['meta']['notifications'] : array();
+        $aMergeMeta=isset($this->_aAppResult['meta']['notifications'])     ? array_merge($aMergeMeta, $this->_aAppResult['meta']['notifications']) : $aMergeMeta;
+        return $aMergeMeta;
+    }
+    // ---------- email
+    /**
+     * get contacts for current app from check result meta -> notifications -> email
+     */
+    public function getAppEmailContacts(){
+        $aReturn=array();
+        $aData=$this->getAppNotificationdata();
+        if (isset($aData['email']) && is_array($aData['email']) && count($aData['email'])){
+            $aReturn=array_values($aData['email']);
+        }
+        return $aReturn;
+    }
+    
+    /**
+     * send email notifications to monitor server admins and application contacts
+     * @return boolean
+     */
+    protected function _sendEmailNotifications(){
+        if(!isset($this->_aNotificationOptions['email'])){
+            return false; // email subkey does not exist
+        }
+        $aMyCfg=$this->_aNotificationOptions['email']; // "shortcut"
+        
+        $sFrom=(isset($aMyCfg['from']) && $aMyCfg['from']) ? $aMyCfg['from'] : false;
+        if(!$sFrom){
+            return false; // no from address
+        }
+        
+        // server monitor contacts
+        $aTo=(isset($aMyCfg['to']) && is_array($aMyCfg['to']) && count($aMyCfg['to'])) 
+                ? array_values($aMyCfg['to'])
+                : array();
+        $aTo=array_merge($aTo, $this->getAppEmailContacts());
+        if(!count($aTo)){
+            return false; // no to adress in server config nor app metadata
+        }
+        
+        $sTo=implode(";", $aTo);
+        $sEmailSubject=$this->_generateMessage('changetype-'.$this->_iAppResultChange.'.email.subject');
+        $sEmailBody=$this->_generateMessage('changetype-'.$this->_iAppResultChange.'.email.message');
+        
+        mail($sTo, $sEmailSubject, $sEmailBody, "From: " . $sFrom . "\r\n" .
+            "Reply-To: " . $sFrom . "\r\n"
+        );
+        return true;
+    }
+    
+    // ---------- slack
+    
+    /**
+     * get contacts for current app from check result meta -> notifications -> slack
+     */
+    public function getAppSlackChannels(){
+        $aReturn=array();
+        $aData=$this->getAppNotificationdata();
+        if (isset($aData['slack']) && is_array($aData['slack']) && count($aData['slack'])){
+            $aReturn=array_values($aData['slack']);
+        }
+        return $aReturn;
+    }
+    /**
+     * send email notifications to monitor server admins and application contacts
+     * @return boolean
+     */
+    protected function _sendSlackNotifications(){
+        
+        return true; // TODO 
+        
+        if(!isset($this->_aNotificationOptions['slack'])){
+            return false; // email subkey does not exist
+        }
+        $aMyCfg=$this->_aNotificationOptions['slack']; // "shortcut"
+        // server monitor contacts
+        $aTargetChannels=(isset($aMyCfg['to']) && is_array($aMyCfg['to']) && count($aMyCfg['to'])) 
+                ? array_values($aMyCfg['to'])
+                : array();
+        $aTargetChannels=array_merge($aTargetChannels, $this->getAppSlackChannels());
+        if(!count($aTargetChannels)){
+            return false; // no slack channel in server config nor app metadata
+        }
+        
+        // --- start sending
+        $data=array(
+            'text'       => $this->_generateMessage('changetype-'.$this->_iAppResultChange.'.logmessage'),
+            'username'   => '[APPMONITOR]',
+            'icon_emoji' => false
+        );
+
+        $options = array(
+          'http' => array(
+            'header'  => 'Content-type: application/x-www-form-urlencoded\r\n',
+            'method'  => 'POST',
+            'content' => json_encode($data)
+          )
+        );
+        $context  = stream_context_create($options);
+
+        // --- loop over slack targets
+        foreach($aTargetChannels as $sChannel){
+            // check if channel exists in predefined channels
+            $result = file_get_contents($this->incomingURL, false, $context);            
+        }
+
+        return true;
     }
     
 }

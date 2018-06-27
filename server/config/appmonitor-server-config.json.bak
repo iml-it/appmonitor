@@ -3,16 +3,19 @@
     "lang": "en-en",
     "debug": true,
     "notification": {
-        "email": {
-			"from": "sysadmin@iml.unibe.ch",
-			"to": {
-				"Sysadmin Axel": "axel.hahn@iml.unibe.ch"
-			}
-        }
+        "email": []
     },
     "urls": {
         "2": "http:\/\/lithium.iml.unibe.ch\/appmonitor\/client\/",
-        "3": "https:\/\/ci.iml.unibe.ch\/appmonitor\/",
-        "4": "http:\/\/aum-cba02.unibe.ch\/appmonitor\/"
+        "5": "https:\/\/studmed.unibe.ch\/appmonitor\/",
+        "6": "https:\/\/ci.iml.unibe.ch\/appmonitor\/"
+    },
+    "notifications": {
+        "email": {
+            "from": "sysadmin@iml.unibe.ch",
+            "to": {
+                "Sysadmin Axel": "axel.hahn@iml.unibe.ch"
+            }
+        }
     }
 }

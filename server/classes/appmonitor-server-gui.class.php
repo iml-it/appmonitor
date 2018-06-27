@@ -38,7 +38,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.16";
+    var $_sTitle = "Appmonitor Server GUI v0.17";
     
     /**
      * html code for icons in the web gui
@@ -335,7 +335,7 @@ class appmonitorserver_gui extends appmonitorserver{
             return $this->_showWelcomeMessage();
         }
 
-        $sTableClass = $sHost ? "datatablehost" : "datatable";
+        $sTableClass = $sHost ? "datatable-hosts" : "datatable-checks";
         $sReturn .= $sHost ? $this->_generateTableHead(array(
                     $this->_tr('Timestamp'),
                     $this->_tr('TTL'),
@@ -416,7 +416,6 @@ class appmonitorserver_gui extends appmonitorserver{
         $aLogs=$this->oNotifcation->getLogdata();
         rsort($aLogs);
         
-        
         $sReturn = $this->_generateTableHead(array(
                     $this->_tr('Timestamp'),
                     $this->_tr('Change'),
@@ -434,7 +433,7 @@ class appmonitorserver_gui extends appmonitorserver{
         }
         $sReturn.='</tbody>'."\n";
         
-        $sReturn='<table class="datatableXYZ">' ."\n" . $sReturn . '</table>';
+        $sReturn='<table class="datatable-notifications">' ."\n" . $sReturn . '</table>';
         
         // $sReturn.='<pre>'. htmlentities($sReturn).'</pre>';
         return $sReturn;
@@ -763,8 +762,10 @@ class appmonitorserver_gui extends appmonitorserver{
                 . '<div class="footer"><a href="' . $this->_sProjectUrl . '" target="_blank">' . $this->_sProjectUrl . '</a></div>'
                 . '<script>'
                 . '$(document).ready(function() {'
-                . ' $(\'.datatable\').dataTable( { "order": [[ 6, "desc" ]] } ); '
-                . ' $(\'.datatablehost\').dataTable( { "order": [[ 4, "desc" ]] } ); '
+                . ' $(\'.datatable\').dataTable( { } ); '
+                . ' $(\'.datatable-checks\').dataTable( { "order": [[ 6, "desc" ]] } ); '
+                . ' $(\'.datatable-hosts\').dataTable( { "order": [[ 4, "desc" ]] } ); '
+                . ' $(\'.datatable-notifications\').dataTable( { "order": [[ 0, "desc" ]] } ); '
                 . 'if (document.location.hash) {'
                 . ' showDiv( document.location.hash ) ; '
                 . '} else {'
