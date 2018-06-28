@@ -54,7 +54,7 @@ class appmonitorserver {
         CURLOPT_HEADER => true,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 5,
-        CURLOPT_FAILONERROR => 1,
+        CURLOPT_FAILONERROR => 0,
         CURLOPT_SSL_VERIFYHOST => 0,
         CURLOPT_SSL_VERIFYPEER => 0,
             // CURLMOPT_MAXCONNECTS => 10
@@ -405,7 +405,7 @@ class appmonitorserver {
                 // Cache does not exist or is expired
                 $aUrls[$sKey] = $sUrl;
             } else {
-                // age is below ttl ... read from Cache 
+                // age is bel['result']['error']ow ttl ... read from Cache 
                 $this->_data[$sKey] = $oCache->read();
                 $this->_data[$sKey]["result"]["fromcache"] = true;
             }
@@ -421,7 +421,7 @@ class appmonitorserver {
                     $aClientData = array();
                 } else {
                     if (
-                            is_array($aClientData) && array_key_exists("ttl", $aClientData["meta"]) && $aClientData["meta"]["ttl"]
+                            is_array($aClientData) && isset($aClientData["meta"]) && array_key_exists("ttl", $aClientData["meta"]) && $aClientData["meta"]["ttl"]
                     ) {
                         $iTtl = (int) $aClientData["meta"]["ttl"];
                     }
@@ -429,7 +429,8 @@ class appmonitorserver {
                 // detect error
                 $iHttpStatus=$this->_getHttpStatus($aResult['response_header']);
                 $sError=!$aResult['response_header'] ? $this->_tr('msgErr-Http-request-failed')
-                            : ((!$iHttpStatus || $iHttpStatus<200 || $iHttpStatus>299) ? sprint_f($this->_tr('msgErr-Http-error'), $aResult['response_header'])
+                            : ((!$iHttpStatus || $iHttpStatus<200 || $iHttpStatus>299) 
+                                ? $this->_tr('msgErr-Http-error')
                                 : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
                                 )
                             ;

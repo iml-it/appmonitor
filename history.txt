@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.19  2018-06-28
+    - fix sample server config (plural in notifications)
+    - get http response header on failed http requests
+    - update email notification
+
 v0.18  2018-06-28
     - added notification methods in the appmonitor client 
     - added more tiles; show notification targets

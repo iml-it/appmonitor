@@ -484,28 +484,24 @@ class notificationhandler {
      * @return boolean
      */
     protected function _sendEmailNotifications(){
-        if(!isset($this->_aNotificationOptions['email'])){
-            return false; // email subkey does not exist
-        }
-        $aMyCfg=$this->_aNotificationOptions['email']; // "shortcut"
-        
-        $sFrom=(isset($aMyCfg['from']) && $aMyCfg['from']) ? $aMyCfg['from'] : false;
+        $sFrom=(isset($this->_aNotificationOptions['from']) && $this->_aNotificationOptions['from']) ? $this->_aNotificationOptions['from'] : false;
         if(!$sFrom){
             return false; // no from address
         }
-        
+
         $aTo=$this->getAppEmailContacts();
         if(!count($aTo)){
             return false; // no to adress in server config nor app metadata
         }
-        
+
         $sTo=implode(";", $aTo);
         $sEmailSubject=$this->_generateMessage('changetype-'.$this->_iAppResultChange.'.email.subject');
         $sEmailBody=$this->_generateMessage('changetype-'.$this->_iAppResultChange.'.email.message');
-        
+
         mail($sTo, $sEmailSubject, $sEmailBody, "From: " . $sFrom . "\r\n" .
             "Reply-To: " . $sFrom . "\r\n"
         );
+        return true;
         return true;
     }
     

@@ -73,7 +73,7 @@
         "msgErr-demosite": "This is a demo website. Changing the config is not possible here.",
 
         "msgErr-Http-request-failed": "Http Request to appmonitor failed: host or service is unreachable.",
-        "msgErr-Http-error": "Http Response sent an error <pre>%s</pre>.",
+        "msgErr-Http-error": "Http response header is not a 2xx code.",
         "msgErr-Http-no-jsondata": "Server response does not contain json data.",
 
         "msgErr-Url-not-added-no-appmonitor": "URL not added: %s - it does not seems to be an app monitor url.",
@@ -85,14 +85,13 @@
     },
     "notifications":{
         
-        
         "changetype-0.logmessage":    "Webapp has no change: __URL__.",
         "changetype-0.email.subject": "Webapp has no change: __URL__.",
         "changetype-0.email.message": "Webapp has no change: __URL__.",
         
         "changetype-1.logmessage":    "Webapp was added to the appmonitor: __URL__.",
-        "changetype-3.email.subject": "ADDED in appmonitor: __URL__.",
-        "changetype-3.email.message": "The webapp __URL__ was added in the appmonitor. You will get notifications if the status changes.",
+        "changetype-1.email.subject": "ADDED in appmonitor: __URL__.",
+        "changetype-1.email.message": "The webapp __URL__ was added in the appmonitor. You will get notifications if the status changes.",
         
         "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.",
         "changetype-2.email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__",

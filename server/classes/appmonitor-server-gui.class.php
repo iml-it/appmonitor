@@ -38,7 +38,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.18";
+    var $_sTitle = "Appmonitor Server GUI v0.19";
     
     /**
      * html code for icons in the web gui
@@ -263,9 +263,11 @@ class appmonitorserver_gui extends appmonitorserver{
         // $sReturn.='<pre>'.print_r($aHostdata, 1).'</pre>';
         
         $sMoreChecks='';
-        for($i=0; $i<4; $i++){
-            // $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-            $sMoreChecks.=($aHostdata['summary'][$i] ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+        if(isset($aHostdata['summary'])){
+            for($i=0; $i<4; $i++){
+                // $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+                $sMoreChecks.=($aHostdata['summary'][$i] ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+            }
         }
         $aEmailNotifiers=$this->oNotifcation->getAppNotificationdata('email');
         $aSlachChannels=$this->oNotifcation->getAppNotificationdata('slack');
@@ -365,7 +367,7 @@ class appmonitorserver_gui extends appmonitorserver{
         
         foreach ($this->_data as $sKey => $aEntries) {
             $bHasData=true;
-            if(!$aEntries['result']['httpstatus']){
+            if(!isset($aEntries["result"]["host"])){
                 $bHasData=false;
                 $iMiss++;
             }
@@ -378,7 +380,7 @@ class appmonitorserver_gui extends appmonitorserver{
                         . ($bHasData 
                                 ? '<a href="#divweb' . $sKey . '">' . $aEntries["result"]["website"].'</a><br>'
                                     . $this->_aIco['host'] .' '. $aEntries["result"]["host"] . ' '. $this->_renderBadgesForWebsite($sKey, true)
-                                : '<span title="'.$aEntries['result']['url']."\n".$aEntries['result']['error'].'">'
+                                : '<span title="'.$aEntries['result']['url']."\n".str_replace('"', '&quot;', $aEntries['result']['error']).'">'
                                         .$this->_aIco['error'] .' '. parse_url($aEntries['result']['url'], PHP_URL_HOST) .'<br>'
                                   .'</span>'
                             )
@@ -748,7 +750,7 @@ class appmonitorserver_gui extends appmonitorserver{
 
                 }
                 $sHtml .= '<h3>'.$this->_tr('Http-details').'</h3>'
-                        . ($aEntries['result']['error']      ? $this->_tr('Error-message'). ': ' . $aEntries['result']['error'].'<br>': '')
+                        . ($aEntries['result']['error']      ? '<div class="result3">'.$this->_tr('Error-message'). ': ' . $aEntries['result']['error'].'</div><br>': '')
                         . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status'). ': <strong>' . $aEntries['result']['httpstatus'].'</strong><br>': '')
                         . ($aEntries['result']['header']     ? $this->_tr('Http-header'). ': <pre>' . $aEntries['result']['header'].'</pre>': '')
                         // . '<pre>'.print_r($aEntries["result"], 1).'</pre>'

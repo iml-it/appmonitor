@@ -2,9 +2,8 @@
     "theme": "default",
     "lang": "en-en",
     "debug": false,
-    "notification":{
-        "email":{
-        }
+    "notifications":{
+        "email":[]
     },
     "urls": {
     }
