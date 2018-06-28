@@ -448,7 +448,7 @@ class notificationhandler {
                     }
                 }
             }
-            if (is_array($this->_aNotificationOptions[$sNotificationType])){
+            if (isset($this->_aNotificationOptions[$sNotificationType]) && is_array($this->_aNotificationOptions[$sNotificationType])){
                 foreach($this->_aNotificationOptions[$sNotificationType] as $sKey=>$Value){
                     if(is_int($sKey)){
                         $aMergeMeta[$sNotificationType][]=$Value;
@@ -458,7 +458,9 @@ class notificationhandler {
                 }
             }
         }
-        return $sType ? $aMergeMeta[$sType] : $aMergeMeta;
+        return $sType 
+                ? (isset($aMergeMeta[$sType]) ? $aMergeMeta[$sType] : array())
+                : $aMergeMeta;
     }
     // ---------- email
     /**
