@@ -424,25 +424,59 @@ class notificationhandler {
     }
 
     /**
-     * get notification data of an app
-     * taken from check result meta -> notifications
+     * get array with notification data of an app
+     * taken from check result meta -> notifications merged with server config
+     * 
+     * @param string  $sType  optional: type email|slack; defailt: false (=return all keys)
+     * @return array
      */
-    public function getAppNotificationdata(){
-        $aMergeMeta=isset($this->_aAppLastResult['meta']['notifications']) ? $this->_aAppLastResult['meta']['notifications'] : array();
-        $aMergeMeta=isset($this->_aAppResult['meta']['notifications'])     ? array_merge($aMergeMeta, $this->_aAppResult['meta']['notifications']) : $aMergeMeta;
-        return $aMergeMeta;
+    
+    public function getAppNotificationdata($sType=false){
+
+        $aMergeMeta=array();
+        $aArray_keys=$sType ? array($sType) : array_keys($this->_aNotificationOptions);
+
+        // take data from web app ... meta -> notifications
+        // $aMergeMeta=isset($this->_aAppLastResult['meta']['notifications']) ? $this->_aAppLastResult['meta']['notifications'] : array();
+        foreach($aArray_keys as $sNotificationType){
+            if(isset ($this->_aAppLastResult['meta']['notifications'][$sNotificationType]) && count($this->_aAppLastResult['meta']['notifications'][$sNotificationType])){
+                foreach($this->_aAppLastResult['meta']['notifications'][$sNotificationType] as $sKey=>$Value){
+                    if(is_int($sKey)){
+                        $aMergeMeta[$sNotificationType][]=$Value;
+                    } else {
+                        $aMergeMeta[$sNotificationType][$sKey]=$Value;
+                    }
+                }
+            }
+            if (is_array($this->_aNotificationOptions[$sNotificationType])){
+                foreach($this->_aNotificationOptions[$sNotificationType] as $sKey=>$Value){
+                    if(is_int($sKey)){
+                        $aMergeMeta[$sNotificationType][]=$Value;
+                    } else {
+                        $aMergeMeta[$sNotificationType][$sKey]=$Value;
+                    }
+                }
+            }
+        }
+        return $sType ? $aMergeMeta[$sType] : $aMergeMeta;
     }
     // ---------- email
     /**
-     * get contacts for current app from check result meta -> notifications -> email
+     * get flat array with contacts email addresses for current app from 
+     * check result meta -> notifications -> email
      */
     public function getAppEmailContacts(){
-        $aReturn=array();
-        $aData=$this->getAppNotificationdata();
-        if (isset($aData['email']) && is_array($aData['email']) && count($aData['email'])){
-            $aReturn=array_values($aData['email']);
-        }
-        return $aReturn;
+        return array_values($this->getAppNotificationdata('email'));
+    }
+    /**
+     * get flat array with slack webhook addresses for current app from 
+     * check result meta -> notifications -> slack
+     * remark: to get key cvalue array use
+     * $this->getAppNotificationdata('slack') 
+     * instead
+     */
+    public function getAppSlackChannels(){
+        return array_values($this->getAppNotificationdata('slack'));
     }
     
     /**
@@ -460,11 +494,7 @@ class notificationhandler {
             return false; // no from address
         }
         
-        // server monitor contacts
-        $aTo=(isset($aMyCfg['to']) && is_array($aMyCfg['to']) && count($aMyCfg['to'])) 
-                ? array_values($aMyCfg['to'])
-                : array();
-        $aTo=array_merge($aTo, $this->getAppEmailContacts());
+        $aTo=$this->getAppEmailContacts();
         if(!count($aTo)){
             return false; // no to adress in server config nor app metadata
         }
@@ -481,17 +511,6 @@ class notificationhandler {
     
     // ---------- slack
     
-    /**
-     * get contacts for current app from check result meta -> notifications -> slack
-     */
-    public function getAppSlackChannels(){
-        $aReturn=array();
-        $aData=$this->getAppNotificationdata();
-        if (isset($aData['slack']) && is_array($aData['slack']) && count($aData['slack'])){
-            $aReturn=array_values($aData['slack']);
-        }
-        return $aReturn;
-    }
     /**
      * send email notifications to monitor server admins and application contacts
      * @return boolean

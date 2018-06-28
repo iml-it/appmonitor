@@ -7,8 +7,7 @@
     },
     "urls": {
         "2": "http:\/\/lithium.iml.unibe.ch\/appmonitor\/client\/",
-        "5": "https:\/\/studmed.unibe.ch\/appmonitor\/",
-        "6": "https:\/\/ci.iml.unibe.ch\/appmonitor\/"
+        "5": "https:\/\/studmed.unibe.ch\/appmonitor\/"
     },
     "notifications": {
         "email": {
@@ -16,6 +15,14 @@
             "to": {
                 "Sysadmin Axel": "axel.hahn@iml.unibe.ch"
             }
+        },
+        "slack":{
+            "channels": {
+                "#medsurf-heartbeat": "https://hooks.slack.com/services/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"
+            },
+            "to": [
+                
+            ]
         }
     }
 }

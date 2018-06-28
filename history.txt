@@ -1,5 +1,11 @@
 
 HISTORY
+
+v0.18  2018-06-28
+    - added notification methods in the appmonitor client 
+    - added more tiles; show notification targets
+    - update colors
+
 v0.17  2018-06-27
     - fix datatable on notification page
     - first lines for email and slack notification

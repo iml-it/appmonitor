@@ -38,7 +38,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.17";
+    var $_sTitle = "Appmonitor Server GUI v0.18 W.I.P";
     
     /**
      * html code for icons in the web gui
@@ -53,9 +53,13 @@ class appmonitorserver_gui extends appmonitorserver{
         'webs' => '<i class="fa fa-globe"></i>',
         'host' => '<i class="fa fa-hdd-o"></i>',
         'check' => '<i class="fa fa-check"></i>',
-        'checks' => '<i class="fa fa-navicon"></i>',
+        'checks' => '<i class="fa fa-list"></i>',
         'notifications' => '<i class="fa fa-bell-o"></i>',
         'setup' => '<i class="fa fa-wrench"></i>',
+        'notify-email' => '<i class="fa fa-envelope-o"></i>',
+        'notify-slack' => '<i class="fa fa-slack"></i>',
+        'age' => '<i class="fa fa-clock-o"></i>',
+        'httpstatus' => '<i class="fa fa-tag"></i>',
         'debug' => '<i class="fa fa-bug"></i>',
         'ok' => '<i class="fa fa-check"></i>',
         'info' => '<i class="fa fa-info"></i>',
@@ -204,13 +208,44 @@ class appmonitorserver_gui extends appmonitorserver{
      * @param string   $sMore   more text below a horizontal line
      * @return string
      */
-    protected function _getTile($iCount, $sIcon='', $sLabel='', $sMore='') {
-        return '<div class="tile">'
-            . ($sIcon ? '<span class="icon">'.$sIcon.'</span>' : '' )
-            . '<div class="count">'.$iCount.'</div>'
-            . ($sLabel ? '<div class="label">'.$sLabel.'</div>' : '' )
-            . ($sMore ? '<div class="more">'.$sMore .'</div>' : '' )
+    protected function _getTile($aOptions=array()) {
+        // $iCount, $sIcon='', $sLabel='', $sMore=''
+        foreach(array('count', 'icon','label', 'more', 'result') as $sKey){
+            if (!isset($aOptions[$sKey])){
+                $aOptions[$sKey]=false;
+            }
+        }
+        return '<div class="tile'
+            . ($aOptions['result']!==false ? ' result'.$aOptions['result'] : '' )
+            .'">'
+            . ($aOptions['icon'] ? '<span class="icon">'.$aOptions['icon'].'</span>' : '' )
+            . '<div class="count">'.$aOptions['count'].'</div>'
+            . ($aOptions['label'] ? '<div class="label">'.$aOptions['label'].'</div>' : '' )
+            . ($aOptions['more'] ? '<div class="more">'.$aOptions['more'].'</div>' : '' )
+            // . '<pre>'.print_r($aOptions, 1).'</pre>'
         . '</div>';
+    }
+    
+    /**
+     * get html code for tiles of a single webapp
+     * 
+     * @param string  $sKey  webapp id
+     * @return string
+     */
+    protected function _generateChecksTile() {
+        $sReturn='';
+        $aCounter=$this->_getCounter();
+        // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
+        
+        $sMoreChecks='';
+        for($i=0; $i<4; $i++){
+            $sMoreChecks.=($aCounter['checkresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['checkresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+        }
+        return $this->_getTile(array(
+            'count'=>$aCounter['checks'],
+            'label'=>$this->_aIco['check'].' '.$this->_tr('Checks-total'),
+            'more'=>$sMoreChecks
+        ));
     }
     
     /**
@@ -230,12 +265,44 @@ class appmonitorserver_gui extends appmonitorserver{
         $sMoreChecks='';
         for($i=0; $i<4; $i++){
             // $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-            $sMoreChecks.=(isset($aHostdata['summary'][$i]) ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+            $sMoreChecks.=($aHostdata['summary'][$i] ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
         }
+        $aEmailNotifiers=$this->oNotifcation->getAppNotificationdata('email');
+        $aSlachChannels=$this->oNotifcation->getAppNotificationdata('slack');
         
+        // $aPeople=array('email1@example.com', 'email2@example.com');
+        $sMoreNotify=(count($aEmailNotifiers) ? '<span title="'.implode("\n", $aEmailNotifiers).'">'.count($aEmailNotifiers).' x '.$this->_aIco['notify-email'].'</span>' : '')
+            // .'<pre>'.print_r($aEmailNotifiers, 1).'</pre>'
+            .(count($aSlachChannels) ? '<span title="'.implode("\n", array_keys($aSlachChannels)).'">'.count($aSlachChannels).' x '.$this->_aIco['notify-slack'].'</span>' : '')
+            ;
+        $iNotifyTargets=count($aEmailNotifiers) + count($aSlachChannels);
         $sReturn.=''
-                .(isset($aHostdata['result'])           ? $this->_getTile('<span class="result'.$aHostdata['result'].'">'.$this->_tr('Resulttype-'.$aHostdata['result']).'</span>', '', $this->_tr('Appstatus'), $sSince) : '')
-                .(isset($aHostdata['summary']['total']) ? $this->_getTile($aHostdata['summary']['total'], '', $this->_aIco['check'].' '.$this->_tr('Checks'), $sMoreChecks): '')
+                .(isset($aHostdata['result']) ? $this->_getTile(array(
+                        'result'=>$aHostdata['result'],
+                        'count'=>$this->_tr('Resulttype-'.$aHostdata['result']),
+                        'label'=>$this->_tr('Appstatus'),
+                        'more'=>$sSince
+                    )) : '')
+                . $this->_getTile(array(
+                        'count'=>$aHostdata['httpstatus'],
+                        'label'=>$this->_tr('Http-status'),
+                    ))
+                . $this->_getTile(array(
+                        'count'=>time() - $aHostdata['ts'].'s',
+                        'label'=>$this->_aIco['age'].' '.$this->_tr('age-of-result'),
+                        'more'=> $this->_tr('TTL') .'='. $aHostdata['ttl'].'s',
+                    ))
+                .(isset($aHostdata['summary']['total']) ? $this->_getTile(array(
+                        'count'=>$aHostdata['summary']['total'],
+                        'label'=>$this->_aIco['check'].' '.$this->_tr('Checks-on-webapp'),
+                        'more'=>$sMoreChecks
+                    )) : '')
+                .($iNotifyTargets ? $this->_getTile(array(
+                        'count'=>$iNotifyTargets,
+                        'label'=>$this->_aIco['notifications'].' '.$this->_tr('Notifications'),
+                        'more'=>$sMoreNotify
+                    )) : '')
+            
                 .'<div style="clear: both;"></div>'
                 ;
         return $sReturn;
@@ -251,16 +318,21 @@ class appmonitorserver_gui extends appmonitorserver{
         // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
         
         $sMoreHosts='';
-        $sMoreChecks='';
         for($i=0; $i<4; $i++){
             $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-            $sMoreChecks.=($aCounter['checkresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['checkresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
         }
-        
+
         $sReturn.=''
-                .$this->_getTile($aCounter['hosts'], '', $this->_aIco['host'].' '.$this->_tr('Hosts'))
-                .$this->_getTile($aCounter['apps'], '', $this->_aIco['webs'].' '.$this->_tr('Webs'), $sMoreHosts)
-                .$this->_getTile($aCounter['checks'], '', $this->_aIco['check'].' '.$this->_tr('Checks'), $sMoreChecks)
+                .$this->_getTile(array(
+                        'count'=>$aCounter['apps'],
+                        'label'=>$this->_aIco['webs'].' '.$this->_tr('Webs'),
+                        'more'=>$sMoreHosts
+                    ))
+                .$this->_getTile(array(
+                        'count'=>$aCounter['hosts'],
+                        'label'=>$this->_aIco['host'].' '.$this->_tr('Hosts'),
+                    ))
+                .$this->_generateChecksTile()
                 .'<div style="clear: both;"></div>'
                 ;
         return $sReturn;
@@ -416,27 +488,50 @@ class appmonitorserver_gui extends appmonitorserver{
         $aLogs=$this->oNotifcation->getLogdata();
         rsort($aLogs);
         
-        $sReturn = $this->_generateTableHead(array(
+        $sTable = $this->_generateTableHead(array(
                     $this->_tr('Timestamp'),
                     $this->_tr('Change'),
                     $this->_tr('Result'),
                     $this->_tr('Message')
                 ))."\n";
-        $sReturn .= '<tbody>';
+        $sTable .= '<tbody>';
+        
+        $aChanges=array();
+        $aResults=array();
         foreach ($aLogs as $aLogentry) {
-            $sReturn .= '<tr class="result' . $aLogentry['status'] . '">'
+            
+            if(!isset($aChanges[$aLogentry['changetype']])){
+                $aChanges[$aLogentry['changetype']]=0;
+            }
+            $aChanges[$aLogentry['changetype']]++;
+            
+            if(!isset($aResults[$aLogentry['status']])){
+                $aResults[$aLogentry['status']]=0;
+            }
+            $aResults[$aLogentry['status']]++;
+            
+            $sTable .= '<tr class="result' . $aLogentry['status'] . '">'
                 . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
                 . '<td>' . $this->_tr('changetype-'.$aLogentry['changetype']) . '</td>'
                 . '<td>' . $this->_tr('Resulttype-'.$aLogentry['status']) . '</td>'
                 . '<td>' . $aLogentry['message'] . '</td>'
             . '</tr>';
         }
-        $sReturn.='</tbody>'."\n";
+        $sTable.='</tbody>'."\n";
+        $sTable='<table class="datatable-notifications">' ."\n" . $sTable . '</table>';
+
+        $sMoreResults='';
+        for ($i=0; $i<=4; $i++){
+            $sMoreResults.=(isset($aResults[$i]) ? '<span class="result'.$i.'">'.$aResults[$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+        }
+        return 
+            $this->_getTile(array(
+                'count'=>count($aLogs),
+                'label'=>$this->_tr('Notifications'),
+                'more'=>$sMoreResults,
+            ))
+            .$sTable;
         
-        $sReturn='<table class="datatable-notifications">' ."\n" . $sReturn . '</table>';
-        
-        // $sReturn.='<pre>'. htmlentities($sReturn).'</pre>';
-        return $sReturn;
         
     }
     
@@ -478,7 +573,7 @@ class appmonitorserver_gui extends appmonitorserver{
                             . '<a href="' . $sUrl . '" target="_blank">'
                                     . $sUrl
                             . '</a><br>'
-                            . '<pre>'.($aData['result']['header'] ? $aData['result']['header'] : $aData['result']['error']).'</pre>'
+                            // . '<pre>'.($aData['result']['header'] ? $aData['result']['header'] : $aData['result']['error']).'</pre>'
                             // . '<pre>'.print_r($aData, 1).'</pre>'
                         .'</div>'
                     . '</div>';
@@ -665,6 +760,7 @@ class appmonitorserver_gui extends appmonitorserver{
         $sId = 'divall';
         $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                 . '<h2>' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks-header') . '</h2>'
+                . $this->_generateChecksTile().'<div style="clear: both;"></div>'
                 . $this->_generateMonitorTable()
                 . '</div>';
 

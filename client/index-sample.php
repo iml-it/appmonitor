@@ -7,6 +7,10 @@
 require_once('appmonitor-client.class.php');
 $oMonitor = new appmonitor();
 
+// to add notifications
+// $oMonitor->addEmail('sysadmin@example.com');
+// $oMonitor->addSlackWebhook(array("mywebhook"=> "https://hooks.slack.com/services/(...)"));
+
 $oMonitor->addCheck(
     array(
         "name" => "Dummy",

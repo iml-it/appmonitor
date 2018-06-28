@@ -4,8 +4,6 @@ h2{color:#678;}
 
 .divtopheader, .divtopnavi,  .footer{
     background:#234; 
-    color:#eee;
 }
-.divtopheader{
-    color:#678; 
-}
+
+.tile{ box-shadow: 0 0 5em #cde inset;}

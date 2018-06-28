@@ -1,3 +1,4 @@
 nbproject
 /server/config/appmonitor-server-config.json
 /server/tmp/ahcache/
+/client/index-tester.php

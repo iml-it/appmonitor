@@ -1,12 +1,13 @@
 @import url("base.css");
 
 h2{color:#67a;}
+h2>i {color:#abc;}
 h3{color:#89c;}
 
 .divtopheader, .divtopnavi,  .footer{
-    background:#124; 
-    color:#eee;
+    background:#126; 
 }
 .divtopheader{
     color:#678; 
 }
+.tile{ box-shadow: 0 0 5em #cde inset;}

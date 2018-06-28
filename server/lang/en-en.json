@@ -9,9 +9,12 @@
 
         "Checks": "Checks",
         "Checks-header": "Overview with all Checks",
+        
+        "Checks-on-webapp": "Checks for webapp",
+        "Checks-total": "Checks total",
 
         "Notifications": "Notifications",
-        "Notifications-header": "List of last sent notifications",
+        "Notifications-header": "Log of last changes",
 
         "Setup": "Setup",
         "Setup-client-list": "List of existing Clients",
@@ -46,8 +49,10 @@
         "Change": "Change", 
         "Message": "Message", 
 
+        "age-of-result": "age of result",
         "since": "since",
         "unknown": "unknown",
+        "next-reload": "next reload in %s s",
 
         "Result-checks": "Checks",
         "Resulttype-total": "Total",

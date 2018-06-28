@@ -159,6 +159,50 @@ class appmonitor {
         }
         return $this->_aChecks[] = $aCheck;
     }
+    
+    /**
+     * add an item to notifications meta data
+     * 
+     * @param string $sType   type ... one of email|slack
+     * @param type $sValue    value
+     * @param type $sKey      optional key (for key->value instead of list of values)
+     * @return boolean
+     */
+    protected function _addNotification($sType, $sValue,$sKey=false) {
+        $sTypeCleaned=preg_replace('/[^a-z]/', '', strtolower($sType));
+        if (!isset($this->_aMeta['notifications'])){
+            $this->_aMeta['notifications']=array();
+        }
+        if (!isset($this->_aMeta['notifications'][$sTypeCleaned])){
+            $this->_aMeta['notifications'][$sTypeCleaned]=array();
+        }
+        if($sKey){
+            $this->_aMeta['notifications'][$sTypeCleaned][$sKey]=$sValue;
+        } else {
+            $this->_aMeta['notifications'][$sTypeCleaned][]=$sValue;
+        }
+        return true;
+    }
+    
+    
+    /**
+     * add an email to notifications list
+     * 
+     * @param string $sEmailAddress  email address to add
+     * @return boolean
+     */
+    public function addEmail($sEmailAddress) {
+        return $this->_addNotification('email', $sEmailAddress);
+    }
+    /**
+     * 
+     * @param string  $sLabel
+     * @param string  $sSlackWebhookUrl
+     * @return type
+     */
+    public function addSlackWebhook($sLabel, $sSlackWebhookUrl) {
+        return $this->_addNotification('slack', $sSlackWebhookUrl, $sLabel);
+    }
 
     // ----------------------------------------------------------------------
     // getter

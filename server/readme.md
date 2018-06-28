@@ -53,9 +53,14 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
     "debug": false,
     "lang": "en-en",
     "tmpdir": "__DIR__/tmp",
-    "notification":{
-        "email":{
-            "Sysadmin": "sysadmin@example.com"
+    "notifications": {
+        "from": "noreply@example.com",
+        "email": [
+            "sysadmin@example.com"
+        ],
+        "slack": {
+            "#sysadmin-channel": "https:\/\/hooks.slack.com\/services\/AAAAA\/BBBBB\/CCCCCC"
+            }
         }
     },
     "urls":[
@@ -82,7 +87,12 @@ Remarks:
 - _tmpdir_ must be writable for apache user and service.php (cli)
 - _notification_ will be used in a future release
 - _urls_ is a flat list of urls
+- "notifications": notification targets (optional) \
+  Here can be the subkeys 
+  - "email": flat list of emails
+  - "slack": key-value list with a readable label for the target channel and the Slack webhook url
 
+  
 # NOTIFICATION #
 
 ## Message texts ##

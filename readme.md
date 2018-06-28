@@ -97,15 +97,143 @@ Remarks:
 - The steps use the subdir ./appmonitor/ - but you can put all files
   of a client and of the server into any directory/ subdirectory.
 
+# Description of metadata / NON-PHP clients #
+
+If you dont use php on your webserver you can create your own client that 
+returns JSON answers with the conventions described below.
+
+
+    {
+    "meta": {
+        "host": "[string: name of the computer]", 
+        "website": "[string: domain (and maybe path) of the webapp]", 
+        "ttl": [integer: ttl for the server gui], 
+        "result": [integer: 0..3],
+        "notifications": {
+            "email": [
+                "email1@example.com",
+                "email2@example.com"
+            ],
+            "slack": {
+                "#dev-channel": "https:\/\/hooks.slack.com\/services\/AAAAA\/BBBBB\/CCCCCC",
+                "#owner-channel": "https:\/\/hooks.slack.com\/services\/XXXXXX\/YYYYYY\/ZZZZZ"
+                }
+            }
+        }
+    }, 
+    "checks": [
+        {
+            "name": "[string: short name of the test 1]", 
+            "description": "[string: a description what the test is verifying]", 
+            "result": [integer: 0..3]
+            "value": "[string: result in words]" 
+        },
+	...
+        {
+            "name": "[string: short name of the test N]", 
+            "description": "[string: a description what the test N is verifying]", 
+            "result": [integer: 0..3]
+            "value": "[string: result in words]" 
+        }
+    ] 
+    }
+
+The response has 2 keys:
+
+- meta: metadata for the check
+- checks: container for all checks
+
+## meta ##
+
+The meta key has these subkeys
+
+- "host": [string: name of the computer] \
+  This is the hostname. The server GUI for the monitoring can group by server. 
+  If you host several websites then these have the same "host".
+- "website": [string: domain (and maybe path) of the webapp
+- "ttl": [integer: ttl for the server gui] \
+  Time to live value in seconds. The server GUI respects this value and does
+  not ask the appmonitor client more often. A goof value for beginning is
+  60 or 300 (1 min/ 5 min)
+- "result": [integer: 0..3] \
+  Result code of all checks of the webapp. \
+  0 - OK \
+  1 - unknown \
+  2 - warning \
+  3 - error \
+  The server GUI will render the view by webapp by this result code.
+- "notifications": notification targets (optional) \
+  Here can be the subkeys 
+  - "email": flat list of emails
+  - "slack": key-value list with a readable label for the target channel and the Slack webhook url
+
+
+  
+## checks ##
+
+The section "checks" is a container for the result of all checks.
+As an example: To verify the health of a webapp you need to check if the
+database is available, permissions exist on needed files or directories,
+if the port of a needed service is available.
+All these things are several single checks you have to put in the checks
+key for the response.
+
+Each check must have these keys:
+
+- "name": [string: short name of the test N]
+  This string is for you - make it unique to identify it in the server GUI.
+  i.e. "Mysql-db ABC"
+- "description": [string: a description what the test N is verifying]
+  This string is for you - you see the description in the server GUI
+  i.e. "Check mysql-db ABC on the server db01"
+- "result": [integer: 0..3]
+  result code of the check. The values are the same like the result in the 
+  meta section.
+  Based on the result code the server GUI renders the item for the check
+  (i.e. green if OK, red on error)
+- "value": [string: result in words]
+  A human readable text of the result of the ckeck
+  i.e. 
+  - OK, database was connected successfully
+  - ERROR: no write permission on file XY
 
 
 # CHECKS ON CLIENT SIDE WITH PHP CLIENT #
 
-Remark:
-You can implement the client in other languages. The only thing you need to
-know is to send a JSON response. See section NON-PHP CLIENTS below.
 
-In the index.php of a client you can add several checks with the class that
+## Get started ##
+
+### Initialiasation ###
+
+Have a look to the example in ./client/index.sample.php
+
+The first step is to initialize the client.
+
+    require_once('appmonitor-client.class.php');
+    $oMonitor = new appmonitor();
+
+This will set these default of client metadata with 
+- hostname
+- dominaname of website and 
+- ttl of 300 sec (= 5 min)
+
+
+### Notifications ###
+
+You can add add notification targets. At the beginning emails and Slack will be supported. 
+Here are 2 methods to add the targets:
+
+    // to add notifications
+    $oMonitor->addEmail('developer@example.com');
+    $oMonitor->addSlackWebhook(array("dev-webhook"=> "https://hooks.slack.com/services/(...)"));
+
+The notification is done on the appmonitor server.
+
+
+### Add checks ###
+
+
+You can add several checks with the class that
 was initialized on top of the file.
 
 The class has a render method that generates the json for you.
@@ -129,8 +257,8 @@ The check contains 2 keys:
 
 The checks are defined in appmonitor-checks.class.php as private functions.
 To see all defined checks:
-print_r($oMonitor->listChecks());
 
+    print_r($oMonitor->listChecks());
 
 - checkSimple 
 - checkHttpContent 
@@ -139,8 +267,31 @@ print_r($oMonitor->listChecks());
 - checkListeningIp
 
 
+### Set total result ###
+
+Set the value meta->result for the total status for your webapp.
+There is an automatic function that sets the total result to the worst status of any check: If one check ist on warning, 1 on error - then the total result will be an error. For this simple case you can use 
+
+    $oMonitor->setResult();
+
+If you made several checks then not each failure maybe critical to have a runnable application. Example: you write data to an external host once per week, but this host not reachable and the check status is error.
+For that constellation you need to calculate the result by yourselfs and set it by
+
+    $oMonitor->render([your value; 0..3]);
+	
+### Render output ###
+
+This method echoes all information as JSON
+
+    $oMonitor->render();
+
+If you wish to read it then you can use true as param. This feature requires PHP 5.4 or higher.
+
+    $oMonitor->render(true);
+
 
 ## SIMPLE ##
+
 
 
 The most simple variant is direct call with the resultcode and output text. 
@@ -294,95 +445,3 @@ parameters:
         );
     }
 
-# NON-PHP CLIENTS #
-
-If you dont use php on your webserver you can create your own client that 
-returns JSON answers with the conventions described below.
-
-
-    {
-    "meta": {
-        "host": "[string: name of the computer]", 
-        "website": "[string: domain (and maybe path) of the webapp]", 
-        "ttl": [integer: ttl for the server gui], 
-        "result": [integer: 0..3],
-        "notifications": {
-            "email":{
-                "email1@example.com",
-                "email2@example.com",
-            },
-            "slack":{
-                "channelname#1",
-                "channelname#N"
-            }
-    }, 
-    "checks": [
-        {
-            "name": "[string: short name of the test 1]", 
-            "description": "[string: a description what the test is verifying]", 
-            "result": [integer: 0..3]
-            "value": "[string: result in words]" 
-        },
-	...
-        {
-            "name": "[string: short name of the test N]", 
-            "description": "[string: a description what the test N is verifying]", 
-            "result": [integer: 0..3]
-            "value": "[string: result in words]" 
-        }
-    ] 
-    }
-
-The response has 2 keys:
-
-- meta: metadata for the check
-- checks: container for all checks
-
-## meta ##
-
-The meta key has these subkeys
-
-- "host": [string: name of the computer] 
-  This is the hostname. The server GUI for the monitoring can group by server. 
-  If you host several websites then these have the same "host".
-- "website": [string: domain (and maybe path) of the webapp
-- "ttl": [integer: ttl for the server gui]
-  Time to live value in seconds. The server GUI respects this value and does
-  not ask the appmonitor client more often. A goof value for beginning is
-  60 or 300 (1 min/ 5 min)
-- "result": [integer: 0..3]
-  Result code of all checks of the webapp.
-  0 - OK
-  1 - unknown
-  2 - warning
-  3 - error
-  The server GUI will render the view by webapp by this result code.
-
-  
-## checks ##
-
-The section "checks" is a container for the result of all checks.
-As an example: To verify the health of a webapp you need to check if the
-database is available, permissions exist on needed files or directories,
-if the port of a needed service is available.
-All these things are several single checks you have to put in the checks
-key for the response.
-
-Each check must have these keys:
-
-- "name": [string: short name of the test N]
-  This string is for you - make it unique to identify it in the server GUI.
-  i.e. "Mysql-db ABC"
-- "description": [string: a description what the test N is verifying]
-  This string is for you - you see the description in the server GUI
-  i.e. "Check mysql-db ABC on the server db01"
-- "result": [integer: 0..3]
-  result code of the check. The values are the same like the result in the 
-  meta section.
-  Based on the result code the server GUI renders the item for the check
-  (i.e. green if OK, red on error)
-- "value": [string: result in words]
-  A human readable text of the result of the ckeck
-  i.e. 
-  - OK, database was connected successfully
-  - ERROR: no write permission on file XY
