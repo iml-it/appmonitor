@@ -19,8 +19,9 @@ define("RESULT_ERROR", 3);
  * --------------------------------------------------------------------------------<br>
  * <br>
  * --- HISTORY:<br>
- * 2014-10-24  0.5  axel.hahn@iml.unibe.ch<br>
- * 2015-04-08  0.9  axel.hahn@iml.unibe.ch  added sochket test: checkPortTcp<br>
+ * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
+ * 2015-04-08  0.9   axel.hahn@iml.unibe.ch  added sochket test: checkPortTcp<br>
+ * 2018-06-29  0.24  axel.hahn@iml.unibe.ch  add file and directory checks<br>
  * --------------------------------------------------------------------------------<br>
  * @version 0.9
  * @author Axel Hahn
@@ -190,18 +191,51 @@ class appmonitorcheck {
     // ----------------------------------------------------------------------
 
     /**
-     * most simple check: set values
-     * @return type
+     * check a directory
+     * 
+     * @param array $aParams
+     * array(
+     *     "dir"       directory that must exist
+     *     "writable"  flag to check that it must be writable too
+     * )
+     * @param integer $iTimeout  value in sec; default: 5sec
      */
-    private function checkSimple($aParams) {
-        $aHelp = array(
-            "result" => "(integer) result value",
-            "value" => "(string) explaination"
-        );
-        $this->_checkArrayKeys($aParams, "result,value");
-        return $this->_setReturn((int) $aParams["result"], $aParams["value"]);
+    private function checkDir($aParams) {
+        $this->_checkArrayKeys($aParams, "dir");
+        if(!is_dir($aParams["dir"])){
+            $this->_setReturn(RESULT_ERROR, 'ERROR: ' . $aParams['dir'] . ' is not a directory.');
+            return false;
+        }
+        if(isset($aParams['writable']) && $aParams['writable'] && is_writable($aParams["dir"])){
+            $this->_setReturn(RESULT_OK, 'OK: directory ' . $aParams['dir'] . ' exists and is writable.');            
+        } else {
+            $this->_setReturn(RESULT_OK, 'OK: directory ' . $aParams['dir'] . ' exists.');
+        }
+        return ;
     }
-
+    
+    /**
+     * check a file
+     * @param array $aParams
+     * array(
+     *     "file"      directory that must exist
+     *     "writable"  flag to check that it must be writable too
+     * )
+     * @param integer $iTimeout  value in sec; default: 5sec
+     */
+    private function checkFile($aParams) {
+        $this->_checkArrayKeys($aParams, "file");
+        if(!is_file($aParams["file"])){
+            $this->_setReturn(RESULT_ERROR, 'ERROR: ' . $aParams['file'] . ' is not a file.');
+            return false;
+        }
+        if(isset($aParams['writable']) && $aParams['writable'] && is_writable($aParams["file"])){
+            $this->_setReturn(RESULT_OK, 'OK: file ' . $aParams['file'] . ' exists and is writable.');            
+        } else {
+            $this->_setReturn(RESULT_OK, 'OK: file ' . $aParams['dir'] . ' exists.');            
+        }
+        return ;
+    }
     /**
      * make http request and test response body
      * @param array $aParams
@@ -209,6 +243,7 @@ class appmonitorcheck {
      *     "url"       url to fetch
      *     "contains"  string that must exist in response body
      * )
+     * @param integer $iTimeout  value in sec; default: 5sec
      */
     private function checkHttpContent($aParams, $iTimeout = 5) {
         $this->_checkArrayKeys($aParams, "url,contains");
@@ -257,34 +292,6 @@ class appmonitorcheck {
             return false;
         }
     }
-
-    /**
-     * check sqlite connection
-     * @param array $aParams
-     * array(
-     *     "db" 
-     * )
-     * @return boolean
-     */
-    private function checkSqliteConnect($aParams) {
-        $this->_checkArrayKeys($aParams, "db");
-        if (!file_exists($aParams["db"])) {
-            $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database file " . $aParams["db"] . " does not exist.");
-            return false;
-        }
-        try {
-            // $db = new SQLite3($sqliteDB);
-            // $db = new PDO("sqlite:".$sqliteDB);
-            $o = new PDO("sqlite:" . $aParams["db"]);
-            $this->_setReturn(RESULT_OK, "OK: Sqlite database " . $aParams["db"] . " was connected");
-            return true;
-        } catch (Exception $exc) {
-            $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database " . $aParams["db"] . " was not connected. " . mysqli_connect_error());
-            return false;
-        }
-    }
-
-    
     /**
      * check if system is listening to a given port
      * @param array $aParams
@@ -320,22 +327,40 @@ class appmonitorcheck {
         }
     }    
     /**
-     * DEPRECATED - use checkPortTcp instead
-     * check if system is listening to a given port
+     * most simple check: set values
+     * @return type
+     */
+    private function checkSimple($aParams) {
+        $aHelp = array(
+            "result" => "(integer) result value",
+            "value" => "(string) explaination"
+        );
+        $this->_checkArrayKeys($aParams, "result,value");
+        return $this->_setReturn((int) $aParams["result"], $aParams["value"]);
+    }
+
+    /**
+     * check sqlite connection
      * @param array $aParams
      * array(
-     *     "port" 
+     *     "db" 
      * )
      * @return boolean
      */
-    private function checkListeningIp($aParams) {
-        $this->_checkArrayKeys($aParams, "port");
-        $sResult = exec('netstat -tulen | grep ":' . $aParams["port"] . ' "');
-        if ($sResult) {
-            $this->_setReturn(RESULT_OK, "OK: Port " . $aParams["port"] . " was found: " . $sResult);
+    private function checkSqliteConnect($aParams) {
+        $this->_checkArrayKeys($aParams, "db");
+        if (!file_exists($aParams["db"])) {
+            $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database file " . $aParams["db"] . " does not exist.");
+            return false;
+        }
+        try {
+            // $db = new SQLite3($sqliteDB);
+            // $db = new PDO("sqlite:".$sqliteDB);
+            $o = new PDO("sqlite:" . $aParams["db"]);
+            $this->_setReturn(RESULT_OK, "OK: Sqlite database " . $aParams["db"] . " was connected");
             return true;
-        } else {
-            $this->_setReturn(RESULT_ERROR, "ERROR: Port " . $aParams["port"] . " is not in use.");
+        } catch (Exception $exc) {
+            $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database " . $aParams["db"] . " was not connected. " . mysqli_connect_error());
             return false;
         }
     }

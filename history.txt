@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.24  2018-06-29
+    - client checks for directories and files
+    - add client check for current appmonitor server instance
+    - reduce flickering on reload
+
 v0.23  2018-06-29
     - added placeholder for checks and update notification templates
     - checks table shows result as text (i.e. "OK" instead of "0")

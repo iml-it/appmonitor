@@ -48,14 +48,14 @@ padding: 1em;}
 .footer a{color:#fff; text-decoration: none;}
 .footer a:hover{text-decoration: underline;}
 
-.tile{float: left; background: #fff; border: 0px dotted #ccc; box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); padding: 1em; margin: 0 1em 1em 0; text-align: center; min-height: 8em;min-width: 10em;}
+.tile{float: left; background: #fff; border: 1px solid #ddd; box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); padding: 1em; margin: 0 1em 1em 0; text-align: center; min-height: 8em;min-width: 10em;}
 .tile .count{font-size: 300%; opacity: 0.8; font-weight: bold;}
 .tile .count span{padding: 0.01em 0.2em; border: 0px solid rgba(0,0,0,0.1);}
 .tile .label{}
 .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
 .tile .more span{padding: 0.5em;}
 
-.outsegment{min-height: 40em;}
+.outsegment{min-height: 40em; display:none;}
 
 .divhost{float: left; padding: 0.5em; border-left: 10px solid rgba(0,0,0,0.10); margin: 0 1em 1em 0; min-width: 20em;}
 

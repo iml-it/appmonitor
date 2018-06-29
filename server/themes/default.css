@@ -6,4 +6,4 @@ h2{color:#678;}
     background:#234; 
 }
 
-.tile{ box-shadow: 0 0 5em #cde inset;}
+.tile{ border: 1px solid #cdd; box-shadow: 0 0 5em #cdd inset;}

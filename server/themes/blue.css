@@ -10,4 +10,4 @@ h3{color:#89c;}
 .divtopheader{
     color:#678; 
 }
-.tile{ box-shadow: 0 0 5em #cde inset;}
+.tile{ border: 1px solid #cde; box-shadow: 0 0 5em #cde inset;}
