@@ -13,7 +13,7 @@
 // CONFIG
 // -----------------------------------------------------------------------------
 
-$iSleep=3; // seconds
+$iSleep=20; // seconds
 
 
 // -----------------------------------------------------------------------------
@@ -22,8 +22,12 @@ $iSleep=3; // seconds
 require_once('classes/tinyservice.class.php');
 $oService=new tinyservice('appmomonitor_server_loop', $iSleep);
 
+
+// disallow root to run it
+$oService->denyRoot();
+
 // setting a signal handler - this is NOT platform independent
-// pcntl_signal(SIGTERM, "\$oService->sigHandler");
+pcntl_signal(SIGTERM, "\$oService->sigHandler");
 // pcntl_signal(SIGHUP, "sig_handler");
 
 if (!$oService->canStart()){

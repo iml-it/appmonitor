@@ -40,6 +40,20 @@ class tinyservice {
         return true;
     }
 
+    /**
+     * do not allow to run as root (for *NIX systems)
+     * @return boolean
+     */
+    public function denyRoot(){
+        if (function_exists("posix_getpwuid")){
+            $processUser = posix_getpwuid(posix_geteuid());
+            if ($processUser['name']=="root"){
+                die("ERROR: Do not start the script as user root. Run it as the user of the application\n");
+            }
+        }
+        return true;
+    }
+    
     // signal handler - UNTESTED 
     public function sigHandler($signo) {
         $this->send("signal $signo received ...");

@@ -264,12 +264,13 @@ class appmonitorserver_gui extends appmonitorserver{
                 $sMoreChecks.=($aHostdata['summary'][$i] ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
             }
         }
+        $aEmailNotifiers=$this->oNotifcation->setApp($sKey,$this->_data[$sKey]);
         $aEmailNotifiers=$this->oNotifcation->getAppNotificationdata('email');
-        $aSlackChannels=$this->oNotifcation->getAppNotificationdata('slack');
+        $aSlackChannels=$this->oNotifcation->getAppNotificationdata('slack',1);
         
         // $aPeople=array('email1@example.com', 'email2@example.com');
         $sMoreNotify=(count($aEmailNotifiers) ? '<span title="'.implode("\n", $aEmailNotifiers).'">'.count($aEmailNotifiers).' x '.$this->_aIco['notify-email'].'</span>' : '')
-            // .'<pre>'.print_r($aEmailNotifiers, 1).'</pre>'
+            // .'<pre>'.print_r($this->oNotifcation->getAppNotificationdata(), 1).'</pre>'
             .(count($aSlackChannels) ? '<span title="'.implode("\n", array_keys($aSlackChannels)).'">'.count($aSlackChannels).' x '.$this->_aIco['notify-slack'].'</span>' : '')
             ;
         $iNotifyTargets=count($aEmailNotifiers) + count($aSlackChannels);
@@ -747,7 +748,7 @@ class appmonitorserver_gui extends appmonitorserver{
                         // . '<pre>'.print_r($aEntries["result"], 1).'</pre>'
                         ;
                 if ($this->_aCfg['debug']){
-                    $this->oNotifcation->setApp($sKey, $aEntries);
+                    $this->oNotifcation->setApp($sKey);
                     $sHtml .= '<h3>'.$this->_tr('Preview-of-messages').'</h3>'
                             . '<h4>'.$this->_tr('Preview-replacements').'</h4>'
                             . '<pre>'.htmlentities(print_r($this->oNotifcation->getMessageReplacements(), 1)).'</pre>'

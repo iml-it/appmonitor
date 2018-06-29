@@ -159,11 +159,12 @@ class notificationhandler {
      * @param array   $aData   data of current check; can be false if you want to access last status
      * @return boolean
      */
-    public function setApp($sAppId, $aData=false){
+    public function setApp($sAppId){
         $this->_sAppId=$sAppId;
-        $this->_aAppResult=$aData;
+        $this->_aAppResult=$this->getAppResult();
         $this->_iAppResultChange=false;
         $this->_aAppLastResult=$this->getAppLastResult();
+        // echo "DEBUG: ".__METHOD__ . " current data = <pre>".print_r($this->_aAppResult, 1)."</pre>";
         return true;
     }
     
@@ -192,7 +193,7 @@ class notificationhandler {
             case CHANGETYPE_CHANGE:
                 // to get the notification metadata from current data
                 if(!$this->_aAppResult) {
-                    $this->_aAppResult=$this->_aAppLastResult;
+                    // $this->_aAppResult=$this->_aAppLastResult;
                 }
                 $this->_saveAppResult();
                 // TODO: trigger notification
@@ -222,7 +223,7 @@ class notificationhandler {
      * @return boolean
      */
     public function deleteApp($sAppId){
-        $this->setApp($sAppId, array());
+        $this->setApp($sAppId, $this->getAppLastResult());
         $this->_iAppResultChange=CHANGETYPE_DELETE;
         // $sLogMessage=$this->_generateMessage('changetype-'.CHANGETYPE_DELETE.'.logmessage', CHANGETYPE_DELETE);
         // $this->addLogitem(CHANGETYPE_DELETE, RESULT_UNKNOWN, $sAppId, $sLogMessage);
@@ -276,6 +277,14 @@ class notificationhandler {
         return true;
     }
     
+    /**
+     * get current result from cache
+     * @return type
+     */
+    public function getAppResult(){
+        $oCache=new AhCache("appmonitor-server", $this->_sAppId);
+        return $oCache->read();
+    }
     /**
      * get last (differing) result from cache
      * @return type
@@ -458,11 +467,21 @@ class notificationhandler {
         $aMergeMeta=array();
         $aArray_keys=$sType ? array($sType) : array_keys($this->_aNotificationOptions);
 
+        // server side notifications:
+        // echo '<pre>'.print_r($this->_aNotificationOptions, 1).'</pre>';
+
+        // got from client
+        // echo '<pre>'.print_r($this->_aAppLastResult['meta'], 1).'</pre>';
+        $aClientNotifications=$this->_aAppResult['meta']['notifications'];
+        // echo '<pre>'.print_r($this->_aAppResult['meta'], 1).'</pre>';
+
+        
         // take data from web app ... meta -> notifications
         // $aMergeMeta=isset($this->_aAppLastResult['meta']['notifications']) ? $this->_aAppLastResult['meta']['notifications'] : array();
         foreach($aArray_keys as $sNotificationType){
-            if(isset ($this->_aAppResult['meta']['notifications'][$sNotificationType]) && count($this->_aAppResult['meta']['notifications'][$sNotificationType])){
-                foreach($this->_aAppResult['meta']['notifications'][$sNotificationType] as $sKey=>$Value){
+            // echo "DEBUG: $sNotificationType\n<pre>" . print_r($aClientNotifications[$sNotificationType], 1) . '</pre>';
+            if(isset ($aClientNotifications[$sNotificationType]) && count($aClientNotifications[$sNotificationType])){
+                foreach($aClientNotifications[$sNotificationType] as $sKey=>$Value){
                     if(is_int($sKey)){
                         $aMergeMeta[$sNotificationType][]=$Value;
                     } else {

@@ -209,7 +209,7 @@ class appmonitorserver {
                 $sAppId=$this->_generateUrlKey($sUrl);
                 $this->oNotifcation->deleteApp($sAppId);
                 
-                $oCache = new AhCache("appmonitor-server", $sUrl);
+                $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
                 $oCache->delete();
                 unset($this->_aCfg["urls"][$key]);
                 $this->_saveConfig();
@@ -401,7 +401,7 @@ class appmonitorserver {
         $this->_data = array();
         $aUrls = array();
         foreach ($this->_urls as $sKey => $sUrl) {
-            $oCache = new AhCache("appmonitor-server", $sUrl);
+            $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
             if ($oCache->isExpired()) {
                 // Cache does not exist or is expired
                 $aUrls[$sKey] = $sUrl;
@@ -444,16 +444,17 @@ class appmonitorserver {
                 $aClientData["result"]["headerarray"] = $this->_getHttpStatusArray($aResult['response_header']);
                 $aClientData["result"]["httpstatus"] = $iHttpStatus;
                 $aClientData["result"]["error"] = $sError;
-                    
+                
                 
                 // write cache
-                $oCache = new AhCache("appmonitor-server", $aResult['url']);
+                $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($aResult['url']));
                 $oCache->write($aClientData, $iTtl);
 
                 $aClientData["result"]["fromcache"] = false;
                 $this->_data[$sKey] = $aClientData;
                 
-                $this->oNotifcation->setApp($sKey, $aClientData);
+                
+                $this->oNotifcation->setApp($sKey);
                 $this->oNotifcation->notify();
             }
         }
