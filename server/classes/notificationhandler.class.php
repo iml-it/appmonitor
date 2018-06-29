@@ -413,6 +413,18 @@ class notificationhandler {
         if($this->_sServerurl){
             $aReplace['__MONITORURL__']=$this->_sServerurl . '#divweb'.$this->_sAppId;
         }
+        // echo '<pre>'.print_r($this->_aAppResult['checks'], 1).'</pre>';
+        $sChecks='';
+        if(isset($this->_aAppResult['checks'])){
+            foreach($this->_aAppResult['checks'] as $aCheck){
+                $sChecks.=($sChecks ? "\n\n" : '')
+                        . '----- '.$aCheck['name'].' ('.$aCheck['description'].")\n"
+                        . $aCheck['value']."\n"
+                        . $this->_tr('Resulttype-'. $aCheck['result'])
+                        ;
+            }
+            $aReplace['__CHECKS__']=$sChecks;
+        }
         return $aReplace;
     }
     

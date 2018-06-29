@@ -471,7 +471,7 @@ class appmonitorserver_gui extends appmonitorserver{
                                 . '<td>' . $aEntries["result"]["ttl"] . '</td>'
                                 . '<td>' . $aCheck["name"] . '</td>'
                                 . '<td>' . $aCheck["description"] . '</td>'
-                                . '<td>' . $aCheck["result"] . '</td>'
+                                . '<td>' . $this->_tr('Resulttype-'. $aCheck["result"]) . '</td>'
                                 . '<td>' . $aCheck["value"] . '</td>'
                                 . '</tr>';
                     }

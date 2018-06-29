@@ -1,9 +1,13 @@
 
 HISTORY
 
+v0.23  2018-06-29
+    - added placeholder for checks and update notification templates
+    - checks table shows result as text (i.e. "OK" instead of "0")
+
 v0.22  2018-06-29
     - change cache ids of notifications and current status to an id
-    - select tab "webs" n webapp detail page too
+    - select tab "webs" on webapp detail page too
     - do not save bak file of config
 
 v0.21  2018-06-29
