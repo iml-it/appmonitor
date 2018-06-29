@@ -8,7 +8,7 @@ require_once('appmonitor-client.class.php');
 $oMonitor = new appmonitor();
 
 $oMonitor->setWebsite('Appmonitor server');
-$oMonitor->setTTL(2);
+// $oMonitor->setTTL(2);
 
 // to add notifications
 // $oMonitor->addEmail('sysadmin@example.com');
