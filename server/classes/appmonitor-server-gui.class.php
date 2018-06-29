@@ -16,7 +16,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.22
+ * @version 0.23
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -26,7 +26,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.22";
+    var $_sTitle = "Appmonitor Server v0.23";
     
     /**
      * html code for icons in the web gui
