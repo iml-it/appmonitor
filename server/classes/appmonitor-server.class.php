@@ -137,12 +137,13 @@ class appmonitorserver {
         $sCfgFile = $this->_getConfigDir() . '/' . $this->_sConfigfile;
 
         // JSON_PRETTY_PRINT reqires PHP 5.4
-        $sData = (defined('JSON_PRETTY_PRINT')) ?
-                $sData = json_encode($this->_aCfg, JSON_PRETTY_PRINT) : $sData = json_encode($this->_aCfg);
+        $sData = (defined('JSON_PRETTY_PRINT')) ? $sData = json_encode($this->_aCfg, JSON_PRETTY_PRINT) : $sData = json_encode($this->_aCfg);
 
+        /*
         if (file_exists($sCfgFile)) {
             copy($sCfgFile, $sCfgFile . ".bak");
         }
+         */
 
         return file_put_contents($sCfgFile, $sData);
     }

@@ -13,7 +13,7 @@
 // CONFIG
 // -----------------------------------------------------------------------------
 
-$iSleep=20; // seconds
+$iSleep=5; // seconds
 
 
 // -----------------------------------------------------------------------------
@@ -27,7 +27,7 @@ $oService=new tinyservice('appmomonitor_server_loop', $iSleep);
 $oService->denyRoot();
 
 // setting a signal handler - this is NOT platform independent
-pcntl_signal(SIGTERM, "\$oService->sigHandler");
+// pcntl_signal(SIGTERM, "\$oService->sigHandler");
 // pcntl_signal(SIGHUP, "sig_handler");
 
 if (!$oService->canStart()){

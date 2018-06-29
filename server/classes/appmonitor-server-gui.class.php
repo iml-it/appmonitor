@@ -16,7 +16,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.21
+ * @version 0.22
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -26,7 +26,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.21";
+    var $_sTitle = "Appmonitor Server v0.22";
     
     /**
      * html code for icons in the web gui
@@ -742,7 +742,7 @@ class appmonitorserver_gui extends appmonitorserver{
                 }
                 $sHtml .= '<h3>'.$this->_tr('Http-details').'</h3>'
                         . ($aEntries['result']['error']      ? '<div class="result3">'.$this->_tr('Error-message'). ': ' . $aEntries['result']['error'].'</div><br>': '')
-                        . ($aEntries['result']['url']        ? $this->_tr('Url'). ': ' . $aEntries['result']['url'].'<br>': '')
+                        . ($aEntries['result']['url']        ? $this->_tr('Url'). ': <a href="'.$aEntries['result']['url'].'" target="_blank">' . $aEntries['result']['url'].'</a><br>': '')
                         . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status'). ': <strong>' . $aEntries['result']['httpstatus'].'</strong><br>': '')
                         . ($aEntries['result']['header']     ? $this->_tr('Http-header'). ': <pre>' . $aEntries['result']['header'].'</pre>': '')
                         // . '<pre>'.print_r($aEntries["result"], 1).'</pre>'
@@ -774,7 +774,7 @@ class appmonitorserver_gui extends appmonitorserver{
         $sId = 'divall';
         $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                 . '<h2>' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks-header') . '</h2>'
-                . $this->_generateChecksTile().'<div style="clear: both;"></div>'
+                . (count($this->_data) ? $this->_generateChecksTile().'<div style="clear: both;"></div>' : '')
                 . $this->_generateMonitorTable()
                 . '</div>';
 

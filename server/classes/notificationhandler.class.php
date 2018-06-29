@@ -223,7 +223,7 @@ class notificationhandler {
      * @return boolean
      */
     public function deleteApp($sAppId){
-        $this->setApp($sAppId, $this->getAppLastResult());
+        $this->setApp($sAppId);
         $this->_iAppResultChange=CHANGETYPE_DELETE;
         // $sLogMessage=$this->_generateMessage('changetype-'.CHANGETYPE_DELETE.'.logmessage', CHANGETYPE_DELETE);
         // $this->addLogitem(CHANGETYPE_DELETE, RESULT_UNKNOWN, $sAppId, $sLogMessage);
@@ -387,7 +387,9 @@ class notificationhandler {
                 )
 
          */
-        $this->_detectChangetype();
+        if ($this->_iAppResultChange===false){
+            $this->_detectChangetype();
+        }
         $sMiss='-';
         $aReplace=array(
             '__APPID__'          => $this->_sAppId,
@@ -471,9 +473,7 @@ class notificationhandler {
         // echo '<pre>'.print_r($this->_aNotificationOptions, 1).'</pre>';
 
         // got from client
-        // echo '<pre>'.print_r($this->_aAppLastResult['meta'], 1).'</pre>';
-        $aClientNotifications=$this->_aAppResult['meta']['notifications'];
-        // echo '<pre>'.print_r($this->_aAppResult['meta'], 1).'</pre>';
+        $aClientNotifications=isset($this->_aAppResult['meta']['notifications']) ? $this->_aAppResult['meta']['notifications'] : false;
 
         
         // take data from web app ... meta -> notifications

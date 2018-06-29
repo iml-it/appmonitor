@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.22  2018-06-29
+    - change cache ids of notifications and current status to an id
+    - select tab "webs" n webapp detail page too
+    - do not save bak file of config
+
 v0.21  2018-06-29
     - added placeholder __MONITORURL__ to offer a direct link in messages
     - preview of placeholders and messages (if debug is enabled)

@@ -22,6 +22,9 @@ function showDiv(sDiv) {
     $(sDiv).fadeIn(300);
     $(".divtopnavi a").removeClass("active");
     $("a[href='" + sDiv + "']").addClass("active");
+    if(sDiv.indexOf('divweb')>0){
+        $("a[href='#divwebs']").addClass("active");
+    }
 }
 
 
