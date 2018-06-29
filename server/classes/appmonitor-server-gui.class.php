@@ -38,7 +38,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.20";
+    var $_sTitle = "Appmonitor Server v0.20";
     
     /**
      * html code for icons in the web gui
