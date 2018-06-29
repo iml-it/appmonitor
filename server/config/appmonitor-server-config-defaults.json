@@ -2,6 +2,7 @@
     "theme": "default",
     "lang": "en-en",
     "debug": false,
+    "pagereload": 60,
     "notifications":{
         "email":[]
     },

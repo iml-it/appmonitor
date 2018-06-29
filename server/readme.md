@@ -50,9 +50,9 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
 ``` json
 {
     "theme": "default",
-    "debug": false,
     "lang": "en-en",
-    "tmpdir": "__DIR__/tmp",
+    "debug": false,
+	"pagereload": 60,
     "notifications": {
         "from": "noreply@example.com",
         "email": [
@@ -73,22 +73,22 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
 
 The values are:
 
-| Key            | Description                                         |
-|---             |---                                                  |
-| _theme_        | \{string\} name of css to load (aka "skin")         |
-| _debug_        | \{bool\} show debug tab with internal values        |
-| _lang_         | \{string\} language                                 |
-| _tmpdir_       | \{string\} custom temp dir; default: tmp inside app |
-| _notification_ | \{array\} notification setup                        |
-| _urls_         | \{array\} list of urls                              |
+| Key            | Description                                                           |
+|---             |---                                                                    |
+| _theme_        | \{string\} name of css to load (aka "skin")                           |
+| _debug_        | \{bool\} show debug tab with internal values                          |
+| _lang_         | \{string\} language                                                   |
+| _pagereload_   | \{integer\} auto refresh of server webgui in sec (0=off; default: 60) |
+| _notification_ | \{array\} notification setup                                          |
+| _urls_         | \{array\} list of urls                                                |
 
 Remarks:
 
-- _tmpdir_ must be writable for apache user and service.php (cli)
 - _notification_ will be used in a future release
 - _urls_ is a flat list of urls
 - "notifications": notification targets (optional) \
   Here can be the subkeys 
+  - "from":  sender email address for notifications (is reply-to address too)
   - "email": flat list of emails
   - "slack": key-value list with a readable label for the target channel and the Slack webhook url
 

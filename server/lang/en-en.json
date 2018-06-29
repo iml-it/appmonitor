@@ -2,6 +2,7 @@
     "gui":{
         "Reload": "Reload",
         "Reload-hint": "Reload the page",
+        "Reload-every": "Auto-Reload every %ss",
 
         "Webs": "Webs",
         "Webs-header": "Monitor :: Webs",
@@ -52,7 +53,6 @@
         "age-of-result": "age of result",
         "since": "since",
         "unknown": "unknown",
-        "next-reload": "next reload in %s s",
 
         "Result-checks": "Checks",
         "Resulttype-total": "Total",
@@ -91,7 +91,7 @@
         
         "changetype-1.logmessage":    "Webapp was added to the appmonitor: __URL__.",
         "changetype-1.email.subject": "ADDED in appmonitor: __URL__.",
-        "changetype-1.email.message": "The webapp __URL__ was added in the appmonitor. You will get notifications if the status changes.",
+        "changetype-1.email.message": "The webapp __URL__ was added in the appmonitor. From now on you will get notifications if the status changes.",
         
         "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.",
         "changetype-2.email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__",

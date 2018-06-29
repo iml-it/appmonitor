@@ -1,10 +1,11 @@
 
 HISTORY
 
-v0.19  2018-06-28
-    - fix sample server config (plural in notifications)
-    - get http response header on failed http requests
-    - update email notification
+v0.20  2018-06-29
+    - List of webapps ordered by status and then by hostname
+    - List of checks: do not show missing hosts anymore
+    - host detail: add requested url in http details
+    - auto refresh of server webpage (default 60s)
 
 v0.18  2018-06-28
     - added notification methods in the appmonitor client 

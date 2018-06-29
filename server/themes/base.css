@@ -4,7 +4,7 @@ a{color:#67c;}
 h1{color:#888; color:rgba(255,255,255,0.5); margin: 0 0.5em 0 0; float: left;}
 h2, h2 a{padding-top: 5em; color:#777; border-bottom: 0px solid #ddd; }
 h2>i {font-size: 150% !important; color:#aaa; margin-right: 0.3em;}
-pre{padding: 0.5em; border: 2px solid rgba(0,0,0,0.1); }
+pre{padding: 0.5em; background: rgba(0,0,0,0.1); border: 2px solid rgba(0,0,0,0.2); }
 table.dataTable tbody tr:hover{background:rgba(255,255,255,0.2); }
 
 .inputtext{
@@ -57,7 +57,7 @@ padding: 1em;}
 
 .outsegment{min-height: 40em;}
 
-.divhost{float: left; padding: 0.5em; border-left: 10px solid rgba(0,0,0,0.10); margin: 0 1em 1em 0; min-width: 15em; padding: 1em;}
+.divhost{float: left; padding: 0.2em; border-left: 10px solid rgba(0,0,0,0.10); margin: 0 1em 1em 0; min-width: 20em;}
 
 .result0{background:#efe !important;    background: linear-gradient(#dfd,#cec)!important;}
 .result1{background:#eee !important;    background: linear-gradient(#eee,#ddd)!important;}

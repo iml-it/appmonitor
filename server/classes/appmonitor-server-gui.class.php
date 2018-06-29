@@ -38,7 +38,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server GUI v0.19";
+    var $_sTitle = "Appmonitor Server GUI v0.20";
     
     /**
      * html code for icons in the web gui
@@ -149,6 +149,14 @@ class appmonitorserver_gui extends appmonitorserver{
     // ----------------------------------------------------------------------
 
 
+    protected function _getResultDefs(){
+        return array(
+            RESULT_OK,
+            RESULT_UNKNOWN,
+            RESULT_WARNING,
+            RESULT_ERROR,
+        );
+    }
     /**
      * helper: generate html code for table header
      * @param array  $aHeaditems  items in header colums
@@ -238,7 +246,7 @@ class appmonitorserver_gui extends appmonitorserver{
         // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
         
         $sMoreChecks='';
-        for($i=0; $i<4; $i++){
+        foreach($this->_getResultDefs() as $i){
             $sMoreChecks.=($aCounter['checkresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['checkresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
         }
         return $this->_getTile(array(
@@ -264,7 +272,7 @@ class appmonitorserver_gui extends appmonitorserver{
         
         $sMoreChecks='';
         if(isset($aHostdata['summary'])){
-            for($i=0; $i<4; $i++){
+            foreach($this->_getResultDefs() as $i){
                 // $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
                 $sMoreChecks.=($aHostdata['summary'][$i] ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
             }
@@ -286,6 +294,7 @@ class appmonitorserver_gui extends appmonitorserver{
                         'more'=>$sSince
                     )) : '')
                 . $this->_getTile(array(
+                        'result'=>$aHostdata['error'] ? RESULT_ERROR : false,
                         'count'=>$aHostdata['httpstatus'],
                         'label'=>$this->_tr('Http-status'),
                     ))
@@ -320,7 +329,7 @@ class appmonitorserver_gui extends appmonitorserver{
         // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
         
         $sMoreHosts='';
-        for($i=0; $i<4; $i++){
+        foreach($this->_getResultDefs() as $i){
             $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
         }
 
@@ -365,13 +374,17 @@ class appmonitorserver_gui extends appmonitorserver{
         // echo '<pre>'.print_r($this->_data, 1).'</pre>';
         $sReturn .= $this->_generateWebTiles();
         
+        $aAllWebapps=array();
         foreach ($this->_data as $sKey => $aEntries) {
             $bHasData=true;
             if(!isset($aEntries["result"]["host"])){
                 $bHasData=false;
                 $iMiss++;
             }
-            $sReturn .= '<div '
+            
+            $sWebapp=isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
+            $sTilekey='result-'.(999-$aEntries["result"]["result"]).'-'.$sWebapp;
+            $sOut = '<div '
                             . 'class="divhost result' . $aEntries["result"]["result"] . '" '
                             // . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
                             . 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"'
@@ -379,21 +392,24 @@ class appmonitorserver_gui extends appmonitorserver{
                         
                         . ($bHasData 
                                 ? '<a href="#divweb' . $sKey . '">' . $aEntries["result"]["website"].'</a><br>'
-                                    . $this->_aIco['host'] .' '. $aEntries["result"]["host"] . ' '. $this->_renderBadgesForWebsite($sKey, true)
+                                    . $this->_aIco['host'] .' '. $sWebapp . ' '. $this->_renderBadgesForWebsite($sKey, true)
                                 : '<span title="'.$aEntries['result']['url']."\n".str_replace('"', '&quot;', $aEntries['result']['error']).'">'
-                                        .$this->_aIco['error'] .' '. parse_url($aEntries['result']['url'], PHP_URL_HOST) .'<br>'
+                                        .$this->_aIco['error'] .' '. $sWebapp .'<br>'
                                   .'</span>'
                             )
                         . '<br>'
                     . '</div>';
+            $aAllWebapps[$sTilekey]=$sOut;
         }
-        if (!$sReturn) {
-            return '<div class="diverror">' . $this->_aIco["error"] . ' ' . sprintf($this->_tr('msgErr-nodata'), $this->_getConfigDir() . '/' . $this->_sConfigfile) . '</div>';
+        ksort($aAllWebapps);
+        // echo '<pre>'.htmlentities(print_r($aHosts, 1)).'</pre>'; die();
+        foreach($aAllWebapps as $aWebapp){
+            $sReturn.=$aWebapp;
         }
         if ($iMiss > 0) {
             // $sReturn = '<div class="diverror">' . $this->_aIco["error"] . ' ' . sprintf($this->_tr('msgErr-missedchecks'), $iMiss) . '</div>' . $sReturn;
         }
-        return $sReturn . '<div style="clear;"><br><br></div>';
+        return $sReturn . '<div style="clear;"></div>';
     }
 
     /**
@@ -440,15 +456,8 @@ class appmonitorserver_gui extends appmonitorserver{
 
                 if (
                         $aEntries["result"]["error"]
-                        
-                        // !array_key_exists("result", $aEntries)
-                        /*
-                          || !array_key_exists("host", $aEntries["meta"])
-                          || !array_key_exists("host", $aEntries["website"])
-                         * 
-                         */
-                        // || !array_key_exists("checks", $aEntries) || !count($aEntries["checks"])
                 ) {
+                    /*
                     $sReturn .= '<tr class="result3">'
                             . '<td>?</td>'
                             . '<td>?</td>'
@@ -459,7 +468,10 @@ class appmonitorserver_gui extends appmonitorserver{
                             . '<td>?</td>'
                             . '<td>' . $aEntries["result"]["error"] . '</td>'
                             . '</tr>';
+                     * 
+                     */
                 } else {
+                
                     foreach ($aEntries["checks"] as $aCheck) {
                         $sReturn .= '<tr class="result' . $aCheck["result"] . '">';
                         if (!$sHost) {
@@ -751,6 +763,7 @@ class appmonitorserver_gui extends appmonitorserver{
                 }
                 $sHtml .= '<h3>'.$this->_tr('Http-details').'</h3>'
                         . ($aEntries['result']['error']      ? '<div class="result3">'.$this->_tr('Error-message'). ': ' . $aEntries['result']['error'].'</div><br>': '')
+                        . ($aEntries['result']['url']        ? $this->_tr('Url'). ': ' . $aEntries['result']['url'].'<br>': '')
                         . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status'). ': <strong>' . $aEntries['result']['httpstatus'].'</strong><br>': '')
                         . ($aEntries['result']['header']     ? $this->_tr('Http-header'). ': <pre>' . $aEntries['result']['header'].'</pre>': '')
                         // . '<pre>'.print_r($aEntries["result"], 1).'</pre>'
@@ -809,8 +822,13 @@ class appmonitorserver_gui extends appmonitorserver{
         $sNavi = '';
         $sTitle = $this->_sTitle;
 
+        $iReload=((isset($this->_aCfg['pagereload']) && (int)$this->_aCfg['pagereload'] ) ? (int)$this->_aCfg['pagereload'] : 0);
 
-        $sNavi .= '<a href="#" class="reload" onclick="reloadPage()">' . $this->_aIco["reload"] . ' ' . $this->_tr('Reload') . '</a>';
+        $sNavi .= '<a href="#" class="reload" onclick="reloadPage()"'
+                . ($iReload ? ' title="'.sprintf($this->_tr('Reload-every'), $iReload).'"' : '')
+                . '>' 
+                . $this->_aIco["reload"] . ' ' . $this->_tr('Reload') 
+                . ' </a>';
 
         $sId = 'divwebs';
         $sFirstDiv = $sId;
@@ -835,6 +853,7 @@ class appmonitorserver_gui extends appmonitorserver{
                 . '<html>' . "\n"
                 . '<head>' . "\n"
                 . '<title>' . $sTitle . '</title>'
+                . ($iReload ? '<meta http-equiv="refresh" content="'.$iReload.'">' : '')
                 . $oCdn->getHtmlInclude("jquery/3.2.1/jquery.min.js")
                 . $oCdn->getHtmlInclude("datatables/1.10.16/js/jquery.dataTables.min.js")
                 . $oCdn->getHtmlInclude("datatables/1.10.16/css/jquery.dataTables.min.css")

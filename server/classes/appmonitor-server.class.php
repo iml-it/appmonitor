@@ -68,10 +68,6 @@ class appmonitorserver {
     public function __construct() {
         $this->loadConfig();
         $this->_loadLangTexts();
-        $this->oNotifcation=new notificationhandler(array(
-            'lang' => $this->_aCfg['lang'],
-            'notifications' => $this->_aCfg['notifications']
-        ));
         $this->_handleParams();
     }
 
@@ -108,20 +104,24 @@ class appmonitorserver {
         $sCfgDefaultsFile = str_replace('.json', '-defaults.json', $sCfgFile);
         if (!file_exists($sCfgDefaultsFile)) {
             die("ERROR: default config file is not readable: [$sCfgDefaultsFile].");
-        } else {
-            $aDefaults=json_decode(file_get_contents($sCfgDefaultsFile), true);
-            if (file_exists($sCfgFile)) {
-                $aUserdata=json_decode(file_get_contents($sCfgFile), true);
-            }
-            $this->_aCfg = array_merge($aDefaults, $aUserdata);
-            
-            if (is_array($this->_aCfg) && array_key_exists("urls", $this->_aCfg)) {
-                // add urls
-                foreach ($this->_aCfg["urls"] as $sUrl) {
-                    $this->addUrl($sUrl);
-                }
+        } 
+
+        $aDefaults=json_decode(file_get_contents($sCfgDefaultsFile), true);
+        if (file_exists($sCfgFile)) {
+            $aUserdata=json_decode(file_get_contents($sCfgFile), true);
+        }
+        $this->_aCfg = array_merge($aDefaults, $aUserdata);
+
+        if (is_array($this->_aCfg) && array_key_exists("urls", $this->_aCfg)) {
+            // add urls
+            foreach ($this->_aCfg["urls"] as $sUrl) {
+                $this->addUrl($sUrl);
             }
         }
+        $this->oNotifcation=new notificationhandler(array(
+            'lang' => $this->_aCfg['lang'],
+            'notifications' => $this->_aCfg['notifications']
+        ));
     }
 
     /**
