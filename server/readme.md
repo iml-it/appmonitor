@@ -53,6 +53,7 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
     "lang": "en-en",
     "debug": false,
 	"pagereload": 60,
+	"serverurl": "http://monitor.example.com/appmonitor/server/server.php",
     "notifications": {
         "from": "noreply@example.com",
         "email": [
@@ -73,24 +74,26 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
 
 The values are:
 
-| Key            | Description                                                           |
-|---             |---                                                                    |
-| _theme_        | \{string\} name of css to load (aka "skin")                           |
-| _debug_        | \{bool\} show debug tab with internal values                          |
-| _lang_         | \{string\} language                                                   |
-| _pagereload_   | \{integer\} auto refresh of server webgui in sec (0=off; default: 60) |
-| _notification_ | \{array\} notification setup                                          |
-| _urls_         | \{array\} list of urls                                                |
+| Key             | Description                                                           |
+|---              |---                                                                    |
+| _theme_         | \{string\} name of css to load (aka "skin")                           |
+| _debug_         | \{bool\} show debug tab with internal values                          |
+| _lang_          | \{string\} language                                                   |
+| _pagereload_    | \{integer\} auto refresh of server webgui in sec (0=off; default: 60) |
+| _notifications_ | \{array\} notification setup                                          |
+| _serverurl_     | \{string\} url of installation; it is used for notification only      |
+| _urls_          | \{array\} list of urls                                                |
 
 Remarks:
 
-- _notification_ will be used in a future release
 - _urls_ is a flat list of urls
 - "notifications": notification targets (optional) \
   Here can be the subkeys 
-  - "from":  sender email address for notifications (is reply-to address too)
   - "email": flat list of emails
   - "slack": key-value list with a readable label for the target channel and the Slack webhook url
+  - "from":  sender information ... in the subkeys 
+    - "email": email address for notifications (is reply-to address too)
+    - "slack": sender name ("Appmonitor" as default)
 
   
 # NOTIFICATION #
@@ -118,7 +121,14 @@ These texts can contain placeholders.
 | _\_\_RESULT___       | one of OK\|Unknown\|Warning\|Error (1)               |
 | _\_\_TIME___         | current time YYYY-MM-DD hh:mm:ss                     | 
 | _\_\_URL___          | url of web application check                         |
+| _\_\_MONITORURL___   | url to monitoring page (3)                           | 
 
 Remarks:
 - (1) this depends on the set appmonitor server language. The values are these of the English version.
 - (2) It requires that a saved state with another status for this url. Value is "-" if there is no state change logged yet
+- (3) requires a value for "serverurl" in the config
+
+To preview the texts you can 
+- set "debug" to true in you config
+- open server monitoring in the browser - go into a detail page of any web app
+- on the bottom you see all placeholders, current replacements and the preview messages for all change types

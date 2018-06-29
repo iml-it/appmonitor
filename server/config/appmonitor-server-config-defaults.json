@@ -2,9 +2,15 @@
     "theme": "default",
     "lang": "en-en",
     "debug": false,
+    "serverurl": false,
     "pagereload": 60,
     "notifications":{
-        "email":[]
+        "from": {
+            "email":"sysadmin@example.com",
+            "slack":"Appmonitor"
+        },
+        "email":[],
+        "slack":[]
     },
     "urls": {
     }

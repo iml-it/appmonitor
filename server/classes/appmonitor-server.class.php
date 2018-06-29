@@ -120,6 +120,7 @@ class appmonitorserver {
         }
         $this->oNotifcation=new notificationhandler(array(
             'lang' => $this->_aCfg['lang'],
+            'serverurl' => $this->_aCfg['serverurl'],
             'notifications' => $this->_aCfg['notifications']
         ));
     }

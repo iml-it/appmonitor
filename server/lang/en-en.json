@@ -2,7 +2,7 @@
     "gui":{
         "Reload": "Reload",
         "Reload-hint": "Reload the page",
-        "Reload-every": "Auto-Reload every %ss",
+        "Reload-every": "Auto-Reload is every %ss",
 
         "Webs": "Webs",
         "Webs-header": "Monitor :: Webs",
@@ -56,9 +56,12 @@
 
         "Result-checks": "Checks",
         "Resulttype-total": "Total",
+        
+        "Preview-of-messages": "Preview of messages to send (Debug is enabled)",
+        "Preview-replacements": "Replacements: placeholder and its current texts",
+        "Preview-emails": "Preview of email texts",
 
         "btn-addUrl": "add",
-        "btn-back": "back",
         "btn-close": "close",
         "btn-details": "details",
 
@@ -91,15 +94,15 @@
         
         "changetype-1.logmessage":    "Webapp was added to the appmonitor: __URL__.",
         "changetype-1.email.subject": "ADDED in appmonitor: __URL__.",
-        "changetype-1.email.message": "The webapp __URL__ was added in the appmonitor. From now on you will get notifications if the status changes.",
+        "changetype-1.email.message": "Welcome! The webapp __URL__ was added in the appmonitor. From now on you will get notifications if the status changes.\n\nurl: __MONITORURL__",
         
         "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.",
         "changetype-2.email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__",
-        "changetype-2.email.message": "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.",
+        "changetype-2.email.message": "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.\n\nurl: __MONITORURL__",
         
         "changetype-3.logmessage":    "Webapp was deleted from appmonitor: __URL__.",
         "changetype-3.email.subject": "DELETED in appmonitor: __URL__.",
-        "changetype-3.email.message": "The webapp __URL__ was deleted in the appmonitor. If this is an error, then contact the sysadmin.",
+        "changetype-3.email.message": "The webapp __URL__ was deleted in the appmonitor. You will not get notifications about status changes anymore. If this is an error, then contact the sysadmin.\n\nurl: __MONITORURL__",
         
         "email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__.",
         

@@ -14,21 +14,9 @@ require_once 'appmonitor-server.class.php';
  * <br>
  * --------------------------------------------------------------------------------<br>
  * TODO:
- * - server job that caches all entries
  * - GUI uses cached data only
- * - NAGIOS output
  * --------------------------------------------------------------------------------<br>
- * <br>
- * --- HISTORY:<br>
- * 2018-06-XX  0.15  axel.hahn@iml.unibe.ch   split server class<br>
- * 2018-06-21  0.14  axel.hahn@iml.unibe.ch   use multicurl with parrallel requests; fetch http header; added tiles<br>
- * 2017-06-20  0.12  axel.hahn@iml.unibe.ch   use POST instead of GET<br>
- * 2015-01-20  0.8   axel.hahn@iml.unibe.ch   fixed icons, nagios check<br>
- * 2014-11-27  0.7   axel.hahn@iml.unibe.ch   added icons, lang texts, ...<br>
- * 2014-11-21  0.6   axel.hahn@iml.unibe.ch   added setup functions<br>
- * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
- * --------------------------------------------------------------------------------<br>
- * @version 0.15
+ * @version 0.21
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -38,7 +26,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.20";
+    var $_sTitle = "Appmonitor Server v0.21";
     
     /**
      * html code for icons in the web gui
@@ -65,7 +53,6 @@ class appmonitorserver_gui extends appmonitorserver{
         'info' => '<i class="fa fa-info"></i>',
         'warning' => '<i class="fa fa-warning"></i>',
         'error' => '<i class="fa fa-flash"></i>',
-        'back' => '<i class="fa fa-level-up"></i>',
         'add' => '',
         'del' => '',
         'close' => '',
@@ -278,14 +265,14 @@ class appmonitorserver_gui extends appmonitorserver{
             }
         }
         $aEmailNotifiers=$this->oNotifcation->getAppNotificationdata('email');
-        $aSlachChannels=$this->oNotifcation->getAppNotificationdata('slack');
+        $aSlackChannels=$this->oNotifcation->getAppNotificationdata('slack');
         
         // $aPeople=array('email1@example.com', 'email2@example.com');
         $sMoreNotify=(count($aEmailNotifiers) ? '<span title="'.implode("\n", $aEmailNotifiers).'">'.count($aEmailNotifiers).' x '.$this->_aIco['notify-email'].'</span>' : '')
             // .'<pre>'.print_r($aEmailNotifiers, 1).'</pre>'
-            .(count($aSlachChannels) ? '<span title="'.implode("\n", array_keys($aSlachChannels)).'">'.count($aSlachChannels).' x '.$this->_aIco['notify-slack'].'</span>' : '')
+            .(count($aSlackChannels) ? '<span title="'.implode("\n", array_keys($aSlackChannels)).'">'.count($aSlackChannels).' x '.$this->_aIco['notify-slack'].'</span>' : '')
             ;
-        $iNotifyTargets=count($aEmailNotifiers) + count($aSlachChannels);
+        $iNotifyTargets=count($aEmailNotifiers) + count($aSlackChannels);
         $sReturn.=''
                 .(isset($aHostdata['result']) ? $this->_getTile(array(
                         'result'=>$aHostdata['result'],
@@ -739,16 +726,7 @@ class appmonitorserver_gui extends appmonitorserver{
                             . ' > ' . ' ' 
                             . (isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : '?')
                         . '</h2>'
-                        /*
-                        . '<div class="divhost result' . $aEntries["result"]["result"] . '" style="float: none;">'
-                        . '<a href="#divwebs" class="btn">' . $this->_aIco['back'] . ' ' . $this->_tr('btn-back') . '</a> '
-                        . $this->_renderBadgesForWebsite($sKey) .'<br>'
-                        . '</div>'
-                         * 
-                         */
                         . $this->_generateWebappTiles($sKey)
-                        // . '<br><a href="#divwebs" class="btn">' . $this->_aIco['back'] . ' ' . $this->_tr('btn-back') . '</a> '
-                        // . '<br><br><br>'
                         ;
                 if (array_key_exists("host", $aEntries["result"])) {
                     
@@ -767,7 +745,27 @@ class appmonitorserver_gui extends appmonitorserver{
                         . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status'). ': <strong>' . $aEntries['result']['httpstatus'].'</strong><br>': '')
                         . ($aEntries['result']['header']     ? $this->_tr('Http-header'). ': <pre>' . $aEntries['result']['header'].'</pre>': '')
                         // . '<pre>'.print_r($aEntries["result"], 1).'</pre>'
-                        . '</div>';
+                        ;
+                if ($this->_aCfg['debug']){
+                    $this->oNotifcation->setApp($sKey, $aEntries);
+                    $sHtml .= '<h3>'.$this->_tr('Preview-of-messages').'</h3>'
+                            . '<h4>'.$this->_tr('Preview-replacements').'</h4>'
+                            . '<pre>'.htmlentities(print_r($this->oNotifcation->getMessageReplacements(), 1)).'</pre>'
+                            . '<h4>'.$this->_tr('Preview-emails').'</h4>'
+                            ;
+                            foreach($this->_getResultDefs() as $i){
+                                $sMgIdPrefix='changetype-'.$i;
+                                $sHtml .= $this->_tr('changetype-'.$i)
+                                        .'<pre>'
+                                        . ''.htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix.'.logmessage'), 1)).'<hr>'
+                                        . 'TO: '.implode('; ', $this->oNotifcation->getAppNotificationdata('email')).'<br>'
+                                        . '<strong>'.htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix.'.email.subject'), 1)).'</strong><br>'
+                                        . ''.htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix.'.email.message'), 1)).'<br>'
+                                        .'</pre>';
+
+                            }
+                }
+                $sHtml .=  '</div>';
             }
         }
 

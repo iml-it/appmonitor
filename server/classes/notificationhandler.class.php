@@ -38,6 +38,7 @@ class notificationhandler {
     protected $oLang = false;
     
     protected $_aNotificationOptions=false;
+    protected $_sServerurl=false;
     
     // ------------------------------------------------------------------
     // data of the current app 
@@ -54,6 +55,9 @@ class notificationhandler {
     public function __construct($aOptions=array()) {
         if(isset($aOptions['lang'])){
             $this->_loadLangTexts($aOptions['lang']);
+        }
+        if(isset($aOptions['serverurl'])){
+            $this->_sServerurl=$aOptions['serverurl'];
         }
         
         $this->_aNotificationOptions = isset($aOptions['notifications']) ? $aOptions['notifications'] : false;
@@ -183,9 +187,14 @@ class notificationhandler {
                 break;
 
             case CHANGETYPE_NEW:
+                // to get the notification metadata from current data
+                // $this->_aAppLastResult=$this->_aAppResult;
             case CHANGETYPE_CHANGE:
+                // to get the notification metadata from current data
+                if(!$this->_aAppResult) {
+                    $this->_aAppResult=$this->_aAppLastResult;
+                }
                 $this->_saveAppResult();
-                // $this->addLogitem($iChangetype, $iResult, $this->_sAppId, $sLogMessage);
                 // TODO: trigger notification
                 $this->sendAllNotifications($iChangetype);
                 break;
@@ -348,15 +357,12 @@ class notificationhandler {
     }
 
     /**
-     * helper function: generate message text frem template based on type of
-     * change, its template and the values of check data
+     * helper function: get the array with all current replacements in message 
+     * texts with key = placeholder and value = replacement
      * 
-     * @param string $sMessageId  one of changetype-[N].logmessage | changetype-[N].email.message | email.subject
-     * @return integer
+     * @return array
      */
-    protected function _generateMessage($sMessageId){
-        $sTemplate=$this->_tr($sMessageId);
-        
+    public function getMessageReplacements(){
         /*
                 [result] => Array
                 (
@@ -372,10 +378,11 @@ class notificationhandler {
                 )
 
          */
+        $this->_detectChangetype();
         $sMiss='-';
         $aReplace=array(
             '__APPID__'          => $this->_sAppId,
-            '__CHANGE__'         => $this->_tr('changetype-'. $this->_iAppResultChange),
+            '__CHANGE__'         => isset($this->_iAppResultChange) ? $this->_tr('changetype-'. $this->_iAppResultChange) : $sMiss,
             '__TIME__'           => date("Y-m-d H:i:s", (time())),
             '__URL__'            => isset($this->_aAppResult['result']['url']) ? $this->_aAppResult['result']['url'] 
                                         : (isset($this->_aAppLastResult['result']['url']) ? $this->_aAppLastResult['result']['url'] : $sMiss),
@@ -392,7 +399,22 @@ class notificationhandler {
                     ,
             
         );
-        $sReturn = $this->_makeReplace($aReplace, $sTemplate);
+        if($this->_sServerurl){
+            $aReplace['__MONITORURL__']=$this->_sServerurl . '#divweb'.$this->_sAppId;
+        }
+        return $aReplace;
+    }
+    
+    /**
+     * helper function: generate message text frem template based on type of
+     * change, its template and the values of check data
+     * 
+     * @param string $sMessageId  one of changetype-[N].logmessage | changetype-[N].email.message | email.subject
+     * @return integer
+     */
+    public function getReplacedMessage($sMessageId){
+        $sTemplate=$this->_tr($sMessageId);
+        $sReturn = $this->_makeReplace($this->getMessageReplacements(), $sTemplate);
         return $sReturn;
     }
     
@@ -407,7 +429,7 @@ class notificationhandler {
         }
 
         // write entry in message log
-        $sLogMessage=$this->_generateMessage('changetype-'.$this->_iAppResultChange.'.logmessage');
+        $sLogMessage=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.logmessage');
         
         // set result: 
         // - use current result, if it existst
@@ -439,8 +461,8 @@ class notificationhandler {
         // take data from web app ... meta -> notifications
         // $aMergeMeta=isset($this->_aAppLastResult['meta']['notifications']) ? $this->_aAppLastResult['meta']['notifications'] : array();
         foreach($aArray_keys as $sNotificationType){
-            if(isset ($this->_aAppLastResult['meta']['notifications'][$sNotificationType]) && count($this->_aAppLastResult['meta']['notifications'][$sNotificationType])){
-                foreach($this->_aAppLastResult['meta']['notifications'][$sNotificationType] as $sKey=>$Value){
+            if(isset ($this->_aAppResult['meta']['notifications'][$sNotificationType]) && count($this->_aAppResult['meta']['notifications'][$sNotificationType])){
+                foreach($this->_aAppResult['meta']['notifications'][$sNotificationType] as $sKey=>$Value){
                     if(is_int($sKey)){
                         $aMergeMeta[$sNotificationType][]=$Value;
                     } else {
@@ -486,7 +508,7 @@ class notificationhandler {
      * @return boolean
      */
     protected function _sendEmailNotifications(){
-        $sFrom=(isset($this->_aNotificationOptions['from']) && $this->_aNotificationOptions['from']) ? $this->_aNotificationOptions['from'] : false;
+        $sFrom=(isset($this->_aNotificationOptions['from']['email']) && $this->_aNotificationOptions['from']['email']) ? $this->_aNotificationOptions['from']['email'] : false;
         if(!$sFrom){
             return false; // no from address
         }
@@ -497,13 +519,12 @@ class notificationhandler {
         }
 
         $sTo=implode(";", $aTo);
-        $sEmailSubject=$this->_generateMessage('changetype-'.$this->_iAppResultChange.'.email.subject');
-        $sEmailBody=$this->_generateMessage('changetype-'.$this->_iAppResultChange.'.email.message');
+        $sEmailSubject=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.subject');
+        $sEmailBody=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.message');
 
         mail($sTo, $sEmailSubject, $sEmailBody, "From: " . $sFrom . "\r\n" .
             "Reply-To: " . $sFrom . "\r\n"
         );
-        return true;
         return true;
     }
     
@@ -514,25 +535,19 @@ class notificationhandler {
      * @return boolean
      */
     protected function _sendSlackNotifications(){
-        
-        return true; // TODO 
-        
-        if(!isset($this->_aNotificationOptions['slack'])){
-            return false; // email subkey does not exist
+        $sFrom=(isset($this->_aNotificationOptions['from']['slack']) && $this->_aNotificationOptions['from']['slack']) ? $this->_aNotificationOptions['from']['slack'] : false;
+        if(!$sFrom){
+            return false; // no from address
         }
-        $aMyCfg=$this->_aNotificationOptions['slack']; // "shortcut"
-        // server monitor contacts
-        $aTargetChannels=(isset($aMyCfg['to']) && is_array($aMyCfg['to']) && count($aMyCfg['to'])) 
-                ? array_values($aMyCfg['to'])
-                : array();
-        $aTargetChannels=array_merge($aTargetChannels, $this->getAppSlackChannels());
+        $aTargetChannels=$this->getAppNotificationdata('slack');
+
         if(!count($aTargetChannels)){
             return false; // no slack channel in server config nor app metadata
         }
-        
+
         // --- start sending
         $data=array(
-            'text'       => $this->_generateMessage('changetype-'.$this->_iAppResultChange.'.logmessage'),
+            'text'       => $this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.message'),
             'username'   => '[APPMONITOR]',
             'icon_emoji' => false
         );
@@ -547,9 +562,9 @@ class notificationhandler {
         $context  = stream_context_create($options);
 
         // --- loop over slack targets
-        foreach($aTargetChannels as $sChannel){
+        foreach($aTargetChannels as $sLabel=>$sChannelUrl){
             // check if channel exists in predefined channels
-            $result = file_get_contents($this->incomingURL, false, $context);            
+            $result = file_get_contents($sChannelUrl, false, $context);
         }
 
         return true;
