@@ -16,7 +16,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.23
+ * @version 0.25
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -26,7 +26,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver{
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.24";
+    var $_sTitle = "Appmonitor Server v0.25";
     
     /**
      * html code for icons in the web gui
@@ -852,13 +852,12 @@ class appmonitorserver_gui extends appmonitorserver{
                 . '<html>' . "\n"
                 . '<head>' . "\n"
                 . '<title>' . $sTitle . '</title>'
-                . ($iReload ? '<meta http-equiv="refresh" content="'.$iReload.'">' : '')
                 . $oCdn->getHtmlInclude("jquery/3.2.1/jquery.min.js")
                 . $oCdn->getHtmlInclude("datatables/1.10.16/js/jquery.dataTables.min.js")
                 . $oCdn->getHtmlInclude("datatables/1.10.16/css/jquery.dataTables.min.css")
                 . $oCdn->getHtmlInclude("font-awesome/4.7.0/css/font-awesome.css")
                 . '<script src="javascript/functions.js"></script>'
-                . '<link href="themes/' . $sTheme . '.css" rel="stylesheet"/>'
+                . '<link href="themes/' . $sTheme . '/screen.css" rel="stylesheet"/>'
                 . '</head>' . "\n"
                 . '<body>' . "\n"
                 . '<div class="divtop">'
@@ -887,9 +886,10 @@ class appmonitorserver_gui extends appmonitorserver{
                 . '} else {'
                 . ' showDiv( "#' . $sFirstDiv . '" ) ; '
                 . '}'
-                . '$("a[href^=\'#\']").click(function() { showDiv( this.hash ) } ); '
+                . '$("a[href^=\'#\']").click(function() { showDiv( this.hash ); return false; } ); '
                 . '/* window.setTimeout("updateContent()", 5000); */'
                 . '} );'
+                . ($iReload ? 'window.setTimeout("location.reload()", '.($iReload*1000).');' : '')
                 . '</script>' . "\n"
                 . '</body></html>';
 

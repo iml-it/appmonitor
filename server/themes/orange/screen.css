@@ -1,8 +1,8 @@
-@import url("base.css");
+@import url("../default/base.css");
 
-h2{color:#a6c;}
+h2{color:#98b;}
 h2>i {color:#abc;}
-h3{color:#b8d;}
+h3{color:#98b;}
 
 .divtopheader, .divtopnavi,  .footer{
     background:#e82; 

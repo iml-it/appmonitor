@@ -19,12 +19,14 @@ function reloadPage() {
  */
 function showDiv(sDiv) {
     $(".outsegment").hide();
-    $(sDiv).fadeIn(300);
+    // $(sDiv).fadeIn(200);
+    $(sDiv).show();
     $(".divtopnavi a").removeClass("active");
     $("a[href='" + sDiv + "']").addClass("active");
     if(sDiv.indexOf('divweb')>0){
         $("a[href='#divwebs']").addClass("active");
     }
+    window.history.pushState('dummy', 'Title', sDiv);
 }
 
 
