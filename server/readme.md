@@ -77,13 +77,14 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
             "/[2][1-3]:/",
             "/[0][0-4]:/"
         ],
-        "from": 
-			"email": [
-				"noreply@example.com"
-			],
-			"slack": [
-				"noreply@example.com"
-			],
+        "from": {
+            "email": [
+                "noreply@example.com"
+            ],
+            "slack": [
+                "noreply@example.com"
+            ],
+        }
         "email": [
             "sysadmin@example.com"
         ],
