@@ -28,7 +28,8 @@ table.dataTable tbody tr:hover{background:rgba(255,255,255,0.2); }
 	border-radius: 0.2em;
 	padding: 0.4em;
 }
-.divmain{margin: 0 3% 5em;}.divsourceinfo{background:#ddd; padding: 1em; }
+.divmain{margin: 0 3% 5em;}
+.divsourceinfo{background:#ddd; padding: 1em; }
 #divmodal{
     position: fixed; height: 100%; width: 100%; top:0; left:0;
     background: #ccc; background: rgba(0,0,0,0.1);
@@ -49,12 +50,11 @@ padding: 1em;}
 
 .tile{float: left; background: rgba(255,255,255,0.1); border: 1px solid #ddd; box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); padding: 1em; margin: 0 1em 1em 0; text-align: center; min-height: 8em;min-width: 10em;}
 .tile .count{font-size: 300%; opacity: 0.8; font-weight: bold;}
-.tile .count span{padding: 0.01em 0.2em; border: 0px solid rgba(0,0,0,0.1);}
 .tile .label{}
 .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
 .tile .more span{padding: 0.5em;}
 
-.outsegment{min-height: 30em; display:none; margin-top: 7em; padding: 1em; border: 1px solid #f8f8f8; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #eee;}
+.outsegment{min-height: 30em; display:none; margin-top: 7em; padding: 1em; border: 2px solid #fff; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #e8e8e8;}
 
 .divhost{float: left; padding: 0.5em; border-left: 10px solid rgba(0,0,0,0.10); margin: 0 1em 1em 0; min-width: 20em;}
 
@@ -79,4 +79,10 @@ padding: 1em;}
 .divok{margin: 0 0 2em; padding: 1em;}
 .divwarning{background:#fff0c0 !important; margin: 0 0 2em; padding: 1em;}
 .diverror{background:#fdd !important; background: linear-gradient(#fdd,#ecc) !important; margin: 0 0 2em; padding: 1em; border: 1px solid rgba(0,0,0,0.15);}
+
+table th{ background:rgba(0,0,0,0.05);}
+table.dataTable thead .sorting, table.dataTable thead .sorting_asc, table.dataTable thead .sorting_desc, table.dataTable thead .sorting_asc_disabled, table.dataTable thead .sorting_desc_disabled,
+table.dataTable.no-footer{
+    border-bottom-color:rgba(0,0,0,0.2);
+}
 

@@ -111,9 +111,11 @@ class appmonitorcheck {
     private function _checkArrayKeys($aConfig, $sKeyList) {
         foreach (explode(",", $sKeyList) as $sKey) {
             if (!array_key_exists($sKey, $aConfig)) {
+                header('HTTP/1.0 503 Service Unavailable');
                 die('ERROR in ' . __CLASS__ . "<br>array requires the keys [$sKeyList] - but key '$sKey' was not found in config array <pre>" . print_r($aConfig, true));
             }
             if (is_null($aConfig[$sKey])) {
+                header('HTTP/1.0 503 Service Unavailable');
                 die('ERROR in ' . __CLASS__ . "<br> key '$sKey' is empty in config array <pre>" . print_r($aConfig, true));
             }
         }
@@ -149,6 +151,7 @@ class appmonitorcheck {
 
         $sCheck = "check" . $this->_aConfig["check"]["function"];
         if (!method_exists($this, $sCheck)) {
+            header('HTTP/1.0 503 Service Unavailable');
             die(__CLASS__ . " check not found: $sCheck <pre>" . print_r($aConfig, true));
         }
         $aParams = array_key_exists("params", $this->_aConfig["check"]) ? $this->_aConfig["check"]["params"] : array();
@@ -248,6 +251,7 @@ class appmonitorcheck {
     private function checkHttpContent($aParams, $iTimeout = 5) {
         $this->_checkArrayKeys($aParams, "url,contains");
         if (!function_exists("curl_init")) {
+            header('HTTP/1.0 503 Service Unavailable');
             die("ERROR: PHP CURL module is not installed.");
         }
         $ch = curl_init($aParams["url"]);

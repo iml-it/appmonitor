@@ -111,7 +111,7 @@ class appmonitor {
      * @return bool
      */
     public function setWebsite($s = false) {
-        if (!$s) {
+        if (!$s && isset($_SERVER["HTTP_HOST"])) {
             $s = $_SERVER["HTTP_HOST"];
         }
         return $this->_aMeta["website"] = $s;
@@ -204,6 +204,48 @@ class appmonitor {
         return $this->_addNotification('slack', $sSlackWebhookUrl, $sLabel);
     }
 
+    /**
+     * check referers IP address if it matches any entry in the list
+     * requires http request; CLI is always allowed
+     * On deny this method exits with 403 response
+     * 
+     * @param array $aAllowedIps  array of allowed ip addresses / ranges
+     *                            the ip must match from the beginning, i.e.
+     *                            "127.0." will allow requests from 127.0.X.Y
+     */
+    public function checkIp($aAllowedIps=array()){
+        if (!isset($_SERVER['REMOTE_ADDR']) || !count($aAllowedIps)){
+            return true;
+        }
+        $sIP=$_SERVER['REMOTE_ADDR'];
+        foreach($aAllowedIps as $sIp2Check){
+            if(strpos($sIp2Check, $sIP)===0){
+                return true;
+            }
+        }
+        header('HTTP/1.0 403 Forbidden');
+        die('ERROR: Your ip address ['.$sIP.'] has no access.');
+    }
+    /**
+     * Check a token
+     * requires http request; CLI is always allowed
+     * On deny this method exits with 403 response
+     * 
+     * @param type $sVarname
+     * @param type $sToken
+     * @return boolean
+     */
+    public function checkToken($sVarname, $sToken){
+        if (!isset($_GET)){
+            return true;
+        }
+        if (isset($_GET[$sVarname]) && $_GET[$sVarname]===$sToken){
+            return true;
+        }
+        header('HTTP/1.0 403 Forbidden');
+        die('ERROR: A token is required.');
+        
+    }    
     // ----------------------------------------------------------------------
     // getter
     // ----------------------------------------------------------------------
@@ -240,6 +282,7 @@ class appmonitor {
 
 
         if (count($aErrors)) {
+            header('HTTP/1.0 503 Service Unavailable');
             echo "<h1>Errors detected</h1><ol><li>" . implode("<li>", $aErrors) . "</ol><hr>";
             echo "<pre>" . print_r($this->getResults(), true) . "</pre><hr>";
             die("ABORT");

@@ -110,6 +110,23 @@ class notificationhandler {
     }
 
     /**
+     * check if a defined sleept time was reached
+     * @return boolean
+     */
+    public function isSleeptime(){
+        if(isset($this->_aNotificationOptions['sleeptimes']) && is_array($this->_aNotificationOptions['sleeptimes']) && count($this->_aNotificationOptions['sleeptimes'])){
+            $sNow = date("D H:i");
+            foreach($this->_aNotificationOptions['sleeptimes'] as $sRegex){
+                if (preg_match($sRegex, $sNow)) {
+                    return $sRegex;
+                }                
+            }
+        }
+        // echo '<pre>'.print_r($this->_aNotificationOptions, 1).'</pre>';
+        return false;
+    }
+    
+    /**
      * save last app status data to conpare with the next time
      * 
      * @param string $sAppId   of webapp (url or key)
@@ -117,8 +134,11 @@ class notificationhandler {
      * @return boolean
      */
     protected function _saveAppResult(){
-        $oCache=new AhCache($this->_sCacheIdPrefix."-app", $this->_sAppId);
-        return $oCache->write($this->_aAppResult);
+        if($this->isSleeptime()){
+            $oCache=new AhCache($this->_sCacheIdPrefix."-app", $this->_sAppId);
+            return $oCache->write($this->_aAppResult);
+        }
+        return false;
     }
     
     

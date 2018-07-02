@@ -4,8 +4,8 @@
         "Reload-hint": "Reload the page",
         "Reload-every": "Auto-Reload is every %ss",
 
-        "Webs": "Webs",
-        "Webs-header": "Monitor :: Webs",
+        "All-webapps": "Web applications",
+        "All-webapps-header": "Web applications",
 
 
         "Checks": "Checks",
@@ -33,7 +33,8 @@
         "Appstatus": "Status of application",
         "Host": "Host", 
         "Hosts": "Hosts", 
-        "Website": "Website", 
+        "Webapp": "Web application",
+        "Webapps": "Web applications",
         "Timestamp": "Timestamp", 
         "TTL": "TTL", 
         "Check": "Check", 
@@ -60,6 +61,10 @@
         "Preview-of-messages": "Preview of messages to send (Debug is enabled)",
         "Preview-replacements": "Replacements: placeholder and its current texts",
         "Preview-emails": "Preview of email texts",
+        
+        "Sleepmode": "Sleep mode",
+        "Sleepmode-on": "Zzz ... notifications OFF",
+        "Sleepmode-off": "Notication is ON",
 
         "btn-addUrl": "add",
         "btn-close": "close",
@@ -98,7 +103,7 @@
         
         "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.",
         "changetype-2.email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__",
-        "changetype-2.email.message": "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.\n\nurl: __MONITORURL__\n\n__CHECKS__",
+        "changetype-2.email.message": "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.\n\nurl: __MONITORURL__\n\n__CHECKS__\n\n__HEADER__",
         
         "changetype-3.logmessage":    "Webapp was deleted from appmonitor: __URL__.",
         "changetype-3.email.subject": "DELETED in appmonitor: __URL__.",

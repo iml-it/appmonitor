@@ -1,17 +1,17 @@
 
-# APPMONITOR :: SERVER #
+# [APPMONITOR](../readme.md) > SERVER #
 
-University Berne
-IML - Institute of Medical Education
+OPEN SOURCE from University Berne :: IML - Institute of Medical Education
 
 https://github.com/iml-it/appmonitor
+
 
 - - -
 
 
-# REQUIREMENTS #
+# Requirements #
 
-- php7 (runs on php5 but is not suppoorted)
+- PHP7 (up to PHP 7.2; runs on php5 but is not suppoorted)
 - php-curl
 
 The server uses 
@@ -26,9 +26,26 @@ The server uses
 - [font-awesome] (http://fortawesome.github.io/Font-Awesome/)
 
 
+# Features #
+
+- very small installation (100 kB zip file)
+- fast web interface using a single html page
+- notifications can be sent as email and as slack message
+- sleep time to be quiet
+
+# Installation #
+
+Below a document root of a website create a directory [webroot]/appmonitor/
+- copy all files of the archive into [webroot]/appmonitor/
+- verify the installation with your browser 
+  http://localhost/appmonitor/server/server.php
+  You should see a welcome message.
+- Go to the setup.
+- Add the url http://localhost/appmonitor/client/check-appmonitor-server.php to integrate a first check.
 
 
-# CONFIG #
+
+# Configuration #
 
 The config is in json syntax. The files are located in 
 _[webroot-appmonitor]/server/config/appmonitor-server-config.json_
@@ -52,10 +69,21 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
     "theme": "default",
     "lang": "en-en",
     "debug": false,
-	"pagereload": 60,
-	"serverurl": "http://monitor.example.com/appmonitor/server/server.php",
+    "pagereload": 60,
+    "serverurl": "http:\/\/monitor.example.com\/appmonitor\/server\/server.php",
     "notifications": {
-        "from": "noreply@example.com",
+        "sleeptimes": [
+            "/(Sat|Sun)/",
+            "/[2][1-3]:/",
+            "/[0][0-4]:/"
+        ],
+        "from": 
+			"email": [
+				"noreply@example.com"
+			],
+			"slack": [
+				"noreply@example.com"
+			],
         "email": [
             "sysadmin@example.com"
         ],
@@ -94,9 +122,13 @@ Remarks:
   - "from":  sender information ... in the subkeys 
     - "email": email address for notifications (is reply-to address too)
     - "slack": sender name ("Appmonitor" as default)
+  - "sleeptimes": flat array of time definitions when no notification will be sent. Each entry is a regex. If any matches the current system time (PHP function date("D H:i") - it returns short weekdays plus hour, ":" and minutes: "Mon 09:23"). The example will disable Notifications:
+    - "/(Sat|Sun)/" --> Saturday and Sunday
+	- "/[2][1-3]:/" --> daily from 21:00-23:59
+	- "/[0][0-4]:/" --> daily from 00:00-04:59
 
   
-# NOTIFICATION #
+# Notification #
 
 ## Message texts ##
 
@@ -132,3 +164,9 @@ To preview the texts you can
 - set "debug" to true in you config
 - open server monitoring in the browser - go into a detail page of any web app
 - on the bottom you see all placeholders, current replacements and the preview messages for all change types
+
+
+# Security #
+
+Important remark:
+The appmonitor has no user login. Protect it by configuration of your webserver, i.e. use ip restriction and/ or basic authentication.

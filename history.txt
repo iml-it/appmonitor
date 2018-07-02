@@ -1,6 +1,24 @@
 
 HISTORY
 
+v0.26  2018-07-01
+    - appmonitor client: added subdir classes
+    - appmonitor client: added apmonitor check to be delivered by default
+    - appmonitor client: added checks for Matomo and Concreete5 were tested (I create a new repository
+    - appmonitor gui: restructure theme directory for more simple theming
+    - appmonitor gui: remove fading - it feels faster
+    - appmonitor gui: prevent reload of the page in the setup tab
+    - appmonitor gui: added a counter for age in sec
+    - appmonitor gui: fix applications checklist - it was not filtered on several applications running on the same host
+    - appmonitor server: rename several internal varnames for beter reading
+    - added sleeptime when notification will be sent.. including a tile
+    - appmonitor gui: show 0 notification targets
+
+v0.25  2018-06-29
+    - improve positioning after tab clicks; remove fading for instant content
+    - improve positioning on page reload 
+    - restructure theme folder
+
 v0.24  2018-06-29
     - client checks for directories and files
     - add client check for current appmonitor server instance

@@ -2,4 +2,11 @@ nbproject
 /server/config/appmonitor-server-config.json
 /server/tmp/ahcache/
 /client/index-tester.php
-/server/themes/*.min.css
+/server/themes/**/*.min.css
+/functions/*.min.js
+/client/general_include.php
+/client/check-matomo.settings.sample.php
+/client/check-concrete5.settings.php
+/client/check-matomo.php
+/client/check-concrete5.php
+/client/check-matomo.settings.php
