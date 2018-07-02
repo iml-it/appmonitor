@@ -2,6 +2,10 @@
 HISTORY
 
 v0.26  2018-07-01
+    - notification: update handling for sleep mode
+    - appmonitor client: added time measuring in checks
+
+v0.26  2018-07-01
     - appmonitor client: added subdir classes
     - appmonitor client: added apmonitor check to be delivered by default
     - appmonitor client: added checks for Matomo and Concreete5 were tested (I create a new repository

@@ -28,7 +28,7 @@ $oMonitor->checkIp(array(
 
 // --- check a token
 // an incoming request must have the param ?token=123
-// $oMonitor->checkTokem('token', '123');
+// $oMonitor->checkToken('token', '123');
 
 
 // ----------------------------------------------------------------------

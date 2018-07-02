@@ -134,10 +134,8 @@ class notificationhandler {
      * @return boolean
      */
     protected function _saveAppResult(){
-        if($this->isSleeptime()){
-            $oCache=new AhCache($this->_sCacheIdPrefix."-app", $this->_sAppId);
-            return $oCache->write($this->_aAppResult);
-        }
+        $oCache=new AhCache($this->_sCacheIdPrefix."-app", $this->_sAppId);
+        return $oCache->write($this->_aAppResult);
         return false;
     }
     
@@ -197,7 +195,9 @@ class notificationhandler {
         if(!$this->_sAppId){
             die("ERROR: ".__METHOD__." no application was initialized ... use setApp() first");
         }
-        
+        if ($this->isSleeptime()){
+            return false;
+        }
         $iChangetype=$this->_detectChangetype(); 
         // $iResult=$this->_aAppResult['result']['result'];
         // $sLogMessage=$this->_generateMessage('changetype-'.$iChangetype.'.logmessage');

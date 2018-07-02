@@ -38,6 +38,7 @@ function updateContent() {
         window.setTimeout("updateContent()", 1000);
         return false;
     }
+    // console.log("reload page after " + (getUnixTS() - iStartTime) + " sec");
     location.reload();
 }
 

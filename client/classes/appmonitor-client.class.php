@@ -53,11 +53,7 @@ class appmonitor {
      */
     private $_aChecks = array();
     
-    /**
-     * @var array
-     */
-    private $_aMustKeysChecks = array("name", "description", "result", "value");
-
+    protected $_iStart=false;
     /**
      * constructor: init data
      */
@@ -74,18 +70,19 @@ class appmonitor {
      * @return boolean
      */
     private function _createDefaultMetadata() {
+        $this->_iStart= microtime(true);
         $this->_aMeta = array(
             "host" => false,
             "website" => false,
             "ttl" => false,
-            "result" => false
+            "result" => false,
+            "time"   => false
         );
 
         // fill with default values
         $this->setHost();
         $this->setWebsite();
         $this->setTTL();
-
         return true;
     }
 
@@ -311,7 +308,8 @@ class appmonitor {
      */
     public function render($bPretty = false, $bHighlight = false) {
         $this->_checkData();
-	
+	$this->_aMeta['time']= number_format((microtime(true) - $this->_iStart), 6);
+        
 	// JSON_PRETTY_PRINT reqires PHP 5.4
 	if (!defined('JSON_PRETTY_PRINT')) {
 		$bPretty=false;
