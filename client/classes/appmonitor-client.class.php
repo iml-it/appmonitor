@@ -308,7 +308,7 @@ class appmonitor {
      */
     public function render($bPretty = false, $bHighlight = false) {
         $this->_checkData();
-	$this->_aMeta['time']= number_format((microtime(true) - $this->_iStart), 6);
+	$this->_aMeta['time']= number_format((microtime(true) - $this->_iStart)*1000, 3).'ms';
         
 	// JSON_PRETTY_PRINT reqires PHP 5.4
 	if (!defined('JSON_PRETTY_PRINT')) {

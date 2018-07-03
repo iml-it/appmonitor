@@ -160,7 +160,7 @@ class appmonitorcheck {
         // call the check ...
         call_user_func(array($this, $sCheck), $aParams);
 
-        $this->_aData['time']= number_format((microtime(true) - $this->_iStart), 6);
+        $this->_aData['time']= number_format((microtime(true) - $this->_iStart)*1000, 3).'ms';
         // echo "<pre>"; print_r($this->listChecks()); die();
         // ... and send response 
         return $this->respond();
