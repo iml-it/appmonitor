@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.27
+ * @version 0.28
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.27";
+    var $_sTitle = "Appmonitor Server v0.28";
 
     /**
      * html code for icons in the web gui
@@ -395,8 +395,9 @@ class appmonitorserver_gui extends appmonitorserver {
 
             $sWebapp = isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
             $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp;
+            $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
             $sOut = '<div '
-                    . 'class="divhost result' . $aEntries["result"]["result"] . '" '
+                    . 'class="divhost result' . $aEntries["result"]["result"] . ' tags '.$this->_getCssclassForTag($aTags).'" '
                     // . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
                     . 'onclick="window.location.hash=\'#divweb' . $sAppId . '\'; showDiv( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
                     . '>'
@@ -483,7 +484,9 @@ class appmonitorserver_gui extends appmonitorserver {
                 } else {
 
                     foreach ($aEntries["checks"] as $aCheck) {
-                        $sReturn .= '<tr class="result' . $aCheck["result"] . '">';
+                        $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
+                        
+                        $sReturn .= '<tr class="result' . $aCheck["result"] . ' tags '.$this->_getCssclassForTag($aTags).'">';
                         if (!$sUrl) {
                             $sReturn .= '<td>' . $aEntries["result"]["host"] . '</td>'
                                     . '<td>' . $aEntries["result"]["website"] . '</td>';
@@ -535,7 +538,8 @@ class appmonitorserver_gui extends appmonitorserver {
             }
             $aResults[$aLogentry['status']] ++;
 
-            $sTable .= '<tr class="result' . $aLogentry['status'] . '">'
+            $aTags=isset($this->_data[$aLogentry['appid']]["meta"]["tags"]) ? $this->_data[$aLogentry['appid']]["meta"]["tags"] : false;
+            $sTable .= '<tr class="result' . $aLogentry['status'] . ' tags '.$this->_getCssclassForTag($aTags).'">'
                     . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
                     . '<td>' . $this->_tr('changetype-' . $aLogentry['changetype']) . '</td>'
                     . '<td>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
@@ -821,13 +825,65 @@ class appmonitorserver_gui extends appmonitorserver {
                     . '<pre>' . print_r($this->_aCfg, true) . '</pre>'
                     . '<h3>' . $this->_tr('Debug-urls') . '</h3>'
                     . '<pre>' . print_r($this->_urls, true) . '</pre>'
-                    . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
+                        . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
                     . '<pre>' . print_r($this->_data, true) . '</pre>'
                     // . '<h3>' . $this->_tr('Debug-notificationlog') . '</h3>'
                     // . '<pre>' . print_r($this->oNotifcation->getLogdata(), true) . '</pre>'
                     . '</div>';
         }
         return $sHtml;
+    }
+
+    protected function _getClientTags(){
+        $aTags=array();
+        foreach ($this->_data as $aEntries) {
+            if (isset($aEntries['meta']['tags'])){
+                foreach($aEntries['meta']['tags'] as $sTag){
+                    $aTags[]=$sTag;
+                }
+            }
+        }
+        sort($aTags);
+        array_unique($aTags);
+        return $aTags;
+    }
+    
+    /**
+     * get name for css class of a tag
+     * 
+     * @param string|array $sTag
+     * @return type
+     */
+    protected function _getCssclassForTag($sTag){
+        if(is_string($sTag)){
+            return $this->_getCssclassForTag(array($sTag));
+            // return 'tag-'.md5($sTag);
+        }
+        if(is_array($sTag) && count($sTag)){
+            $sReturn='';
+            foreach($sTag as $sSingletag){
+                $sReturn.=($sReturn ? ' ' : '')
+                    . 'tag-'.md5($sSingletag);
+            }
+            return $sReturn;
+        }
+        return false;
+    }
+
+    protected function _renderTagfilter(){
+        $sReturn='';
+        $aTaglist=$this->_getClientTags();
+        $sOptions='';
+        foreach($aTaglist as $sTag){
+            $sOptions.='<option value="'.$this->_getCssclassForTag($sTag).'">'.$sTag.'</a>';
+        }
+        if($sOptions){
+            $sReturn='<select onchange="filterForTag(this.value)">'
+                        . '<option value="">---</option>'
+                        . $sOptions
+                    . '</select>';
+        }
+        return $sReturn;
     }
 
     /**
@@ -851,6 +907,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
         $sId = 'divwebs';
         $sFirstDiv = $sId;
+        $sNavi.=$this->_renderTagfilter();
         $sNavi .= '<a href="#' . $sId . '" class="allwebapps" >' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps') . '</a>';
 
         $sId = 'divall';
@@ -881,35 +938,37 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '</head>' . "\n"
                 . '<body>' . "\n"
                 . '<div class="divtop">'
-                . '<div class="divtopheader">'
-                . '<span style="float: right; margin-right: 1.5em;">' . sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '</span>'
-                . '<h1>' . $this->_aIco['title'] . ' ' . $sTitle . '</h1>'
-                . '<br>'
+                    . '<div class="divtopheader">'
+                        . '<span style="float: right; margin-right: 1.5em;">' . sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '</span>'
+                        . '<h1>' . $this->_aIco['title'] . ' ' . $sTitle . '</h1>'
+                        . '<br>'
+                    . '</div>'
+                    . '<div class="divtopnavi">'
+                        . $sNavi
+                    . '</div>'
                 . '</div>'
-                . '<div class="divtopnavi">'
-                . $sNavi
-                . '</div>'
-                . '</div>'
+                
                 . '<div class="divlog">' . $this->_renderLogs() . '</div>'
                 . '<div class="divmain">'
-                . '' . $sHtml . "\n"
+                    . '' . $sHtml . "\n"
                 . '</div>'
                 . '<div class="footer"><a href="' . $this->_sProjectUrl . '" target="_blank">' . $this->_sProjectUrl . '</a></div>'
+
                 . '<script>'
-                . '$(document).ready(function() {'
-                . ' $(\'.datatable\').dataTable( { } ); '
-                . ' $(\'.datatable-checks\').dataTable( { "order": [[ 6, "desc" ]] } ); '
-                . ' $(\'.datatable-hosts\').dataTable( { "order": [[ 4, "desc" ]] } ); '
-                . ' $(\'.datatable-notifications\').dataTable( { "order": [[ 0, "desc" ]] } ); '
-                . 'if (document.location.hash) {'
-                . ' showDiv( document.location.hash ) ; '
-                . '} else {'
-                . ' showDiv( "#' . $sFirstDiv . '" ) ; '
-                . '}'
-                . 'timerAgeInSec();'
-                . '$("a[href^=\'#\']").click(function() { showDiv( this.hash ); return false; } ); '
-                . '} );'
-                . ($iReload ? 'window.setTimeout("updateContent()",   ' . ($iReload * 1000) . ');' : '')
+                    . '$(document).ready(function() {'
+                    . ' $(\'.datatable\').dataTable( { } ); '
+                    . ' $(\'.datatable-checks\').dataTable( { "order": [[ 6, "desc" ]] } ); '
+                    . ' $(\'.datatable-hosts\').dataTable( { "order": [[ 4, "desc" ]] } ); '
+                    . ' $(\'.datatable-notifications\').dataTable( { "order": [[ 0, "desc" ]] } ); '
+                    . 'if (document.location.hash) {'
+                    . ' showDiv( document.location.hash ) ; '
+                    . '} else {'
+                    . ' showDiv( "#' . $sFirstDiv . '" ) ; '
+                    . '}'
+                    . 'initGuiStuff();'
+                    . ''
+                    . '} );'
+                    . ($iReload ? 'window.setTimeout("updateContent()",   ' . ($iReload * 1000) . ');' : '')
                 . '</script>' . "\n"
                 . '</body></html>';
 

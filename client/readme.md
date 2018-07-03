@@ -8,7 +8,7 @@ https://github.com/iml-it/appmonitor
 - - -
 
 
-# How does ist work? #
+# How does it work? #
 
 An application creates a JSON in a predefined structure. 
 
@@ -34,11 +34,15 @@ returns JSON answers with the conventions described below.
         "website": "[string: description of the webapp]", 
         "ttl": [integer: ttl for the server gui], 
         "result": [integer: 0..3],
+        "tags": [
+            "[tag 1]",
+            "[tag N]"
+        ],
         "time": "[value]ms",
         "notifications": {
             "email": [
-                "email1@example.com",
-                "email2@example.com"
+                "email_1@example.com",
+                "email_N@example.com"
             ],
             "slack": {
                 "#dev-channel": "https:\/\/hooks.slack.com\/services\/AAAAA\/BBBBB\/CCCCCC",
@@ -91,6 +95,9 @@ The meta key has these subkeys
   2 - warning \
   3 - error \
   The server GUI will render the view by webapp by this result code.
+- "tags": array of tags 
+  You can send tags to describe kind of tool, department/ developer team, whatever.
+  In the server webgui you will see a list of all tags of all monitors and can filter them
 - "time": "[value]ms"
   total time that was used for complete run of all checks
 - "notifications": notification targets (optional) \
@@ -99,8 +106,7 @@ The meta key has these subkeys
   - "slack": key-value list with a readable label for the target channel and the Slack webhook url
 
 
-  
-## checks ##
+## Checks ##
 
 The section "checks" is a container for the result of all checks.
 As an example: To verify the health of a webapp you need to check if the
@@ -260,8 +266,9 @@ If you wish to read it then you can use true as param. This feature requires PHP
     $oMonitor->render(true);
 
 
-## SIMPLE ##
+## Check functions ##
 
+### Simple ###
 
 
 The most simple variant is direct call with the resultcode and output text. 
@@ -294,7 +301,7 @@ parameters:
 You can use the simple check to verify anything that has no pre defined function
 yet.
 
-## Directory ##
+### Directory ###
 
 Check if a directory locally exists. With an additional flag you can verify if it is writable.
 
@@ -318,7 +325,8 @@ parameters:
 - dir (string) local directory
 - writable (string) optional; set true to check if it is writable
 
-## File ##
+
+### File ###
 
 Check if a file locally exists. With an additional flag you can verify if it is writable.
 
@@ -342,7 +350,7 @@ parameters:
 - writable (string) optional; set true to check if it is writable
 
 
-## HTTPCONTENT ##
+### HttpContent ###
 
 This check verifies if a given string exists in the reponse body of a given url.
 
@@ -367,7 +375,7 @@ parameters:
 - contains (string) string that must exist in response body
 
 
-## checkMysqlConnect ##
+### checkMysqlConnect ###
 
 verify a database connection with mysqli_connect function.
 
@@ -400,7 +408,7 @@ parameters:
 - "db"       - database to connect
 
 
-## checkSqliteConnect ##
+### checkSqliteConnect ###
 
 Make a database connection to a sqlite database.
 The function fails if the filename does not exist or the PDO cannot open it
@@ -411,7 +419,7 @@ parameters:
 - "db" (string) full path of the sqlite database file
 
 
-## checkPortTcp ##
+### checkPortTcp ###
 
 Check if the local server is listening to a given port number.
 
@@ -463,3 +471,51 @@ parameters:
         );
     }
 
+
+	
+## Additional Metadata ##
+
+The appmonitor client has 
+- add* functions to add values - "as many as you want" by repeating the method
+- set* function to set a single attribute - by repeating the method the value will be overwritten
+
+
+### Notification ###
+
+You have these notification possibilities to get informed if a service is down ... or available again.
+
+**Email**
+
+Add an E-Mail address.
+
+     $oMonitor->addEmail("[your-email-address]");
+
+To add several email addresses you need this command with each email address you want to add.
+
+**Slack**
+
+You need to create a webhook in slack first. Each webhook has an url like https://hooks.slack.com/services/AAAAA/BBBBB/CCCCCC and will send a message to (exactly) one specific channel.
+With the method addSlackWebhook you can add a slack channel where to post the notification. Because the url is not readable you can set a label for better reading (I suggest to set the channel name here).
+
+     $oMonitor->addSlackWebhook("[Label]", "https://hooks.slack.com/services/AAAAA/BBBBB/CCCCCC");
+
+If you would like to notify several Slack channels you need to create an additional Slack Webhook and add it with addSlackWebhook().
+
+### Tags ###
+
+Add a tag to describe the type of the application, the environment, department, dev team, ... whatever.
+In the Appmonitor webgui will be dropdown with all tags in alphabetic order. There you can filter monitor checks.
+
+     $oMonitor->addTag("production");
+     $oMonitor->addTag("monitoring");
+
+
+TODO:
+	 
+setHost()
+
+setResult()
+
+setTTL()
+
+setWebsite()

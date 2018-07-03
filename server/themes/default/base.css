@@ -50,7 +50,7 @@ padding: 1em;}
 .footer a:hover{text-decoration: underline;}
 
 .tile{float: left; background: rgba(255,255,255,0.1); border: 1px solid #ddd; box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8em;min-width: 10em;}
-.tile .count{font-size: 200%; opacity: 0.8; font-weight: bold;}
+.tile .count{font-size: 200%; opacity: 0.8; font-weigh1t: bold; padding: 0.3em 0;}
 .tile .label{}
 .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
 .tile .more span{padding: 0.5em;}

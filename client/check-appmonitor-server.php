@@ -16,7 +16,8 @@ $sApproot = str_replace('\\', '/', dirname(__DIR__));
 
 // ----------------------------------------------------------------------
 
-// $oMonitor->addTag('monitoring');
+$oMonitor->setTTL(20);
+$oMonitor->addTag('monitoring');
 
 // ----------------------------------------------------------------------
 

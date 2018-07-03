@@ -1,3 +1,27 @@
+/* ######################################################################
+ * 
+ * APPMONITIR GUI :: JAVASCRIPT FUNCTIONS
+ * 
+ * ######################################################################
+ */
+
+
+// ----------------------------------------------------------------------
+// CONFIG
+// ----------------------------------------------------------------------
+
+var sLocalStorageLastTag='sFilterTag';
+
+/**
+ * define a start time as UnixTS; used in agetimer
+ * @type Number
+ */
+var iStartTime=getUnixTS();
+
+
+// ----------------------------------------------------------------------
+// FUNCTIONS
+// ----------------------------------------------------------------------
 
 /**
  * relaod the page and remove the query parameters
@@ -11,6 +35,23 @@ function reloadPage() {
         window.location.reload();
     }
 }
+
+/**
+ * filter content elements by a given css class
+ * @param {string} sTagfilter  css class of a tag (must be tag-[hash])
+ * @returns {undefined}
+ */
+function filterForTag(sTagfilter){
+    if(sTagfilter && sTagfilter.indexOf('tag-')===0 ){
+        $('.tags').hide();
+        $('.'+sTagfilter).show();
+        
+    } else {
+        $('.tags').show();
+    }
+    localStorage.setItem(sLocalStorageLastTag,sTagfilter);
+}
+
 
 /**
  * switch the visible output div
@@ -38,7 +79,6 @@ function updateContent() {
         window.setTimeout("updateContent()", 1000);
         return false;
     }
-    // console.log("reload page after " + (getUnixTS() - iStartTime) + " sec");
     location.reload();
 }
 
@@ -50,11 +90,6 @@ function getUnixTS(){
     return Date.now()/1000;
 }
 
-/**
- * define a start time as UnixTS; used in agetimer
- * @type Number
- */
-var iStartTime=getUnixTS();
 
 /**
  * let a counter update its age in sec
@@ -79,6 +114,14 @@ function timerAgeInSec(){
         oNewValue=$(this).find("span.current");
         
         $(oNewValue[0]).html(iCurrent);
-        window.setTimeout("timerAgeInSec()", 1000);
+        // window.setTimeout("timerAgeInSec()", 1000);
     });
 }
+
+function initGuiStuff(){
+    var oTimerAgeInSec=window.setInterval("timerAgeInSec();", 5000);
+    $("a[href^=\'#\']").click(function() { showDiv( this.hash ); return false; } ); 
+    var sFilterTag=localStorage.getItem(sLocalStorageLastTag) ? localStorage.getItem(sLocalStorageLastTag) : '';
+    filterForTag(sFilterTag);
+}
+

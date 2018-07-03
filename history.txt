@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.28  2018-07-03
+    - appmonitor client: fix strange setTimeout behavior on reload
+    - appmonitor client + gui: support tags and filter them in the webgui
+      (work in progress)
+
 v0.27  2018-07-03
     - appmonitor client: time values for measurement in ms (instead of sec)
     - appmonitor client: tags for (later) filtering in server webgui
