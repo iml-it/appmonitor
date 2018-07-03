@@ -1,5 +1,6 @@
 <?php
-/** 
+
+/**
  * APPMONITOR CLIENT<br>
  * <br>
  * THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE <br>
@@ -32,28 +33,28 @@ class appmonitor {
      * @var int
      */
     private $_iDefaultTtl = 300;
-    
+
     /**
      * internal counter: greatest return value of all checks
      * @var type 
      */
     private $_iMaxResult = false;
-    
+
     /**
      * responded metadata of a website
      * @see _createDefaultMetadata()
      * @var array
      */
     private $_aMeta = array();
-    
+
     /**
      * repended array of all checks
      * @see addCheck()
      * @var array
      */
     private $_aChecks = array();
-    
-    protected $_iStart=false;
+    protected $_iStart = false;
+
     /**
      * constructor: init data
      */
@@ -70,13 +71,13 @@ class appmonitor {
      * @return boolean
      */
     private function _createDefaultMetadata() {
-        $this->_iStart= microtime(true);
+        $this->_iStart = microtime(true);
         $this->_aMeta = array(
             "host" => false,
             "website" => false,
             "ttl" => false,
             "result" => false,
-            "time"   => false
+            "time" => false
         );
 
         // fill with default values
@@ -156,7 +157,7 @@ class appmonitor {
         }
         return $this->_aChecks[] = $aCheck;
     }
-    
+
     /**
      * add an item to notifications meta data
      * 
@@ -165,23 +166,22 @@ class appmonitor {
      * @param type $sKey      optional key (for key->value instead of list of values)
      * @return boolean
      */
-    protected function _addNotification($sType, $sValue,$sKey=false) {
-        $sTypeCleaned=preg_replace('/[^a-z]/', '', strtolower($sType));
-        if (!isset($this->_aMeta['notifications'])){
-            $this->_aMeta['notifications']=array();
+    protected function _addNotification($sType, $sValue, $sKey = false) {
+        $sTypeCleaned = preg_replace('/[^a-z]/', '', strtolower($sType));
+        if (!isset($this->_aMeta['notifications'])) {
+            $this->_aMeta['notifications'] = array();
         }
-        if (!isset($this->_aMeta['notifications'][$sTypeCleaned])){
-            $this->_aMeta['notifications'][$sTypeCleaned]=array();
+        if (!isset($this->_aMeta['notifications'][$sTypeCleaned])) {
+            $this->_aMeta['notifications'][$sTypeCleaned] = array();
         }
-        if($sKey){
-            $this->_aMeta['notifications'][$sTypeCleaned][$sKey]=$sValue;
+        if ($sKey) {
+            $this->_aMeta['notifications'][$sTypeCleaned][$sKey] = $sValue;
         } else {
-            $this->_aMeta['notifications'][$sTypeCleaned][]=$sValue;
+            $this->_aMeta['notifications'][$sTypeCleaned][] = $sValue;
         }
         return true;
     }
-    
-    
+
     /**
      * add an email to notifications list
      * 
@@ -191,6 +191,7 @@ class appmonitor {
     public function addEmail($sEmailAddress) {
         return $this->_addNotification('email', $sEmailAddress);
     }
+
     /**
      * 
      * @param string  $sLabel
@@ -210,19 +211,20 @@ class appmonitor {
      *                            the ip must match from the beginning, i.e.
      *                            "127.0." will allow requests from 127.0.X.Y
      */
-    public function checkIp($aAllowedIps=array()){
-        if (!isset($_SERVER['REMOTE_ADDR']) || !count($aAllowedIps)){
+    public function checkIp($aAllowedIps = array()) {
+        if (!isset($_SERVER['REMOTE_ADDR']) || !count($aAllowedIps)) {
             return true;
         }
-        $sIP=$_SERVER['REMOTE_ADDR'];
-        foreach($aAllowedIps as $sIp2Check){
-            if(strpos($sIp2Check, $sIP)===0){
+        $sIP = $_SERVER['REMOTE_ADDR'];
+        foreach ($aAllowedIps as $sIp2Check) {
+            if (strpos($sIp2Check, $sIP) === 0) {
                 return true;
             }
         }
         header('HTTP/1.0 403 Forbidden');
-        die('ERROR: Your ip address ['.$sIP.'] has no access.');
+        die('ERROR: Your ip address [' . $sIP . '] has no access.');
     }
+
     /**
      * Check a token
      * requires http request; CLI is always allowed
@@ -232,21 +234,21 @@ class appmonitor {
      * @param type $sToken
      * @return boolean
      */
-    public function checkToken($sVarname, $sToken){
-        if (!isset($_GET)){
+    public function checkToken($sVarname, $sToken) {
+        if (!isset($_GET)) {
             return true;
         }
-        if (isset($_GET[$sVarname]) && $_GET[$sVarname]===$sToken){
+        if (isset($_GET[$sVarname]) && $_GET[$sVarname] === $sToken) {
             return true;
         }
         header('HTTP/1.0 403 Forbidden');
         die('ERROR: A token is required.');
-        
-    }    
+    }
+
     // ----------------------------------------------------------------------
     // getter
     // ----------------------------------------------------------------------
-    
+
     /**
      * list all available check functions. This is a helper class you cann call
      * to get an overview overbuilt in functions. You get a flat array with
@@ -308,28 +310,28 @@ class appmonitor {
      */
     public function render($bPretty = false, $bHighlight = false) {
         $this->_checkData();
-	$this->_aMeta['time']= number_format((microtime(true) - $this->_iStart)*1000, 3).'ms';
-        
-	// JSON_PRETTY_PRINT reqires PHP 5.4
-	if (!defined('JSON_PRETTY_PRINT')) {
-		$bPretty=false;
-	}
+        $this->_aMeta['time'] = number_format((microtime(true) - $this->_iStart) * 1000, 3) . 'ms';
+
+        // JSON_PRETTY_PRINT reqires PHP 5.4
+        if (!defined('JSON_PRETTY_PRINT')) {
+            $bPretty = false;
+        }
         if (!$bPretty) {
-            $bHighlight=false;
+            $bHighlight = false;
             $sOut = json_encode($this->getResults());
         } else {
             $sOut = json_encode($this->getResults(), JSON_PRETTY_PRINT);
             if ($bHighlight) {
-                $aMsg=array(
-                    0=>"OK",
-                    1=>"UNKNOWN",
-                    2=>"WARNING",
-                    3=>"ERROR"
+                $aMsg = array(
+                    0 => "OK",
+                    1 => "UNKNOWN",
+                    2 => "WARNING",
+                    3 => "ERROR"
                 );
-                foreach(array_keys($aMsg) as $iCode){
-                    $sOut = preg_replace('/(\"result\":\ '.$iCode.')/', '$1 <span class="result'.$iCode.'"> &lt;--- '.$aMsg[$iCode].' </span>', $sOut);
+                foreach (array_keys($aMsg) as $iCode) {
+                    $sOut = preg_replace('/(\"result\":\ ' . $iCode . ')/', '$1 <span class="result' . $iCode . '"> &lt;--- ' . $aMsg[$iCode] . ' </span>', $sOut);
                 }
-                
+
                 $sOut = preg_replace('/:\ \"(.*)\"/U', ': "<span style="color:#66e;">$1</span>"', $sOut);
                 $sOut = preg_replace('/:\ ([0-9]*)/', ': <span style="color:#3a3; font-weight: bold;">$1</span>', $sOut);
                 $sOut = preg_replace('/\"(.*)\":/U', '"<span style="color:#840;">$1</span>":', $sOut);
@@ -339,27 +341,25 @@ class appmonitor {
                 $sOut = str_replace('    ', '', $sOut);
                 // $sOut = preg_replace('/([{}])/', '<span style="color:#a00; ">$1</span>', $sOut);
                 // $sOut = preg_replace('/([\[\]])/', '<span style="color:#088; ">$1</span>', $sOut);
-                
-                $sOut = '<!DOCTYPE html><html><head>'
-                . '<style>'
-                        
-                . 'body{background:#e0e8f8; color:#235; font-family: verdana,arial;}'
-                . 'blockquote{background:rgba(0,0,0,0.03); border-left: 0px solid rgba(0,0,0,0.06); margin: 0 0 0 3em; padding: 0; border-radius: 1em; border-top-left-radius: 0;}'
-                . 'blockquote blockquote:hover{; }'
-                . 'blockquote blockquote blockquote:hover{border-color: #808;}'
-                . 'pre{background:rgba(0,0,0,0.05); padding: 1em; border-radius: 1em;}'
-                . '.result0{background:#aca; border-right: 0em solid #080;}'
-                . '.result1{background:#666; border-right: 0em solid #ccc;}'
-                . '.result2{background:#fc9; border-right: 0em solid #860;}'
-                . '.result3{background:#800; border-right: 0em solid #f00;}'
 
-                . '</style>'
-                . '<title>'.__CLASS__.'</title>'
-                . '</head><body>'
-                . '<h1>'.__CLASS__.' :: debug</h1>'
-                . '<pre>'
-                . $sOut 
-                . '</pre></body></html>';
+                $sOut = '<!DOCTYPE html><html><head>'
+                        . '<style>'
+                        . 'body{background:#e0e8f8; color:#235; font-family: verdana,arial;}'
+                        . 'blockquote{background:rgba(0,0,0,0.03); border-left: 0px solid rgba(0,0,0,0.06); margin: 0 0 0 3em; padding: 0; border-radius: 1em; border-top-left-radius: 0;}'
+                        . 'blockquote blockquote:hover{; }'
+                        . 'blockquote blockquote blockquote:hover{border-color: #808;}'
+                        . 'pre{background:rgba(0,0,0,0.05); padding: 1em; border-radius: 1em;}'
+                        . '.result0{background:#aca; border-right: 0em solid #080;}'
+                        . '.result1{background:#666; border-right: 0em solid #ccc;}'
+                        . '.result2{background:#fc9; border-right: 0em solid #860;}'
+                        . '.result3{background:#800; border-right: 0em solid #f00;}'
+                        . '</style>'
+                        . '<title>' . __CLASS__ . '</title>'
+                        . '</head><body>'
+                        . '<h1>' . __CLASS__ . ' :: debug</h1>'
+                        . '<pre>'
+                        . $sOut
+                        . '</pre></body></html>';
             }
         }
         if (!$bHighlight) {

@@ -1,7 +1,15 @@
 
 HISTORY
 
-v0.26  2018-07-01
+v0.27  2018-07-03
+    - appmonitor client: time values for measurement in ms (instead of sec)
+    - appmonitor gui: smaller tiles
+    - appmonitor gui: show time if available
+    - appmonitor gui: show client source data in app detail page
+    - appmonitor gui: remove notification source in debug tab
+    - appmonitor gui: added timer in tables
+
+v0.26  2018-07-02
     - notification: update handling for sleep mode
     - appmonitor client: added time measuring in checks
 

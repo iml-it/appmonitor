@@ -34,6 +34,7 @@ returns JSON answers with the conventions described below.
         "website": "[string: description of the webapp]", 
         "ttl": [integer: ttl for the server gui], 
         "result": [integer: 0..3],
+        "time": "[value]ms",
         "notifications": {
             "email": [
                 "email1@example.com",
@@ -51,7 +52,8 @@ returns JSON answers with the conventions described below.
             "name": "[string: short name of the test 1]", 
             "description": "[string: a description what the test is verifying]", 
             "result": [integer: 0..3]
-            "value": "[string: result in words]" 
+            "value": "[string: result in words]",
+			"time": "[value]ms"
         },
 	...
         {
@@ -59,6 +61,7 @@ returns JSON answers with the conventions described below.
             "description": "[string: a description what the test N is verifying]", 
             "result": [integer: 0..3]
             "value": "[string: result in words]" 
+			"time": "[value]ms"
         }
     ] 
     }
@@ -88,6 +91,8 @@ The meta key has these subkeys
   2 - warning \
   3 - error \
   The server GUI will render the view by webapp by this result code.
+- "time": "[value]ms"
+  total time that was used for complete run of all checks
 - "notifications": notification targets (optional) \
   Here can be the subkeys 
   - "email": flat list of emails
@@ -122,6 +127,8 @@ Each check must have these keys:
   i.e. 
   - OK, database was connected successfully
   - ERROR: no write permission on file XY
+- "time": "[value]ms"
+  time that was used for the single checks
 
 
 # Checks on client side with PHP #

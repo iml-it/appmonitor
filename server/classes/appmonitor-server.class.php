@@ -1,7 +1,9 @@
 <?php
+
 require_once 'cache.class.php';
 require_once 'lang.class.php';
 require_once 'notificationhandler.class.php';
+
 /**
  * APPMONITOR SERVER<br>
  * <br>
@@ -45,10 +47,8 @@ class appmonitorserver {
     var $_iTtl = 60;
     var $_iTtlOnError = 20;
     var $_sConfigfile = "appmonitor-server-config.json";
-    
     protected $_aMessages = array();
     protected $oLang = false;
-
     protected $_bIsDemo = false; // set true to disallow changing config in webgui
     private static $curl_opts = array(
         CURLOPT_HEADER => true,
@@ -59,8 +59,7 @@ class appmonitorserver {
         CURLOPT_SSL_VERIFYPEER => 0,
             // CURLMOPT_MAXCONNECTS => 10
     );
-    
-    protected $_aCounter=false;
+    protected $_aCounter = false;
 
     /**
      * constructor
@@ -94,21 +93,21 @@ class appmonitorserver {
      * (re) load config and get all urls to fetch
      */
     public function loadConfig() {
-        $aUserdata=array();
-        $aDefaults=array();
+        $aUserdata = array();
+        $aDefaults = array();
         $this->_urls = array();
-        
-        $this->_aCfg=array(); // reset current config array
-        
+
+        $this->_aCfg = array(); // reset current config array
+
         $sCfgFile = $this->_getConfigDir() . '/' . $this->_sConfigfile;
         $sCfgDefaultsFile = str_replace('.json', '-defaults.json', $sCfgFile);
         if (!file_exists($sCfgDefaultsFile)) {
             die("ERROR: default config file is not readable: [$sCfgDefaultsFile].");
-        } 
+        }
 
-        $aDefaults=json_decode(file_get_contents($sCfgDefaultsFile), true);
+        $aDefaults = json_decode(file_get_contents($sCfgDefaultsFile), true);
         if (file_exists($sCfgFile)) {
-            $aUserdata=json_decode(file_get_contents($sCfgFile), true);
+            $aUserdata = json_decode(file_get_contents($sCfgFile), true);
         }
         $this->_aCfg = array_merge($aDefaults, $aUserdata);
 
@@ -118,7 +117,7 @@ class appmonitorserver {
                 $this->addUrl($sUrl);
             }
         }
-        $this->oNotifcation=new notificationhandler(array(
+        $this->oNotifcation = new notificationhandler(array(
             'lang' => $this->_aCfg['lang'],
             'serverurl' => $this->_aCfg['serverurl'],
             'notifications' => $this->_aCfg['notifications']
@@ -140,9 +139,9 @@ class appmonitorserver {
         $sData = (defined('JSON_PRETTY_PRINT')) ? $sData = json_encode($this->_aCfg, JSON_PRETTY_PRINT) : $sData = json_encode($this->_aCfg);
 
         /*
-        if (file_exists($sCfgFile)) {
-            copy($sCfgFile, $sCfgFile . ".bak");
-        }
+          if (file_exists($sCfgFile)) {
+          copy($sCfgFile, $sCfgFile . ".bak");
+          }
          */
 
         return file_put_contents($sCfgFile, $sData);
@@ -168,7 +167,6 @@ class appmonitorserver {
          */
         return true;
     }
-
 
     /**
      * setup action: add a new url and save the config
@@ -207,9 +205,9 @@ class appmonitorserver {
     protected function _actionDeleteUrl($sUrl) {
         if ($sUrl) {
             if (($key = array_search($sUrl, $this->_aCfg["urls"])) !== false) {
-                $sAppId=$this->_generateUrlKey($sUrl);
+                $sAppId = $this->_generateUrlKey($sUrl);
                 $this->oNotifcation->deleteApp($sAppId);
-                
+
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
                 $oCache->delete();
                 unset($this->_aCfg["urls"][$key]);
@@ -249,29 +247,29 @@ class appmonitorserver {
      * @param string $sHttpHeader
      * @return array
      */
-    protected function _getHttpStatusArray($sHttpHeader){
-        if(!$sHttpHeader){
+    protected function _getHttpStatusArray($sHttpHeader) {
+        if (!$sHttpHeader) {
             return false;
         }
-        $aHeader=array();
-        foreach(explode("\r\n",$sHttpHeader) as $sLine){
+        $aHeader = array();
+        foreach (explode("\r\n", $sHttpHeader) as $sLine) {
             preg_match_all('#^(.*)\:(.*)$#U', $sLine, $aMatches);
-            $sKey=isset($aMatches[1][0]) ? $aMatches[1][0] : '_status';
-            $sValue=isset($aMatches[2][0]) ? $aMatches[2][0] : $sLine;
-            $aHeader[$sKey]=$sValue;
-            if($sKey==='_status'){
+            $sKey = isset($aMatches[1][0]) ? $aMatches[1][0] : '_status';
+            $sValue = isset($aMatches[2][0]) ? $aMatches[2][0] : $sLine;
+            $aHeader[$sKey] = $sValue;
+            if ($sKey === '_status') {
                 preg_match_all('#HTTP.*([0-9][0-9][0-9])#', $sValue, $aMatches);
-                $aHeader['_statuscode']=isset($aMatches[1][0]) ? $aMatches[1][0] : false;
+                $aHeader['_statuscode'] = isset($aMatches[1][0]) ? $aMatches[1][0] : false;
             }
         }
         return $aHeader;
     }
-    
-    protected function _getHttpStatus($sHttpHeader){
-        $aHeader=$this->_getHttpStatusArray($sHttpHeader);
+
+    protected function _getHttpStatus($sHttpHeader) {
+        $aHeader = $this->_getHttpStatusArray($sHttpHeader);
         return isset($aHeader['_statuscode']) ? $aHeader['_statuscode'] : false;
     }
-    
+
     /**
      * helper function for multi_curl_exec
      * hint from kempo19b
@@ -429,13 +427,10 @@ class appmonitorserver {
                     }
                 }
                 // detect error
-                $iHttpStatus=$this->_getHttpStatus($aResult['response_header']);
-                $sError=!$aResult['response_header'] ? $this->_tr('msgErr-Http-request-failed')
-                            : ((!$iHttpStatus || $iHttpStatus<200 || $iHttpStatus>299) 
-                                ? $this->_tr('msgErr-Http-error')
-                                : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
-                                )
-                            ;
+                $iHttpStatus = $this->_getHttpStatus($aResult['response_header']);
+                $sError = !$aResult['response_header'] ? $this->_tr('msgErr-Http-request-failed') : ((!$iHttpStatus || $iHttpStatus < 200 || $iHttpStatus > 299) ? $this->_tr('msgErr-Http-error') : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
+                        )
+                ;
 
                 // add more metadata
                 $aClientData["result"] = $this->_generateResultArray($aClientData);
@@ -445,16 +440,16 @@ class appmonitorserver {
                 $aClientData["result"]["headerarray"] = $this->_getHttpStatusArray($aResult['response_header']);
                 $aClientData["result"]["httpstatus"] = $iHttpStatus;
                 $aClientData["result"]["error"] = $sError;
-                
-                
+
+
                 // write cache
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($aResult['url']));
                 $oCache->write($aClientData, $iTtl);
 
                 $aClientData["result"]["fromcache"] = false;
                 $this->_data[$sKey] = $aClientData;
-                
-                
+
+
                 $this->oNotifcation->setApp($sKey);
                 $this->oNotifcation->notify();
             }
@@ -475,16 +470,17 @@ class appmonitorserver {
     // setter
     // ----------------------------------------------------------------------
 
-    protected function _generateUrlKey($sUrl){
+    protected function _generateUrlKey($sUrl) {
         return md5($sUrl);
     }
+
     /**
      * add appmonitor url
      * @param string $sUrl
      * @return boolean
      */
     public function addUrl($sUrl) {
-        $sKey=$this->_generateUrlKey($sUrl);
+        $sKey = $this->_generateUrlKey($sUrl);
         $this->_urls[$sKey] = $sUrl;
         return true;
     }
@@ -495,7 +491,7 @@ class appmonitorserver {
      * @return boolean
      */
     public function removeUrl($sUrl) {
-        $sKey=$this->_generateUrlKey($sUrl);
+        $sKey = $this->_generateUrlKey($sUrl);
         if (array_key_exists($sKey, $this->_urls)) {
             unset($this->_urls[$sKey]);
             return true;
@@ -537,39 +533,38 @@ class appmonitorserver {
         return ' (' . $sReturn . ' ago)';
     }
 
-    
     protected function _getCounter() {
-        $iCountApps=0;
-        $iCountChecks=0;
-        $aResults=array(0,0,0,0);
-        $aCheckResults=array(0,0,0,0);
-        $aServers=array();
+        $iCountApps = 0;
+        $iCountChecks = 0;
+        $aResults = array(0, 0, 0, 0);
+        $aCheckResults = array(0, 0, 0, 0);
+        $aServers = array();
         foreach ($this->_data as $sKey => $aEntries) {
-            $iCountApps++;// count of webapps
-            $aResults[$aEntries['result']['result']]++;// counter by result of app
-            if (isset($aEntries['result']['host']) && $aEntries['result']['host']){
-                $aServers[$aEntries['result']['host']]=true;// helper array to count hosts
+            $iCountApps++; // count of webapps
+            $aResults[$aEntries['result']['result']] ++; // counter by result of app
+            if (isset($aEntries['result']['host']) && $aEntries['result']['host']) {
+                $aServers[$aEntries['result']['host']] = true; // helper array to count hosts
             }
 
             // count of checks
-            if(isset($this->_data[$sKey]["result"]["summary"])){
+            if (isset($this->_data[$sKey]["result"]["summary"])) {
                 $aChecks = $this->_data[$sKey]["result"]["summary"];
-                $iCountChecks+=$aChecks["total"];
-                for ($i=0; $i<4; $i++){
-                    $aCheckResults[$i]+=$aChecks[$i];
+                $iCountChecks += $aChecks["total"];
+                for ($i = 0; $i < 4; $i++) {
+                    $aCheckResults[$i] += $aChecks[$i];
                 }
             }
         }
         return array(
-            'apps'=>$iCountApps,
-            'hosts'=>count($aServers),
-            'appresults'=>$aResults,
-            'checks'=>$iCountChecks,
-            'checks'=>$iCountChecks,
-            'checkresults'=>$aCheckResults
+            'apps' => $iCountApps,
+            'hosts' => count($aServers),
+            'appresults' => $aResults,
+            'checks' => $iCountChecks,
+            'checks' => $iCountChecks,
+            'checkresults' => $aCheckResults
         );
     }
-    
+
     /**
      * get all client data and final result as array
      * @param   string  $sHost  filter by given hostname
@@ -634,5 +629,4 @@ class appmonitorserver {
         );
     }
 
-    
 }

@@ -51,6 +51,7 @@
         "Change": "Change", 
         "Message": "Message", 
 
+        "Client-source-data": "Source data from the client",
         "age-of-result": "age of result",
         "since": "since",
         "unknown": "unknown",
@@ -65,6 +66,9 @@
         "Sleepmode": "Sleep mode",
         "Sleepmode-on": "Zzz ... notifications OFF",
         "Sleepmode-off": "Notication is ON",
+        
+        "Time": "Time",
+        "Time-for-all-checks": "time for all checks",
 
         "btn-addUrl": "add",
         "btn-close": "close",

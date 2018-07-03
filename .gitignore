@@ -10,3 +10,4 @@ nbproject
 /client/check-matomo.php
 /client/check-concrete5.php
 /client/check-matomo.settings.php
+/server/javascript/functions.min.js

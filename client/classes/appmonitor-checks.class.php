@@ -4,7 +4,8 @@ define("RESULT_OK", 0);
 define("RESULT_UNKNOWN", 1);
 define("RESULT_WARNING", 2);
 define("RESULT_ERROR", 3);
-/** 
+
+/**
  * APPMONITOR CLIENT CHECKS<br>
  * <br>
  * THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE <br>
@@ -31,7 +32,6 @@ define("RESULT_ERROR", 3);
  * @package IML-Appmonitor
  */
 class appmonitorcheck {
-    
     // ----------------------------------------------------------------------
     // CONFIG
     // ----------------------------------------------------------------------
@@ -143,7 +143,7 @@ class appmonitorcheck {
      * @return array
      */
     public function makeCheck($aConfig) {
-        $this->_iStart= microtime(true);
+        $this->_iStart = microtime(true);
         $this->_checkArrayKeys($aConfig, "name,description,check");
         $this->_checkArrayKeys($aConfig["check"], "function");
 
@@ -160,7 +160,7 @@ class appmonitorcheck {
         // call the check ...
         call_user_func(array($this, $sCheck), $aParams);
 
-        $this->_aData['time']= number_format((microtime(true) - $this->_iStart)*1000, 3).'ms';
+        $this->_aData['time'] = number_format((microtime(true) - $this->_iStart) * 1000, 3) . 'ms';
         // echo "<pre>"; print_r($this->listChecks()); die();
         // ... and send response 
         return $this->respond();
@@ -207,18 +207,18 @@ class appmonitorcheck {
      */
     private function checkDir($aParams) {
         $this->_checkArrayKeys($aParams, "dir");
-        if(!is_dir($aParams["dir"])){
+        if (!is_dir($aParams["dir"])) {
             $this->_setReturn(RESULT_ERROR, 'ERROR: ' . $aParams['dir'] . ' is not a directory.');
             return false;
         }
-        if(isset($aParams['writable']) && $aParams['writable'] && is_writable($aParams["dir"])){
-            $this->_setReturn(RESULT_OK, 'OK: directory ' . $aParams['dir'] . ' exists and is writable.');            
+        if (isset($aParams['writable']) && $aParams['writable'] && is_writable($aParams["dir"])) {
+            $this->_setReturn(RESULT_OK, 'OK: directory ' . $aParams['dir'] . ' exists and is writable.');
         } else {
             $this->_setReturn(RESULT_OK, 'OK: directory ' . $aParams['dir'] . ' exists.');
         }
-        return ;
+        return;
     }
-    
+
     /**
      * check a file
      * @param array $aParams
@@ -230,17 +230,18 @@ class appmonitorcheck {
      */
     private function checkFile($aParams) {
         $this->_checkArrayKeys($aParams, "file");
-        if(!is_file($aParams["file"])){
+        if (!is_file($aParams["file"])) {
             $this->_setReturn(RESULT_ERROR, 'ERROR: ' . $aParams['file'] . ' is not a file.');
             return false;
         }
-        if(isset($aParams['writable']) && $aParams['writable'] && is_writable($aParams["file"])){
-            $this->_setReturn(RESULT_OK, 'OK: file ' . $aParams['file'] . ' exists and is writable.');            
+        if (isset($aParams['writable']) && $aParams['writable'] && is_writable($aParams["file"])) {
+            $this->_setReturn(RESULT_OK, 'OK: file ' . $aParams['file'] . ' exists and is writable.');
         } else {
-            $this->_setReturn(RESULT_OK, 'OK: file ' . $aParams['dir'] . ' exists.');            
+            $this->_setReturn(RESULT_OK, 'OK: file ' . $aParams['dir'] . ' exists.');
         }
-        return ;
+        return;
     }
+
     /**
      * make http request and test response body
      * @param array $aParams
@@ -298,6 +299,7 @@ class appmonitorcheck {
             return false;
         }
     }
+
     /**
      * check if system is listening to a given port
      * @param array $aParams
@@ -309,18 +311,18 @@ class appmonitorcheck {
      */
     private function checkPortTcp($aParams) {
         $this->_checkArrayKeys($aParams, "port");
-        
-        $sHost=array_key_exists('host',$aParams)?$aParams['host']:'127.0.0.1';
-        $iPort=(int)$aParams['port'];
-        
+
+        $sHost = array_key_exists('host', $aParams) ? $aParams['host'] : '127.0.0.1';
+        $iPort = (int) $aParams['port'];
+
         // from http://php.net/manual/de/sockets.examples.php
-        
+
         $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if ($socket === false) {
             $this->_setReturn(RESULT_UNKNOWN, "ERROR: $sHost:$iPort was not checked. socket_create() failed: " . socket_strerror(socket_last_error()));
             return false;
         }
-        
+
         $result = socket_connect($socket, $sHost, $iPort);
         if ($result === false) {
             $this->_setReturn(RESULT_ERROR, "ERROR: $sHost:$iPort failed. " . socket_strerror(socket_last_error($socket)));
@@ -331,7 +333,8 @@ class appmonitorcheck {
             socket_close($socket);
             return true;
         }
-    }    
+    }
+
     /**
      * most simple check: set values
      * @return type

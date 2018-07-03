@@ -1,5 +1,7 @@
 <?php
+
 require_once 'appmonitor-server.class.php';
+
 /**
  * APPMONITOR SERVER<br>
  * <br>
@@ -23,11 +25,11 @@ require_once 'appmonitor-server.class.php';
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
  */
-class appmonitorserver_gui extends appmonitorserver{
+class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sTitle = "Appmonitor Server v0.27";
-    
+
     /**
      * html code for icons in the web gui
      * https://fontawesome.com/v4.7.0/icons/
@@ -50,6 +52,7 @@ class appmonitorserver_gui extends appmonitorserver{
         'sleepmode-on' => '<i class="fa fa-bed"></i>',
         'sleepmode-off' => '<i class="fa fa-bullhorn"></i>',
         'age' => '<i class="fa fa-clock-o"></i>',
+        'time' => '<i class="fa fa-clock-o"></i>',
         'httpstatus' => '<i class="fa fa-tag"></i>',
         'debug' => '<i class="fa fa-bug"></i>',
         'ok' => '<i class="fa fa-check"></i>',
@@ -89,23 +92,21 @@ class appmonitorserver_gui extends appmonitorserver{
         return $sOut;
     }
 
-
-
-
     // ----------------------------------------------------------------------
     // setter
     // ----------------------------------------------------------------------
 
-    protected function _generateUrlKey($sUrl){
+    protected function _generateUrlKey($sUrl) {
         return md5($sUrl);
     }
+
     /**
      * add appmonitor url
      * @param string $sUrl
      * @return boolean
      */
     public function addUrl($sUrl) {
-        $sAppId=$this->_generateUrlKey($sUrl);
+        $sAppId = $this->_generateUrlKey($sUrl);
         $this->_urls[$sAppId] = $sUrl;
         return true;
     }
@@ -116,7 +117,7 @@ class appmonitorserver_gui extends appmonitorserver{
      * @return boolean
      */
     public function removeUrl($sUrl) {
-        $sAppId=$this->_generateUrlKey($sUrl);
+        $sAppId = $this->_generateUrlKey($sUrl);
         if (array_key_exists($sAppId, $this->_urls)) {
             unset($this->_urls[$sAppId]);
             return true;
@@ -139,7 +140,7 @@ class appmonitorserver_gui extends appmonitorserver{
     // ----------------------------------------------------------------------
 
 
-    protected function _getResultDefs(){
+    protected function _getResultDefs() {
         return array(
             RESULT_OK,
             RESULT_UNKNOWN,
@@ -147,6 +148,7 @@ class appmonitorserver_gui extends appmonitorserver{
             RESULT_ERROR,
         );
     }
+
     /**
      * helper: generate html code for table header
      * @param array  $aHeaditems  items in header colums
@@ -159,44 +161,44 @@ class appmonitorserver_gui extends appmonitorserver{
         }
         return '<thead><tr>' . $sReturn . '</tr></thead>';
     }
-    
+
     /**
      * helper function for overview of all web apps
      * 
      * @return type
      */
     protected function _getCounter() {
-        $iCountApps=0;
-        $iCountChecks=0;
-        $aResults=array(0,0,0,0);
-        $aCheckResults=array(0,0,0,0);
-        $aServers=array();
+        $iCountApps = 0;
+        $iCountChecks = 0;
+        $aResults = array(0, 0, 0, 0);
+        $aCheckResults = array(0, 0, 0, 0);
+        $aServers = array();
         foreach ($this->_data as $sAppId => $aEntries) {
-            $iCountApps++;// count of webapps
-            $aResults[$aEntries['result']['result']]++;// counter by result of app
-            if (isset($aEntries['result']['host']) && $aEntries['result']['host']){
-                $aServers[$aEntries['result']['host']]=true;// helper array to count hosts
+            $iCountApps++; // count of webapps
+            $aResults[$aEntries['result']['result']] ++; // counter by result of app
+            if (isset($aEntries['result']['host']) && $aEntries['result']['host']) {
+                $aServers[$aEntries['result']['host']] = true; // helper array to count hosts
             }
 
             // count of checks
-            if(isset($this->_data[$sAppId]["result"]["summary"])){
+            if (isset($this->_data[$sAppId]["result"]["summary"])) {
                 $aChecks = $this->_data[$sAppId]["result"]["summary"];
-                $iCountChecks+=$aChecks["total"];
-                for ($i=0; $i<4; $i++){
-                    $aCheckResults[$i]+=$aChecks[$i];
+                $iCountChecks += $aChecks["total"];
+                for ($i = 0; $i < 4; $i++) {
+                    $aCheckResults[$i] += $aChecks[$i];
                 }
             }
         }
         return array(
-            'apps'=>$iCountApps,
-            'hosts'=>count($aServers),
-            'appresults'=>$aResults,
-            'checks'=>$iCountChecks,
-            'checks'=>$iCountChecks,
-            'checkresults'=>$aCheckResults
+            'apps' => $iCountApps,
+            'hosts' => count($aServers),
+            'appresults' => $aResults,
+            'checks' => $iCountChecks,
+            'checks' => $iCountChecks,
+            'checkresults' => $aCheckResults
         );
     }
-    
+
     /**
      * get html code for a tile
      * 
@@ -206,45 +208,45 @@ class appmonitorserver_gui extends appmonitorserver{
      * @param string   $sMore   more text below a horizontal line
      * @return string
      */
-    protected function _getTile($aOptions=array()) {
+    protected function _getTile($aOptions = array()) {
         // $iCount, $sIcon='', $sLabel='', $sMore=''
-        foreach(array('count', 'icon','label', 'more', 'result') as $sKey){
-            if (!isset($aOptions[$sKey])){
-                $aOptions[$sKey]=false;
+        foreach (array('count', 'icon', 'label', 'more', 'result') as $sKey) {
+            if (!isset($aOptions[$sKey])) {
+                $aOptions[$sKey] = false;
             }
         }
         return '<div class="tile'
-            . ($aOptions['result']!==false ? ' result'.$aOptions['result'] : '' )
-            .'">'
-            . ($aOptions['icon'] ? '<span class="icon">'.$aOptions['icon'].'</span>' : '' )
-            . '<div class="count">'.$aOptions['count'].'</div>'
-            . ($aOptions['label'] ? '<div class="label">'.$aOptions['label'].'</div>' : '' )
-            . ($aOptions['more'] ? '<div class="more">'.$aOptions['more'].'</div>' : '' )
-            // . '<pre>'.print_r($aOptions, 1).'</pre>'
-        . '</div>';
+                . ($aOptions['result'] !== false ? ' result' . $aOptions['result'] : '' )
+                . '">'
+                . ($aOptions['icon'] ? '<span class="icon">' . $aOptions['icon'] . '</span>' : '' )
+                . '<div class="count">' . $aOptions['count'] . '</div>'
+                . ($aOptions['label'] ? '<div class="label">' . $aOptions['label'] . '</div>' : '' )
+                . ($aOptions['more'] ? '<div class="more">' . $aOptions['more'] . '</div>' : '' )
+                // . '<pre>'.print_r($aOptions, 1).'</pre>'
+                . '</div>';
     }
-    
+
     /**
      * get html code for tiles of a single webapp
      * 
      * @return string
      */
     protected function _generateChecksTile() {
-        $sReturn='';
-        $aCounter=$this->_getCounter();
+        $sReturn = '';
+        $aCounter = $this->_getCounter();
         // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
-        
-        $sMoreChecks='';
-        foreach($this->_getResultDefs() as $i){
-            $sMoreChecks.=($aCounter['checkresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['checkresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+
+        $sMoreChecks = '';
+        foreach ($this->_getResultDefs() as $i) {
+            $sMoreChecks .= ($aCounter['checkresults'][$i] ? '<span class="result' . $i . '">' . $aCounter['checkresults'][$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' : '');
         }
         return $this->_getTile(array(
-            'count'=>$aCounter['checks'],
-            'label'=>$this->_aIco['check'].' '.$this->_tr('Checks-total'),
-            'more'=>$sMoreChecks
+                    'count' => $aCounter['checks'],
+                    'label' => $this->_aIco['check'] . ' ' . $this->_tr('Checks-total'),
+                    'more' => $sMoreChecks
         ));
     }
-    
+
     /**
      * get html code for tiles of a single webapp
      * 
@@ -252,118 +254,122 @@ class appmonitorserver_gui extends appmonitorserver{
      * @return string
      */
     protected function _generateWebappTiles($sAppId) {
-        $aHostdata=$this->_data[$sAppId]['result'];
+        $aHostdata = $this->_data[$sAppId]['result'];
         $this->oNotifcation->setApp($sAppId);
-        $aLast=$this->oNotifcation->getAppLastResult(); 
-        $sSince=$aLast && (int)$aLast['result']['ts'] ? $this->_tr('since') . ' '.date("Y-m-d H:i", $aLast['result']['ts']) : '';
-        $sReturn='';
+        $aLast = $this->oNotifcation->getAppLastResult();
+        $sSince = $aLast && (int) $aLast['result']['ts'] ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['result']['ts']) : '';
+        $sReturn = '';
         // $sReturn.='<pre>'.print_r($aHostdata, 1).'</pre>';
-        
-        $sMoreChecks='';
-        if(isset($aHostdata['summary'])){
-            foreach($this->_getResultDefs() as $i){
+
+        $sMoreChecks = '';
+        if (isset($aHostdata['summary'])) {
+            foreach ($this->_getResultDefs() as $i) {
                 // $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-                $sMoreChecks.=($aHostdata['summary'][$i] ? '<span class="result'.$i.'">'.$aHostdata['summary'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+                $sMoreChecks .= ($aHostdata['summary'][$i] ? '<span class="result' . $i . '">' . $aHostdata['summary'][$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' : '');
             }
         }
-        $aEmailNotifiers=$this->oNotifcation->setApp($sAppId,$this->_data[$sAppId]);
-        $aEmailNotifiers=$this->oNotifcation->getAppNotificationdata('email');
-        $aSlackChannels=$this->oNotifcation->getAppNotificationdata('slack',1);
-        
-        // $aPeople=array('email1@example.com', 'email2@example.com');
-        $sMoreNotify=(count($aEmailNotifiers) ? '<span title="'.implode("\n", $aEmailNotifiers).'">'.count($aEmailNotifiers).' x '.$this->_aIco['notify-email'].'</span>' : '')
-            // .'<pre>'.print_r($this->oNotifcation->getAppNotificationdata(), 1).'</pre>'
-            .(count($aSlackChannels) ? '<span title="'.implode("\n", array_keys($aSlackChannels)).'">'.count($aSlackChannels).' x '.$this->_aIco['notify-slack'].'</span>' : '')
-            ;
-        $iNotifyTargets=count($aEmailNotifiers) + count($aSlackChannels);
-        $sSleeping=$this->oNotifcation->isSleeptime();
-        $sReturn.=''
-                .(isset($aHostdata['result']) ? $this->_getTile(array(
-                        'result'=>$aHostdata['result'],
-                        'count'=>$this->_tr('Resulttype-'.$aHostdata['result']),
-                        'label'=>$this->_tr('Appstatus'),
-                        'more'=>$sSince
-                    )) : '')
-                . $this->_getTile(array(
-                        'result'=>$aHostdata['error'] ? RESULT_ERROR : false,
-                        'count'=>$aHostdata['httpstatus'],
-                        'label'=>$this->_tr('Http-status'),
-                    ))
-                . $this->_getTile(array(
-                        'count'=>'<span class="timer-age-in-sec">'.(time() - $aHostdata['ts']).'</span>s',
-                        'label'=>$this->_aIco['age'].' '.$this->_tr('age-of-result'),
-                        'more'=> $this->_tr('TTL') .'='. $aHostdata['ttl'].'s',
-                    ))
-                .(isset($aHostdata['summary']['total']) ? $this->_getTile(array(
-                        'count'=>$aHostdata['summary']['total'],
-                        'label'=>$this->_aIco['check'].' '.$this->_tr('Checks-on-webapp'),
-                        'more'=>$sMoreChecks
-                    )) : '')
-                . $this->_getTile(array(
-                        'result'=>$iNotifyTargets ? false : RESULT_WARNING,
-                        'count'=>$iNotifyTargets,
-                        'label'=>$this->_aIco['notifications'].' '.$this->_tr('Notifications'),
-                        'more'=>$sMoreNotify
-                    ))
-                . $this->_getTile(array(
-                        'result'=>($sSleeping ? RESULT_WARNING : false),
-                        'count'=>($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
-                        'label'=>($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
-                        'more'=>$sSleeping,
-                    ))
+        $aEmailNotifiers = $this->oNotifcation->setApp($sAppId, $this->_data[$sAppId]);
+        $aEmailNotifiers = $this->oNotifcation->getAppNotificationdata('email');
+        $aSlackChannels = $this->oNotifcation->getAppNotificationdata('slack', 1);
 
-                .'<div style="clear: both;"></div>'
-                ;
+        // $aPeople=array('email1@example.com', 'email2@example.com');
+        $sMoreNotify = (count($aEmailNotifiers) ? '<span title="' . implode("\n", $aEmailNotifiers) . '">' . count($aEmailNotifiers) . ' x ' . $this->_aIco['notify-email'] . '</span>' : '')
+                // .'<pre>'.print_r($this->oNotifcation->getAppNotificationdata(), 1).'</pre>'
+                . (count($aSlackChannels) ? '<span title="' . implode("\n", array_keys($aSlackChannels)) . '">' . count($aSlackChannels) . ' x ' . $this->_aIco['notify-slack'] . '</span>' : '')
+        ;
+        $iNotifyTargets = count($aEmailNotifiers) + count($aSlackChannels);
+        $sSleeping = $this->oNotifcation->isSleeptime();
+        $sReturn .= ''
+                . (isset($aHostdata['result']) ? $this->_getTile(array(
+                    'result' => $aHostdata['result'],
+                    'count' => $this->_tr('Resulttype-' . $aHostdata['result']),
+                    'label' => $this->_tr('Appstatus'),
+                    'more' => $sSince
+                )) : '')
+                . $this->_getTile(array(
+                    'result' => $aHostdata['error'] ? RESULT_ERROR : false,
+                    'count' => $aHostdata['httpstatus'],
+                    'label' => $this->_tr('Http-status'),
+                ))
+                . $this->_getTile(array(
+                    'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
+                    'label' => $this->_aIco['age'] . ' ' . $this->_tr('age-of-result'),
+                    'more' => $this->_tr('TTL') . '=' . $aHostdata['ttl'] . 's',
+                ))
+                . (isset($aHostdata['summary']['total']) ? $this->_getTile(array(
+                    'count' => $aHostdata['summary']['total'],
+                    'label' => $this->_aIco['check'] . ' ' . $this->_tr('Checks-on-webapp'),
+                    'more' => $sMoreChecks
+                )) : '')
+                . (isset($this->_data[$sAppId]['meta']['time']) ? $this->_getTile(array(
+                    'count' => $this->_data[$sAppId]['meta']['time'],
+                    'label' => $this->_aIco['time'] . ' ' . $this->_tr('Time-for-all-checks'),
+                )) : '')
+                . $this->_getTile(array(
+                    'result' => $iNotifyTargets ? false : RESULT_WARNING,
+                    'count' => $iNotifyTargets,
+                    'label' => $this->_aIco['notifications'] . ' ' . $this->_tr('Notifications'),
+                    'more' => $sMoreNotify
+                ))
+                . $this->_getTile(array(
+                    'result' => ($sSleeping ? RESULT_WARNING : false),
+                    'count' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
+                    'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
+                    'more' => $sSleeping,
+                ))
+                . '<div style="clear: both;"></div>'
+        ;
         return $sReturn;
     }
+
     /**
      * get html code for tiles of a webapp overview with all applications
      * 
      * @return string
      */
     protected function _generateWebTiles() {
-        $sReturn='';
-        $aCounter=$this->_getCounter();
+        $sReturn = '';
+        $aCounter = $this->_getCounter();
         // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
-        
-        $sMoreHosts='';
-        foreach($this->_getResultDefs() as $i){
-            $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+
+        $sMoreHosts = '';
+        foreach ($this->_getResultDefs() as $i) {
+            $sMoreHosts .= ($aCounter['appresults'][$i] ? '<span class="result' . $i . '">' . $aCounter['appresults'][$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' : '');
         }
 
-        $sSleeping=$this->oNotifcation->isSleeptime();
-        $sReturn.=''
-                .$this->_getTile(array(
-                        'count'=>$aCounter['apps'],
-                        'label'=>$this->_aIco['webapp'].' '.$this->_tr('Webapps'),
-                        'more'=>$sMoreHosts
-                    ))
-                .$this->_getTile(array(
-                        'count'=>$aCounter['hosts'],
-                        'label'=>$this->_aIco['host'].' '.$this->_tr('Hosts'),
-                    ))
-                .$this->_generateChecksTile()
+        $sSleeping = $this->oNotifcation->isSleeptime();
+        $sReturn .= ''
                 . $this->_getTile(array(
-                        'result'=>($sSleeping ? RESULT_WARNING : false),
-                        'count'=>($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
-                        'label'=>($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
-                        'more'=>$sSleeping,
-                    ))
-                .'<div style="clear: both;"></div>'
-                ;
+                    'count' => $aCounter['apps'],
+                    'label' => $this->_aIco['webapp'] . ' ' . $this->_tr('Webapps'),
+                    'more' => $sMoreHosts
+                ))
+                . $this->_getTile(array(
+                    'count' => $aCounter['hosts'],
+                    'label' => $this->_aIco['host'] . ' ' . $this->_tr('Hosts'),
+                ))
+                . $this->_generateChecksTile()
+                . $this->_getTile(array(
+                    'result' => ($sSleeping ? RESULT_WARNING : false),
+                    'count' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
+                    'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
+                    'more' => $sSleeping,
+                ))
+                . '<div style="clear: both;"></div>'
+        ;
         return $sReturn;
     }
-    
+
     /**
      * get html code to show a welcome message if no webapp was setup so far.
      * @return string
      */
     private function _showWelcomeMessage() {
-        return '<div>' 
-            . $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome') 
-            . '<br>'
-            . '<a class="btn" href="#divsetup">'.$this->_aIco['setup'].' '.$this->_tr('Setup').'</a>'
-            . '</div>';
+        return '<div>'
+                . $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
+                . '<br>'
+                . '<a class="btn" href="#divsetup">' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>'
+                . '</div>';
     }
 
     /**
@@ -378,38 +384,35 @@ class appmonitorserver_gui extends appmonitorserver{
         }
         // echo '<pre>'.print_r($this->_data, 1).'</pre>';
         $sReturn .= $this->_generateWebTiles();
-        
-        $aAllWebapps=array();
+
+        $aAllWebapps = array();
         foreach ($this->_data as $sAppId => $aEntries) {
-            $bHasData=true;
-            if(!isset($aEntries["result"]["host"])){
-                $bHasData=false;
+            $bHasData = true;
+            if (!isset($aEntries["result"]["host"])) {
+                $bHasData = false;
                 $iMiss++;
             }
-            
-            $sWebapp=isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
-            $sTilekey='result-'.(999-$aEntries["result"]["result"]).'-'.$sWebapp;
+
+            $sWebapp = isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
+            $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp;
             $sOut = '<div '
-                            . 'class="divhost result' . $aEntries["result"]["result"] . '" '
-                            // . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
-                            . 'onclick="window.location.hash=\'#divweb' . $sAppId . '\'; showDiv( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
+                    . 'class="divhost result' . $aEntries["result"]["result"] . '" '
+                    // . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
+                    . 'onclick="window.location.hash=\'#divweb' . $sAppId . '\'; showDiv( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
                     . '>'
-                        
-                        . ($bHasData 
-                                ? '<a href="#divweb' . $sAppId . '">' . $this->_aIco['webapp'] .' '. $sWebapp.'</a><br>'
-                                    . $this->_aIco['host'] .' '. $aEntries["result"]["host"] . ' '. $this->_renderBadgesForWebsite($sAppId, true)
-                                : '<span title="'.$aEntries['result']['url']."\n".str_replace('"', '&quot;', $aEntries['result']['error']).'">'
-                                        .$this->_aIco['error'] .' '. $sWebapp .'<br>'
-                                  .'</span>'
-                            )
-                        . '<br>'
+                    . ($bHasData ? '<a href="#divweb' . $sAppId . '">' . $this->_aIco['webapp'] . ' ' . $sWebapp . '</a><br>'
+                    . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' ' . $this->_renderBadgesForWebsite($sAppId, true) : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
+                    . $this->_aIco['error'] . ' ' . $sWebapp . '<br>'
+                    . '</span>'
+                    )
+                    . '<br>'
                     . '</div>';
-            $aAllWebapps[$sTilekey]=$sOut;
+            $aAllWebapps[$sTilekey] = $sOut;
         }
         ksort($aAllWebapps);
         // echo '<pre>'.htmlentities(print_r($aHosts, 1)).'</pre>'; die();
-        foreach($aAllWebapps as $aWebapp){
-            $sReturn.=$aWebapp;
+        foreach ($aAllWebapps as $aWebapp) {
+            $sReturn .= $aWebapp;
         }
         if ($iMiss > 0) {
             // $sReturn = '<div class="diverror">' . $this->_aIco["error"] . ' ' . sprintf($this->_tr('msgErr-missedchecks'), $iMiss) . '</div>' . $sReturn;
@@ -438,6 +441,7 @@ class appmonitorserver_gui extends appmonitorserver{
                     $this->_tr('Description'),
                     $this->_tr('Result'),
                     $this->_tr('Output'),
+                    $this->_tr('Time'),
                 )) : $this->_generateTableHead(array(
                     $this->_tr('Host'),
                     $this->_tr('Webapp'),
@@ -447,6 +451,7 @@ class appmonitorserver_gui extends appmonitorserver{
                     $this->_tr('Description'),
                     $this->_tr('Result'),
                     $this->_tr('Output'),
+                    $this->_tr('Time'),
         ));
         $sReturn .= '<tbody>';
 
@@ -463,20 +468,20 @@ class appmonitorserver_gui extends appmonitorserver{
                         $aEntries["result"]["error"]
                 ) {
                     /*
-                    $sReturn .= '<tr class="result3">'
-                            . '<td>?</td>'
-                            . '<td>?</td>'
-                            . '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (' . (date("U") - $aEntries["result"]["ts"]) . '&nbsp;s)</td>'
-                            . '<td>' . $aEntries["result"]["ttl"] . '</td>'
-                            . '<td>' . $aEntries["result"]["url"] . '</td>'
-                            . '<td>?</td>'
-                            . '<td>?</td>'
-                            . '<td>' . $aEntries["result"]["error"] . '</td>'
-                            . '</tr>';
+                      $sReturn .= '<tr class="result3">'
+                      . '<td>?</td>'
+                      . '<td>?</td>'
+                      . '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (' . (date("U") - $aEntries["result"]["ts"]) . '&nbsp;s)</td>'
+                      . '<td>' . $aEntries["result"]["ttl"] . '</td>'
+                      . '<td>' . $aEntries["result"]["url"] . '</td>'
+                      . '<td>?</td>'
+                      . '<td>?</td>'
+                      . '<td>' . $aEntries["result"]["error"] . '</td>'
+                      . '</tr>';
                      * 
                      */
                 } else {
-                
+
                     foreach ($aEntries["checks"] as $aCheck) {
                         $sReturn .= '<tr class="result' . $aCheck["result"] . '">';
                         if (!$sUrl) {
@@ -484,18 +489,19 @@ class appmonitorserver_gui extends appmonitorserver{
                                     . '<td>' . $aEntries["result"]["website"] . '</td>';
                         }
                         $sReturn .= // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
-                                '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (' . (date("U") - $aEntries["result"]["ts"]) . '&nbsp;s)</td>'
+                                '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (<span class="timer-age-in-sec">' . (date("U") - $aEntries["result"]["ts"]) . '</span>&nbsp;s)</td>'
                                 . '<td>' . $aEntries["result"]["ttl"] . '</td>'
                                 . '<td>' . $aCheck["name"] . '</td>'
                                 . '<td>' . $aCheck["description"] . '</td>'
-                                . '<td>' . $this->_tr('Resulttype-'. $aCheck["result"]) . '</td>'
+                                . '<td>' . $this->_tr('Resulttype-' . $aCheck["result"]) . '</td>'
                                 . '<td>' . $aCheck["value"] . '</td>'
+                                . '<td>' . (isset($aCheck["time"]) ? $aCheck["time"] : '-') . '</td>'
                                 . '</tr>';
                     }
                 }
             }
         }
-        $sReturn.='</tbody>';
+        $sReturn .= '</tbody>';
         return '<table class="' . $sTableClass . '">' . $sReturn . '</table>';
     }
 
@@ -503,60 +509,58 @@ class appmonitorserver_gui extends appmonitorserver{
      * get html code for notification log page
      * @return string
      */
-    protected function _generateNoftificationlog(){
-        $aLogs=$this->oNotifcation->getLogdata();
+    protected function _generateNoftificationlog() {
+        $aLogs = $this->oNotifcation->getLogdata();
         rsort($aLogs);
-        
+
         $sTable = $this->_generateTableHead(array(
                     $this->_tr('Timestamp'),
                     $this->_tr('Change'),
                     $this->_tr('Result'),
                     $this->_tr('Message')
-                ))."\n";
+                )) . "\n";
         $sTable .= '<tbody>';
-        
-        $aChanges=array();
-        $aResults=array();
-        foreach ($aLogs as $aLogentry) {
-            
-            if(!isset($aChanges[$aLogentry['changetype']])){
-                $aChanges[$aLogentry['changetype']]=0;
-            }
-            $aChanges[$aLogentry['changetype']]++;
-            
-            if(!isset($aResults[$aLogentry['status']])){
-                $aResults[$aLogentry['status']]=0;
-            }
-            $aResults[$aLogentry['status']]++;
-            
-            $sTable .= '<tr class="result' . $aLogentry['status'] . '">'
-                . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
-                . '<td>' . $this->_tr('changetype-'.$aLogentry['changetype']) . '</td>'
-                . '<td>' . $this->_tr('Resulttype-'.$aLogentry['status']) . '</td>'
-                . '<td>' . $aLogentry['message'] . '</td>'
-            . '</tr>';
-        }
-        $sTable.='</tbody>'."\n";
-        $sTable='<table class="datatable-notifications">' ."\n" . $sTable . '</table>';
 
-        $sMoreResults='';
-        for ($i=0; $i<=4; $i++){
-            $sMoreResults.=(isset($aResults[$i]) ? '<span class="result'.$i.'">'.$aResults[$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
+        $aChanges = array();
+        $aResults = array();
+        foreach ($aLogs as $aLogentry) {
+
+            if (!isset($aChanges[$aLogentry['changetype']])) {
+                $aChanges[$aLogentry['changetype']] = 0;
+            }
+            $aChanges[$aLogentry['changetype']] ++;
+
+            if (!isset($aResults[$aLogentry['status']])) {
+                $aResults[$aLogentry['status']] = 0;
+            }
+            $aResults[$aLogentry['status']] ++;
+
+            $sTable .= '<tr class="result' . $aLogentry['status'] . '">'
+                    . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
+                    . '<td>' . $this->_tr('changetype-' . $aLogentry['changetype']) . '</td>'
+                    . '<td>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
+                    . '<td>' . $aLogentry['message'] . '</td>'
+                    . '</tr>';
         }
-        return 
-            /*
-             * a tile seems to be useless
-            $this->_getTile(array(
-                'count'=>count($aLogs),
-                'label'=>$this->_tr('Notifications'),
-                'more'=>$sMoreResults,
-            ))
-             */
-            $sTable;
-        
-        
+        $sTable .= '</tbody>' . "\n";
+        $sTable = '<table class="datatable-notifications">' . "\n" . $sTable . '</table>';
+
+        $sMoreResults = '';
+        for ($i = 0; $i <= 4; $i++) {
+            $sMoreResults .= (isset($aResults[$i]) ? '<span class="result' . $i . '">' . $aResults[$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' : '');
+        }
+        return
+                /*
+                 * a tile seems to be useless
+                  $this->_getTile(array(
+                  'count'=>count($aLogs),
+                  'label'=>$this->_tr('Notifications'),
+                  'more'=>$sMoreResults,
+                  ))
+                 */
+                $sTable;
     }
-    
+
     /**
      * get html code for setup page
      * @return string
@@ -568,49 +572,47 @@ class appmonitorserver_gui extends appmonitorserver{
         foreach ($this->_data as $sAppId => $aData) {
             $iResult = array_key_exists("result", $aData["result"]) ? $aData["result"]["result"] : 3;
             $sUrl = $aData["result"]["url"];
-            $sWebsite = array_key_exists("website", $aData["result"]) ? $aData["result"]["website"] : $this->_tr('unknown') . ' ('.$sUrl.')';
+            $sWebsite = array_key_exists("website", $aData["result"]) ? $aData["result"]["website"] : $this->_tr('unknown') . ' (' . $sUrl . ')';
             $sHost = array_key_exists("host", $aData["result"]) ? $aData["result"]["host"] : $this->_tr('unknown');
 
-            $sIdDetails='setupdetail'.md5($sAppId);
+            $sIdDetails = 'setupdetail' . md5($sAppId);
             $sReturn .= '<div class="divhost result' . $iResult . '" style="float: none; ">'
                     . '<div style="float: right;">'
                     . $sFormOpenTag
-                        . '<input type="hidden" name="action" value="deleteurl">'
-                        . '<input type="hidden" name="url" value="' . $sUrl . '">'
-                        . '<input type="submit" class="btn btndel" '
-                            . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
-                            . 'value="' . $this->_tr('btn-deleteUrl') . '">'
-                        //. '<a href="#" class="btn btndel"><i class="fa fa-minus"></i> delete</a>'
+                    . '<input type="hidden" name="action" value="deleteurl">'
+                    . '<input type="hidden" name="url" value="' . $sUrl . '">'
+                    . '<input type="submit" class="btn btndel" '
+                    . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
+                    . 'value="' . $this->_tr('btn-deleteUrl') . '">'
+                    //. '<a href="#" class="btn btndel"><i class="fa fa-minus"></i> delete</a>'
                     . '</form>'
                     . '</div>'
-                    
-                        . '<button class="btn" onclick="$(\'#'.$sIdDetails.'\').toggle(); return false;">'.$this->_tr('btn-details').'</button>'
+                    . '<button class="btn" onclick="$(\'#' . $sIdDetails . '\').toggle(); return false;">' . $this->_tr('btn-details') . '</button>'
                     . ' ' . $this->_aIco['webapp'] . ' ' . $this->_tr('Webapp') . ' '
-                        . $sWebsite
-                        . '... ' 
-                        . $this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $sHost.' '
-                        
-                        . '<div id="'.$sIdDetails.'" style="display: none;">'
-                            . $this->_tr('Url') . ' '
-                            . '<a href="' . $sUrl . '" target="_blank">'
-                                    . $sUrl
-                            . '</a><br>'
-                            // . '<pre>'.($aData['result']['header'] ? $aData['result']['header'] : $aData['result']['error']).'</pre>'
-                            // . '<pre>'.print_r($aData, 1).'</pre>'
-                        .'</div>'
+                    . $sWebsite
+                    . '... '
+                    . $this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $sHost . ' '
+                    . '<div id="' . $sIdDetails . '" style="display: none;">'
+                    . $this->_tr('Url') . ' '
+                    . '<a href="' . $sUrl . '" target="_blank">'
+                    . $sUrl
+                    . '</a><br>'
+                    // . '<pre>'.($aData['result']['header'] ? $aData['result']['header'] : $aData['result']['error']).'</pre>'
+                    // . '<pre>'.print_r($aData, 1).'</pre>'
+                    . '</div>'
                     . '</div>';
         }
         $sReturn .= '<br><br><h3>' . $this->_tr('Setup-add-client') . '</h3>';
         $sReturn .= '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
                 . $sFormOpenTag
-                    . '<input type="hidden" name="action" value="addurl">'
-                    . '<input type="text" class="inputtext" name="url" size="70" value="" '
-                    . 'placeholder="http://[domain]/appmonitor/client/" '
-                    . 'pattern="http.*://..*" '
-                    . 'required="required" '
-                    . '>'
-                    // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
-                    . '<input type="submit" class="btn btnadd" value="' . $this->_tr('btn-addUrl') . '">'
+                . '<input type="hidden" name="action" value="addurl">'
+                . '<input type="text" class="inputtext" name="url" size="70" value="" '
+                . 'placeholder="http://[domain]/appmonitor/client/" '
+                . 'pattern="http.*://..*" '
+                . 'required="required" '
+                . '>'
+                // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
+                . '<input type="submit" class="btn btnadd" value="' . $this->_tr('btn-addUrl') . '">'
                 . '</form><br>';
         return $sReturn;
     }
@@ -733,61 +735,58 @@ class appmonitorserver_gui extends appmonitorserver{
         // ----- one table per checked client
         foreach ($this->_data as $sAppId => $aEntries) {
             $sId = 'divweb' . $sAppId;
-            if(!isset($aEntries["result"]["website"])){
+            if (!isset($aEntries["result"]["website"])) {
                 // echo '<pre>'.print_r($aEntries, 1).'</pre>'; 
             }
             if (true ||
-                    array_key_exists("result", $aEntries) 
-                    && array_key_exists("result", $aEntries["result"]) 
-                    && array_key_exists("website", $aEntries["result"]) 
-                    && array_key_exists("host", $aEntries["result"])
+                    array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
             ) {
                 $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                        . '<h2>' . $this->_aIco['allwebapps'] . ' <a href="#divwebs">' . $this->_tr('All-webapps-header').'</a>'
-                            . ' > ' 
-                                . $this->_aIco['webapp']
-                            . (isset($aEntries['result']['website']) ? $aEntries['result']['website'] : '?')
+                        . '<h2>' . $this->_aIco['allwebapps'] . ' <a href="#divwebs">' . $this->_tr('All-webapps-header') . '</a>'
+                        . ' > '
+                        . $this->_aIco['webapp']
+                        . (isset($aEntries['result']['website']) ? $aEntries['result']['website'] : '?')
                         . '</h2>'
                         . $this->_generateWebappTiles($sAppId)
-                        ;
+                ;
                 if (array_key_exists("host", $aEntries["result"])) {
-                    
-                    $sHtml .= '<h3>'.$this->_tr('Checks').'</h3>'
+
+                    $sHtml .= '<h3>' . $this->_tr('Checks') . '</h3>'
                             // TODO: create tabs
                             . $this->_generateMonitorTable($aEntries["result"]["url"])
-                            // TODO: Info page for people that get notifications
-                            // TODO: Info page status changes
-                            // .'DEBUG: <pre>'.print_r($aEntries, 1).'</pre>'
-                            ;
-
+                    // TODO: Info page for people that get notifications
+                    // TODO: Info page status changes
+                    // .'DEBUG: <pre>'.print_r($aEntries, 1).'</pre>'
+                    ;
                 }
-                $sHtml .= '<h3>'.$this->_tr('Http-details').'</h3>'
-                        . ($aEntries['result']['error']      ? '<div class="result3">'.$this->_tr('Error-message'). ': ' . $aEntries['result']['error'].'</div><br>': '')
-                        . ($aEntries['result']['url']        ? $this->_tr('Url'). ': <a href="'.$aEntries['result']['url'].'" target="_blank">' . $aEntries['result']['url'].'</a><br>': '')
-                        . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status'). ': <strong>' . $aEntries['result']['httpstatus'].'</strong><br>': '')
-                        . ($aEntries['result']['header']     ? $this->_tr('Http-header'). ': <pre>' . $aEntries['result']['header'].'</pre>': '')
-                        // . '<pre>'.print_r($aEntries["result"], 1).'</pre>'
-                        ;
-                if ($this->_aCfg['debug']){
+                $sHtml .= '<h3>' . $this->_tr('Http-details') . '</h3>'
+                        . ($aEntries['result']['error'] ? '<div class="result3">' . $this->_tr('Error-message') . ': ' . $aEntries['result']['error'] . '</div><br>' : '')
+                        . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
+                        . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
+                        . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
+                        . '<h3>' . $this->_tr('Client-source-data') . '</h3>'
+                        . '<pre>' . htmlentities(print_r($aEntries, 1)) . '</pre>'
+                // . '<pre>'.print_r($aEntries["result"], 1).'</pre>'
+                ;
+                if ($this->_aCfg['debug']) {
                     $this->oNotifcation->setApp($sAppId);
-                    $sHtml .= '<h3>'.$this->_tr('Preview-of-messages').'</h3>'
-                            . '<h4>'.$this->_tr('Preview-replacements').'</h4>'
-                            . '<pre>'.htmlentities(print_r($this->oNotifcation->getMessageReplacements(), 1)).'</pre>'
-                            . '<h4>'.$this->_tr('Preview-emails').'</h4>'
-                            ;
-                            foreach($this->_getResultDefs() as $i){
-                                $sMgIdPrefix='changetype-'.$i;
-                                $sHtml .= $this->_tr('changetype-'.$i)
-                                        .'<pre>'
-                                        . ''.htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix.'.logmessage'), 1)).'<hr>'
-                                        . 'TO: '.implode('; ', $this->oNotifcation->getAppNotificationdata('email')).'<br>'
-                                        . '<strong>'.htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix.'.email.subject'), 1)).'</strong><br>'
-                                        . ''.htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix.'.email.message'), 1)).'<br>'
-                                        .'</pre>';
-
-                            }
+                    $sHtml .= '<h3>' . $this->_tr('Preview-of-messages') . '</h3>'
+                            . '<h4>' . $this->_tr('Preview-replacements') . '</h4>'
+                            . '<pre>' . htmlentities(print_r($this->oNotifcation->getMessageReplacements(), 1)) . '</pre>'
+                            . '<h4>' . $this->_tr('Preview-emails') . '</h4>'
+                    ;
+                    foreach ($this->_getResultDefs() as $i) {
+                        $sMgIdPrefix = 'changetype-' . $i;
+                        $sHtml .= $this->_tr('changetype-' . $i)
+                                . '<pre>'
+                                . '' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.logmessage'), 1)) . '<hr>'
+                                . 'TO: ' . implode('; ', $this->oNotifcation->getAppNotificationdata('email')) . '<br>'
+                                . '<strong>' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.email.subject'), 1)) . '</strong><br>'
+                                . '' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.email.message'), 1)) . '<br>'
+                                . '</pre>';
+                    }
                 }
-                $sHtml .=  '</div>';
+                $sHtml .= '</div>';
             }
         }
 
@@ -795,7 +794,7 @@ class appmonitorserver_gui extends appmonitorserver{
         $sId = 'divall';
         $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                 . '<h2>' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks-header') . '</h2>'
-                . (count($this->_data) ? $this->_generateChecksTile().'<div style="clear: both;"></div>' : '')
+                . (count($this->_data) ? $this->_generateChecksTile() . '<div style="clear: both;"></div>' : '')
                 . $this->_generateMonitorTable()
                 . '</div>';
 
@@ -824,8 +823,8 @@ class appmonitorserver_gui extends appmonitorserver{
                     . '<pre>' . print_r($this->_urls, true) . '</pre>'
                     . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
                     . '<pre>' . print_r($this->_data, true) . '</pre>'
-                    . '<h3>' . $this->_tr('Debug-notificationlog') . '</h3>'
-                    . '<pre>' . print_r($this->oNotifcation->getLogdata(), true) . '</pre>'
+                    // . '<h3>' . $this->_tr('Debug-notificationlog') . '</h3>'
+                    // . '<pre>' . print_r($this->oNotifcation->getLogdata(), true) . '</pre>'
                     . '</div>';
         }
         return $sHtml;
@@ -842,12 +841,12 @@ class appmonitorserver_gui extends appmonitorserver{
         $sNavi = '';
         $sTitle = $this->_sTitle;
 
-        $iReload=((isset($this->_aCfg['pagereload']) && (int)$this->_aCfg['pagereload'] ) ? (int)$this->_aCfg['pagereload'] : 0);
+        $iReload = ((isset($this->_aCfg['pagereload']) && (int) $this->_aCfg['pagereload'] ) ? (int) $this->_aCfg['pagereload'] : 0);
 
         $sNavi .= '<a href="#" class="reload" onclick="reloadPage()"'
-                . ($iReload ? ' title="'.sprintf($this->_tr('Reload-every'), $iReload).'"' : '')
-                . '>' 
-                . $this->_aIco["reload"] . ' ' . $this->_tr('Reload') 
+                . ($iReload ? ' title="' . sprintf($this->_tr('Reload-every'), $iReload) . '"' : '')
+                . '>'
+                . $this->_aIco["reload"] . ' ' . $this->_tr('Reload')
                 . ' </a>';
 
         $sId = 'divwebs';
@@ -910,7 +909,7 @@ class appmonitorserver_gui extends appmonitorserver{
                 . 'timerAgeInSec();'
                 . '$("a[href^=\'#\']").click(function() { showDiv( this.hash ); return false; } ); '
                 . '} );'
-                . ($iReload ? 'window.setTimeout("updateContent()",   '.($iReload*1000).');' : '')
+                . ($iReload ? 'window.setTimeout("updateContent()",   ' . ($iReload * 1000) . ');' : '')
                 . '</script>' . "\n"
                 . '</body></html>';
 
