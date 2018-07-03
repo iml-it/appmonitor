@@ -16,6 +16,10 @@ $sApproot = str_replace('\\', '/', dirname(__DIR__));
 
 // ----------------------------------------------------------------------
 
+// $oMonitor->addTag('monitoring');
+
+// ----------------------------------------------------------------------
+
 $oMonitor->addCheck(
         array(
             "name" => "check tmp subdir",

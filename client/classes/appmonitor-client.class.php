@@ -193,13 +193,27 @@ class appmonitor {
     }
 
     /**
-     * 
+     * Add slack channel for notification
      * @param string  $sLabel
      * @param string  $sSlackWebhookUrl
      * @return type
      */
     public function addSlackWebhook($sLabel, $sSlackWebhookUrl) {
         return $this->_addNotification('slack', $sSlackWebhookUrl, $sLabel);
+    }
+    /**
+     * add a tag for grouping in the server gui
+     * 
+     * @param string  $sLabel
+     * @param string  $sSlackWebhookUrl
+     * @return type
+     */
+    public function addTag($sTag) {
+        if(!isset($this->_aMeta['tags'])){
+            $this->_aMeta['tags']=array();
+        }
+        $this->_aMeta['tags'][]=$sTag;
+        return true;
     }
 
     /**

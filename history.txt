@@ -3,6 +3,7 @@ HISTORY
 
 v0.27  2018-07-03
     - appmonitor client: time values for measurement in ms (instead of sec)
+    - appmonitor client: tags for (later) filtering in server webgui
     - appmonitor gui: smaller tiles
     - appmonitor gui: show time if available
     - appmonitor gui: show client source data in app detail page

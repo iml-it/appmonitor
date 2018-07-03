@@ -53,15 +53,15 @@ returns JSON answers with the conventions described below.
             "description": "[string: a description what the test is verifying]", 
             "result": [integer: 0..3]
             "value": "[string: result in words]",
-			"time": "[value]ms"
+            "time": "[value]ms"
         },
-	...
+        ...
         {
             "name": "[string: short name of the test N]", 
             "description": "[string: a description what the test N is verifying]", 
             "result": [integer: 0..3]
             "value": "[string: result in words]" 
-			"time": "[value]ms"
+            "time": "[value]ms"
         }
     ] 
     }
@@ -229,6 +229,8 @@ To see all defined checks:
     print_r($oMonitor->listChecks());
 
 - checkSimple 
+- checkDir
+- checkFile
 - checkHttpContent 
 - checkMysqlConnect 
 - checkSqliteConnect 
@@ -291,6 +293,54 @@ parameters:
 
 You can use the simple check to verify anything that has no pre defined function
 yet.
+
+## Directory ##
+
+Check if a directory locally exists. With an additional flag you can verify if it is writable.
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "check tmp subdir",
+            "description" => "Check cache storage",
+            "check" => array(
+                "function" => "Dir",
+                "params" => array(
+                    "dir" => $sApproot . "/server/tmp",
+                    "writable" => true,
+                ),
+            ),
+        )
+    );
+
+
+parameters:
+
+- dir (string) local directory
+- writable (string) optional; set true to check if it is writable
+
+## File ##
+
+Check if a file locally exists. With an additional flag you can verify if it is writable.
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "check config file",
+            "description" => "The config file must be writable",
+            "check" => array(
+                "function" => "File",
+                "params" => array(
+                    "file" => $sApproot . "/server/config/appmonitor-server-config.json",
+                    "writable" => true,
+                ),
+            ),
+        )
+    );
+
+parameters:
+
+- file (string) local directory
+- writable (string) optional; set true to check if it is writable
+
 
 ## HTTPCONTENT ##
 
