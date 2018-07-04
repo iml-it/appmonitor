@@ -42,7 +42,7 @@ The server uses
 Below a document root of a website create a directory [webroot]/appmonitor/
 - copy all files of the archive into [webroot]/appmonitor/
 - verify the installation with your browser 
-  http://localhost/appmonitor/server/server.php
+  http://localhost/appmonitor/server/
   You should see a welcome message.
 - Go to the setup.
 - Add the url http://localhost/appmonitor/client/check-appmonitor-server.php to integrate a first check.
@@ -74,7 +74,7 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
     "lang": "en-en",
     "debug": false,
     "pagereload": 60,
-    "serverurl": "http:\/\/monitor.example.com\/appmonitor\/server\/server.php",
+    "serverurl": "http:\/\/monitor.example.com\/appmonitor\/server\/",
     "notifications": {
         "sleeptimes": [
             "/(Sat|Sun)/",
