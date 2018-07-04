@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.28  2018-07-04
+    - appmonitor server: added filter select box
+    - appmonitor server: show / hide button for server details
+
 v0.28  2018-07-03
     - appmonitor client: fix strange setTimeout behavior on reload
     - appmonitor client + gui: support tags and filter them in the webgui

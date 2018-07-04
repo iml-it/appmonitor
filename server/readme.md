@@ -171,3 +171,67 @@ To preview the texts you can
 
 Important remark:
 The appmonitor has no user login. Protect it by configuration of your webserver, i.e. use ip restriction and/ or basic authentication.
+
+
+# Service #
+
+The server instance can be used by just using the web interface. If you do not need the notification feature then there is no need to run the service.
+
+The service that is a permanently running loop that fetches the outdated client data and sends notification data around the clock (respecting the sleep times).
+
+
+## Run as systemd service ##
+
+(this section is work in progress)
+
+This method works on newer Linux OS with systemd, i.e. CentOS 7.
+
+Below */etc/systemd/*  create a service file named *appmonitor.service*
+[webroot] is something like /var/www/localhost/public_html/
+
+```
+[Unit]
+Description=IML Appmonitor service Daemon
+After=httpd.service
+Documentation=https://github.com/iml-it/appmonitor/blob/master/readme.md
+
+[Service]
+Type=simple
+User=apache
+PrivateTmp=true
+ExecStart=/usr/bin/php [webroot]/appmonitor/server/service.php
+
+[Install]
+WantedBy=default.target
+```
+
+Check it with
+
+`systemd-analyze verify /etc/systemd/system/appmonitor.service`
+
+Then work these commands:
+
+```
+systemctl start appmonitor
+systemctl status appmonitor
+systemctl stop appmonitor
+```
+
+
+## Manual start ##
+
+This method does runs on all OS (MS Windows, Mac, Linux).
+
+remark for *nix systems:
+
+Manual start form command line as apache user (www-data or apache) is possible if the user apache has a login shell. Do not start as another user to prevent permission problems with created files (in ./server/tmp/).
+
+Interactive mode (*nix and MS Windows):
+
+`php [webroot]/appmonitor/server/service.php`
+
+
+To let it run permanently in the background and after logging out use the nohup command in front and an ampersend at the end (*nix only):
+
+`nohup php [webroot]/appmonitor/server/service.php &`
+

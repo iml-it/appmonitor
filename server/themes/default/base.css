@@ -5,7 +5,14 @@ h2, h2 a{margin:0 0 0.5em; color:#777; border-bottom: 0px solid #ddd; }
 h2>i {font-size: 150% !important; color:#aaa; margin-right: 0.3em;}
 h3{margin: 2em 0 1em 0;}
 pre{padding: 0.5em; background: rgba(0,0,0,0.05); border: 2px solid rgba(0,0,0,0.1); }
+select{border: 1px solid rgba(0,0,0,0.1); border-radius: 0.3em; color:#444; padding: 0.3em;}
 table.dataTable tbody tr:hover{background:rgba(255,255,255,0.2); }
+table th{ background:rgba(0,0,0,0.05);}
+table.dataTable thead .sorting, table.dataTable thead .sorting_asc, table.dataTable thead .sorting_desc, table.dataTable thead .sorting_asc_disabled, table.dataTable thead .sorting_desc_disabled,
+table.dataTable.no-footer{
+    border-bottom-color:rgba(0,0,0,0.2);
+}
+
 
 .inputtext{
     border: 2px solid rgba(0,0,0,0.3);
@@ -29,7 +36,7 @@ table.dataTable tbody tr:hover{background:rgba(255,255,255,0.2); }
 	border-radius: 0.2em;
 	padding: 0.4em;
 }
-.divmain{margin: 0 3% 5em;}
+.divmain{margin: 0 2% 5em;}
 .divsourceinfo{background:#ddd; padding: 1em; }
 #divmodal{
     position: fixed; height: 100%; width: 100%; top:0; left:0;
@@ -81,9 +88,4 @@ padding: 1em;}
 .divwarning{background:#fff0c0 !important; margin: 0 0 2em; padding: 1em;}
 .diverror{background:#fdd !important; background: linear-gradient(#fdd,#ecc) !important; margin: 0 0 2em; padding: 1em; border: 1px solid rgba(0,0,0,0.15);}
 
-table th{ background:rgba(0,0,0,0.05);}
-table.dataTable thead .sorting, table.dataTable thead .sorting_asc, table.dataTable thead .sorting_desc, table.dataTable thead .sorting_asc_disabled, table.dataTable thead .sorting_desc_disabled,
-table.dataTable.no-footer{
-    border-bottom-color:rgba(0,0,0,0.2);
-}
 

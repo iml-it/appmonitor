@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.28
+ * @version 0.29
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.28";
+    var $_sTitle = "Appmonitor Server v0.29";
 
     /**
      * html code for icons in the web gui
@@ -51,6 +51,7 @@ class appmonitorserver_gui extends appmonitorserver {
         'notify-slack' => '<i class="fa fa-slack"></i>',
         'sleepmode-on' => '<i class="fa fa-bed"></i>',
         'sleepmode-off' => '<i class="fa fa-bullhorn"></i>',
+        'filter' => '<i class="fa fa-filter"></i>',
         'age' => '<i class="fa fa-clock-o"></i>',
         'time' => '<i class="fa fa-clock-o"></i>',
         'httpstatus' => '<i class="fa fa-tag"></i>',
@@ -61,7 +62,8 @@ class appmonitorserver_gui extends appmonitorserver {
         'error' => '<i class="fa fa-flash"></i>',
         'add' => '',
         'del' => '',
-        'close' => '',
+        'plus' => '<i class="fa fa-plus"></i>',
+        'close' => '<i class="fa fa-times"></i>',
     );
 
     // ----------------------------------------------------------------------
@@ -401,10 +403,13 @@ class appmonitorserver_gui extends appmonitorserver {
                     // . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
                     . 'onclick="window.location.hash=\'#divweb' . $sAppId . '\'; showDiv( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
                     . '>'
-                    . ($bHasData ? '<a href="#divweb' . $sAppId . '">' . $this->_aIco['webapp'] . ' ' . $sWebapp . '</a><br>'
-                    . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' ' . $this->_renderBadgesForWebsite($sAppId, true) : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
-                    . $this->_aIco['error'] . ' ' . $sWebapp . '<br>'
-                    . '</span>'
+                    . ($bHasData ? 
+                            '<a href="#divweb' . $sAppId . '">' . $this->_aIco['webapp'] . ' ' . $sWebapp . '</a><br>'
+                            . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' ' 
+                            . $this->_renderBadgesForWebsite($sAppId, true) 
+                        : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
+                            . $this->_aIco['error'] . ' ' . $sWebapp . '<br>'
+                            . '</span>'
                     )
                     . '<br>'
                     . '</div>';
@@ -572,6 +577,18 @@ class appmonitorserver_gui extends appmonitorserver {
     private function _generateSetup() {
         $sReturn = '';
         $sFormOpenTag = '<form action="?" method="POST">';
+        $sReturn .= '<h3>' . $this->_tr('Setup-add-client') . '</h3>'
+                . '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
+                . $sFormOpenTag
+                . '<input type="hidden" name="action" value="addurl">'
+                . '<input type="text" class="inputtext" name="url" size="70" value="" '
+                . 'placeholder="http://[domain]/appmonitor/client/" '
+                . 'pattern="http.*://..*" '
+                . 'required="required" '
+                . '>'
+                // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
+                . '<input type="submit" class="btn btnadd" value="' . $this->_tr('btn-addUrl') . '">'
+                . '</form><br>';
         $sReturn .= '<h3>' . $this->_tr('Setup-client-list') . '</h3>';
         foreach ($this->_data as $sAppId => $aData) {
             $iResult = array_key_exists("result", $aData["result"]) ? $aData["result"]["result"] : 3;
@@ -606,18 +623,6 @@ class appmonitorserver_gui extends appmonitorserver {
                     . '</div>'
                     . '</div>';
         }
-        $sReturn .= '<br><br><h3>' . $this->_tr('Setup-add-client') . '</h3>';
-        $sReturn .= '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
-                . $sFormOpenTag
-                . '<input type="hidden" name="action" value="addurl">'
-                . '<input type="text" class="inputtext" name="url" size="70" value="" '
-                . 'placeholder="http://[domain]/appmonitor/client/" '
-                . 'pattern="http.*://..*" '
-                . 'required="required" '
-                . '>'
-                // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
-                . '<input type="submit" class="btn btnadd" value="' . $this->_tr('btn-addUrl') . '">'
-                . '</form><br>';
         return $sReturn;
     }
 
@@ -739,6 +744,11 @@ class appmonitorserver_gui extends appmonitorserver {
         // ----- one table per checked client
         foreach ($this->_data as $sAppId => $aEntries) {
             $sId = 'divweb' . $sAppId;
+            $sDivMoredetails='div-http-'.$sAppId;
+            $sShowHide='<br><button class="btn" id="btn-plus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideDown(); $(this).hide(); $(\'#btn-minus-'.$sAppId.'\').show(); return false;"'
+                        . '> '.$this->_aIco['plus'].' '.$this->_tr('btn-details').' </button>'
+                    . '<button class="btn" id="btn-minus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideUp();   $(this).hide(); $(\'#btn-plus-'.$sAppId.'\').show(); return false;" style="display: none;"'
+                    . '> '.$this->_aIco['close'].' '.$this->_tr('btn-hide-details').' </button>';
             if (!isset($aEntries["result"]["website"])) {
                 // echo '<pre>'.print_r($aEntries, 1).'</pre>'; 
             }
@@ -763,14 +773,15 @@ class appmonitorserver_gui extends appmonitorserver {
                     // .'DEBUG: <pre>'.print_r($aEntries, 1).'</pre>'
                     ;
                 }
-                $sHtml .= '<h3>' . $this->_tr('Http-details') . '</h3>'
-                        . ($aEntries['result']['error'] ? '<div class="result3">' . $this->_tr('Error-message') . ': ' . $aEntries['result']['error'] . '</div><br>' : '')
-                        . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
-                        . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
-                        . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
+                $sHtml .= $sShowHide
+                        . '<div id="'.$sDivMoredetails.'" style="display: none;">'
+                        . '<h3>' . $this->_tr('Http-details') . '</h3>'
+                            . ($aEntries['result']['error'] ? '<div class="result3">' . $this->_tr('Error-message') . ': ' . $aEntries['result']['error'] . '</div><br>' : '')
+                            . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
+                            . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
+                            . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
                         . '<h3>' . $this->_tr('Client-source-data') . '</h3>'
                         . '<pre>' . htmlentities(print_r($aEntries, 1)) . '</pre>'
-                // . '<pre>'.print_r($aEntries["result"], 1).'</pre>'
                 ;
                 if ($this->_aCfg['debug']) {
                     $this->oNotifcation->setApp($sAppId);
@@ -790,7 +801,7 @@ class appmonitorserver_gui extends appmonitorserver {
                                 . '</pre>';
                     }
                 }
-                $sHtml .= '</div>';
+                $sHtml .= '</div></div>';
             }
         }
 
@@ -878,7 +889,7 @@ class appmonitorserver_gui extends appmonitorserver {
             $sOptions.='<option value="'.$this->_getCssclassForTag($sTag).'">'.$sTag.'</a>';
         }
         if($sOptions){
-            $sReturn='<select onchange="filterForTag(this.value)">'
+            $sReturn=$this->_aIco['filter'].' '.$this->_tr('Tag-filter').': <select onchange="filterForTag(this.value)">'
                         . '<option value="">---</option>'
                         . $sOptions
                     . '</select>';
@@ -897,17 +908,17 @@ class appmonitorserver_gui extends appmonitorserver {
         $sNavi = '';
         $sTitle = $this->_sTitle;
 
+        $sNavi.='<span style="float: right; margin-right: 1.5em;">'.$this->_renderTagfilter().'</span>';
         $iReload = ((isset($this->_aCfg['pagereload']) && (int) $this->_aCfg['pagereload'] ) ? (int) $this->_aCfg['pagereload'] : 0);
 
         $sNavi .= '<a href="#" class="reload" onclick="reloadPage()"'
                 . ($iReload ? ' title="' . sprintf($this->_tr('Reload-every'), $iReload) . '"' : '')
                 . '>'
-                . $this->_aIco["reload"] . ' ' . $this->_tr('Reload')
+                . $this->_aIco["reload"] . ' ' . $this->_tr('Reload') . ' ('.$this->_tr('age-of-page') . ': <span class="timer-age-in-sec">0</span> s)'
                 . ' </a>';
 
         $sId = 'divwebs';
         $sFirstDiv = $sId;
-        $sNavi.=$this->_renderTagfilter();
         $sNavi .= '<a href="#' . $sId . '" class="allwebapps" >' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps') . '</a>';
 
         $sId = 'divall';
@@ -939,7 +950,9 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<body>' . "\n"
                 . '<div class="divtop">'
                     . '<div class="divtopheader">'
-                        . '<span style="float: right; margin-right: 1.5em;">' . sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) . '</span>'
+                        . '<span style="float: right; margin-right: 1.5em;">' 
+                            . sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) 
+                        . '</span>'
                         . '<h1>' . $this->_aIco['title'] . ' ' . $sTitle . '</h1>'
                         . '<br>'
                     . '</div>'
