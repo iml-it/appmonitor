@@ -2,8 +2,8 @@
 
 /**
  * tinyservice
- * 
- * TODO: check a running PID instead of timeout based on sleep time 
+ *
+ * TODO: check a running PID instead of timeout based on sleep time
  *      MS WINDOWS: tasklist /FI "PID eq [PID]"
  *      *NIX: if(!file_exists('/proc/'.$pid))
  *
@@ -44,43 +44,41 @@ class tinyservice {
      * do not allow to run as root (for *NIX systems)
      * @return boolean
      */
-    public function denyRoot(){
-        if (function_exists("posix_getpwuid")){
+    public function denyRoot() {
+        if (function_exists("posix_getpwuid")) {
             $processUser = posix_getpwuid(posix_geteuid());
-            if ($processUser['name']=="root"){
+            if ($processUser['name'] == "root") {
                 die("ERROR: Do not start the script as user root. Run it as the user of the application\n");
             }
         }
         return true;
     }
-    
-    // signal handler - UNTESTED 
+
+    // signal handler - UNTESTED
     public function sigHandler($signo) {
         $this->send("signal $signo received ...");
         switch ($signo) {
+            case SIGINT:
             case SIGTERM:
                 // actions SIGTERM signal processing
                 // fclose($fd_log); // close the log-file
-                $this->send("handle SIGTERM ... exiting");
+                $this->send("removing touchfile and exiting.");
                 unlink($this->sTouchfile); // destroy touch file
-                $this->sTouchfile=false;
+                $this->sTouchfile = false;
+                echo "Bye.\n";
                 exit;
                 break;
-            /*
-            case SIGHUP:
-                // actions SIGHUP handling
-                init_data(); // reread the configuration file and initialize the data again
-                break;
-            default:
-            // Other signals, information about errors
-             * 
-             */
+              case SIGHUP:
+              // actions SIGHUP handling
+              break;
+              default:
+                $this->send("No action for signal $signo ... I will continue ...");
         }
     }
 
     /**
      * set an application name - to create a run file
-     * 
+     *
      * @param string $sAppname  name of the application
      * @return boolean
      */
@@ -96,7 +94,7 @@ class tinyservice {
 
     /**
      * enable/ disable debug
-     * 
+     *
      * @param boolean $bDebug  flag with true|false
      * @return boolean
      */
@@ -120,9 +118,9 @@ class tinyservice {
     }
 
     /**
-     * check if application can start. It checks the existance of touch file 
+     * check if application can start. It checks the existance of touch file
      * if it was found then an older file will be ignored.
-     * 
+     *
      * @return boolean
      */
     function canStart() {
@@ -136,16 +134,16 @@ class tinyservice {
             return true;
         }
         echo "ERROR: run file was found - it is " . $iAge . "s old. "
-                . "A process seems to run already. "
-                . "Or you need to wait up to ".($this->iSleep - $iAge)." seconds.\n"
-                . "$this->sTouchfile\n\nits content:\n";
+        . "A process seems to run already. "
+        . "Or you need to wait up to " . ($this->iSleep - $iAge) . " seconds.\n"
+        . "$this->sTouchfile\n\nits content:\n";
         echo file_get_contents($this->sTouchfile) . "\n\n";
         return false;
     }
 
     /**
      * write the message to a touch file ... as a life sign
-     * 
+     *
      * @param string $sMessage  message text
      * @return boolean
      */
@@ -157,7 +155,7 @@ class tinyservice {
     /**
      * write a message to STDOUT (if actiated or debug is on) and
      * touch the run file
-     * 
+     *
      * @param string   $sMessage  message text
      * @param boolean $bShow     flag to write to stdout
      * @return boolean
@@ -171,16 +169,15 @@ class tinyservice {
 
     /**
      * sleep a bit
-     * 
+     *
      * @param boolean $bShow     flag to write to stdout
      * @return boolean
      */
-    public function sleep($bShow=false){
-        for ($i=0; $i<$this->iSleep; $i++){
-            $this->send("SLEEPING for ".$this->iSleep." seconds ... ".($this->iSleep-$i). " seconds left", $bShow);
-            sleep(1);
-        }
+    public function sleep($bShow = false) {
+        $this->send("SLEEPING for " . $this->iSleep . " seconds ... ", $bShow);
+        sleep($this->iSleep);
         $this->send("Waking up.", $bShow);
         return true;
     }
+
 }

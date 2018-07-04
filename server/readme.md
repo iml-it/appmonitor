@@ -1,3 +1,7 @@
+<style>
+	.mark{background:#fc0; color:#f22;}
+	.optional{color:#888;}
+</style>
 
 # [APPMONITOR](../readme.md) > SERVER #
 
@@ -123,10 +127,15 @@ Remarks:
   - "from":  sender information ... in the subkeys 
     - "email": email address for notifications (is reply-to address too)
     - "slack": sender name ("Appmonitor" as default)
-  - "sleeptimes": flat array of time definitions when no notification will be sent. Each entry is a regex. If any matches the current system time (PHP function date("D H:i") - it returns short weekdays plus hour, ":" and minutes: "Mon 09:23"). The example will disable Notifications:
+  - "sleeptimes": flat array of time definitions when no notification will be sent. Each entry is a regex. If any matches the current system time (PHP function date("Y-m-d D H:i") - it returns the date in YYYY-MM-DD, the short weekday plus hour, ":" and minutes: "2018-07-04 Mon 09:23"). Pay attention to the dividers: "-" is used for dates and ":" to divide hour and minute. The example will disable Notifications:
     - "/(Sat|Sun)/" --> Saturday and Sunday
-	- "/[2][1-3]:/" --> daily from 21:00-23:59
-	- "/[0][0-4]:/" --> daily from 00:00-04:59
+	- "/[2][1-3]<span class="mark">:</span>/" --> digit 2 + 1..3 before ":" --> daily from 21:00-23:59
+	- "/[0][0-4]<span class="mark">:</span>/" --> digit 0 + 0..4 before ":" --> daily from 00:00-04:59
+	- other examples
+	- "/2018<span class="mark">-</span>08<span class="mark">-</span>01/" --> disable notification on complete 1st of August 2018 (Swiss holiday)
+	- "/[0-9]{4}<span class="mark">-</span>12<span class="mark">-</span>/" --> 4 digits is a year then "minus" + month 12 --> disables notification in December of each year
+	
+
 
   
 # Notification #
@@ -182,27 +191,28 @@ The service that is a permanently running loop that fetches the outdated client 
 
 ## Run as systemd service ##
 
-(this section is work in progress)
-
 This method works on newer Linux OS with systemd, i.e. CentOS 7.
 
-Below */etc/systemd/*  create a service file named *appmonitor.service*
+Below */etc/systemd/*  create a service file */etc/systemd/system/appmonitor.service*
+
 [webroot] is something like /var/www/localhost/public_html/
 
 ```
 [Unit]
-Description=IML Appmonitor service Daemon
-After=httpd.service
-Documentation=https://github.com/iml-it/appmonitor/blob/master/readme.md
+Description=IML Appmonitor service daemon
+Wants=multi-user.target
 
 [Service]
-Type=simple
-User=apache
-PrivateTmp=true
 ExecStart=/usr/bin/php [webroot]/appmonitor/server/service.php
+Restart=on-failure
+RestartSec=30s
+SyslogIdentifier=appmonitor
+User=apache
+Group=root
+Type=simple
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
 ```
 
 Check it with

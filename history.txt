@@ -1,7 +1,14 @@
 
 HISTORY
 
-v0.28  2018-07-04
+v0.30  2018-07-04
+    - appmonitor service: runs on Linux + as systemd service + manually by hand under Windows
+    - appmonitor server: renamed to index.php
+    - added index php that forwards to ./server/
+    - notification: new sortorder of listed checks by type: first errors, then warnings then ok 
+    - notification: expand sleeptime by dates too (to disable on a holiday)
+
+v0.29  2018-07-04
     - appmonitor server: added filter select box
     - appmonitor server: show / hide button for server details
 

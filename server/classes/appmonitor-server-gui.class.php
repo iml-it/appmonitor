@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.29
+ * @version 0.30
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.29";
+    var $_sTitle = "Appmonitor Server v0.30";
 
     /**
      * html code for icons in the web gui
@@ -41,7 +41,7 @@ class appmonitorserver_gui extends appmonitorserver {
         'welcome' => '<i class="fa fa-flag-o" style="font-size: 500%;float: left; margin: 0 1em 10em 0;"></i>',
         'reload' => '<i class="fa fa-refresh"></i>',
         'allwebapps' => '<i class="fa fa-globe"></i>',
-        'webapp' => '<i class="fa fa-book"></i>',
+        'webapp' => '<i class="fa fa-cube"></i>',
         'host' => '<i class="fa fa-hdd-o"></i>',
         'check' => '<i class="fa fa-check"></i>',
         'checks' => '<i class="fa fa-list"></i>',
@@ -404,9 +404,13 @@ class appmonitorserver_gui extends appmonitorserver {
                     . 'onclick="window.location.hash=\'#divweb' . $sAppId . '\'; showDiv( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
                     . '>'
                     . ($bHasData ? 
-                            '<a href="#divweb' . $sAppId . '">' . $this->_aIco['webapp'] . ' ' . $sWebapp . '</a><br>'
-                            . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' ' 
+                            '<span class="icon">'.$this->_aIco['webapp'].'</span>'
+                            . '<a href="#divweb' . $sAppId . '">' 
+                            // . $this->_aIco['webapp'] . ' ' 
+                            . $sWebapp . '</a>'
                             . $this->_renderBadgesForWebsite($sAppId, true) 
+                            . '<br>'
+                            . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' ' 
                         : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
                             . $this->_aIco['error'] . ' ' . $sWebapp . '<br>'
                             . '</span>'
@@ -757,7 +761,7 @@ class appmonitorserver_gui extends appmonitorserver {
             ) {
                 $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                         . '<h2>' . $this->_aIco['allwebapps'] . ' <a href="#divwebs">' . $this->_tr('All-webapps-header') . '</a>'
-                        . ' > '
+                        . ' .. '
                         . $this->_aIco['webapp']
                         . (isset($aEntries['result']['website']) ? $aEntries['result']['website'] : '?')
                         . '</h2>'

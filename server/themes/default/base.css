@@ -64,7 +64,8 @@ padding: 1em;}
 
 .outsegment{min-height: 30em; display:none; margin-top: 7em; padding: 1em; border: 2px solid #fff; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #e8e8e8;}
 
-.divhost{float: left; padding: 0.5em; border-left: 10px solid rgba(0,0,0,0.10); margin: 0 1em 1em 0; min-width: 20em;}
+.divhost{float: left; padding: 0.5em; border-left1: 10px solid rgba(0,0,0,0.10); margin: 0 1em 1em 0; min-width: 20em;}
+.divhost>.icon{background: rgba(0,0,0,0.10); font-size: 200%; padding: 0.3em; display: block; float: left; margin-right: 0.3em;}
 
 .result0{background:#efe !important;    background: linear-gradient(#dfd,#cec)!important;}
 .result1{background:#eee !important;    background: linear-gradient(#eee,#ddd)!important;}

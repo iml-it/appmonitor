@@ -115,7 +115,7 @@ class notificationhandler {
      */
     public function isSleeptime(){
         if(isset($this->_aNotificationOptions['sleeptimes']) && is_array($this->_aNotificationOptions['sleeptimes']) && count($this->_aNotificationOptions['sleeptimes'])){
-            $sNow = date("D H:i");
+            $sNow = date("Y-m-d D H:i");
             foreach($this->_aNotificationOptions['sleeptimes'] as $sRegex){
                 if (preg_match($sRegex, $sNow)) {
                     return $sRegex;
@@ -436,14 +436,21 @@ class notificationhandler {
         // echo '<pre>'.print_r($this->_aAppResult['checks'], 1).'</pre>';
         $sChecks='';
         if(isset($this->_aAppResult['checks'])){
+            
+            // one key for each result ... 3 is error .. 0 is OK
+            $aSortedChecks=array();
+            for($i=3; $i>=0; $i--){
+                $aSortedChecks[$i]='';
+            }
             foreach($this->_aAppResult['checks'] as $aCheck){
-                $sChecks.=($sChecks ? "\n\n" : '')
+                $iResult=$aCheck['result'];
+                $aSortedChecks[$iResult].=($aSortedChecks[$iResult] ? "\n\n" : '')
                         . '----- '.$aCheck['name'].' ('.$aCheck['description'].")\n"
                         . $aCheck['value']."\n"
                         . $this->_tr('Resulttype-'. $aCheck['result'])
                         ;
             }
-            $aReplace['__CHECKS__']=$sChecks;
+            $aReplace['__CHECKS__']=implode("", $aSortedChecks);
         }
         return $aReplace;
     }

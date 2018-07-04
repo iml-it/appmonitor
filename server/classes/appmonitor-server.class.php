@@ -41,12 +41,44 @@ require_once 'notificationhandler.class.php';
  */
 class appmonitorserver {
 
-    var $_data = array();
-    var $_aCfg = array();
-    var $_urls = array();
-    var $_iTtl = 60;
-    var $_iTtlOnError = 20;
-    var $_sConfigfile = "appmonitor-server-config.json";
+    /**
+     * key value hash with all clients to fetch appmon client status from
+     * key is a hash; value the client url
+     * @var array
+     */
+    protected $_urls = array();
+
+    /**
+     * hash with response data of all clients
+     * @var array
+     */
+    protected $_data = array();
+
+    /**
+     * loaded config data
+     * @var array
+     */
+    protected $_aCfg = array();
+
+    /**
+     * default TTL if a client does not send its own TTL value
+     * value is in sec
+     * @var integer
+     */
+    protected $_iTtl = 300;
+
+    /**
+     * default TTL if a client does not send its own TTL value
+     * value is in sec
+     * @var integer
+     */
+    protected $_iTtlOnError = 20;
+
+    /**
+     * name of the config file to load
+     * @var type 
+     */
+    protected $_sConfigfile = "appmonitor-server-config.json";
     protected $_aMessages = array();
     protected $oLang = false;
     protected $_bIsDemo = false; // set true to disallow changing config in webgui
@@ -90,7 +122,10 @@ class appmonitorserver {
     }
 
     /**
-     * (re) load config and get all urls to fetch
+     * (re) load config and get all urls to fetch (and all other config items)
+     * This method 
+     * - fills $this->_aCfg
+     * - newly initializes $this->oNotifcation
      */
     public function loadConfig() {
         $aUserdata = array();
@@ -126,7 +161,7 @@ class appmonitorserver {
 
     /**
      * save the current config
-     * @return type
+     * @return boolean
      */
     protected function _saveConfig() {
         if ($this->_bIsDemo) {
@@ -160,11 +195,6 @@ class appmonitorserver {
             'message' => $sMessage,
             'level' => $sLevel
         );
-        /*
-          if ($sLevel=="MAIL"){
-          mail($aCfg["emailDeveloper"], "Logmessage", $sMessage);
-          }
-         */
         return true;
     }
 
@@ -224,7 +254,6 @@ class appmonitorserver {
      * helper function: handle url parameters
      */
     protected function _handleParams() {
-        // echo "<br><br><br><br><br><br>POST: " . print_r($_POST, true); //print_r($_SERVER,true);
         $sAction = (array_key_exists("action", $_POST)) ? $_POST["action"] : '';
         switch ($sAction) {
             case "addurl":
