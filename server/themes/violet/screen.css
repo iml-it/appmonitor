@@ -7,4 +7,4 @@ h3{color:#a8b;}
 .divtopheader, .divtopnavi,  .footer{
     background:#415; 
 }
-.tile1{ border: 1px solid #ece; box-shadow: 0 0 5em #ece inset;}
+.tile1{ border-color: #ece; box-shadow: 0 0 5em #ece inset;}

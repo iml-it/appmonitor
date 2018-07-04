@@ -8,4 +8,4 @@ h3{color:#89c;}
     background:#126; 
 }
 
-.tile{ border: 1px solid #cde; box-shadow: 0 0 5em #cde inset;}
+.tile{ border-color: #cde; box-shadow: 0 0 5em #cde inset;}
