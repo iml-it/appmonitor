@@ -8,6 +8,7 @@
 require_once('classes/appmonitor-client.class.php');
 $oMonitor = new appmonitor();
 $oMonitor->setWebsite('Appmonitor server');
+$oMonitor->setTTL(10);
 
 
 @include 'general_include.php';
@@ -25,9 +26,10 @@ $oMonitor->addCheck(
             "name" => "check tmp subdir",
             "description" => "Check cache storage",
             "check" => array(
-                "function" => "Dir",
+                "function" => "File",
                 "params" => array(
-                    "dir" => $sApproot . "/server/tmp",
+                    "filename" => $sApproot . "/server/tmp",
+                    "dir" => true,
                     "writable" => true,
                 ),
             ),
@@ -38,9 +40,10 @@ $oMonitor->addCheck(
             "name" => "check config subdir",
             "description" => "Check config target directory",
             "check" => array(
-                "function" => "Dir",
+                "function" => "File",
                 "params" => array(
-                    "dir" => $sApproot . "/server/config",
+                    "filename" => $sApproot . "/server/config",
+                    "dir" => true,
                     "writable" => true,
                 ),
             ),
@@ -53,7 +56,8 @@ $oMonitor->addCheck(
             "check" => array(
                 "function" => "File",
                 "params" => array(
-                    "file" => $sApproot . "/server/config/appmonitor-server-config.json",
+                    "filename" => $sApproot . "/server/config/appmonitor-server-config.json",
+                    "file" => true,
                     "writable" => true,
                 ),
             ),

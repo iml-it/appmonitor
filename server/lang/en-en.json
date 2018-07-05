@@ -109,7 +109,7 @@
         
         "msgWarn-missing-key-checks-description":"checks > %s > description is not set - this check has no description about its action/ reason.",
         "msgWarn-missing-key-checks-value":"checks > %s > value is not set - the result of this check hast explaination of its result.",
-        "msgWarn-missing-key-checks-time":"checks > %s > time is not set - the check has no measurtemnt data.",
+        "msgWarn-missing-key-checks-time":"checks > %s > time is not set - the check has no measurement data.",
     
 
         "msgErr-missing-section-meta":"There is no section &quot;meta&quot; in the response (request failed?).",

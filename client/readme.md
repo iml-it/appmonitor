@@ -148,7 +148,7 @@ Each check must have these keys:
 <span class="required">(*)</span> The keys "name", "description", "value" and "result" are required.
 
 
-# Checks on client side with PHP client#
+# Checks on client side with PHP client #
 
 
 ## Get started ##
@@ -301,64 +301,72 @@ The most simple variant is direct call with the resultcode and output text.
 
 parameters:
 
-- result (integer)  
-  0   = OK  
-  1   = unknown  
-  2   = Warning  
-  3   = Error  
-- value (string)
+- "result" (integer) <span class="required">(*)</span> \
+  0   = OK \
+  1   = unknown  \
+  2   = Warning \
+  3   = Error 
+- "value" (string) <span class="required">(*)</span>
 
 
 You can use the simple check to verify anything that has no pre defined function
 yet.
 
-### Directory ###
-
-Check if a directory locally exists. With an additional flag you can verify if it is writable.
-
-    $oMonitor->addCheck(
-        array(
-            "name" => "check tmp subdir",
-            "description" => "Check cache storage",
-            "check" => array(
-                "function" => "Dir",
-                "params" => array(
-                    "dir" => $sApproot . "/server/tmp",
-                    "writable" => true,
-                ),
-            ),
-        )
-    );
-
-
-parameters:
-
-- dir (string) local directory
-- writable (string) optional; set true to check if it is writable
-
-
 ### File ###
 
-Check if a file locally exists. With an additional flag you can verify if it is writable.
+Check if a file for file, link or directory. Use the parameter "filename" to set the full filename.
+
+Other given parameters are flags to check. Its values can be set to true (flag must must be true) or false (flag must fail to return a true result). Missing flags won't be checked. 
+
+Giving just a filename without any other flag returns true.
+
+**Example 1**: \
+check if "filename" is a directory and is writable
 
     $oMonitor->addCheck(
         array(
-            "name" => "check config file",
-            "description" => "The config file must be writable",
+            "name" => "tmp subdir",
+            "description" => "Check cache storage",
             "check" => array(
                 "function" => "File",
                 "params" => array(
-                    "file" => $sApproot . "/server/config/appmonitor-server-config.json",
+                    "filename" => $sApproot . "/server/tmp",
+                    "dir"      => true,
                     "writable" => true,
                 ),
             ),
         )
     );
 
+**Example 2**: \
+With *"exists" => false* you can check if a file does not exist (flag is checked that it is not matching).
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "tmp subdir",
+            "description" => "Check if Maintenance mode is not active",
+            "check" => array(
+                "function" => "File",
+                "params" => array(
+                    "filename" => "/var/www/maintenance_is_active.txt",
+                    "exists"      => false,
+                ),
+            ),
+        )
+    );
+
+
 parameters:
 
-- file (string) local directory
-- writable (string) optional; set true to check if it is writable
+- "filename" (string) filename or directory to check  <span class="required">(*)</span>
+- "exists" {boolean} - "filename" must exist/ must be absent
+- "dir" {boolean} - filetype directory
+- "file" {boolean} - filetype file
+- "link" {boolean} - filetype symbolic link
+- "executable" {boolean} - flag executable
+- "readable" {boolean} - flag is readable
+- "writable" (string) - flag is writable
+
 
 
 ### HttpContent ###
@@ -382,7 +390,7 @@ This check verifies if a given string exists in the reponse body of a given url.
 
 parameters:
 
-- url (string) url to fetch
+- url (string) url to fetch <span class="required">(*)</span>
 - contains (string) string that must exist in response body
 
 
@@ -413,10 +421,10 @@ verify a database connection with mysqli_connect function.
 
 parameters:
 
-- "server"   - hostname/ ip of mysql server
-- "user"     - mysql username
-- "password" - password
-- "db"       - database to connect
+- "server"   - hostname/ ip of mysql server <span class="required">(*)</span>
+- "user"     - mysql username <span class="required">(*)</span>
+- "password" - password <span class="required">(*)</span>
+- "db"       - database to connect <span class="required">(*)</span>
 
 
 ### checkSqliteConnect ###
@@ -427,7 +435,7 @@ The function fails if the filename does not exist or the PDO cannot open it
 
 parameters:
 
-- "db" (string) full path of the sqlite database file
+- "db" (string) full path of the sqlite database file <span class="required">(*)</span>
 
 
 ### checkPortTcp ###
@@ -450,7 +458,7 @@ Check if the local server is listening to a given port number.
 
 parameters:
 
-- "port" (integer) port to check
+- "port" (integer) port to check <span class="required">(*)</span>
 - "host" (string)  optional: hostname to connect to; if unavailable 127.0.0.1
   will be tested
 

@@ -196,50 +196,47 @@ class appmonitorcheck {
     // ----------------------------------------------------------------------
 
     /**
-     * check a directory
-     * 
-     * @param array $aParams
-     * array(
-     *     "dir"       directory that must exist
-     *     "writable"  flag to check that it must be writable too
-     * )
-     * @param integer $iTimeout  value in sec; default: 5sec
-     */
-    private function checkDir($aParams) {
-        $this->_checkArrayKeys($aParams, "dir");
-        if (!is_dir($aParams["dir"])) {
-            $this->_setReturn(RESULT_ERROR, 'ERROR: ' . $aParams['dir'] . ' is not a directory.');
-            return false;
-        }
-        if (isset($aParams['writable']) && $aParams['writable'] && is_writable($aParams["dir"])) {
-            $this->_setReturn(RESULT_OK, 'OK: directory ' . $aParams['dir'] . ' exists and is writable.');
-        } else {
-            $this->_setReturn(RESULT_OK, 'OK: directory ' . $aParams['dir'] . ' exists.');
-        }
-        return;
-    }
-
-    /**
      * check a file
      * @param array $aParams
      * array(
-     *     "file"      directory that must exist
+     *     "filename"  directory that must exist
      *     "writable"  flag to check that it must be writable too
      * )
-     * @param integer $iTimeout  value in sec; default: 5sec
+     * @return boolean
      */
-    private function checkFile($aParams) {
-        $this->_checkArrayKeys($aParams, "file");
-        if (!is_file($aParams["file"])) {
-            $this->_setReturn(RESULT_ERROR, 'ERROR: ' . $aParams['file'] . ' is not a file.');
-            return false;
+    public function checkFile($aParams) {
+        $aOK=array();
+        $aErrors=array();
+        $this->_checkArrayKeys($aParams, "filename");
+        $sFile=$aParams["filename"];
+        
+        if (isset($aParams['exists'])){
+            $sMyflag='exists='.($aParams['exists'] ? 'yes' : 'no');
+            if (file_exists($sFile) && $aParams['exists']){
+                $aOK[]=$sMyflag;
+            } else {
+                $aErrors[]=$sMyflag;
+            }
         }
-        if (isset($aParams['writable']) && $aParams['writable'] && is_writable($aParams["file"])) {
-            $this->_setReturn(RESULT_OK, 'OK: file ' . $aParams['file'] . ' exists and is writable.');
+        foreach(array('dir', 'executable', 'file', 'link', 'readable', 'writable') as $sFiletest){
+            if (isset($aParams[$sFiletest])){
+                $sTestCmd='return is_'.$sFiletest.'("'.$sFile.'");';
+                if (eval($sTestCmd) && $aParams[$sFiletest]){
+                    $aOK[]=$sFiletest . '='.($aParams[$sFiletest] ? 'yes' : 'no');
+                } else {
+                    $aErrors[]=$sFiletest . '='.($aParams[$sFiletest] ? 'yes' : 'no');
+                }
+            }
+        }
+        $sMessage=(count($aOK)     ? ' flags OK: '     .implode('|', $aOK)     : '')
+                .' '. (count($aErrors) ? ' flags FAILED: '.implode('|', $aErrors) : '')
+                ;
+        if(count($aErrors)){
+            $this->_setReturn(RESULT_ERROR, 'file test ['. $sFile . '] '.$sMessage);
         } else {
-            $this->_setReturn(RESULT_OK, 'OK: file ' . $aParams['dir'] . ' exists.');
+            $this->_setReturn(RESULT_OK, 'file test ['. $sFile . '] '.$sMessage);
         }
-        return;
+        return true;
     }
 
     /**
@@ -340,10 +337,6 @@ class appmonitorcheck {
      * @return type
      */
     private function checkSimple($aParams) {
-        $aHelp = array(
-            "result" => "(integer) result value",
-            "value" => "(string) explaination"
-        );
         $this->_checkArrayKeys($aParams, "result,value");
         return $this->_setReturn((int) $aParams["result"], $aParams["value"]);
     }

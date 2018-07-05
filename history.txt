@@ -1,6 +1,13 @@
 
 HISTORY
 
+v0.34  2018-07-05
+    - appmonitor gui: fix typo in lang file
+    - appmonitor gui: http status is red only on http error (status 400+)
+    - appmonitor gui: fix missing webapps if both failed and run on the same domain
+    - appmonitor client: fix checkIp
+    - appmonitor client: File check is feature complete - with checks for file/ folder/softlink, flags must match/ must fail
+
 v0.33  2018-07-05
     - appmonitor gui: ouput of validation in host details
 

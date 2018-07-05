@@ -231,7 +231,7 @@ class appmonitor {
         }
         $sIP = $_SERVER['REMOTE_ADDR'];
         foreach ($aAllowedIps as $sIp2Check) {
-            if (strpos($sIp2Check, $sIP) === 0) {
+            if (strpos($sIP, $sIp2Check) === 0) {
                 return true;
             }
         }

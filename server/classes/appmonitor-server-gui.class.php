@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.33
+ * @version 0.34
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.33";
+    var $_sTitle = "Appmonitor Server v0.34";
 
     /**
      * html code for icons in the web gui
@@ -289,7 +289,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     'more' => $sSince
                 )) : '')
                 . $this->_getTile(array(
-                    'result' => $aHostdata['error'] ? RESULT_ERROR : false,
+                    'result' => ($aHostdata['httpstatus'] && $aHostdata['httpstatus'] >= 400) ? RESULT_ERROR : false,
                     'count' => $aHostdata['httpstatus'],
                     'label' => $this->_tr('Http-status'),
                 ))
@@ -467,7 +467,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 }
             }
             $sWebapp = isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
-            $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp;
+            $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp.$sAppId;
             $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
             $sOut = '<div '
                     . 'class="divhost result' . $aEntries["result"]["result"] . ' tags '.$this->_getCssclassForTag($aTags).'" '
