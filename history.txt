@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.32  2018-07-05
+    - appmonitor gui: first validation checks of client response
+
 v0.31  2018-07-05
     - appmonitor: timout for fetching client data 5 --> 15 sec
     - appmonitor gui: remove text "generated at"

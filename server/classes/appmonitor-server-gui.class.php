@@ -362,6 +362,68 @@ class appmonitorserver_gui extends appmonitorserver {
         return $sReturn;
     }
 
+    protected function _checkClientResponse($sAppId){
+        if(!isset($this->_data[$sAppId])){
+            return false;
+        }
+        $aErrors=array();
+        $aWarnings=array();
+
+        $aData=$this->_data[$sAppId];
+        
+        // ----- validate section meta
+        if (!isset($aData['meta'])){
+            $aErrors[]='msgErr-missing-section-meta';
+        } else {
+            foreach(array('host', 'website', 'result') as $sMetakey){
+                if (!isset($aData['meta'][$sMetakey]) || $aData['meta'][$sMetakey]===false){
+                    $aErrors[]='msgErr-missing-key-meta-'.$sMetakey;
+                }
+            }
+            foreach(array('ttl', 'time', 'notifications') as $sMetakey){
+                if (!isset($aData['meta'][$sMetakey])){
+                    $aWarnings[]='msgWarn-missing-key-meta-'.$sMetakey;
+                }
+            }
+            
+            if (isset($aData['notifications'])){
+                if (
+                    !isset($aData['notifications']['email'])
+                    || !count($aData['notifications']['email'])
+                    || !isset($aData['notifications']['slack'])
+                    || !count($aData['notifications']['slack'])
+                ){
+                    $aWarnings[]='msgWarn-no-notifications';
+                }
+            }
+        }
+        // ----- validate section with checks
+        if (!isset($aData['checks'])){
+            $aErrors[]='msgErr-missing-section-checks';
+        } else {
+            $iCheckCounter=0;
+            foreach($aData['checks'] as $aSingleCheck){
+                foreach(array('name', 'result') as $sMetakey){
+                    if (!isset($aSingleCheck[$sMetakey]) || $aSingleCheck[$sMetakey]===false){
+                        $aErrors[]=sprintf('msgErr-missing-key-checks-'.$sMetakey, $iCheckCounter);
+                    }
+                }
+                foreach(array('description', 'value', 'time') as $sMetakey){
+                    if (!isset($aSingleCheck[$sMetakey]) || $aSingleCheck[$sMetakey]===false){
+                        $aErrors[]=sprintf('msgWarn-missing-key-checks-'.$sMetakey, $iCheckCounter);
+                    }
+                }
+                $iCheckCounter++;
+            }
+        }
+        
+        // ----- return result
+        return array(
+            'error'=>$aErrors,
+            'warning'=>$aWarnings,
+        );
+    }
+    
     /**
      * get html code to show a welcome message if no webapp was setup so far.
      * @return string
@@ -395,6 +457,15 @@ class appmonitorserver_gui extends appmonitorserver {
                 $iMiss++;
             }
 
+            $aValidaion=$this->_checkClientResponse($sAppId);
+            $sValidatorinfo='';
+            if($aValidaion){
+                foreach($aValidaion as $sSection=>$aMessages){
+                    if (count($aValidaion[$sSection])){
+                        $sValidatorinfo.='<span title="'.sprintf($this->_tr('Validator-'.$sSection.'-title'), count($aMessages)) .'">'.$this->_aIco[$sSection].'</span>';
+                    }
+                }
+            }
             $sWebapp = isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
             $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp;
             $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
@@ -408,9 +479,12 @@ class appmonitorserver_gui extends appmonitorserver {
                             . '<a href="#divweb' . $sAppId . '">' 
                             // . $this->_aIco['webapp'] . ' ' 
                             . $sWebapp . '</a>'
-                            . '<span style="float: right;">'.$this->_renderBadgesForWebsite($sAppId, true) .'</span>'
+                            . '<span style="float: right;">'
+                                .$this->_renderBadgesForWebsite($sAppId, true) 
+                                . $sValidatorinfo
+                            .'</span>'
                             . '<br>'
-                            . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' ' 
+                            . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' '
                         : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
                             . $this->_aIco['error'] . ' ' . $sWebapp . '<br>'
                             . '</span>'
@@ -769,6 +843,19 @@ class appmonitorserver_gui extends appmonitorserver {
                 ;
                 if (array_key_exists("host", $aEntries["result"])) {
 
+                    $aValidatorResult=$this->_checkClientResponse($sAppId);
+                    if($aValidatorResult){
+                        $sSection='';
+                        foreach($aValidatorResult as $aSection=>$aMessageItems){
+                            if(count($aMessageItems)){
+                                foreach($aMessageItems as $sSingleMessage){
+                                    $sSection.=($sSection?'':'<h3>'.$this->_aIco[$aSection].' '.$this->_tr('Validator-'.$aSection).'</h3>')
+                                        . '- '.$this->_tr($sSingleMessage).'<br>';
+                                }
+                            }
+                        }
+                        $sHtml .= $sSection;
+                    }
                     $sHtml .= '<h3>' . $this->_tr('Checks') . '</h3>'
                             // TODO: create tabs
                             . $this->_generateMonitorTable($aEntries["result"]["url"])

@@ -70,6 +70,11 @@
         "Time": "Time",
         "Time-for-all-checks": "time for all checks",
 
+        "Validator-error": "Validation errors",
+        "Validator-error-title": "Found validation errors: %s",
+        "Validator-warning": "Validation warnings",
+        "Validator-warning-title": "Found validation warnings: %s",
+        
         "btn-addUrl": "add",
         "btn-close": "close",
         "btn-details": "show details",
@@ -84,6 +89,8 @@
         "msgErr-nodata": "ERROR: Sorry, no response from any website. See Tab <a href=#divall>Overview</a> for details.",
         "msgErr-missedchecks": "ERROR: <strong>%d</strong> check(s) failed. The view is incomplete. See Tab <a href=#divall>Checks</a> for details.",
         "msgErr-demosite": "This is a demo website. Changing the config is not possible here.",
+        "msgErr-missing-meta-website": "Missing &quot;meta&quot; - &quot;website&quot;",
+
 
         "msgErr-Http-request-failed": "Http Request to appmonitor failed: host or service is unreachable.",
         "msgErr-Http-error": "Http response header is not a 2xx code.",
@@ -93,6 +100,26 @@
         "msgErr-Url-was-added-already": "Skip. URL was added already: %s.",
         "msgErr-Url-not-removed-it-does-not-exist": "URL cannot be removed - it doees not exist in the config: %s.",
         "msgOK-Url-was-removed": "URL was removed: %s",
+    
+    
+        "msgErr-missing-section-checks":"There is no section &quot;checks&quot; in the response.",
+        "msgErr-missing-key-checks-name":"Check %s: The check has no &quot;name&quot; as identifier.",
+        "msgErr-missing-key-checks-result":"Check %s: The check has no &quot;result&quot;.",
+        
+        "msgWarn-missing-key-checks-description":"Check %s: The check has no &quot;description&quot;-",
+        "msgWarn-missing-key-checks-value":"Check %s: The check has no &quot;value&quot; that explains the result.",
+        "msgWarn-missing-key-checks-time":"Check %s: The check has no &quot;time&quot; for measurement.",
+    
+
+        "msgErr-missing-section-meta":"There is no section &quot;meta&quot; in the response (request failed).",
+        "msgErr-missing-key-meta-host":"No hostname was set with meta :: host",
+        "msgErr-missing-key-meta-website":"No website / name of application was set meta :: website",
+        "msgErr-missing-key-meta-result":"The check does not have a result. No meta :: result",
+        
+        "msgWarn-missing-key-meta-ttl":"No ttl value was set with meta :: ttl. using the default.",
+        "msgWarn-missing-key-meta-notifications":"No section for notification was set. No notification will be sent to developers or product owners.",
+        "msgWarn-no-notifications":"In the section notification there is no notification target. No notification will be sent to developers or product owners.",
+        "msgWarn-missing-key-meta-time":"No measurement - no value was set with meta :: time.",
     
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },
