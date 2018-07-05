@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.30
+ * @version 0.31
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.30";
+    var $_sTitle = "Appmonitor Server v0.31";
 
     /**
      * html code for icons in the web gui
@@ -408,7 +408,7 @@ class appmonitorserver_gui extends appmonitorserver {
                             . '<a href="#divweb' . $sAppId . '">' 
                             // . $this->_aIco['webapp'] . ' ' 
                             . $sWebapp . '</a>'
-                            . $this->_renderBadgesForWebsite($sAppId, true) 
+                            . '<span style="float: right;">'.$this->_renderBadgesForWebsite($sAppId, true) .'</span>'
                             . '<br>'
                             . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' ' 
                         : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
@@ -954,9 +954,6 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<body>' . "\n"
                 . '<div class="divtop">'
                     . '<div class="divtopheader">'
-                        . '<span style="float: right; margin-right: 1.5em;">' 
-                            . sprintf($this->_tr('generated-at'), date("Y-m-d H:i:s")) 
-                        . '</span>'
                         . '<h1>' . $this->_aIco['title'] . ' ' . $sTitle . '</h1>'
                         . '<br>'
                     . '</div>'

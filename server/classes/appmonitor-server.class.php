@@ -85,7 +85,7 @@ class appmonitorserver {
     private static $curl_opts = array(
         CURLOPT_HEADER => true,
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 5,
+        CURLOPT_TIMEOUT => 15,
         CURLOPT_FAILONERROR => 0,
         CURLOPT_SSL_VERIFYHOST => 0,
         CURLOPT_SSL_VERIFYPEER => 0,

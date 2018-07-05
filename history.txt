@@ -1,6 +1,13 @@
 
 HISTORY
 
+v0.31  2018-07-04
+    - appmonitor: timout for fetching client data 5 --> 15 sec
+    - appmonitor gui: remove text "generated at"
+    - appmonitor gui: restyle badges in host box    
+    - appmonitor gui: added 2 background images
+    - notification: fix missing linebreaks between checks of different resulttypes
+
 v0.30  2018-07-04
     - appmonitor service: runs on Linux + as systemd service + manually by hand under Windows
     - appmonitor server: renamed to index.php

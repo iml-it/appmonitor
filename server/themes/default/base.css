@@ -73,7 +73,7 @@ padding: 1em;}
 .result3{background:#fdd !important;    background: linear-gradient(#fde,#fcd)!important;}
 
 
-.badge{border: 2px solid rgba(0,0,0,0.2); padding: 0 0.5em; border-radius: 50%;}
+.badge{border: 1px solid rgba(0,0,0,0.2); padding: 0 0.5em; border-radius: 20%;}
 
 .btn{padding: 0.3em 0.5em; color:#eee; background:#888; border: 2px solid rgba(0,0,0,0.2); border-radius: 0.4em; box-shadowX: 0 0 0.5em #888; 
      text-decoration: none;

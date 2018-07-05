@@ -437,14 +437,14 @@ class notificationhandler {
         $sChecks='';
         if(isset($this->_aAppResult['checks'])){
             
-            // one key for each result ... 3 is error .. 0 is OK
+            // force sortorder in notifications - one key for each result ... 3 is error .. 0 is OK
             $aSortedChecks=array();
             for($i=3; $i>=0; $i--){
                 $aSortedChecks[$i]='';
             }
             foreach($this->_aAppResult['checks'] as $aCheck){
                 $iResult=$aCheck['result'];
-                $aSortedChecks[$iResult].=($aSortedChecks[$iResult] ? "\n\n" : '')
+                $aSortedChecks[$iResult].="\n\n"
                         . '----- '.$aCheck['name'].' ('.$aCheck['description'].")\n"
                         . $aCheck['value']."\n"
                         . $this->_tr('Resulttype-'. $aCheck['result'])

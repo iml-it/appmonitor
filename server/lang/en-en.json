@@ -28,8 +28,6 @@
         "Debug-clientdata": "Client data",
         "Debug-notificationlog": "Notification history Log",
 
-        "generated-at": "generated at %s",
-
         "Appstatus": "Status of application",
         "Host": "Host", 
         "Hosts": "Hosts", 
