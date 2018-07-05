@@ -26,12 +26,12 @@ Continue: [Client](client/readme.md) | [Server](server/readme.md)
 # Features #
 
 - PHP 7 on server (clients can be implemented in other languages too)
-- small: 100 kb Download; no database required
+- small: 100 kb download; no database required
 
 
 Server webgui
 - Themes :-)
-- Filter view by tagging
+- Filter the view by selecting tags
 - Multi language (english language file so far)
 - Optional service for permanent check and notification 24/7
 - Notification as email, Slack message (respecting sleep times)

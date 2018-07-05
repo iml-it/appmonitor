@@ -23,7 +23,7 @@ The main idea is to make the checks with permissions of the application and with
 # Requirements #
 
 (For the delivered PHP client - you can implement a client in other languages)
-- PHP7 (up to PHP 7.2; runs on php5 but is not suppoorted)
+- PHP7 (up to PHP 7.2; runs on php5 but is not supported)
 
 
 
@@ -365,7 +365,7 @@ parameters:
 - "link" {boolean} - filetype symbolic link
 - "executable" {boolean} - flag executable
 - "readable" {boolean} - flag is readable
-- "writable" (string) - flag is writable
+- "writable" (boolean) - flag is writable
 
 
 
