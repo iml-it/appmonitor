@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.31
+ * @version 0.33
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.31";
+    var $_sTitle = "Appmonitor Server v0.33";
 
     /**
      * html code for icons in the web gui
@@ -373,16 +373,16 @@ class appmonitorserver_gui extends appmonitorserver {
         
         // ----- validate section meta
         if (!isset($aData['meta'])){
-            $aErrors[]='msgErr-missing-section-meta';
+            $aErrors[]=$this->_tr('msgErr-missing-section-meta');
         } else {
             foreach(array('host', 'website', 'result') as $sMetakey){
                 if (!isset($aData['meta'][$sMetakey]) || $aData['meta'][$sMetakey]===false){
-                    $aErrors[]='msgErr-missing-key-meta-'.$sMetakey;
+                    $aErrors[]=$this->_tr('msgErr-missing-key-meta-'.$sMetakey);
                 }
             }
             foreach(array('ttl', 'time', 'notifications') as $sMetakey){
                 if (!isset($aData['meta'][$sMetakey])){
-                    $aWarnings[]='msgWarn-missing-key-meta-'.$sMetakey;
+                    $aWarnings[]=$this->_tr('msgWarn-missing-key-meta-'.$sMetakey);
                 }
             }
             
@@ -393,7 +393,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     || !isset($aData['notifications']['slack'])
                     || !count($aData['notifications']['slack'])
                 ){
-                    $aWarnings[]='msgWarn-no-notifications';
+                    $aWarnings[]=$this->_tr('msgWarn-no-notifications');
                 }
             }
         }
@@ -405,12 +405,12 @@ class appmonitorserver_gui extends appmonitorserver {
             foreach($aData['checks'] as $aSingleCheck){
                 foreach(array('name', 'result') as $sMetakey){
                     if (!isset($aSingleCheck[$sMetakey]) || $aSingleCheck[$sMetakey]===false){
-                        $aErrors[]=sprintf('msgErr-missing-key-checks-'.$sMetakey, $iCheckCounter);
+                        $aErrors[]=sprintf($this->_tr('msgErr-missing-key-checks-'.$sMetakey), $iCheckCounter);
                     }
                 }
                 foreach(array('description', 'value', 'time') as $sMetakey){
                     if (!isset($aSingleCheck[$sMetakey]) || $aSingleCheck[$sMetakey]===false){
-                        $aErrors[]=sprintf('msgWarn-missing-key-checks-'.$sMetakey, $iCheckCounter);
+                        $aWarnings[]=sprintf($this->_tr('msgWarn-missing-key-checks-'.$sMetakey), $iCheckCounter);
                     }
                 }
                 $iCheckCounter++;
@@ -843,19 +843,24 @@ class appmonitorserver_gui extends appmonitorserver {
                 ;
                 if (array_key_exists("host", $aEntries["result"])) {
 
+                    // --- validation
+                    $sValidationContent='';
                     $aValidatorResult=$this->_checkClientResponse($sAppId);
                     if($aValidatorResult){
-                        $sSection='';
-                        foreach($aValidatorResult as $aSection=>$aMessageItems){
+                        foreach($aValidatorResult as $sSection=>$aMessageItems){
                             if(count($aMessageItems)){
+                                $sDivContent='';
                                 foreach($aMessageItems as $sSingleMessage){
-                                    $sSection.=($sSection?'':'<h3>'.$this->_aIco[$aSection].' '.$this->_tr('Validator-'.$aSection).'</h3>')
-                                        . '- '.$this->_tr($sSingleMessage).'<br>';
+                                    $sDivContent.=($sDivContent?'':'<strong>'.$this->_aIco[$sSection].' '.$this->_tr('Validator-'.$sSection).'</strong><br>')
+                                        . '- '.$sSingleMessage.'<br>';
                                 }
+                                $sValidationContent.= $sDivContent ? '<div class="div'.$sSection.'">'.$sDivContent.'</div>' : '';
                             }
                         }
-                        $sHtml .= $sSection;
                     }
+                    $sHtml.=$sValidationContent;
+                    // --- /validation
+
                     $sHtml .= '<h3>' . $this->_tr('Checks') . '</h3>'
                             // TODO: create tabs
                             . $this->_generateMonitorTable($aEntries["result"]["url"])

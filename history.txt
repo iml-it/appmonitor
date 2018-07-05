@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.33  2018-07-05
+    - appmonitor gui: ouput of validation in host details
+
 v0.32  2018-07-05
     - appmonitor gui: first validation checks of client response
 

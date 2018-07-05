@@ -70,6 +70,7 @@
         "Time": "Time",
         "Time-for-all-checks": "time for all checks",
 
+        "Validator-ok": "Validation successful.",
         "Validator-error": "Validation errors",
         "Validator-error-title": "Found validation errors: %s",
         "Validator-warning": "Validation warnings",
@@ -103,23 +104,23 @@
     
     
         "msgErr-missing-section-checks":"There is no section &quot;checks&quot; in the response.",
-        "msgErr-missing-key-checks-name":"Check %s: The check has no &quot;name&quot; as identifier.",
-        "msgErr-missing-key-checks-result":"Check %s: The check has no &quot;result&quot;.",
+        "msgErr-missing-key-checks-name":"checks > %s > name is not set - this check has no identifier.",
+        "msgErr-missing-key-checks-result":"checks > %s > result is not set - this check has no result.",
         
-        "msgWarn-missing-key-checks-description":"Check %s: The check has no &quot;description&quot;-",
-        "msgWarn-missing-key-checks-value":"Check %s: The check has no &quot;value&quot; that explains the result.",
-        "msgWarn-missing-key-checks-time":"Check %s: The check has no &quot;time&quot; for measurement.",
+        "msgWarn-missing-key-checks-description":"checks > %s > description is not set - this check has no description about its action/ reason.",
+        "msgWarn-missing-key-checks-value":"checks > %s > value is not set - the result of this check hast explaination of its result.",
+        "msgWarn-missing-key-checks-time":"checks > %s > time is not set - the check has no measurtemnt data.",
     
 
-        "msgErr-missing-section-meta":"There is no section &quot;meta&quot; in the response (request failed).",
-        "msgErr-missing-key-meta-host":"No hostname was set with meta :: host",
-        "msgErr-missing-key-meta-website":"No website / name of application was set meta :: website",
-        "msgErr-missing-key-meta-result":"The check does not have a result. No meta :: result",
+        "msgErr-missing-section-meta":"There is no section &quot;meta&quot; in the response (request failed?).",
+        "msgErr-missing-key-meta-host":"No hostname was set in meta > host",
+        "msgErr-missing-key-meta-website":"No website / name of application was set meta > website",
+        "msgErr-missing-key-meta-result":"The check does not have a result in meta > result",
         
-        "msgWarn-missing-key-meta-ttl":"No ttl value was set with meta :: ttl. using the default.",
-        "msgWarn-missing-key-meta-notifications":"No section for notification was set. No notification will be sent to developers or product owners.",
-        "msgWarn-no-notifications":"In the section notification there is no notification target. No notification will be sent to developers or product owners.",
-        "msgWarn-missing-key-meta-time":"No measurement - no value was set with meta :: time.",
+        "msgWarn-missing-key-meta-ttl":"No ttl value was set with meta > ttl. Using the default.",
+        "msgWarn-missing-key-meta-notifications":"No section meta > notifications was set. If an erroroccurs no notification will be sent to developers or product owners.",
+        "msgWarn-no-notifications":"In the section meta > notification > [target] is notifier. If an erroroccurs no notification will be sent to developers or product owners.",
+        "msgWarn-missing-key-meta-time":"No measurement - no value was set with meta > time.",
     
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },
