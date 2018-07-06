@@ -199,8 +199,14 @@ class appmonitorcheck {
      * check a file
      * @param array $aParams
      * array(
-     *     "filename"  directory that must exist
-     *     "writable"  flag to check that it must be writable too
+     *     "filename"    directory that must exist
+     *     "exists"      "filename" must exist/ must be absent
+     *     "dir"         filetype directory
+     *     "file"        filetype file
+     *     "link"        filetype symbolic link
+     *     "executable"  flag executable
+     *     "readable"    flag is readable
+     *     "writable"    flag is writable
      * )
      * @return boolean
      */
@@ -334,7 +340,11 @@ class appmonitorcheck {
 
     /**
      * most simple check: set values
-     * @return type
+     * @param array $aParams
+     * array(
+     *     "result" integer; RESUL_nn
+     *     "value"  description text
+     * )
      */
     private function checkSimple($aParams) {
         $this->_checkArrayKeys($aParams, "result,value");
@@ -345,7 +355,7 @@ class appmonitorcheck {
      * check sqlite connection
      * @param array $aParams
      * array(
-     *     "db" 
+     *     "db"  full path of sqlite file 
      * )
      * @return boolean
      */
