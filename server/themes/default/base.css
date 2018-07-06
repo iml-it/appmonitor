@@ -56,7 +56,9 @@ padding: 1em;}
 .footer a{color:#fff; text-decoration: none;}
 .footer a:hover{text-decoration: underline;}
 
-.tile{float: left; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8em;min-width: 10em;}
+.tile{float: left; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); 
+     padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8em; width: 10em;
+}
 .tile .count{font-size: 200%; opacity: 0.8; font-weigh1t: bold; padding: 0.3em 0;}
 .tile .label{}
 .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
@@ -64,8 +66,9 @@ padding: 1em;}
 
 .outsegment{min-height: 30em; display:none; margin-top: 7em; padding: 1em; border: 2px solid #fff; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #e8e8e8;}
 
-.divhost{float: left; padding: 0.5em; border: 1px solid rgba(0,0,0,0.01); margin: 0 1em 1em 0; min-width: 20em;}
+.divhost{border: 1px solid rgba(0,0,0,0.01); float: left; padding: 0.6em; margin: 0 1em 1em 0; width: 21em;}
 .divhost>.icon{background: rgba(0,0,0,0.10); font-size: 200%; padding: 0.3em; display: block; float: left; margin-right: 0.3em;}
+#divsetup .divhost{width: auto;}
 
 .result0{background:#efe !important;    background: linear-gradient(#dfd,#cec)!important;}
 .result1{background:#eee !important;    background: linear-gradient(#eee,#ddd)!important;}
@@ -79,7 +82,7 @@ padding: 1em;}
      text-decoration: none;
     transition: all ease 0.2s;
 }
-.btn:hover{box-shadowX: 0 0 0.3em #888; border: 2px solid rgba(255,255,255,0.7); }
+.btn:hover{box-shadowX: 0 0 0.3em #888; border: 2px solid rgba(0,0,0,0.05); cursor: pointer;}
 .btnadd{color:#383; background-color:#ada; background: linear-gradient(-45deg,#ada,#afa,#ada);}
 .btndel{color:#833; background-color:#faa; background: linear-gradient(-45deg,#d88,#ebb,#d88);}
 .divhost .btndel{margin-top: -0.4em;}
@@ -89,4 +92,6 @@ padding: 1em;}
 .divwarning{background:#fff0c0 !important; margin: 0 0 2em; padding: 1em;}
 .diverror{background:#fdd !important; background: linear-gradient(#fdd,#ecc) !important; margin: 0 0 2em; padding: 1em; border: 1px solid rgba(0,0,0,0.15);}
 
-
+.icook{color:#2a2;}
+.icowarning{color:#ea2;}
+.icoerror{color:#c22;}

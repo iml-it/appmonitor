@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.34
+ * @version 0.35
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.34";
+    var $_sTitle = "Appmonitor Server v0.35";
 
     /**
      * html code for icons in the web gui
@@ -462,7 +462,7 @@ class appmonitorserver_gui extends appmonitorserver {
             if($aValidaion){
                 foreach($aValidaion as $sSection=>$aMessages){
                     if (count($aValidaion[$sSection])){
-                        $sValidatorinfo.='<span title="'.sprintf($this->_tr('Validator-'.$sSection.'-title'), count($aMessages)) .'">'.$this->_aIco[$sSection].'</span>';
+                        $sValidatorinfo.='<span class="ico'.$sSection.'" title="'.sprintf($this->_tr('Validator-'.$sSection.'-title'), count($aMessages)) .'">'.$this->_aIco[$sSection].'</span>';
                     }
                 }
             }
@@ -476,14 +476,11 @@ class appmonitorserver_gui extends appmonitorserver {
                     . '>'
                     . ($bHasData ? 
                             '<span class="icon">'.$this->_aIco['webapp'].'</span>'
-                            . '<a href="#divweb' . $sAppId . '">' 
-                            // . $this->_aIco['webapp'] . ' ' 
-                            . $sWebapp . '</a>'
                             . '<span style="float: right;">'
                                 .$this->_renderBadgesForWebsite($sAppId, true) 
                                 . $sValidatorinfo
                             .'</span>'
-                            . '<br>'
+                            . '<a href="#divweb' . $sAppId . '">' . str_replace('.', '.&shy;', $sWebapp) . '</a><br>'
                             . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' '
                         : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
                             . $this->_aIco['error'] . ' ' . $sWebapp . '<br>'
@@ -851,7 +848,7 @@ class appmonitorserver_gui extends appmonitorserver {
                             if(count($aMessageItems)){
                                 $sDivContent='';
                                 foreach($aMessageItems as $sSingleMessage){
-                                    $sDivContent.=($sDivContent?'':'<strong>'.$this->_aIco[$sSection].' '.$this->_tr('Validator-'.$sSection).'</strong><br>')
+                                    $sDivContent.=($sDivContent?'':'<strong class="ico'.$sSection.'">'.$this->_aIco[$sSection].' '.$this->_tr('Validator-'.$sSection).'</strong><br>')
                                         . '- '.$sSingleMessage.'<br>';
                                 }
                                 $sValidationContent.= $sDivContent ? '<div class="div'.$sSection.'">'.$sDivContent.'</div>' : '';
@@ -941,6 +938,10 @@ class appmonitorserver_gui extends appmonitorserver {
         return $sHtml;
     }
 
+    /**
+     * get a flat array of tags sent from all clients
+     * @return array
+     */
     protected function _getClientTags(){
         $aTags=array();
         foreach ($this->_data as $aEntries) {
@@ -951,7 +952,7 @@ class appmonitorserver_gui extends appmonitorserver {
             }
         }
         sort($aTags);
-        array_unique($aTags);
+        $aTags = array_unique($aTags);
         return $aTags;
     }
     

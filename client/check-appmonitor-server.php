@@ -18,6 +18,8 @@ $sApproot = str_replace('\\', '/', dirname(__DIR__));
 // ----------------------------------------------------------------------
 
 $oMonitor->addTag('monitoring');
+$oMonitor->addTag('monitoring');
+$oMonitor->addTag('monitoring');
 
 // ----------------------------------------------------------------------
 

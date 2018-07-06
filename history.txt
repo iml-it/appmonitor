@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.35  2018-07-05
+    - appmonitor gui: fix uniq tag list
+    - appmonitor gui: break long appnames in webapp overview
+    - appmonitor gui: colored validation icons
+
 v0.34  2018-07-05
     - appmonitor gui: fix typo in lang file
     - appmonitor gui: http status is red only on http error (status 400+)
