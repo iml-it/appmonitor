@@ -343,8 +343,8 @@ With *"exists" => false* you can check if a file does not exist (flag is checked
 
     $oMonitor->addCheck(
         array(
-            "name" => "tmp subdir",
-            "description" => "Check if Maintenance mode is not active",
+            "name" => "Maintenance mode",
+            "description" => "Check if Maintenance mode is not activated by a flag file",
             "check" => array(
                 "function" => "File",
                 "params" => array(
