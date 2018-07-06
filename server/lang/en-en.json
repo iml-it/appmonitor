@@ -97,6 +97,7 @@
         "msgErr-Http-error": "Http response header is not a 2xx code.",
         "msgErr-Http-no-jsondata": "Server response does not contain json data.",
 
+        "msgOK-Url-was-added": "URL added: %s",
         "msgErr-Url-not-added-no-appmonitor": "URL not added: %s - it does not seems to be an app monitor url.",
         "msgErr-Url-was-added-already": "Skip. URL was added already: %s.",
         "msgErr-Url-not-removed-it-does-not-exist": "URL cannot be removed - it doees not exist in the config: %s.",

@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.35
+ * @version 0.36
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.35";
+    var $_sTitle = "Appmonitor Server v0.36";
 
     /**
      * html code for icons in the web gui
@@ -98,45 +98,6 @@ class appmonitorserver_gui extends appmonitorserver {
     // setter
     // ----------------------------------------------------------------------
 
-    protected function _generateUrlKey($sUrl) {
-        return md5($sUrl);
-    }
-
-    /**
-     * add appmonitor url
-     * @param string $sUrl
-     * @return boolean
-     */
-    public function addUrl($sUrl) {
-        $sAppId = $this->_generateUrlKey($sUrl);
-        $this->_urls[$sAppId] = $sUrl;
-        return true;
-    }
-
-    /**
-     * remove appmonitor url
-     * @param string $sUrl
-     * @return boolean
-     */
-    public function removeUrl($sUrl) {
-        $sAppId = $this->_generateUrlKey($sUrl);
-        if (array_key_exists($sAppId, $this->_urls)) {
-            unset($this->_urls[$sAppId]);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * switch demo mode on off
-     * TODO: check how switch demo mode and handle parameters
-     * @param type $bBool
-     * @return type
-     */
-    public function setDemoMode($bBool = true) {
-        return $this->_bIsDemo = $bBool;
-    }
-
     // ----------------------------------------------------------------------
     // output
     // ----------------------------------------------------------------------
@@ -164,42 +125,6 @@ class appmonitorserver_gui extends appmonitorserver {
         return '<thead><tr>' . $sReturn . '</tr></thead>';
     }
 
-    /**
-     * helper function for overview of all web apps
-     * 
-     * @return type
-     */
-    protected function _getCounter() {
-        $iCountApps = 0;
-        $iCountChecks = 0;
-        $aResults = array(0, 0, 0, 0);
-        $aCheckResults = array(0, 0, 0, 0);
-        $aServers = array();
-        foreach ($this->_data as $sAppId => $aEntries) {
-            $iCountApps++; // count of webapps
-            $aResults[$aEntries['result']['result']] ++; // counter by result of app
-            if (isset($aEntries['result']['host']) && $aEntries['result']['host']) {
-                $aServers[$aEntries['result']['host']] = true; // helper array to count hosts
-            }
-
-            // count of checks
-            if (isset($this->_data[$sAppId]["result"]["summary"])) {
-                $aChecks = $this->_data[$sAppId]["result"]["summary"];
-                $iCountChecks += $aChecks["total"];
-                for ($i = 0; $i < 4; $i++) {
-                    $aCheckResults[$i] += $aChecks[$i];
-                }
-            }
-        }
-        return array(
-            'apps' => $iCountApps,
-            'hosts' => count($aServers),
-            'appresults' => $aResults,
-            'checks' => $iCountChecks,
-            'checks' => $iCountChecks,
-            'checkresults' => $aCheckResults
-        );
-    }
 
     /**
      * get html code for a tile
@@ -725,70 +650,6 @@ class appmonitorserver_gui extends appmonitorserver {
             }
         }
         return $sHtml;
-    }
-
-    /**
-     * get all client data and final result as array
-     * @param   string  $sHost  filter by given hostname
-     * @return  array
-     */
-    public function getMonitoringData($sHost = false) {
-
-        $aReturn = array();
-        $iMaxReturn = 0;
-        $aMessages = array();
-        $aResults = array();
-
-        if (!count($this->_data) || true) {
-            $this->_getClientData();
-        }
-
-        // print_r($this->_data);
-
-        if (!count($this->_data)) {
-            return array(
-                'return' => 3,
-                'messages' => array($this->_tr('msgErr-nocheck'))
-            );
-        }
-        foreach ($this->_data as $sAppId => $aEntries) {
-
-            // filter if a host was given
-            if (!$sHost ||
-                    (
-                    array_key_exists("result", $aEntries) && array_key_exists("host", $aEntries["result"]) && $sHost == $aEntries["result"]["host"]
-                    )
-            ) {
-
-                if (
-                        !array_key_exists("result", $aEntries)
-                        /*
-                          || !array_key_exists("host", $aEntries["meta"])
-                          || !array_key_exists("host", $aEntries["website"])
-                         * 
-                         */ || !array_key_exists("checks", $aEntries) || !count($aEntries["checks"])
-                ) {
-                    if ($iMaxReturn < 3)
-                        $iMaxReturn = 3;
-                    $aMessages[] = $this->_tr('msgErr-Http-request-failed') . ' (' . $aEntries["result"]["url"] . ')';
-                } else {
-                    if ($iMaxReturn < $aEntries["result"]["result"])
-                        $iMaxReturn = $aEntries["result"]["result"];
-                    $aMessages[] = $aEntries["result"]["host"] . ': ' . $aEntries["result"]["result"];
-                    foreach ($aEntries["result"]["summary"] as $key => $value) {
-                        if (!array_key_exists($key, $aResults)) {
-                            $aResults[$key] = 0;
-                        }
-                        $aResults[$key] += $value;
-                    }
-                }
-            }
-        }
-        return array(
-            'return' => $iMaxReturn,
-            'messages' => $aMessages,
-            'results' => $aResults,
-        );
     }
 
     /**

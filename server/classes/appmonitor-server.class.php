@@ -120,6 +120,10 @@ class appmonitorserver {
     protected function _loadLangTexts() {
         return $this->oLang = new lang($this->_aCfg['lang']);
     }
+    
+    public function getConfigVars() {
+        return $this->_aCfg;
+    }
 
     /**
      * (re) load config and get all urls to fetch (and all other config items)
@@ -163,7 +167,7 @@ class appmonitorserver {
      * save the current config
      * @return boolean
      */
-    protected function _saveConfig() {
+    public function saveConfig() {
         if ($this->_bIsDemo) {
             $this->_addLog($this->_tr('msgErr-demosite'), "error");
             return false;
@@ -172,12 +176,6 @@ class appmonitorserver {
 
         // JSON_PRETTY_PRINT reqires PHP 5.4
         $sData = (defined('JSON_PRETTY_PRINT')) ? $sData = json_encode($this->_aCfg, JSON_PRETTY_PRINT) : $sData = json_encode($this->_aCfg);
-
-        /*
-          if (file_exists($sCfgFile)) {
-          copy($sCfgFile, $sCfgFile . ".bak");
-          }
-         */
 
         return file_put_contents($sCfgFile, $sData);
     }
@@ -201,14 +199,15 @@ class appmonitorserver {
     /**
      * setup action: add a new url and save the config
      * @param string $sUrl
-     * @param bool   $bPreviewOnly
+     * @param bool   $bMakeCheck
      */
-    protected function _actionAddUrl($sUrl, $bPreviewOnly = true) {
+    public  function actionAddUrl($sUrl, $bMakeCheck = true) {
+        echo "DEBUG ". __METHOD__ . "($sUrl, $bMakeCheck)\n";
         if ($sUrl) {
             if (!array_key_exists("urls", $this->_aCfg) || ($key = array_search($sUrl, $this->_aCfg["urls"])) === false) {
 
                 $bAdd = true;
-                if ($bPreviewOnly) {
+                if ($bMakeCheck) {
                     $aClientData = json_decode($this->_httpGet($sUrl), true);
                     if (!is_array($aClientData)) {
                         $bAdd = false;
@@ -216,23 +215,24 @@ class appmonitorserver {
                     }
                 }
                 if ($bAdd) {
-                    // TODO: translate
-                    $this->_addLog("URL was added: " . $sUrl, "ok");
+                    $this->_addLog(sprintf($this->_tr('msgOK-Url-was-added'), $sUrl), "ok");
                     $this->_aCfg["urls"][] = $sUrl;
-                    $this->_saveConfig();
+                    $this->saveConfig();
                     // $this->loadConfig();
+                    return true;
                 }
             } else {
                 $this->_addLog(sprintf($this->_tr('msgErr-Url-was-added-already'), $sUrl));
             }
         }
+        return false;
     }
 
     /**
      * delete an url to fetch and trigger to save the new config file
      * @param type $sUrl
      */
-    protected function _actionDeleteUrl($sUrl) {
+    public function actionDeleteUrl($sUrl) {
         if ($sUrl) {
             if (($key = array_search($sUrl, $this->_aCfg["urls"])) !== false) {
                 $sAppId = $this->_generateUrlKey($sUrl);
@@ -241,13 +241,15 @@ class appmonitorserver {
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
                 $oCache->delete();
                 unset($this->_aCfg["urls"][$key]);
-                $this->_saveConfig();
+                $this->saveConfig();
                 $this->loadConfig();
                 $this->_addLog(sprintf($this->_tr('msgOK-Url-was-removed'), $sUrl), "ok");
+                return true;
             } else {
                 $this->_addLog(sprintf($this->_tr('msgErr-Url-not-removed-it-does-not-exist'), $sUrl), "error");
             }
         }
+        return false;
     }
 
     /**
@@ -257,12 +259,12 @@ class appmonitorserver {
         $sAction = (array_key_exists("action", $_POST)) ? $_POST["action"] : '';
         switch ($sAction) {
             case "addurl":
-                $this->_actionAddUrl($_POST["url"]);
+                $this->actionAddUrl($_POST["url"]);
 
                 break;
 
             case "deleteurl":
-                $this->_actionDeleteUrl($_POST["url"]);
+                $this->actionDeleteUrl($_POST["url"]);
 
                 break;
             default:
@@ -562,6 +564,11 @@ class appmonitorserver {
         return ' (' . $sReturn . ' ago)';
     }
 
+    /**
+     * helper function for overview of all web apps
+     * 
+     * @return type
+     */
     protected function _getCounter() {
         $iCountApps = 0;
         $iCountChecks = 0;

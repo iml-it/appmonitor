@@ -245,3 +245,95 @@ To let it run permanently in the background and after logging out use the nohup 
 
 `nohup php [webroot]/appmonitor/server/service.php &`
 
+
+# CLI #
+
+For automation tools like Puppe, Chef, Ansible & Co it is required to set values to trigger a configuration.
+The cli.php returns exitcode 0 if the action was successful; and <> 0 if an error occured.
+
+
+You can see the supported parameters: with *php server/cli.php* (without parameter)
+
+```
+
+; _________________________________________________________________________________________
+;
+;
+;    CLI API FOR APPMONITOR
+;
+; _________________________________________________________________________________________
+;
+HELP:
+        api/cli.php [action] [parameter]
+            actions are:
+            --addurl URL
+            --deleteurl URL - url must exist
+            --set  VARNAME VALUE
+            --show VARNAME - show value of config
+                             use ALL for varname to show whole config
+                             use ':' as divider of subkeys
+```
+
+## Show current configuration ##
+
+### Introduction ###
+
+To see all variables of the current config you have to use the keyword ALL
+
+*php server/cli.php* **--show** *ALL*
+
+To see a single variable (subkey of the hash):
+
+*php server/cli.php* **--show** *urls*
+
+```
+(...)
+Array
+(
+    [1] => http://server-01/appmonitor/client/
+    [2] => http://server-02/appmonitor/client/
+    [3] => http://server-03/appmonitor/client/
+)
+``` 
+
+### Nested subkeys ###
+
+To see only then subitem of a key use the "<span class="mark">:</span>" char as divider and chain all subkeys:
+
+*$ php server/cli.php* **--show** *notifications<span class="mark">:</span>sleeptimes*
+```
+(...)
+Array
+(
+    [0] => /(Sat|Sun)/
+    [1] => /[2][1-3]:/
+    [2] => /[0][0-4]:/
+)
+``` 
+
+
+*$ php server/cli.php* **--show** *notifications<span class="mark">:</span>sleeptimes<span class="mark">:</span>2*
+```
+/[0][0-4]:/
+``` 
+
+
+## Add and remove urls of appmonitor clients ##
+
+You can 
+
+*php server/cli.php* **--addurl** *[url]*
+
+*php server/cli.php* **--addurl** *https://example.com/appmonitor/client/*
+
+You get an OK message if it was successful - or an error message (with exitcode <>0).
+
+
+Removing an url works in the same way. The url you want to delete must exist.
+
+*php server/cli.php* **--deleteurl** *[url]*
+
+
+You also verify your url actions with listing the urls in the config:
+
+*php server/cli.php* **--show** *urls*
