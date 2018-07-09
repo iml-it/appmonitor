@@ -4,7 +4,7 @@
  * APPMONITOR :: C L I 
  * 
  */
-require_once('./classes/appmonitor-server.class.php');
+require_once(__DIR__ . '/classes/appmonitor-server.class.php');
 $bDebug=false;
 
 global $sDivider;
