@@ -4,9 +4,15 @@
  * APPMONITOR :: C L I 
  * 
  */
-
 require_once('./classes/appmonitor-server.class.php');
 $bDebug=false;
+
+global $sDivider;
+$sDivider='.';
+
+
+$oMonitor = new appmonitorserver();
+$aCfg=$oMonitor->getConfigVars();
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -22,25 +28,50 @@ error_reporting(E_ALL);
  * @global array $argv
  */
 function showHelp(){
-    global $argv;
+    global $argv, $sDivider;
     echo "HELP:
-        ".$argv[0]." [action] [parameter]
-            actions are:
-            --addurl URL
-            --deleteurl URL - url must exist
-            --show VARNAME - show value of config
-                             use ALL for varname to show whole config
-                             use ':' as divider of subkeys
-            --set  VARNAME VALUE (coming soon)
-";
+    ".$argv[0]." [ACTION [parameter1 [parameter2]]]
+
+    ACTIONs and its parameter are:
+
+        --addurl URL
+            add a client monitor url
+            parameter1: url
+
+        --deleteurl URL 
+            delete a client monitor url
+            url must exist
+            parameter1: url
+
+        --delete VARNAME
+            remove subkey from config
+            parameter1: VARNAME
+
+        --show VARNAME
+            show value(s) of the config
+            use no param (or ALL as varname) to show whole config
+            parameter1: VARNAME (optional; default is ALL)
+
+        --set VARNAME VALUE
+            set a value of a given key. If the key does not exist it will be created.
+            parameter1: VARNAME
+            parameter2: VALUE
+
+    remarks:
+    - in VARNAME - use '$sDivider' as divider of subkeys
+    - you can chain commands. i.e. 
+      --set VARNAME VALUE --show 
+      They will be processed sequentially.
+";          
 }
 
 /**
- * prevenmt that root executes this script
+ * prevent that root executes this script - requires php posix module on *nix
  */
 function denyRoot(){
     if (function_exists("posix_getpwuid")) {
         $processUser = posix_getpwuid(posix_geteuid());
+        wd("detected user: ".print_r($processUser, 1));
         if ($processUser['name'] == "root") {
             die("ERROR: Do not start the script as user root. Run it as the user of the application\n");
         }
@@ -50,29 +81,94 @@ function denyRoot(){
 /**
  * check if key exists in an array
  * 
- * @global srray  $aCfg      config data of appmonitor
+ * @global array  $aCfg      config data of appmonitor
  * @param string  $sVarname  subkey to check
  * @param array   $aArray    array to substitute $aCfg
  * @return boolean
  */
 function checkCfgvarExists($sVarname, $aArray=false){
-    global $aCfg;
-    $sDivider=':';
+    global $aCfg, $sDivider;
     if(!$aArray){
         $aArray=$aCfg;
     }
     
-    $aTmp=preg_split('/'.$sDivider.'/', $sVarname);
-    // print_r($aTmp);
+    $aTmp=preg_split('/\\'.$sDivider.'/', $sVarname);
     $sSubkey=array_shift($aTmp);
     if(!isset($aArray[$sSubkey])){
-        echo "ERROR: a varname $sSubkey does not exist in the config.\n";
-        exit(1);
+        quit("a varname [$sSubkey] does not exist in the config.\n");
     }
     if(count($aTmp)){
         return checkCfgvarExists(implode($sDivider, $aTmp), $aArray[$sSubkey]);
     }
     return $aArray[$sSubkey];
+}
+
+/**
+ * set a (new) value in array
+ * 
+ * @global array $aCfg
+ * @param type $sVarname
+ * @param type $value
+ * @return boolean
+ */
+function cfgSet($sVarname, $value){
+    global $aCfg, $sDivider;
+    
+    $aArray=&$aCfg;
+    $aTmp=preg_split('/\\'.$sDivider.'/', $sVarname);
+    $sLastKey=array_pop($aTmp);
+    if(count($aTmp)){
+        foreach($aTmp as $sKeyname){
+            if(!isset($aArray[$sKeyname])){
+                $aArray[$sKeyname]=array();
+            }
+            $aArray=&$aArray[$sKeyname];
+        }
+    }
+    echo "sLastKey = $sLastKey \n";
+    if(is_array($aArray[$sLastKey])){
+        $aArray[$sLastKey][]=$value;
+    } else {
+        $aArray[$sLastKey]=$value;
+    }
+    return true;
+}
+
+/**
+ * delete a value or subkey in the array
+ * @global array $aCfg
+ * @param type $sVarname
+ * @return boolean
+ */
+function cfgRemove($sVarname){
+    global $aCfg, $sDivider;
+    
+    $aArray=&$aCfg;
+    $aTmp=preg_split('/\\'.$sDivider.'/', $sVarname);
+    $sLastKey=array_pop($aTmp);
+    if($aTmp!==false){
+        if(count($aTmp)) foreach($aTmp as $sKeyname){
+            if(!isset($aArray[$sKeyname])){
+                quit("the subkey [$sKeyname] was not found in wanted structure $sVarname");
+            }
+            $aArray=&$aArray[$sKeyname];
+        }
+        if(!isset($aArray[$sLastKey])){
+            quit("the last subkey [$sLastKey] was not found in wanted structure $sVarname");
+        }
+        unset($aArray[$sLastKey]);
+    }
+    return true;
+}
+
+/**
+ * quit with error message and exitcode <> 0
+ * @param string  $sMessage  text to show
+ * @param integer $iExit     optional: exitcode; default=1
+ */
+function quit($sMessage, $iExit=1){
+    echo "ERROR: $sMessage\n";
+    exit($iExit);
 }
 
 /**
@@ -103,73 +199,113 @@ denyRoot();
 
 // ----- get prameters
 
-if($argc<3){
+if($argc<2){
     showHelp();
     exit(0);
 }
-$sAction=$argv[1];
-$sVarname=$argv[2];
-$sValue=isset($argv[3]) ? $argv[3] : false;
+array_shift($argv);
 
-wd("action = $sAction | varname = $sVarname | value = $sValue\n");
+while(count($argv)>0){
+    $sAction=$argv[0];
+    $sParam2=isset($argv[1]) ? $argv[1] : NULL;
+    $sParam3=isset($argv[2]) ? $argv[2] : NULL;
 
-// ----- do action
+    wd("action = $sAction | varname = $sParam2 | value = $sParam3\n");
 
-$oMonitor = new appmonitorserver();
-$aCfg=$oMonitor->getConfigVars();
+    // ----- do action
 
-switch ($sAction){
+    switch ($sAction){
 
-    case "--addurl":
-        $sUrl=$sVarname;
-        wd("addurl $sUrl ...");
-        if ($oMonitor->actionAddUrl($sUrl)){
-            echo "OK, url $sUrl was added.\n";
-        } else {
-            echo "ERROR: url $sUrl was NOT added. Maybe it is \n- not an url or\n- it is not app monitor or\n- it already exists.\n";
-            exit (1);
-        }
-        // $aCfg=$oMonitor->getConfigVars(); print_r($aCfg['urls']);
-        break;
-    case "--deleteurl":
-        $sUrl=$sVarname;
-        wd("deleteurl $sUrl ...");
-        if ($oMonitor->actionDeleteUrl($sUrl)){
-            echo "OK, url $sUrl was deleted.\n";
-        } else {
-            echo "ERROR: url $sUrl was NOT deleted.\n";
-            exit (1);
-        }
-        $aCfg=$oMonitor->getConfigVars();
-        print_r($aCfg['urls']);
-        break;
-    
-    case "--set":
-        wd("set var $sVarname to $sValue ...");
-        checkCfgvarExists($sVarname);
-        if (is_array($aCfg[$sVarname])){
-            echo "ERROR: You cannot set $sVarname - it is an array.";
-            exit(1);
-        }
-        $aCfg[$sVarname]=$sValue;
-        echo "$sVarname was set to $sValue\n";
-        echo "REMARK: work in progress - the value was NOT saved.\n";
-        break;
-    case "--show":
-        echo "; show var $sVarname\n";
-        
-        if($sVarname==='ALL'){
-            print_r($aCfg);
+        case "--addurl":
+            if(!$sParam2){
+                quit("param for url to delete is required.\n");
+            }
+            $sUrl=$sParam2;
+            wd("addurl $sUrl ...");
+            if ($oMonitor->actionAddUrl($sUrl)){
+                echo "OK, url [$sUrl] was added.\n";
+            } else {
+                quit("url [$sUrl] was NOT added. Maybe it is \n- not an url or\n- it is not app monitor or\n- it already exists.\n");
+            }
+            array_shift($argv);
+            array_shift($argv);
+            // $aCfg=$oMonitor->getConfigVars(); print_r($aCfg['urls']);
             break;
-        }
-        print_r(checkCfgvarExists($sVarname));
-        // print_r($aCfg[$sVarname]);
-        break;
-    default:
-        echo "ERROR: not implemented action: ".$sAction."\n";
-        exit(1);
-        break;
+        case "--deleteurl":
+            if(!$sParam2){
+                quit("param for url to delete is required.\n");
+            }
+            $sUrl=$sParam2;
+            wd("deleteurl $sUrl ...");
+            if ($oMonitor->actionDeleteUrl($sUrl)){
+                echo "OK, url [$sUrl] was deleted.\n";
+            } else {
+                quit("url [$sUrl] was NOT deleted.\n");
+            }
+            // $aCfg=$oMonitor->getConfigVars(); print_r($aCfg['urls']);
+            array_shift($argv);
+            array_shift($argv);
+            break;
+
+        case "--delete":
+            if(strpos($sParam2, "urls")===0){
+                quit("use --deleteurl [url] to remove a client monitor url");
+            }
+            if(!$sParam2){
+                quit("param for key(structure) to delete is required.\n");
+            }
+            wd("delete var $sParam2 ...");
+            cfgRemove($sParam2);
+            $oMonitor->saveConfig($aCfg);
+            echo "OK, [$sParam2] was removed.\n";
+            // wd("config is now: ");
+            // print_r($aCfg);
+            array_shift($argv);
+            array_shift($argv);
+            break;
+
+        case "--set":
+            if(!$sParam2){
+                quit("param for key(structure) to set is required.\n");
+            }
+            if(strpos($sParam2, "urls")===0){
+                quit("use --addurl [url] to add a new client monitor url");
+            }
+            if(!$sParam3===NULL){
+                quit("param for value to to set to [$sParam2] is required.\n");
+            }
+            wd("set var $sParam2 to $sParam3 ...");
+            cfgSet($sParam2, $sParam3);
+            $oMonitor->saveConfig($aCfg);
+            echo "OK, [$sParam2] = $sParam3 was set\n";
+            // print_r($aCfg);
+            array_shift($argv);
+            array_shift($argv);
+            array_shift($argv);
+            break;
+        case "--show":
+            array_shift($argv);
+
+            if(strpos($sParam2, '--')===0){
+                $sParam2='ALL';
+            } else {
+                array_shift($argv);
+            }
+            echo "; show var [$sParam2]\n";
+            if(!$sParam2 || $sParam2==='ALL'){
+                print_r($aCfg);
+                break;
+            }
+            print_r(checkCfgvarExists($sParam2));
+            echo "\n";
+            // print_r($aCfg[$sVarname]);
+            break;
+        default:
+            quit("not implemented action: ".$sAction."\n");
+            break;
+    }
+    echo "; ----------------------------------------------------------------------\n";
 }
 
-wd("OK");
+wd("finishing with status OK");
 // ----------------------------------------------------------------------

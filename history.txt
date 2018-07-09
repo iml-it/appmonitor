@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.37  2018-07-05
+    - cli: add/ update, show, remove functions are usable in a basic way now
+
 v0.36  2018-07-05
     - fix: remove overriding methods in appmonitor gui
     - added first functions in cli api

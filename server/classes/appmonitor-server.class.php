@@ -150,7 +150,7 @@ class appmonitorserver {
         }
         $this->_aCfg = array_merge($aDefaults, $aUserdata);
 
-        if (is_array($this->_aCfg) && array_key_exists("urls", $this->_aCfg)) {
+        if (isset($this->_aCfg['urls']) && is_array($this->_aCfg['urls'])) {
             // add urls
             foreach ($this->_aCfg["urls"] as $sUrl) {
                 $this->addUrl($sUrl);
@@ -167,10 +167,13 @@ class appmonitorserver {
      * save the current config
      * @return boolean
      */
-    public function saveConfig() {
+    public function saveConfig($aNewCfg=false) {
         if ($this->_bIsDemo) {
             $this->_addLog($this->_tr('msgErr-demosite'), "error");
             return false;
+        }
+        if($aNewCfg && is_array($aNewCfg)){
+            $this->_aCfg=$aNewCfg;
         }
         $sCfgFile = $this->_getConfigDir() . '/' . $this->_sConfigfile;
 
@@ -202,7 +205,6 @@ class appmonitorserver {
      * @param bool   $bMakeCheck
      */
     public  function actionAddUrl($sUrl, $bMakeCheck = true) {
-        echo "DEBUG ". __METHOD__ . "($sUrl, $bMakeCheck)\n";
         if ($sUrl) {
             if (!array_key_exists("urls", $this->_aCfg) || ($key = array_search($sUrl, $this->_aCfg["urls"])) === false) {
 
