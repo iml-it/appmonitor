@@ -1,10 +1,17 @@
 
 HISTORY
 
-v0.37  2018-07-05
+v0.38  2018-07-09
+    - appmonitor gui: reorder table columns
+    - appmonitor gui: change colors: only result column has strong color; mark active column
+    - appmonitor gui: height of host tiles
+    - appmonitor gui: fix sortorder of results
+    - cli: remove debug output in action set
+
+v0.37  2018-07-09
     - cli: add/ update, show, remove functions are usable in a basic way now
 
-v0.36  2018-07-05
+v0.36  2018-07-06
     - fix: remove overriding methods in appmonitor gui
     - added first functions in cli api
 

@@ -125,7 +125,6 @@ function cfgSet($sVarname, $value){
             $aArray=&$aArray[$sKeyname];
         }
     }
-    echo "sLastKey = $sLastKey \n";
     if(is_array($aArray[$sLastKey])){
         $aArray[$sLastKey][]=$value;
     } else {

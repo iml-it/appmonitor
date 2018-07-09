@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.37
+ * @version 0.38
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.37";
+    var $_sTitle = "Appmonitor Server v0.38";
 
     /**
      * html code for icons in the web gui
@@ -441,21 +441,20 @@ class appmonitorserver_gui extends appmonitorserver {
 
         $sTableClass = $sUrl ? "datatable-hosts" : "datatable-checks";
         $sReturn .= $sUrl ? $this->_generateTableHead(array(
-                    $this->_tr('Timestamp'),
-                    $this->_tr('TTL'),
+                    $this->_tr('Result'),
+                    // $this->_tr('TTL'),
                     $this->_tr('Check'),
                     $this->_tr('Description'),
-                    $this->_tr('Result'),
                     $this->_tr('Output'),
                     $this->_tr('Time'),
                 )) : $this->_generateTableHead(array(
+                    $this->_tr('Result'),
+                    $this->_tr('Timestamp'),
                     $this->_tr('Host'),
                     $this->_tr('Webapp'),
-                    $this->_tr('Timestamp'),
                     $this->_tr('TTL'),
                     $this->_tr('Check'),
                     $this->_tr('Description'),
-                    $this->_tr('Result'),
                     $this->_tr('Output'),
                     $this->_tr('Time'),
         ));
@@ -491,17 +490,22 @@ class appmonitorserver_gui extends appmonitorserver {
                     foreach ($aEntries["checks"] as $aCheck) {
                         $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
                         
-                        $sReturn .= '<tr class="result' . $aCheck["result"] . ' tags '.$this->_getCssclassForTag($aTags).'">';
+                        $sReturn .= '<tr class="result' . $aCheck["result"] . ' tags '.$this->_getCssclassForTag($aTags).'">'
+                                ;
                         if (!$sUrl) {
-                            $sReturn .= '<td>' . $aEntries["result"]["host"] . '</td>'
-                                    . '<td>' . $aEntries["result"]["website"] . '</td>';
+                            $sReturn .= 
+                                    '<td class="result result'.$aCheck["result"].'"><span style="display: none;">'.$aCheck['result'].'</span>' . $this->_tr('Resulttype-'.$aCheck["result"]).'</td>'
+                                    . '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (<span class="timer-age-in-sec">' . (date("U") - $aEntries["result"]["ts"]) . '</span>&nbsp;s)</td>'
+                                    . '<td>' . $aEntries["result"]["host"] . '</td>'
+                                    . '<td>' . $aEntries["result"]["website"] . '</td>'
+                                    . '<td>' . $aEntries["result"]["ttl"] . '</td>'
+                                    ;
+                        } else {
+                            $sReturn .= '<td class="result result'.$aCheck["result"].'"><span style="display: none;">'.$aCheck['result'].'</span>' . $this->_tr('Resulttype-'.$aCheck["result"]).'</td>';
                         }
                         $sReturn .= // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
-                                '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (<span class="timer-age-in-sec">' . (date("U") - $aEntries["result"]["ts"]) . '</span>&nbsp;s)</td>'
-                                . '<td>' . $aEntries["result"]["ttl"] . '</td>'
-                                . '<td>' . $aCheck["name"] . '</td>'
+                                '<td>' . $aCheck["name"] . '</td>'
                                 . '<td>' . $aCheck["description"] . '</td>'
-                                . '<td>' . $this->_tr('Resulttype-' . $aCheck["result"]) . '</td>'
                                 . '<td>' . $aCheck["value"] . '</td>'
                                 . '<td>' . (isset($aCheck["time"]) ? $aCheck["time"] : '-') . '</td>'
                                 . '</tr>';
@@ -522,9 +526,9 @@ class appmonitorserver_gui extends appmonitorserver {
         rsort($aLogs);
 
         $sTable = $this->_generateTableHead(array(
+                    $this->_tr('Result'),
                     $this->_tr('Timestamp'),
                     $this->_tr('Change'),
-                    $this->_tr('Result'),
                     $this->_tr('Message')
                 )) . "\n";
         $sTable .= '<tbody>';
@@ -545,9 +549,9 @@ class appmonitorserver_gui extends appmonitorserver {
 
             $aTags=isset($this->_data[$aLogentry['appid']]["meta"]["tags"]) ? $this->_data[$aLogentry['appid']]["meta"]["tags"] : false;
             $sTable .= '<tr class="result' . $aLogentry['status'] . ' tags '.$this->_getCssclassForTag($aTags).'">'
+                    .'<td class="result' . $aLogentry['status'] . '"><span style="display: none;">'.$aLogentry['status'].'</span>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
                     . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
-                    . '<td>' . $this->_tr('changetype-' . $aLogentry['changetype']) . '</td>'
-                    . '<td>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
+                    . '<td>' . $this->_tr('changetype-' . $aLogentry['changetype']) . '</td>'                    
                     . '<td>' . $aLogentry['message'] . '</td>'
                     . '</tr>';
         }
@@ -925,9 +929,9 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<script>'
                     . '$(document).ready(function() {'
                     . ' $(\'.datatable\').dataTable( { } ); '
-                    . ' $(\'.datatable-checks\').dataTable( { "order": [[ 6, "desc" ]] } ); '
-                    . ' $(\'.datatable-hosts\').dataTable( { "order": [[ 4, "desc" ]] } ); '
-                    . ' $(\'.datatable-notifications\').dataTable( { "order": [[ 0, "desc" ]] } ); '
+                    . ' $(\'.datatable-checks\').dataTable( { "order": [[ 0, "desc" ]] } ); '
+                    . ' $(\'.datatable-hosts\').dataTable( { "order": [[ 0, "desc" ]] } ); '
+                    . ' $(\'.datatable-notifications\').dataTable( { "order": [[ 1, "desc" ]] } ); '
                     . 'if (document.location.hash) {'
                     . ' showDiv( document.location.hash ) ; '
                     . '} else {'
