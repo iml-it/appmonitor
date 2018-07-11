@@ -22,6 +22,12 @@
         "Setup-add-client": "Add client url",
         "Setup-add-client-pretext": "Enter an appmonitor client url to add a new monitor:",
 
+        "About": "About...",
+        "About-title": "Name of this project <strong>%s</strong>.",
+        "About-text": "This is OpenSource software<br>License: GNU Lesser General Public License v3.0<br>University of Bern :: IML - Institute of Medical Education.<br><br>The <strong>client</strong> component makes checks and creates a status file in JSON syntax.<br>The <strong>server</strong> component fetches the health status information data from (all your) application servers and renders a total view and sends notifications to the related teams.",
+        "About-projecturl": "The project is public for all and located at <a href=\"%s\">%s</a>.",
+        "About-docs": "The <a href=\"%s\">Documentation</a> is available as markdown. You can read it online on the project url or as <em>readme.md</em> in the downloaded archive.",
+
         "Debug": "Debug",
         "Debug-config": "Config",
         "Debug-urls": "Urls",

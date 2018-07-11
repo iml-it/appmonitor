@@ -5,7 +5,7 @@
 
 # [APPMONITOR](../readme.md) > SERVER #
 
-OPEN SOURCE from University Berne :: IML - Institute of Medical Education
+OPEN SOURCE from University of Bern :: IML - Institute of Medical Education
 
 https://github.com/iml-it/appmonitor
 

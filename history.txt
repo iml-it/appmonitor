@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.40  2018-07-11
+    - appmonitor gui: added about page
+
 v0.39  2018-07-11
     - appmonitor gui: minify badges in the tiles
 

@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.39
+ * @version 0.40
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,8 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.39";
+    var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
+    var $_sTitle = "Appmonitor Server v0.40";
 
     /**
      * html code for icons in the web gui
@@ -47,6 +48,7 @@ class appmonitorserver_gui extends appmonitorserver {
         'checks' => '<i class="fa fa-list"></i>',
         'notifications' => '<i class="fa fa-bell-o"></i>',
         'setup' => '<i class="fa fa-wrench"></i>',
+        'about' => '<i class="fa fa-info-circle"></i>',
         'notify-email' => '<i class="fa fa-envelope-o"></i>',
         'notify-slack' => '<i class="fa fa-slack"></i>',
         'sleepmode-on' => '<i class="fa fa-bed"></i>',
@@ -790,6 +792,18 @@ class appmonitorserver_gui extends appmonitorserver {
                 . $this->_generateSetup()
                 . '</div>';
 
+        // ----- about page
+        $sId = 'divabout';
+        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
+                . '<h2>' . $this->_aIco["about"] . ' ' . $this->_tr('About') . '</h2>'
+                . sprintf($this->_tr('About-title'), $this->_sTitle).'<br>'
+                . '<br>'
+                . $this->_tr('About-text').'<br>'
+                . '<br>'
+                . sprintf($this->_tr('About-projecturl'), $this->_sProjectUrl, $this->_sProjectUrl).'<br>'
+                . sprintf($this->_tr('About-docs'), $this->_sDocUrl).'<br>'
+                . '</div>';
+
         // ----- debug tab
         if ($this->_aCfg['debug']) {
             $sId = 'divdebug';
@@ -896,6 +910,9 @@ class appmonitorserver_gui extends appmonitorserver {
 
         $sId = 'divsetup';
         $sNavi .= '<a href="#' . $sId . '" class="setup" >' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</a>';
+        
+        $sId = 'divabout';
+        $sNavi .= '<a href="#' . $sId . '" class="about" >' . $this->_aIco["about"] . ' ' . $this->_tr('About') . '</a>';
 
         if ($this->_aCfg['debug']) {
             $sId = 'divdebug';
