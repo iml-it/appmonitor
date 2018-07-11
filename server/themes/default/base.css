@@ -65,7 +65,6 @@ padding: 1em;}
 .tile .count{font-size: 200%; opacity: 0.8; font-weigh1t: bold; padding: 0.3em 0;}
 .tile .label{}
 .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
-.tile .more span{padding: 0.5em;}
 
 .outsegment{min-height: 30em; display:none; margin-top: 7em; padding: 1em; border: 2px solid #fff; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #e8e8e8;}
 
@@ -83,7 +82,7 @@ tr.result1{background:rgba(220,220,220,0.2) !important; color:#999;}
 tr.result2{background:rgba(250,240,220,0.4) !important; color:#a94;}
 tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 
-.badge{border: 1px solid rgba(0,0,0,0.2); padding: 0 0.5em; border-radius: 20%;}
+.badge{border: 1px solid rgba(0,0,0,0.2); padding: 0 0.5em; border-radius: 20%; margin-right: 0.2em;}
 
 .btn{padding: 0.3em 0.5em; color:#eee; background:#888; border: 2px solid rgba(0,0,0,0.2); border-radius: 0.4em; box-shadowX: 0 0 0.5em #888; 
      text-decoration: none;

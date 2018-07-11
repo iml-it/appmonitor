@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.39  2018-07-11
+    - appmonitor gui: minify badges in the tiles
+
 v0.38  2018-07-09
     - appmonitor gui: reorder table columns
     - appmonitor gui: change colors: only result column has strong color; mark active column

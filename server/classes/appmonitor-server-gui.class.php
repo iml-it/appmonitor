@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.38
+ * @version 0.39
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -28,7 +28,7 @@ require_once 'appmonitor-server.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sTitle = "Appmonitor Server v0.38";
+    var $_sTitle = "Appmonitor Server v0.39";
 
     /**
      * html code for icons in the web gui
@@ -103,13 +103,19 @@ class appmonitorserver_gui extends appmonitorserver {
     // ----------------------------------------------------------------------
 
 
-    protected function _getResultDefs() {
-        return array(
-            RESULT_OK,
-            RESULT_UNKNOWN,
-            RESULT_WARNING,
-            RESULT_ERROR,
-        );
+    protected function _getResultDefs($bReverse=false) {
+        return $bReverse 
+            ? array(
+                RESULT_ERROR,
+                RESULT_WARNING,
+                RESULT_UNKNOWN,
+                RESULT_OK,
+            ): array(
+                RESULT_OK,
+                RESULT_UNKNOWN,
+                RESULT_WARNING,
+                RESULT_ERROR,
+            );
     }
 
     /**
@@ -164,8 +170,8 @@ class appmonitorserver_gui extends appmonitorserver {
         // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
 
         $sMoreChecks = '';
-        foreach ($this->_getResultDefs() as $i) {
-            $sMoreChecks .= ($aCounter['checkresults'][$i] ? '<span class="result' . $i . '">' . $aCounter['checkresults'][$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' : '');
+        foreach ($this->_getResultDefs(true) as $i) {
+            $sMoreChecks .= ($aCounter['checkresults'][$i] ? '<span class="badge result' . $i . '" title="'.$aCounter['checkresults'][$i] .' x '.$this->_tr('Resulttype-' . $i).'">' . $aCounter['checkresults'][$i] . '</span>' : '');
         }
         return $this->_getTile(array(
                     'count' => $aCounter['checks'],
@@ -190,9 +196,8 @@ class appmonitorserver_gui extends appmonitorserver {
 
         $sMoreChecks = '';
         if (isset($aHostdata['summary'])) {
-            foreach ($this->_getResultDefs() as $i) {
-                // $sMoreHosts.=($aCounter['appresults'][$i] ? '<span class="result'.$i.'">'.$aCounter['appresults'][$i].'</span> x '.$this->_tr('Resulttype-'.$i).' ' : '');
-                $sMoreChecks .= ($aHostdata['summary'][$i] ? '<span class="result' . $i . '">' . $aHostdata['summary'][$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' : '');
+            foreach ($this->_getResultDefs(true) as $i) {
+                $sMoreChecks .= ($aHostdata['summary'][$i] ? '<span class="badge result' . $i . '" title="' . $aHostdata['summary'][$i] . ' x ' . $this->_tr('Resulttype-' . $i) . '">' . $aHostdata['summary'][$i] . '</span>' : '');
             }
         }
         $aEmailNotifiers = $this->oNotifcation->setApp($sAppId, $this->_data[$sAppId]);
@@ -260,8 +265,8 @@ class appmonitorserver_gui extends appmonitorserver {
         // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
 
         $sMoreHosts = '';
-        foreach ($this->_getResultDefs() as $i) {
-            $sMoreHosts .= ($aCounter['appresults'][$i] ? '<span class="result' . $i . '">' . $aCounter['appresults'][$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' : '');
+        foreach ($this->_getResultDefs(true) as $i) {
+            $sMoreHosts .= ($aCounter['appresults'][$i] ? '<span class="badge result' . $i . '" title="' . $aCounter['appresults'][$i] . ' x ' . $this->_tr('Resulttype-' . $i) . '">'.$aCounter['appresults'][$i].'</span>' : '');
         }
 
         $sSleeping = $this->oNotifcation->isSleeptime();
@@ -647,7 +652,7 @@ class appmonitorserver_gui extends appmonitorserver {
         for ($i = 3; $i >= 0; $i--) {
             $sKey = $i;
             if ($aEntries[$sKey] > 0) {
-                $sHtml .= ' <span class="badge result' . $i . '" title="' . $aEntries[$sKey] . ' x ' . $this->getResultValue($i) . '">' . $aEntries[$sKey] . '</span> ';
+                $sHtml .= '<span class="badge result' . $i . '" title="' . $aEntries[$sKey] . ' x ' . $this->getResultValue($i) . '">' . $aEntries[$sKey] . '</span>';
                 if (!$bShort) {
                     $sHtml .= $this->_tr('Resulttype-' . $i) . ' ';
                 }
