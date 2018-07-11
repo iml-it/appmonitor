@@ -15,7 +15,7 @@ https://github.com/iml-it/appmonitor
 
 # Requirements #
 
-- PHP7 (up to PHP 7.2; runs on php5 but is not suppoorted)
+- PHP7 (up to PHP 7.2; runs on php5 but is not supported)
 - php-curl
 
 The server uses 
@@ -88,7 +88,7 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
             "slack": [
                 "noreply@example.com"
             ],
-        }
+        },
         "email": [
             "sysadmin@example.com"
         ],
