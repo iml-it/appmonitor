@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.41  2018-07-16
+    - appmonitor gui: selected tag filter is set to url; now you can set a
+      url with a given tag name
+
 v0.40  2018-07-11
     - appmonitor gui: added about page
 

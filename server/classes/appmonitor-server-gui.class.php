@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.40
+ * @version 0.41
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -29,7 +29,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
-    var $_sTitle = "Appmonitor Server v0.40";
+    var $_sTitle = "Appmonitor Server v0.41";
 
     /**
      * html code for icons in the web gui
@@ -868,11 +868,11 @@ class appmonitorserver_gui extends appmonitorserver {
         $sOptions='';
         foreach($aTaglist as $sTag){
             $sOptions.='<option value="'.$this->_getCssclassForTag($sTag).'">'.$sTag.'</a>';
-        }
+            }
         if($sOptions){
-            $sReturn=$this->_aIco['filter'].' '.$this->_tr('Tag-filter').': <select onchange="filterForTag(this.value)">'
-                        . '<option value="">---</option>'
-                        . $sOptions
+            $sReturn=$this->_aIco['filter'].' '.$this->_tr('Tag-filter').': <select id="selecttag" onchange="filterForTag(this.value)">'
+                    . '<option value="">---</option>'
+                    . $sOptions
                     . '</select>';
         }
         return $sReturn;
