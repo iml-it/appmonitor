@@ -23,6 +23,7 @@ define("RESULT_ERROR", 3);
  * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
  * 2015-04-08  0.9   axel.hahn@iml.unibe.ch  added sochket test: checkPortTcp<br>
  * 2018-06-29  0.24  axel.hahn@iml.unibe.ch  add file and directory checks<br>
+ * 2018-07-17  0.42  axel.hahn@iml.unibe.ch  add port on mysqli check<br>
  * --------------------------------------------------------------------------------<br>
  * @version 0.9
  * @author Axel Hahn
@@ -211,36 +212,36 @@ class appmonitorcheck {
      * @return boolean
      */
     public function checkFile($aParams) {
-        $aOK=array();
-        $aErrors=array();
+        $aOK = array();
+        $aErrors = array();
         $this->_checkArrayKeys($aParams, "filename");
-        $sFile=$aParams["filename"];
-        
-        if (isset($aParams['exists'])){
-            $sMyflag='exists='.($aParams['exists'] ? 'yes' : 'no');
-            if (file_exists($sFile) && $aParams['exists']){
-                $aOK[]=$sMyflag;
+        $sFile = $aParams["filename"];
+
+        if (isset($aParams['exists'])) {
+            $sMyflag = 'exists=' . ($aParams['exists'] ? 'yes' : 'no');
+            if (file_exists($sFile) && $aParams['exists']) {
+                $aOK[] = $sMyflag;
             } else {
-                $aErrors[]=$sMyflag;
+                $aErrors[] = $sMyflag;
             }
         }
-        foreach(array('dir', 'executable', 'file', 'link', 'readable', 'writable') as $sFiletest){
-            if (isset($aParams[$sFiletest])){
-                $sTestCmd='return is_'.$sFiletest.'("'.$sFile.'");';
-                if (eval($sTestCmd) && $aParams[$sFiletest]){
-                    $aOK[]=$sFiletest . '='.($aParams[$sFiletest] ? 'yes' : 'no');
+        foreach (array('dir', 'executable', 'file', 'link', 'readable', 'writable') as $sFiletest) {
+            if (isset($aParams[$sFiletest])) {
+                $sTestCmd = 'return is_' . $sFiletest . '("' . $sFile . '");';
+                if (eval($sTestCmd) && $aParams[$sFiletest]) {
+                    $aOK[] = $sFiletest . '=' . ($aParams[$sFiletest] ? 'yes' : 'no');
                 } else {
-                    $aErrors[]=$sFiletest . '='.($aParams[$sFiletest] ? 'yes' : 'no');
+                    $aErrors[] = $sFiletest . '=' . ($aParams[$sFiletest] ? 'yes' : 'no');
                 }
             }
         }
-        $sMessage=(count($aOK)     ? ' flags OK: '     .implode('|', $aOK)     : '')
-                .' '. (count($aErrors) ? ' flags FAILED: '.implode('|', $aErrors) : '')
-                ;
-        if(count($aErrors)){
-            $this->_setReturn(RESULT_ERROR, 'file test ['. $sFile . '] '.$sMessage);
+        $sMessage = (count($aOK) ? ' flags OK: ' . implode('|', $aOK) : '')
+                . ' ' . (count($aErrors) ? ' flags FAILED: ' . implode('|', $aErrors) : '')
+        ;
+        if (count($aErrors)) {
+            $this->_setReturn(RESULT_ERROR, 'file test [' . $sFile . '] ' . $sMessage);
         } else {
-            $this->_setReturn(RESULT_OK, 'file test ['. $sFile . '] '.$sMessage);
+            $this->_setReturn(RESULT_OK, 'file test [' . $sFile . '] ' . $sMessage);
         }
         return true;
     }
@@ -287,15 +288,20 @@ class appmonitorcheck {
      *     "user" 
      *     "password" 
      *     "db" 
+     *     "port"     <<< optional
      * )
      */
     private function checkMysqlConnect($aParams) {
         $this->_checkArrayKeys($aParams, "server,user,password,db");
+        if (!isset($aParams["port"])) {
+            $aParams["port"] = false;
+        }
         $db = mysqli_connect(
-                $aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"]
+                $aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"], $aParams["port"]
         );
         if ($db) {
             $this->_setReturn(RESULT_OK, "OK: Mysql database " . $aParams["db"] . " was connected");
+            mysqli_close($db);
             return true;
         } else {
             $this->_setReturn(RESULT_ERROR, "ERROR: Mysql database " . $aParams["db"] . " was not connected. " . mysqli_connect_error());

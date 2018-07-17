@@ -414,6 +414,7 @@ verify a database connection with mysqli_connect function.
                   "user"     => $aDb['user'],
                   "password" => $aDb['pass'],
                   "db"       => $aDb['path'],
+                  "port"     => $aDb['port'], // optional
                 ),
             ),
         )
@@ -424,7 +425,8 @@ parameters:
 - "server"   - hostname/ ip of mysql server <span class="required">(*)</span>
 - "user"     - mysql username <span class="required">(*)</span>
 - "password" - password <span class="required">(*)</span>
-- "db"       - database to connect <span class="required">(*)</span>
+- "db"       - database name / scheme to connect <span class="required">(*)</span>
+- "port"     - database port; optional
 
 
 ### checkSqliteConnect ###
