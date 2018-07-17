@@ -89,6 +89,7 @@ class appmonitorserver {
         CURLOPT_FAILONERROR => 0,
         CURLOPT_SSL_VERIFYHOST => 0,
         CURLOPT_SSL_VERIFYPEER => 0,
+        CURLOPT_USERAGENT => 'Appmonitor (using curl; see https://github.com/iml-it/appmonitor to install your own monitoring instance;)',
             // CURLMOPT_MAXCONNECTS => 10
     );
     protected $_aCounter = false;
@@ -210,10 +211,16 @@ class appmonitorserver {
 
                 $bAdd = true;
                 if ($bMakeCheck) {
-                    $aClientData = json_decode($this->_httpGet($sUrl), true);
-                    if (!is_array($aClientData)) {
+                    $aHttpData = $this->_multipleHttpGet(array($sUrl));
+                    $sBody=isset($aHttpData[0]['response_body']) ? $aHttpData[0]['response_body'] : false;
+                    if (!is_array(json_decode($sBody, 1))) {
                         $bAdd = false;
-                        $this->_addLog(sprintf($this->_tr('msgErr-Url-not-added-no-appmonitor'), $sUrl), 'error');
+                        $this->_addLog(
+                                sprintf(
+                                        $this->_tr('msgErr-Url-not-added-no-appmonitor')
+                                        , $sUrl
+                                        , (isset($aHttpData[0]['response_header']) ? '<pre>'.$aHttpData[0]['response_header'].'</pre>' : '-')
+                                ), 'error');
                     }
                 }
                 if ($bAdd) {
@@ -369,24 +376,6 @@ class appmonitorserver {
         curl_multi_close($master);
 
         return $aResult;
-    }
-
-    /**
-     * make an http get request and return the response body
-     * @param string $url
-     * @return string
-     */
-    protected function _httpGet($url, $iTimeout = 5) {
-        if (!function_exists("curl_init")) {
-            return file_get_contents($sUrl);
-        }
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $iTimeout);
-        $res = curl_exec($ch);
-        curl_close($ch);
-        return $res;
     }
 
     /**

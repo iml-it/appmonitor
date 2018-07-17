@@ -104,7 +104,7 @@
         "msgErr-Http-no-jsondata": "Server response does not contain json data.",
 
         "msgOK-Url-was-added": "URL added: %s",
-        "msgErr-Url-not-added-no-appmonitor": "URL not added: %s - it does not seems to be an app monitor url.",
+        "msgErr-Url-not-added-no-appmonitor": "URL not added: %s<br>it does not seems to be an app monitor url - no JSON data was found.<br>Http response header: %s",
         "msgErr-Url-was-added-already": "Skip. URL was added already: %s.",
         "msgErr-Url-not-removed-it-does-not-exist": "URL cannot be removed - it doees not exist in the config: %s.",
         "msgOK-Url-was-removed": "URL was removed: %s",

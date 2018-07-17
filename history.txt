@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.43  2018-07-17
+    - appmonitor base: adding a new client uses multicurl method; 
+    - appmonitor base: user agent was set (now it works with clients with enabled mod_security)
+    - appmonitor base: remove method _httpGet
+
 v0.42  2018-07-17
     - appmonitor client: add port in mysqli connect check
 
