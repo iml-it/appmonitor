@@ -48,6 +48,10 @@ class appmonitorcheck {
      * @var array
      */
     private $_aData = array();
+    
+    
+    // protected $_units = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+    protected $_units = array( 'B', 'KB', 'MB', 'GB', 'TB');
 
     // ----------------------------------------------------------------------
     // CONSTRUCTOR
@@ -196,6 +200,88 @@ class appmonitorcheck {
     // CHECK FUNCTIONS (private)
     // ----------------------------------------------------------------------
 
+
+    /**
+     * get human readable space value
+     * @param type $size
+     * @return string
+     */
+    protected function _getHrSize($size){
+        $power = $size > 0 ? floor(log($size, 1024)) : 0;
+        return number_format($size / pow(1024, $power), 2, '.', ',') . ' ' . $this->_units[$power];
+    }
+    /**
+     * get a space in a real value if an integer has added MB|GB|...
+     * @param type $sValue
+     * @return integer
+     */
+    protected function _getSize($sValue){
+        if(is_int($sValue)){
+            return $sValue;
+        }
+        $power=0;
+        foreach($this->_units as $sUnit){
+            if (preg_match('/^[0-9\.]*'.$sUnit.'/', $sValue)){
+                $i=preg_replace('/([0-9\.]*).*/', '$1', $sValue);
+                $iReal=$i*pow(1024, $power);
+                // die("FOUND: $sValue with unit ${sUnit} - 1024^$power * $i = $iReal");
+                return $iReal;
+            }
+            $power++;
+        }
+        header('HTTP/1.0 503 Service Unavailable');
+        die("ERROR in space value parameter - there is no size unit in [$sValue] - allowed size units are " . implode('|', $this->_units));
+        return false;
+    }
+
+    /**
+     * check free disk space on a given directory
+     * @param array $aParams
+     * array(
+     *     "filename"    directory that must exist
+     *     "warning"     space for warning (optional)
+     *     "critical"    minimal space
+     * )
+     * @return boolean
+     */
+    public function checkDiskfree($aParams) {
+        $this->_checkArrayKeys($aParams, "directory", "critical");
+        
+        $sDirectory = $aParams["directory"];
+        if(!is_dir($sDirectory)){
+            $this->_setReturn(RESULT_ERROR, 'directory [' . $sDirectory . '] does not exist. Maybe it is wrong or is not mounted.');
+            return true;
+        }
+        
+        $iWarn = isset($aParams["warning"]) ? $this->_getSize($aParams["warning"]) : false;
+        $iCritical = $this->_getSize($aParams["critical"]);
+        $iSpaceLeft=disk_free_space($sDirectory);
+        
+        
+        $sMessage='[' . $sDirectory . '] has '.$this->_getHrSize($iSpaceLeft).' left.';
+        
+        if($iWarn){
+            if($iWarn<=$iCritical){
+                header('HTTP/1.0 503 Service Unavailable');
+                die("ERROR in a Diskfree check - warning value must be larger than critical.<pre>" . print_r($aParams, true));
+            }
+            if ($iWarn<$iSpaceLeft){
+                $this->_setReturn(RESULT_OK, $sMessage.' Warning level is not reached yet (still '.$this->_getHrSize($iSpaceLeft-$iWarn).' over warning limit).');
+                return true;
+            }
+            if ($iWarn>$iSpaceLeft && $iCritical<$iSpaceLeft){
+                $this->_setReturn(RESULT_WARNING, $sMessage.' Warning level '.$this->_getHrSize($iWarn).' was reached (space is '.$this->_getHrSize($iWarn-$iSpaceLeft).' below warning limit; still '.$this->_getHrSize($iSpaceLeft-$iCritical).' over critical limit).');
+                return true;
+            }
+        }
+        // check space
+        if ($iCritical<$iSpaceLeft){
+            $this->_setReturn(RESULT_OK, $sMessage .' Minimum is not reached yet (still '.$this->_getHrSize($iSpaceLeft-$iCritical).' over critical limit).');
+        } else {
+            $this->_setReturn(RESULT_ERROR, $sMessage);
+        }
+        return true;
+    }
     /**
      * check a file
      * @param array $aParams

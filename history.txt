@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.44  2018-07-19
+    - appmonitor client: added check for free disk space with warning and 
+      critical value; 
+
 v0.43  2018-07-17
     - appmonitor base: adding a new client uses multicurl method; 
     - appmonitor base: user agent was set (now it works with clients with enabled mod_security)

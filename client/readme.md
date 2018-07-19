@@ -312,6 +312,57 @@ parameters:
 You can use the simple check to verify anything that has no pre defined function
 yet.
 
+
+### Diskfree ###
+
+Check if a given filesystem / directory that it has enough space.
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "check file storage",
+            "description" => "The file storage have some space left",
+            "check" => array(
+                "function" => "Diskfree",
+                "params" => array(
+                    "directory" => "[directory]",
+                    "warning"   => [size],
+                    "critical"  => [size],
+                ),
+            ),
+        )
+    );
+
+
+parameters:
+
+- "directory" (string) directory to check  <span class="required">(*)</span>
+- "warning" {integer|string} - size for warning level
+- "critical" (integer|string) - size for critical level <span class="required">(*)</span>
+
+Remark to the [size] value:
+
+The values for warning and critical
+- must be integer OR
+- integer or float added by a size unit (see below)
+- warning level must be higher than critical value
+- units can be mixed in warning and critical value
+
+supported size units are 
+
+
+- 'B' byte
+- 'KB' kilobyte
+- 'MB' megabyte
+- 'GB' gigabyte
+- 'TB' terabyte
+
+Example for Diskfree size params:
+
+    "warning"   => "1.25GB",
+    "critical"  => "500.7MB",
+
+	
+
 ### File ###
 
 Check if a file for file, link or directory. Use the parameter "filename" to set the full filename.
