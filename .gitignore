@@ -11,3 +11,4 @@ nbproject
 /client/check-concrete5.php
 /client/check-matomo.settings.php
 /server/javascript/functions.min.js
+/client/check-fs.php

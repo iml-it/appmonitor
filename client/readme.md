@@ -245,13 +245,14 @@ To see all defined checks:
 
     print_r($oMonitor->listChecks());
 
-- checkSimple 
-- checkDir
+- checkCert
+- checkDiskfree
 - checkFile
-- checkHttpContent 
-- checkMysqlConnect 
-- checkSqliteConnect 
-- checkListeningIp
+- checkHttpContent
+- checkMysqlConnect
+- checkPortTcp
+- checkSimple
+- checkSqliteConnect
 
 
 ### Set total result ###
@@ -311,6 +312,56 @@ parameters:
 
 You can use the simple check to verify anything that has no pre defined function
 yet.
+
+
+### Cert ###
+
+Check if a SSL certificate is still valid ... and does not expire soon.
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "Certificate check",
+            "description" => "Check if SSL cert is valid and does not expire soon",
+            "check" => array(
+                "function" => "Cert",
+                "params" => array(
+                    "url"      => [url-to-check],
+                    "warning"  => [days-before-cert-expires],
+				),
+            ),
+        )
+    );
+
+
+parameters:
+
+- "url" (string) optional: url to connect check i.e. https://example.com:3000; default: own protocol + server of your webapp
+- "warning" {integer|string} - optional: count of days to warn; default=30
+
+It returns OK if 
+- ssl connect is successful
+- valid-to date expires in more than 30 days (or given limit)
+
+You get a warning if it expires soon.
+
+You get an error, if 
+- it is not a ssl target
+- certificate is expired
+- ssl connect fails
+
+
+In most cases you can use this snippet to check the ssl certificate of this snippet 
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "Certificate check",
+            "description" => "Check if SSL cert is valid and does not expire soon",
+            "check" => array(
+                "function" => "Cert",
+            ),
+        )
+    );
+
 
 
 ### Diskfree ###

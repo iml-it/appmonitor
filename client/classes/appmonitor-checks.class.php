@@ -200,6 +200,87 @@ class appmonitorcheck {
     // CHECK FUNCTIONS (private)
     // ----------------------------------------------------------------------
 
+    /**
+     * helper function: read certificate data
+     * called in checkCert()
+     * @param string $sUrl  url to connect
+     * @return array
+     */
+    protected function _certGetInfos($sUrl) {
+        $iTimeout=10;
+        $aUrldata=parse_url($sUrl);
+        $sHost = isset($aUrldata['host']) ? $aUrldata['host'] : false;
+        $iPort = isset($aUrldata['port']) ? $aUrldata['port'] : ((isset($aUrldata['scheme']) && $aUrldata['scheme'] === 'https') ? 443 : false);
+
+        
+        $get = stream_context_create(array("ssl" => array("capture_peer_cert" => TRUE)));
+        if(!$get){
+            return array('_error' => 'Error: Cannot create stream_context');
+        }
+        $errno=-1;
+        $errstr="stream_socket_client failed.";
+        $read = stream_socket_client("ssl://$sHost:$iPort", $errno, $errstr, $iTimeout, STREAM_CLIENT_CONNECT, $get);
+        if(!$read){
+            return array('_error' => "Error $errno: $errstr; cannot create stream_context to ssl://$sHost:$iPort");
+        }
+        $cert = stream_context_get_params($read);
+        if(!$cert){
+            return array('_error' => "Error: socket was connected to ssl://$sHost:$iPort - but I cannot read certificate infos with stream_context_get_params ");
+        }
+        $certinfo = openssl_x509_parse($cert['options']['ssl']['peer_certificate']);
+        return $certinfo;
+    }
+
+    
+    
+    /**
+     * check SSL certificate 
+     * @param array $aParams
+     * array(
+     *     "url"       optional: url to connect check; default: own protocol + server
+     *     "warning"   optional: count of days to warn; default=30
+     * )
+     * @return boolean
+     */
+    private function checkCert($aParams) {
+        $sUrl = isset($aParams["url"]) 
+                ? $aParams["url"] 
+                : 'http'. ($_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] .':' . $_SERVER['SERVER_PORT']
+                ;
+        $iWarn = isset($aParams["warning"]) ? (int)($aParams["warning"]) : 30;
+
+        $sMessage="url $sUrl ... ";
+        $certinfo=$this->_certGetInfos($sUrl);
+        if(isset($certinfo['_error'])){
+            $this->_setReturn(RESULT_ERROR, $certinfo['_error'] . $sMessage);
+            return true;
+        }
+        
+        $sDNS=isset($certinfo['extensions']['subjectAltName']) ? $certinfo['extensions']['subjectAltName'] : false;
+        $sHost=parse_url($url,PHP_URL_HOST);
+        if(strstr($sDNS, 'DNS:'.$sHost)===false){
+            $this->_setReturn(RESULT_ERROR, 'Wrong certificate: '.$sHost.' is not listed as DNS alias in ['.$sDNS.']  ' . $sMessage);
+            return true;
+        }
+        
+        $iDaysleft = round(($certinfo['validTo_time_t'] - date('U')) / 60 / 60 / 24);
+        $sMessage.= 'Issuer: '. $sIssuer=$certinfo['issuer']['O'] 
+                . '; valid from: '. date("Y-m-d H:i", $certinfo['validFrom_time_t'])
+                . ' to '.date("Y-m-d H:i", $certinfo['validTo_time_t']).' '
+                . ( $iDaysleft ? "($iDaysleft days left)" : "expired since ".(-$iDaysleft)." days.")
+                ;
+        if ($iDaysleft<0) {
+            $this->_setReturn(RESULT_ERROR, 'Expired ' . $sMessage);
+            return true;
+        }
+        if ($iDaysleft<=$iWarn) {
+            $this->_setReturn(RESULT_WARNING, 'Expires soon ' . $sMessage);
+            return true;
+        }
+        // echo '<pre>';
+        $this->_setReturn(RESULT_OK, 'OK, is valid ' . $sMessage);
+        return true;
+    }
 
     /**
      * get human readable space value
@@ -238,13 +319,13 @@ class appmonitorcheck {
      * check free disk space on a given directory
      * @param array $aParams
      * array(
-     *     "filename"    directory that must exist
+     *     "directory"   directory that must exist
      *     "warning"     space for warning (optional)
      *     "critical"    minimal space
      * )
      * @return boolean
      */
-    public function checkDiskfree($aParams) {
+    private function checkDiskfree($aParams) {
         $this->_checkArrayKeys($aParams, "directory", "critical");
         
         $sDirectory = $aParams["directory"];
@@ -297,7 +378,7 @@ class appmonitorcheck {
      * )
      * @return boolean
      */
-    public function checkFile($aParams) {
+    private function checkFile($aParams) {
         $aOK = array();
         $aErrors = array();
         $this->_checkArrayKeys($aParams, "filename");

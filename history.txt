@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.45  2018-07-24
+    - appmonitor client: added check for ssl certificate
+
 v0.44  2018-07-19
     - appmonitor client: added check for free disk space with warning and 
       critical value; 
