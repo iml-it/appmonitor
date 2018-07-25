@@ -350,7 +350,7 @@ You get an error, if
 - ssl connect fails
 
 
-In most cases you can use this snippet to check the ssl certificate of this snippet 
+In most cases you can use this snippet to check the ssl certificate of the own instance
 
     $oMonitor->addCheck(
         array(
