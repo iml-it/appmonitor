@@ -336,7 +336,7 @@ Check if a SSL certificate is still valid ... and does not expire soon.
 parameters:
 
 - "url" (string) optional: url to connect check i.e. https://example.com:3000; default: own protocol + server of your webapp
-- "warning" {integer|string} - optional: count of days to warn; default=30
+- "warning" {integer} - optional: count of days to warn; default=30
 
 It returns OK if 
 - ssl connect is successful
