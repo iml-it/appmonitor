@@ -35,3 +35,7 @@ Server webgui
 - Multi language (english language file so far)
 - Optional service for permanent check and notification 24/7
 - Notification as email, Slack message (respecting sleep times)
+
+
+For ready to use client checks for a few products see
+https://github.com/iml-it/appmonitor-clients/

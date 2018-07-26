@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.46  2018-07-26
+    - appmonitor client: fix mysql connection check with empty port param
+
 v0.45  2018-07-24
     - appmonitor client: added check for ssl certificate
 

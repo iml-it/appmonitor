@@ -448,7 +448,7 @@ class appmonitorcheck {
     }
 
     /**
-     * check mysql connection to a database
+     * check mysql connection to a database using mysqli
      * @param array $aParams
      * array(
      *     "server" 
@@ -460,12 +460,10 @@ class appmonitorcheck {
      */
     private function checkMysqlConnect($aParams) {
         $this->_checkArrayKeys($aParams, "server,user,password,db");
-        if (!isset($aParams["port"])) {
-            $aParams["port"] = false;
-        }
-        $db = mysqli_connect(
-                $aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"], $aParams["port"]
-        );
+        $db = (isset($aParams["port"]) && $aParams["port"]) 
+                ? mysqli_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"], $aParams["port"])
+                : mysqli_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"])
+                ;
         if ($db) {
             $this->_setReturn(RESULT_OK, "OK: Mysql database " . $aParams["db"] . " was connected");
             mysqli_close($db);
@@ -544,8 +542,8 @@ class appmonitorcheck {
             $o = new PDO("sqlite:" . $aParams["db"]);
             $this->_setReturn(RESULT_OK, "OK: Sqlite database " . $aParams["db"] . " was connected");
             return true;
-        } catch (Exception $exc) {
-            $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database " . $aParams["db"] . " was not connected. " . mysqli_connect_error());
+        } catch (Exception $e) {
+            $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database " . $aParams["db"] . " was not connected. " . $e->getMessage());
             return false;
         }
     }
