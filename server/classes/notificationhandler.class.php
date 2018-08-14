@@ -16,14 +16,14 @@ define("RESULT_ERROR", 3);
 
 
 /**
- * notofocationhandler
+ * notificationhandler
  *
  * @author hahn
  */
 class notificationhandler {
 
     protected $_sCacheIdPrefix="notificationhandler";
-    protected $_iMaxLogentries=25;
+    protected $_iMaxLogentries=100;
     
     /**
      * logdata for detected changes and sent notifications
@@ -106,7 +106,26 @@ class notificationhandler {
      */
     protected function _deleteAppLastResult(){
         $oCache=new AhCache($this->_sCacheIdPrefix."-app", $this->_sAppId);
-        return $oCache->delete();
+        $oCache->delete();
+        $oCache=new AhCache($this->_sCacheIdPrefix."-notify", $this->_sAppId);
+        $oCache->delete();
+        return true;
+    }
+
+    /**
+     * get current or last stored client notification data
+     * this method also stores current notification data on change
+     * @return array
+     */
+    protected function _getAppNotifications(){
+        $oCache=new AhCache($this->_sCacheIdPrefix."-notify", $this->_sAppId);
+        $aCached=$oCache->read();
+        if (isset($this->_aAppResult['meta']['notifications']) && $aCached!==$this->_aAppResult['meta']['notifications']){
+            $oCache->write($this->_aAppResult['meta']['notifications']);
+            return $this->_aAppResult['meta']['notifications'];
+        } else {
+            return $aCached;
+        }
     }
 
     /**
@@ -216,7 +235,7 @@ class notificationhandler {
                     // $this->_aAppResult=$this->_aAppLastResult;
                 }
                 $this->_saveAppResult();
-                // TODO: trigger notification
+                // trigger notification
                 $this->sendAllNotifications($iChangetype);
                 break;
 
@@ -512,7 +531,8 @@ class notificationhandler {
         // echo '<pre>'.print_r($this->_aNotificationOptions, 1).'</pre>';
 
         // got from client
-        $aClientNotifications=isset($this->_aAppResult['meta']['notifications']) ? $this->_aAppResult['meta']['notifications'] : false;
+        $aClientNotifications=$this->_getAppNotifications();
+        // echo '<pre>'.print_r($aClientNotifications, 1).'</pre>';
 
         
         // take data from web app ... meta -> notifications

@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.48  2018-08-14
+    - appmonitor server: store client notification data (to send error infos
+      to the developer if no client data is available, i.e. timeout)
+
 v0.47  2018-08-14
     - appmonitor client: use timeout of 5 sec for tcp socket connections
 
