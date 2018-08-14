@@ -24,7 +24,7 @@ define("RESULT_ERROR", 3);
  * 2015-04-08  0.9   axel.hahn@iml.unibe.ch  added sochket test: checkPortTcp<br>
  * 2018-06-29  0.24  axel.hahn@iml.unibe.ch  add file and directory checks<br>
  * 2018-07-17  0.42  axel.hahn@iml.unibe.ch  add port on mysqli check<br>
- * 2018-08-14  0.42  axel.hahn@iml.unibe.ch  add port on mysqli check<br>
+ * 2018-08-14  0.47  axel.hahn@iml.unibe.ch  appmonitor client: use timeout of 5 sec for tcp socket connections<br>
  * --------------------------------------------------------------------------------<br>
  * @version 0.9
  * @author Axel Hahn
@@ -50,10 +50,17 @@ class appmonitorcheck {
      */
     private $_aData = array();
     
-    
-    // protected $_units = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
+
+    /**
+     * flat array with units for sizes
+     * @var array
+     */
     protected $_units = array( 'B', 'KB', 'MB', 'GB', 'TB');
     
+    /**
+     * timout in sec for tcp socket connections
+     * @var type 
+     */
     protected $_iTimeoutTcp=5;
 
     // ----------------------------------------------------------------------
