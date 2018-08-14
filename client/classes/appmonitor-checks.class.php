@@ -26,7 +26,7 @@ define("RESULT_ERROR", 3);
  * 2018-07-17  0.42  axel.hahn@iml.unibe.ch  add port on mysqli check<br>
  * 2018-08-14  0.47  axel.hahn@iml.unibe.ch  appmonitor client: use timeout of 5 sec for tcp socket connections<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.9
+ * @version 0.47
  * @author Axel Hahn
  * @link TODO
  * @license GPL
