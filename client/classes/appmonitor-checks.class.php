@@ -24,6 +24,7 @@ define("RESULT_ERROR", 3);
  * 2015-04-08  0.9   axel.hahn@iml.unibe.ch  added sochket test: checkPortTcp<br>
  * 2018-06-29  0.24  axel.hahn@iml.unibe.ch  add file and directory checks<br>
  * 2018-07-17  0.42  axel.hahn@iml.unibe.ch  add port on mysqli check<br>
+ * 2018-08-14  0.42  axel.hahn@iml.unibe.ch  add port on mysqli check<br>
  * --------------------------------------------------------------------------------<br>
  * @version 0.9
  * @author Axel Hahn
@@ -52,6 +53,8 @@ class appmonitorcheck {
     
     // protected $_units = array( 'B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
     protected $_units = array( 'B', 'KB', 'MB', 'GB', 'TB');
+    
+    protected $_iTimeoutTcp=5;
 
     // ----------------------------------------------------------------------
     // CONSTRUCTOR
@@ -249,7 +252,7 @@ class appmonitorcheck {
                 ;
         $iWarn = isset($aParams["warning"]) ? (int)($aParams["warning"]) : 30;
 
-        $sMessage="url $sUrl ... ";
+        $sMessage="Checked url: $sUrl ... ";
         $certinfo=$this->_certGetInfos($sUrl);
         if(isset($certinfo['_error'])){
             $this->_setReturn(RESULT_ERROR, $certinfo['_error'] . $sMessage);
@@ -270,15 +273,15 @@ class appmonitorcheck {
                 . ( $iDaysleft ? "($iDaysleft days left)" : "expired since ".(-$iDaysleft)." days.")
                 ;
         if ($iDaysleft<0) {
-            $this->_setReturn(RESULT_ERROR, 'Expired ' . $sMessage);
+            $this->_setReturn(RESULT_ERROR, 'Expired! ' . $sMessage);
             return true;
         }
         if ($iDaysleft<=$iWarn) {
-            $this->_setReturn(RESULT_WARNING, 'Expires soon ' . $sMessage);
+            $this->_setReturn(RESULT_WARNING, 'Expires soon. ' . $sMessage);
             return true;
         }
         // echo '<pre>';
-        $this->_setReturn(RESULT_OK, 'OK, is valid ' . $sMessage);
+        $this->_setReturn(RESULT_OK, 'OK, is valid. ' . $sMessage);
         return true;
     }
 
@@ -496,6 +499,16 @@ class appmonitorcheck {
             $this->_setReturn(RESULT_UNKNOWN, "ERROR: $sHost:$iPort was not checked. socket_create() failed: " . socket_strerror(socket_last_error()));
             return false;
         }
+        // set socket timeout
+        socket_set_option(
+            $socket,
+            SOL_SOCKET,  // socket level
+            SO_SNDTIMEO, // timeout option
+            array(
+              "sec"=>$this->_iTimeoutTcp, // timeout in seconds
+              "usec"=>0
+              )
+            );
 
         $result = socket_connect($socket, $sHost, $iPort);
         if ($result === false) {
