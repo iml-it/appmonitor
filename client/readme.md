@@ -326,6 +326,7 @@ Check if a SSL certificate is still valid ... and does not expire soon.
                 "function" => "Cert",
                 "params" => array(
                     "url"      => [url-to-check],
+                    "verify"   => [flag-for-verification],
                     "warning"  => [days-before-cert-expires],
 				),
             ),
@@ -336,7 +337,16 @@ Check if a SSL certificate is still valid ... and does not expire soon.
 parameters:
 
 - "url" (string) optional: url to connect check i.e. https://example.com:3000; default: own protocol + server of your webapp
-- "warning" {integer} - optional: count of days to warn; default=30
+- "verify" (boolean) optional: flag verify certificate; default = true
+- "warning" (integer) optional: count of days to warn; default=30
+
+I recommend to set verify to *true*. If you should get a warning like 
+
+    PHP Warning:  stream_socket_client(): SSL operation failed with code 1. OpenSSL Error messages:
+    error:14090086:SSL routines:ssl3_get_server_certificate:certificate verify failed in (...)appmonitor-checks.class.php on line NNN
+
+... then set it back to *false* to make a test for expiration only.
+
 
 It returns OK if 
 - ssl connect is successful
@@ -348,6 +358,8 @@ You get an error, if
 - it is not a ssl target
 - certificate is expired
 - ssl connect fails
+
+
 
 
 In most cases you can use this snippet to check the ssl certificate of the own instance
@@ -461,12 +473,12 @@ With *"exists" => false* you can check if a file does not exist (flag is checked
 parameters:
 
 - "filename" (string) filename or directory to check  <span class="required">(*)</span>
-- "exists" {boolean} - "filename" must exist/ must be absent
-- "dir" {boolean} - filetype directory
-- "file" {boolean} - filetype file
-- "link" {boolean} - filetype symbolic link
-- "executable" {boolean} - flag executable
-- "readable" {boolean} - flag is readable
+- "exists" (boolean) - "filename" must exist/ must be absent
+- "dir" (boolean) - filetype directory
+- "file" (boolean) - filetype file
+- "link" (boolean) - filetype symbolic link
+- "executable" (boolean) - flag executable
+- "readable" (boolean) - flag is readable
 - "writable" (boolean) - flag is writable
 
 

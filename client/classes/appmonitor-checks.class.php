@@ -24,7 +24,9 @@ define("RESULT_ERROR", 3);
  * 2015-04-08  0.9   axel.hahn@iml.unibe.ch  added sochket test: checkPortTcp<br>
  * 2018-06-29  0.24  axel.hahn@iml.unibe.ch  add file and directory checks<br>
  * 2018-07-17  0.42  axel.hahn@iml.unibe.ch  add port on mysqli check<br>
+ * 2018-07-26  0.46  axel.hahn@iml.unibe.ch  fix mysql connection check with empty port param<br>
  * 2018-08-14  0.47  axel.hahn@iml.unibe.ch  appmonitor client: use timeout of 5 sec for tcp socket connections<br>
+ * 2018-08-15  0.49  axel.hahn@iml.unibe.ch  cert check: added flag to skip verification<br>
  * --------------------------------------------------------------------------------<br>
  * @version 0.47
  * @author Axel Hahn
@@ -213,17 +215,22 @@ class appmonitorcheck {
     /**
      * helper function: read certificate data
      * called in checkCert()
-     * @param string $sUrl  url to connect
+     * @param string  $sUrl         url to connect
+     * @param boolean $bVerifyCert  flag: verify certificate; default: no check
      * @return array
      */
-    protected function _certGetInfos($sUrl) {
+    protected function _certGetInfos($sUrl, $bVerifyCert) {
         $iTimeout=10;
         $aUrldata=parse_url($sUrl);
         $sHost = isset($aUrldata['host']) ? $aUrldata['host'] : false;
         $iPort = isset($aUrldata['port']) ? $aUrldata['port'] : ((isset($aUrldata['scheme']) && $aUrldata['scheme'] === 'https') ? 443 : false);
 
-        
-        $get = stream_context_create(array("ssl" => array("capture_peer_cert" => TRUE)));
+        $aSsl=array('capture_peer_cert' => true);
+        if($bVerifyCert){
+            $aSsl['verify_peer']=false;
+            $aSsl['verify_peer_name']=false;
+        };
+        $get = stream_context_create(array('ssl' => $aSsl));
         if(!$get){
             return array('_error' => 'Error: Cannot create stream_context');
         }
@@ -231,7 +238,7 @@ class appmonitorcheck {
         $errstr="stream_socket_client failed.";
         $read = stream_socket_client("ssl://$sHost:$iPort", $errno, $errstr, $iTimeout, STREAM_CLIENT_CONNECT, $get);
         if(!$read){
-            return array('_error' => "Error $errno: $errstr; cannot create stream_context to ssl://$sHost:$iPort");
+            return array('_error' => "Error $errno: $errstr; cannot create stream_socket_client with given stream_context to ssl://$sHost:$iPort; you can try to set the flag [verify] to false to check expiration date only.");
         }
         $cert = stream_context_get_params($read);
         if(!$cert){
@@ -248,6 +255,7 @@ class appmonitorcheck {
      * @param array $aParams
      * array(
      *     "url"       optional: url to connect check; default: own protocol + server
+     *     "verify"    optional: flag for verification of certificate or check for expiration only; default=true (=verification is on)
      *     "warning"   optional: count of days to warn; default=30
      * )
      * @return boolean
@@ -257,10 +265,11 @@ class appmonitorcheck {
                 ? $aParams["url"] 
                 : 'http'. ($_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] .':' . $_SERVER['SERVER_PORT']
                 ;
-        $iWarn = isset($aParams["warning"]) ? (int)($aParams["warning"]) : 30;
+        $bVerify = isset($aParams["verify"])  ? !!$aParams["verify"] : true;
+        $iWarn   = isset($aParams["warning"]) ? (int)($aParams["warning"]) : 30;
 
         $sMessage="Checked url: $sUrl ... ";
-        $certinfo=$this->_certGetInfos($sUrl);
+        $certinfo=$this->_certGetInfos($sUrl, $bVerify);
         if(isset($certinfo['_error'])){
             $this->_setReturn(RESULT_ERROR, $certinfo['_error'] . $sMessage);
             return true;
@@ -288,7 +297,9 @@ class appmonitorcheck {
             return true;
         }
         // echo '<pre>';
-        $this->_setReturn(RESULT_OK, 'OK, is valid. ' . $sMessage);
+        $this->_setReturn(RESULT_OK, 'OK. ' 
+                .($bVerify ? 'Certificate is valid. ' : '(Verification is disabled; Check for expiration only.) ' )
+                . $sMessage);
         return true;
     }
 
