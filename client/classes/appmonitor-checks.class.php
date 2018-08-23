@@ -493,8 +493,8 @@ class appmonitorcheck {
         }
 
         $db = (isset($aParams["port"]) && $aParams["port"]) 
-                ? $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"].'X', $aParams["db"], $aParams["port"])
-                : $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"].'X', $aParams["db"])
+                ? $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"], $aParams["port"])
+                : $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"])
                 ;
         if ($db) {
             $this->_setReturn(RESULT_OK, "OK: Mysql database " . $aParams["db"] . " was connected");
