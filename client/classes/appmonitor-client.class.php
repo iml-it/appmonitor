@@ -15,10 +15,11 @@
  * --------------------------------------------------------------------------------<br>
  * <br>
  * --- HISTORY:<br>
- * 2014-10-24  0.5  axel.hahn@iml.unibe.ch<br>
- * 2014-11-21  0.6  axel.hahn@iml.unibe.ch  removed meta::ts <br>
+ * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
+ * 2014-11-21  0.6   axel.hahn@iml.unibe.ch  removed meta::ts <br>
+ * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  show version<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.6
+ * @version 0.50
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -26,6 +27,13 @@
  * @package IML-Appmonitor
  */
 class appmonitor {
+
+    /**
+     * config: default ttl for server before requesting the client check again
+     * value is in seconds
+     * @var int
+     */
+    private $_sVersion = 'php-client-v0.50';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -77,7 +85,8 @@ class appmonitor {
             "website" => false,
             "ttl" => false,
             "result" => false,
-            "time" => false
+            "time" => false,
+            "version" => $this->_sVersion,
         );
 
         // fill with default values

@@ -27,8 +27,9 @@ define("RESULT_ERROR", 3);
  * 2018-07-26  0.46  axel.hahn@iml.unibe.ch  fix mysql connection check with empty port param<br>
  * 2018-08-14  0.47  axel.hahn@iml.unibe.ch  appmonitor client: use timeout of 5 sec for tcp socket connections<br>
  * 2018-08-15  0.49  axel.hahn@iml.unibe.ch  cert check: added flag to skip verification<br>
+ * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  replace mysqli connect with mysqli real connect (to use a timeout)<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.47
+ * @version 0.50
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -39,7 +40,7 @@ class appmonitorcheck {
     // ----------------------------------------------------------------------
     // CONFIG
     // ----------------------------------------------------------------------
-
+    
     /**
      * config container
      * @var array
@@ -469,7 +470,7 @@ class appmonitorcheck {
     }
 
     /**
-     * check mysql connection to a database using mysqli
+     * check mysql connection to a database using mysqli realconnect
      * @param array $aParams
      * array(
      *     "server" 
@@ -481,16 +482,26 @@ class appmonitorcheck {
      */
     private function checkMysqlConnect($aParams) {
         $this->_checkArrayKeys($aParams, "server,user,password,db");
+        $mysqli=mysqli_init();
+        if(!$mysqli){
+            $this->_setReturn(RESULT_ERROR, 'ERROR: mysqli_init failed.');
+            return false;
+        }
+        if (!$mysqli->options(MYSQLI_OPT_CONNECT_TIMEOUT, $this->_iTimeoutTcp)) {
+            $this->_setReturn(RESULT_ERROR, 'ERROR: setting mysqli_init failed.');
+            return false;
+        }
+
         $db = (isset($aParams["port"]) && $aParams["port"]) 
-                ? mysqli_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"], $aParams["port"])
-                : mysqli_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"])
+                ? $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"].'X', $aParams["db"], $aParams["port"])
+                : $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"].'X', $aParams["db"])
                 ;
         if ($db) {
             $this->_setReturn(RESULT_OK, "OK: Mysql database " . $aParams["db"] . " was connected");
-            mysqli_close($db);
+            $mysqli->close();
             return true;
         } else {
-            $this->_setReturn(RESULT_ERROR, "ERROR: Mysql database " . $aParams["db"] . " was not connected. " . mysqli_connect_error());
+            $this->_setReturn(RESULT_ERROR, "ERROR: Mysql database " . $aParams["db"] . " was not connected. Error ".mysqli_connect_errno() .": ". mysqli_connect_error());
             return false;
         }
     }

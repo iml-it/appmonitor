@@ -510,7 +510,7 @@ parameters:
 
 ### checkMysqlConnect ###
 
-verify a database connection with mysqli_connect function.
+verify a database connection with mysqli real connect function.
 
     // example: parse a myasl connect string
     require_once '../config/inc_config.php';
