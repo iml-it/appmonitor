@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.51  2018-08-24
+    - appmonitor client: method to show local status page
+
 v0.50  2018-08-23
     - appmonitor client: replace mysqli connect with mysqli real connect (to use a timeout)
     - appmonitor client: show version of the client

@@ -18,8 +18,9 @@
  * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
  * 2014-11-21  0.6   axel.hahn@iml.unibe.ch  removed meta::ts <br>
  * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  show version<br>
+ * 2018-08-24  0.51  axel.hahn@iml.unibe.ch  method to show local status page<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.50
+ * @version 0.51
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -33,7 +34,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    private $_sVersion = 'php-client-v0.50';
+    private $_sVersion = 'php-client-v0.51';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -390,6 +391,80 @@ class appmonitor {
             header('Cache-Control: cache');
             header('max-age: ' . $this->_aMeta["ttl"]);
         }
+        echo $sOut;
+        return $sOut;
+    }
+    /**
+     * output appmonitor client status as single html page
+     * 
+     * @example <code>
+     * ob_start();<br>
+     * require __DIR__ . '/appmonitor/client/index.php';
+     * $sJson=ob_get_contents();
+     * ob_end_clean();
+     * $oMonitor->renderHtmloutput($sJson);
+     * </code>
+     * 
+     * @param string  $sJson  JSON of client output
+     */
+    public function renderHtmloutput($sJson) {
+
+
+        header('Content-type: text/html');
+        header('Cache-Control: cache');
+        header('max-age: ' . $this->_aMeta["ttl"]);
+        $aMsg = array(
+            0 => "OK",
+            1 => "UNKNOWN",
+            2 => "WARNING",
+            3 => "ERROR"
+        );
+
+        // $sOut = print_r($sJson, 1);
+        $aData= json_decode($sJson, 1);
+
+        // ----- Ausgabe human readable
+        $sOut='';
+        $sOut.='<h2>Metadata</h2>'
+                . '<div class="meta'.(isset($aData['meta']['result'])  ? ' result'.$aData['meta']['result'] : '' ) .'">'
+                . 'Status: '  . (isset($aData['meta']['result'])  ? $aMsg[$aData['meta']['result']] : '?').'<br>'
+                . '</div>'
+                . 'Host: '    . (isset($aData['meta']['host'])    ? '<span class="string">' . $aData['meta']['host']   .'</span>'    : '?').'<br>'
+                . 'Website: ' . (isset($aData['meta']['website']) ? '<span class="string">' . $aData['meta']['website'].'</span>'  : '?').'<br>'
+                // . 'Status: '  . (isset($aData['meta']['result'])  ? '<span class="result'.$aData['meta']['result'].'">'. $aMsg[$aData['meta']['result']].'</span>'  : '?').'<br>'
+                . 'Execution time: '    . (isset($aData['meta']['time'])    ? '<span class="float">'  . $aData['meta']['time']  .'</span>'  : '?').'<br>'
+
+                .'<h2>Checks</h2>'
+                ;
+        if (isset($aData['checks'][0]) && count($aData['checks'])){
+            foreach($aData['checks'] as $aCheck){
+               $sOut.= '<span class="result'.$aCheck['result'].'"> <strong>'.$aCheck['name'].'</strong></span> <br>'
+                   . $aCheck['description'].'<br>'
+                   // . '<span class="result'.$aCheck['result'].'">'.$aCheck['value'].'</span><br>'
+                   . $aCheck['value'].'<br>'
+                   . 'Execution time: ' . $aCheck['time'].'<br>'
+                   . 'Status: '  . $aMsg[$aCheck['result']].'<br>'
+                   . '<br>'
+                   ;
+            }
+        }
+        $sOut.= '<hr>List of farbcodes: ';
+        foreach ($aMsg as $i=>$sText){
+            $sOut.= '<span class="result'.$i.'">'. $sText.'</span> ';
+        }
+        $sOut = '<!DOCTYPE html><html><head>'
+                . '<style>'
+                . 'body{background:#fff; color:#444; font-family: verdana,arial; margin: 3em;}'
+                . '.result0{background:#aca; border-left: 1em solid #080; padding: 0 0.5em; }'
+                . '.result1{background:#ccc; border-left: 1em solid #aaa; padding: 0 0.5em; }'
+                . '.result2{background:#fc9; border-left: 1em solid #860; padding: 0 0.5em; }'
+                . '.result3{background:#f88; border-left: 1em solid #f00; padding: 0 0.5em; }'
+                . '</style>'
+                . '<title>' . __CLASS__ . '</title>'
+                . '</head><body>'
+                . '<h1>' . __CLASS__ . ' :: client status</h1>'
+                . $sOut
+                . '</body></html>';
         echo $sOut;
         return $sOut;
     }
