@@ -19,8 +19,9 @@
  * 2014-11-21  0.6   axel.hahn@iml.unibe.ch  removed meta::ts <br>
  * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  show version<br>
  * 2018-08-24  0.51  axel.hahn@iml.unibe.ch  method to show local status page<br>
+ * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.51
+ * @version 0.52
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -34,7 +35,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    private $_sVersion = 'php-client-v0.51';
+    private $_sVersion = 'php-client-v0.52';
 
     /**
      * config: default ttl for server before requesting the client check again

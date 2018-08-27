@@ -508,7 +508,7 @@ parameters:
 - contains (string) string that must exist in response body
 
 
-### checkMysqlConnect ###
+### MysqlConnect ###
 
 verify a database connection with mysqli real connect function.
 
@@ -542,19 +542,46 @@ parameters:
 - "db"       - database name / scheme to connect <span class="required">(*)</span>
 - "port"     - database port; optional
 
+Remark:  
+The idea is not to enter credentials in the parameters. You should parse the config of your application and insert its variables.
 
-### checkSqliteConnect ###
 
-Make a database connection to a sqlite database.
-The function fails if the filename does not exist or the PDO cannot open it
-`$o = new PDO("sqlite:".$aParams["db"]);`
+### PdoConnect ###
+
+verify a database connection with PDO connect.
+
+PDO supports a wide range of database types - see http://php.net/manual/en/pdo.drivers.php.
+BUT: I just started with Mysql. To implement more types go to classes/appmonitor-checks.class.php - method checkPdoConnect().
+
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "Mysql Master",
+            "description" => "Connect mysql db master ".$aDb['host']." - " . $aDb['path'],
+            "check" => array(
+                "function" => "MysqlConnect",
+                "params" => array(
+                  "connect"  => [pdo connect string],
+                  "user"     => [database user],
+                  "password" => [password],
+                ),
+            ),
+        )
+    );
 
 parameters:
 
-- "db" (string) full path of the sqlite database file <span class="required">(*)</span>
+- "conect"   - conect string, i.e. 'mysql:host=localhost;port=3306;dbname=mydatabase;' <span class="required">(*)</span>
+- "user"     - mysql username <span class="required">(*)</span>
+- "password" - password <span class="required">(*)</span>
+
+Remark:  
+The idea is not to enter credentials in the parameters. You should parse the config of your application and insert its variables.
 
 
-### checkPortTcp ###
+
+
+### PortTcp ###
 
 Check if the local server is listening to a given port number.
 
@@ -606,6 +633,16 @@ parameters:
         );
     }
 
+
+### SqliteConnect ###
+
+Make a database connection to a sqlite database.
+The function fails if the filename does not exist or the PDO cannot open it
+`$o = new PDO("sqlite:".$aParams["db"]);`
+
+parameters:
+
+- "db" (string) full path of the sqlite database file <span class="required">(*)</span>
 
 	
 ## Additional Metadata ##

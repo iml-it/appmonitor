@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.52 2018-08-27
+    - add pdo connect (starting with mysql)
+
 v0.51  2018-08-24
     - appmonitor client: method to show local status page
 

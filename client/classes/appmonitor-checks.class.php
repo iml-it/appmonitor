@@ -28,8 +28,9 @@ define("RESULT_ERROR", 3);
  * 2018-08-14  0.47  axel.hahn@iml.unibe.ch  appmonitor client: use timeout of 5 sec for tcp socket connections<br>
  * 2018-08-15  0.49  axel.hahn@iml.unibe.ch  cert check: added flag to skip verification<br>
  * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  replace mysqli connect with mysqli real connect (to use a timeout)<br>
+ * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.50
+ * @version 0.52
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -502,6 +503,43 @@ class appmonitorcheck {
             return true;
         } else {
             $this->_setReturn(RESULT_ERROR, "ERROR: Mysql database " . $aParams["db"] . " was not connected. Error ".mysqli_connect_errno() .": ". mysqli_connect_error());
+            return false;
+        }
+    }
+    /**
+     * check connection to a database using pdo
+     * see http://php.net/manual/en/pdo.drivers.php
+     * 
+     * @param array $aParams
+     * array(
+     *     "connect" 
+     *     "password" 
+     *     "user" 
+     * )
+     */
+    private function checkPdoConnect($aParams) {
+        $this->_checkArrayKeys($aParams, "connect,user,password");
+
+        try{
+            $db = new PDO(
+                $aParams['connect'], 
+                $aParams['user'], 
+                $aParams['password'], 
+                array(
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    
+                    // timeout
+                    // Not all drivers support this option; mysqli does
+                    PDO::ATTR_TIMEOUT => $this->_iTimeoutTcp,                  
+                    // mssql
+                    // PDO::SQLSRV_ATTR_QUERY_TIMEOUT => $this->_iTimeoutTcp,  
+                )
+            );
+            $this->_setReturn(RESULT_OK, "OK: Database was connected with PDO " . $aParams['connect']);
+            $db=null;
+            return true;
+        } catch(PDOException $e) {
+            $this->_setReturn(RESULT_ERROR, "ERROR: Database was not connected " . $aParams['connect'] . " was not connected. Error ".$e->getMessage());
             return false;
         }
     }
