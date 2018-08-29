@@ -250,6 +250,7 @@ To see all defined checks:
 - checkFile
 - checkHttpContent
 - checkMysqlConnect
+- checkPdoConnect
 - checkPortTcp
 - checkSimple
 - checkSqliteConnect
