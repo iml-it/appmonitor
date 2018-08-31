@@ -131,6 +131,9 @@ function reloadPage() {
  * @returns {undefined}
  */
 function setAdressbar() {
+    console.log("--- setAdressbar()");
+    console.log(aViewFilters);
+
     var url = '?'
         + (aViewFilters['tag'] ? '&tag=' + aViewFilters['tag'] : '')
         + (aViewFilters['divwebs'] ? '&webapp=' + aViewFilters['divwebs'] : '')
@@ -186,6 +189,9 @@ function applyViewFilter() {
     $('#divwebs .divhost').show();
     $('#divsetup .divhost').show();
 
+    console.log("--- applyViewFilter()");
+    console.log(aViewFilters);
+    
     // filter by tag
     if (aViewFilters['tag']) {
         var sTagClass = getClassByClearnameTag(aViewFilters['tag']);
@@ -204,7 +210,7 @@ function applyViewFilter() {
     
     // show active tab
     showDiv();
-
+    
     // update url int the browser
     setAdressbar();
 }
@@ -235,6 +241,8 @@ function setTab(sFilter) {
 }
 function setTag(sFilter) {
     aViewFilters['tag'] = sFilter;
+    console.log("--- setTag("+sFilter+")");
+    console.log(aViewFilters);
     applyViewFilter();
 }
 function setTagClass(sClass) {
@@ -355,7 +363,9 @@ function initGuiStuff() {
 
     // set onclick event for links (navigation bar)
     $("a[href^=\'#\']").click(function () {
-        setTab(this.hash);
+        if(this.hash) { 
+            setTab(this.hash); 
+        }
         return false;
     });
 

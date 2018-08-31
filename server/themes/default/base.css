@@ -60,7 +60,7 @@ padding: 1em;}
 .footer a:hover{text-decoration: underline;}
 
 .tile{float: left; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); 
-     padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8em; width: 10em;
+     padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8.5em; width: 10em;
 }
 .tile .count{font-size: 200%; opacity: 0.8; font-weigh1t: bold; padding: 0.3em 0;}
 .tile .label{}
@@ -105,3 +105,4 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 
 .highlight{background:#fc2;}
 .frmFilter{background: rgba(0,0,0,0.05); padding: 0.5em;}
+.tag{color:#669; font-size: 90%;}

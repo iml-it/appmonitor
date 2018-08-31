@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.54 2018-08-31
+    - appmonitor server: tags on hosts are clickable
+
 v0.53 2018-08-31
     - appmonitor server: add textfilter for webapps and in the setup
     - appmonitor server: show tags of a web app

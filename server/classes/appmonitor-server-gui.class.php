@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.48
+ * @version 0.54
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -29,7 +29,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
-    var $_sTitle = "Appmonitor Server v0.53";
+    var $_sTitle = "Appmonitor Server v0.54";
 
     /**
      * html code for icons in the web gui
@@ -403,6 +403,7 @@ class appmonitorserver_gui extends appmonitorserver {
             $sWebapp = isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
             $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp.$sAppId;
             $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
+            
             $sOut = '<div '
                     . 'class="divhost result' . $aEntries["result"]["result"] . ' tags '.$this->_getCssclassForTag($aTags).'" '
                     // . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
@@ -418,7 +419,7 @@ class appmonitorserver_gui extends appmonitorserver {
                             .'</span>'
                             . '<a href="#divweb' . $sAppId . '">' . str_replace('.', '.&shy;', $sWebapp) . '</a><br>'
                             . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' '
-                            . ($aTags ? '<br>'.$this->_aIco['tag'] .' '. implode(', ', $aTags) : '')
+                            . ($aTags ? '<br>'. $this->_getTaglist($aTags) : '')
                             .'</div>'
                         : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
                             . $this->_aIco['error'] . ' ' . $sWebapp . '<br>'
@@ -864,6 +865,23 @@ class appmonitorserver_gui extends appmonitorserver {
             foreach($sTag as $sSingletag){
                 $sReturn.=($sReturn ? ' ' : '')
                     . 'tag-'.md5($sSingletag);
+            }
+            return $sReturn;
+        }
+        return false;
+    }
+    /**
+     * get name for css class of a tag
+     * 
+     * @param string|array $aTags
+     * @return type
+     */
+    protected function _getTaglist($aTags){
+        if(is_array($aTags) && count($aTags)){
+            $sReturn='';
+            foreach($aTags as $sSingletag){
+                $sReturn.=($sReturn ? ' ' : '')
+                    . ' <a href="#" class="tag" title="'.$this->_tr('Tag-filter').': ' .$sSingletag.'" onclick="setTag(\''.$sSingletag.'\')">'.$this->_aIco['tag'] .' ' . $sSingletag.'</a>';
             }
             return $sReturn;
         }
