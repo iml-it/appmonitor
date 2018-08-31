@@ -68,8 +68,9 @@ padding: 1em;}
 
 .outsegment{min-height: 30em; display:none; margin-top: 7em; padding: 1em; border: 2px solid #fff; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #e8e8e8;}
 
-.divhost{border: 1px solid rgba(0,0,0,0.01); float: left; padding: 0.4em; margin: 0 1em 1em 0; width: 21em; height: 4em;}
-.divhost>.icon{background: rgba(0,0,0,0.10); font-size: 200%; padding: 0.3em; display: block; float: left; margin-right: 0.3em;}
+.divhost{border: 1px solid rgba(0,0,0,0.01); float: left; padding: 0.4em; margin: 0 1em 1em 0; width: 21em; width: 21em; height: 4em;}
+.divhost>.icon{background: rgba(0,0,0,0.10); font-size: 200%; padding: 0.3em; display: block; float: left; margin-right: 0.3em; }
+.divhost>div{margin-left: 3.5em;}
 #divsetup .divhost{width: auto; height: auto;}
 
 .result0{background:#efe    !important; background: linear-gradient(#dfd,#cec)!important;}
@@ -101,3 +102,6 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 .icook{color:#2a2;}
 .icowarning{color:#ea2;}
 .icoerror{color:#c22;}
+
+.highlight{background:#fc2;}
+.frmFilter{background: rgba(0,0,0,0.05); padding: 0.5em;}

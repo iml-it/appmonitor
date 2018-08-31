@@ -29,7 +29,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
-    var $_sTitle = "Appmonitor Server v0.48";
+    var $_sTitle = "Appmonitor Server v0.53";
 
     /**
      * html code for icons in the web gui
@@ -56,7 +56,7 @@ class appmonitorserver_gui extends appmonitorserver {
         'filter' => '<i class="fa fa-filter"></i>',
         'age' => '<i class="fa fa-clock-o"></i>',
         'time' => '<i class="fa fa-clock-o"></i>',
-        'httpstatus' => '<i class="fa fa-tag"></i>',
+        'tag' => '<i class="fa fa-tag"></i>',
         'debug' => '<i class="fa fa-bug"></i>',
         'ok' => '<i class="fa fa-check"></i>',
         'info' => '<i class="fa fa-info"></i>',
@@ -379,7 +379,9 @@ class appmonitorserver_gui extends appmonitorserver {
             return $this->_showWelcomeMessage();
         }
         // echo '<pre>'.print_r($this->_data, 1).'</pre>';
-        $sReturn .= $this->_generateWebTiles();
+        $sReturn .= $this->_generateWebTiles()
+                . '<div id="divwebsfilter"></div><br>'
+                ;
 
         $aAllWebapps = array();
         foreach ($this->_data as $sAppId => $aEntries) {
@@ -404,21 +406,24 @@ class appmonitorserver_gui extends appmonitorserver {
             $sOut = '<div '
                     . 'class="divhost result' . $aEntries["result"]["result"] . ' tags '.$this->_getCssclassForTag($aTags).'" '
                     // . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
-                    . 'onclick="window.location.hash=\'#divweb' . $sAppId . '\'; showDiv( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
+                    // . 'onclick="window.location.hash=\'#divweb' . $sAppId . '\'; showDiv( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
+                    . 'onclick="setTab( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
                     . '>'
                     . ($bHasData ? 
                             '<span class="icon">'.$this->_aIco['webapp'].'</span>'
+                            . '<div style="">'
                             . '<span style="float: right;">'
                                 .$this->_renderBadgesForWebsite($sAppId, true) 
                                 . $sValidatorinfo
                             .'</span>'
                             . '<a href="#divweb' . $sAppId . '">' . str_replace('.', '.&shy;', $sWebapp) . '</a><br>'
                             . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' '
+                            . ($aTags ? '<br>'.$this->_aIco['tag'] .' '. implode(', ', $aTags) : '')
+                            .'</div>'
                         : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
                             . $this->_aIco['error'] . ' ' . $sWebapp . '<br>'
                             . '</span>'
                     )
-                    . '<br>'
                     . '</div>';
             $aAllWebapps[$sTilekey] = $sOut;
         }
@@ -600,7 +605,9 @@ class appmonitorserver_gui extends appmonitorserver {
                 // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
                 . '<input type="submit" class="btn btnadd" value="' . $this->_tr('btn-addUrl') . '">'
                 . '</form><br>';
-        $sReturn .= '<h3>' . $this->_tr('Setup-client-list') . '</h3>';
+        $sReturn .= '<h3>' . $this->_tr('Setup-client-list') . '</h3>'
+                . '<div id="divsetupfilter"></div><br>';
+        
         foreach ($this->_data as $sAppId => $aData) {
             $iResult = array_key_exists("result", $aData["result"]) ? $aData["result"]["result"] : 3;
             $sUrl = $aData["result"]["url"];
@@ -608,7 +615,8 @@ class appmonitorserver_gui extends appmonitorserver {
             $sHost = array_key_exists("host", $aData["result"]) ? $aData["result"]["host"] : $this->_tr('unknown');
 
             $sIdDetails = 'setupdetail' . md5($sAppId);
-            $sReturn .= '<div class="divhost result' . $iResult . '" style="float: none; ">'
+            $aTags=isset($aData["meta"]["tags"]) ? $aData["meta"]["tags"] : false;
+            $sReturn .= '<div class="divhost result' . $iResult . ' tags '.$this->_getCssclassForTag($aTags).'" style="float: none; ">'
                     . '<div style="float: right;">'
                     . $sFormOpenTag
                     . '<input type="hidden" name="action" value="deleteurl">'
@@ -686,7 +694,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                 . '<h2>' . $this->_aIco["allwebapps"] . ' ' . $this->_tr('All-webapps-header') . '</h2>'
                 . $this->_generateWeblist()
-                . '</div>';
+                . '<div style="clear: both;"></div></div>';
 
         // ----- one table per checked client
         foreach ($this->_data as $sAppId => $aEntries) {
@@ -870,7 +878,7 @@ class appmonitorserver_gui extends appmonitorserver {
             $sOptions.='<option value="'.$this->_getCssclassForTag($sTag).'">'.$sTag.'</a>';
             }
         if($sOptions){
-            $sReturn=$this->_aIco['filter'].' '.$this->_tr('Tag-filter').': <select id="selecttag" onchange="filterForTag(this.value)">'
+            $sReturn=$this->_aIco['filter'].' '.$this->_tr('Tag-filter').': <select id="selecttag" onchange="setTagClass(this.value)">'
                     . '<option value="">---</option>'
                     . $sOptions
                     . '</select>';
@@ -954,11 +962,6 @@ class appmonitorserver_gui extends appmonitorserver {
                     . ' $(\'.datatable-checks\').dataTable( { "order": [[ 0, "desc" ]] } ); '
                     . ' $(\'.datatable-hosts\').dataTable( { "order": [[ 0, "desc" ]] } ); '
                     . ' $(\'.datatable-notifications\').dataTable( { "order": [[ 1, "desc" ]] } ); '
-                    . 'if (document.location.hash) {'
-                    . ' showDiv( document.location.hash ) ; '
-                    . '} else {'
-                    . ' showDiv( "#' . $sFirstDiv . '" ) ; '
-                    . '}'
                     . 'initGuiStuff();'
                     . ''
                     . '} );'

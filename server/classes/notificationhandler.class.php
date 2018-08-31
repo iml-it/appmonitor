@@ -469,7 +469,7 @@ class notificationhandler {
                         . $this->_tr('Resulttype-'. $aCheck['result'])
                         ;
             }
-            $aReplace['__CHECKS__']=implode("", $aSortedChecks);
+            $aReplace['__CHECKS__']= html_entity_decode($this->_tr('msgErr-missing-section-checks'));
         }
         return $aReplace;
     }

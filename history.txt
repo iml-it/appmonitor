@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.53 2018-08-31
+    - appmonitor server: add textfilter for webapps and in the setup
+    - appmonitor server: show tags of a web app
+    - appmonitor notifications: show message if no checks are available
+
 v0.52 2018-08-27
     - add pdo connect (starting with mysql)
 
