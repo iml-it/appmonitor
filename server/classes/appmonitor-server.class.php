@@ -2,6 +2,7 @@
 
 require_once 'cache.class.php';
 require_once 'lang.class.php';
+// require_once 'health.class.php';
 require_once 'notificationhandler.class.php';
 
 /**
@@ -364,17 +365,16 @@ class appmonitorserver {
 
         // get results
         foreach ($aUrls as $sKey => $sUrl) {
-            $aTmp = explode("\r\n\r\n", curl_multi_getcontent($curl_arr[$sKey]), 2);
-            // echo $sResponse . '<pre>'.print_r($aTmp, 1).'</pre>'; die();
+            list($sHeader, $sBody) = explode("\r\n\r\n", curl_multi_getcontent($curl_arr[$sKey]), 2);
             $aResult[$sKey] = array(
                 'url' => $sUrl,
-                'response_header' => $aTmp[0],
-                'response_body' => count($aTmp) > 1 ? $aTmp[1] : false,
+                'response_header' => $sHeader,
+                'response_body' => $sBody,
+                'curlinfo' => curl_getinfo ($curl_arr[$sKey])
             );
             curl_multi_remove_handle($master, $curl_arr[$sKey]);
         }
         curl_multi_close($master);
-
         return $aResult;
     }
 
@@ -462,6 +462,11 @@ class appmonitorserver {
                 $aClientData["result"]["headerarray"] = $this->_getHttpStatusArray($aResult['response_header']);
                 $aClientData["result"]["httpstatus"] = $iHttpStatus;
                 $aClientData["result"]["error"] = $sError;
+                
+                // $aClientData["result"]["curlinfo"] = $aResult['curlinfo'];
+                
+                // $oHealth=new health($sKey);
+                // $oHealth->add($aClientData["result"]["result"], floor($aResult['curlinfo']['total_time']*1000));
 
 
                 // write cache

@@ -454,7 +454,7 @@ class notificationhandler {
         }
         // echo '<pre>'.print_r($this->_aAppResult['checks'], 1).'</pre>';
         $sChecks='';
-        if(isset($this->_aAppResult['checks'])){
+        if(isset($this->_aAppResult['checks']) && count($this->_aAppResult['checks'])){
             
             // force sortorder in notifications - one key for each result ... 3 is error .. 0 is OK
             $aSortedChecks=array();
@@ -469,7 +469,9 @@ class notificationhandler {
                         . $this->_tr('Resulttype-'. $aCheck['result'])
                         ;
             }
-            $aReplace['__CHECKS__']= html_entity_decode($this->_tr('msgErr-missing-section-checks'));
+            $aReplace['__CHECKS__']=implode("", $aSortedChecks);
+        } else {
+            $aReplace['__CHECKS__']=html_entity_decode($this->_tr('msgErr-missing-section-checks'));
         }
         return $aReplace;
     }

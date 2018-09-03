@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.55 2018-09-03
+    - notification: fix showing the checks and an error message on missing checks
+
 v0.54 2018-08-31
     - appmonitor server: tags on hosts are clickable
 

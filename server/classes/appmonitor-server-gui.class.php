@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.54
+ * @version 0.55
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -29,7 +29,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
-    var $_sTitle = "Appmonitor Server v0.54";
+    var $_sTitle = "Appmonitor Server v0.55";
 
     /**
      * html code for icons in the web gui
@@ -713,8 +713,8 @@ class appmonitorserver_gui extends appmonitorserver {
             ) {
                 $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                         . '<h2>' . $this->_aIco['allwebapps'] . ' <a href="#divwebs">' . $this->_tr('All-webapps-header') . '</a>'
-                        . ' .. '
-                        . $this->_aIco['webapp']
+                        . ' | '
+                        // . $this->_aIco['webapp']
                         . (isset($aEntries['result']['website']) ? $aEntries['result']['website'] : '?')
                         . '</h2>'
                         . $this->_generateWebappTiles($sAppId)
@@ -738,6 +738,11 @@ class appmonitorserver_gui extends appmonitorserver {
                     }
                     $sHtml.=$sValidationContent;
                     // --- /validation
+
+                    
+                    // $oHealth=new health($sAppId);
+                    // $sHtml .= '<pre>'.print_r($oHealth->get(10), 1).'</pre>';
+        
 
                     $sHtml .= '<h3>' . $this->_tr('Checks') . '</h3>'
                             // TODO: create tabs
