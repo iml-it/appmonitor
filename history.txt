@@ -1,6 +1,12 @@
 
 HISTORY
 
+v0.56 2018-09-05
+    - notification: getlogs - added filter and limit
+    - added class to store response time infos
+    - appmonitor-server gui: added graph with chartjs for response time for a single web app
+    - appmonitor-server gui: added notificcations for a single web app
+
 v0.55 2018-09-03
     - notification: fix showing the checks and an error message on missing checks
 
