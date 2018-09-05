@@ -2,7 +2,7 @@
 
 require_once 'cache.class.php';
 require_once 'lang.class.php';
-// require_once 'health.class.php';
+require_once 'responsetimerrd.class.php';
 require_once 'notificationhandler.class.php';
 
 /**
@@ -465,8 +465,8 @@ class appmonitorserver {
                 
                 // $aClientData["result"]["curlinfo"] = $aResult['curlinfo'];
                 
-                // $oHealth=new health($sKey);
-                // $oHealth->add($aClientData["result"]["result"], floor($aResult['curlinfo']['total_time']*1000));
+                $oResponsetime=new responsetimeRrd($sKey);
+                $oResponsetime->add($aClientData["result"]["result"], floor($aResult['curlinfo']['total_time']*1000), $sError ? $sError : $this->_tr('Resulttype-0'));
 
 
                 // write cache

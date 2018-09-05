@@ -23,7 +23,7 @@ define("RESULT_ERROR", 3);
 class notificationhandler {
 
     protected $_sCacheIdPrefix="notificationhandler";
-    protected $_iMaxLogentries=100;
+    protected $_iMaxLogentries=1000;
     
     /**
      * logdata for detected changes and sent notifications
@@ -335,23 +335,35 @@ class notificationhandler {
     
     /**
      * get current log data
-     * @return type
+     * 
+     * @param array   $aFilter  filter with possible keys timestamp|changetype|status|appid|message (see addLogitem())
+     * @param integer $iLimit
+     * @return array
      */
     public function getLogdata($aFilter=array(), $iLimit=false){
         $aReturn=array();
         $aData=$this->loadLogdata();
+        rsort($aData);
         
         // filter
         if (count($aFilter)>0){
             foreach($aData as $aLogentry){
-                // TODO filtering
-                $aReturn[]=$aLogentry;
+                if($iLimit && count($aReturn)>=$iLimit){
+                    break;
+                }
+                $bAdd=false;
+                foreach ($aFilter as $sKey=>$sValue){
+                    if($aLogentry[$sKey]===$sValue){
+                        $bAdd=true;
+                    }
+                }
+                if($bAdd){
+                    $aReturn[]=$aLogentry;
+                }
             }
         } else {
             $aReturn=$aData;
         }
-        
-        // limit
         
         return $aReturn;
     }

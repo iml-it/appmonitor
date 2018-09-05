@@ -16,6 +16,7 @@
 
         "Notifications": "Notifications",
         "Notifications-header": "Log of last changes",
+        "Notifications-none": "No messages available.",
 
         "Setup": "Setup",
         "Setup-client-list": "List of existing Clients",
@@ -28,6 +29,11 @@
         "About-projecturl": "The project is public for all and located at <a href=\"%s\">%s</a>.",
         "About-docs": "The <a href=\"%s\">Documentation</a> is available as markdown. You can read it online on the project url or as <em>readme.md</em> in the downloaded archive.",
 
+        "Chart-graph": "Graph",
+        "Chart-graph-description": "Last reponse times of the monitoring request beginning with connect time up to finish of the transfer.",
+        "Chart-time": "Time",
+        "Chart-responsetime": "Responsetime [ms]",
+        
         "Debug": "Debug",
         "Debug-config": "Config",
         "Debug-urls": "Urls",
@@ -151,6 +157,7 @@
         
         "email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__.",
         
+        "msgErr-missing-section-checks":"There is no section &quot;checks&quot; in the response. This can be the result of a timout or an error.",
         
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },

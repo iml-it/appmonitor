@@ -131,8 +131,7 @@ function reloadPage() {
  * @returns {undefined}
  */
 function setAdressbar() {
-    console.log("--- setAdressbar()");
-    console.log(aViewFilters);
+    // console.log("--- setAdressbar()"); console.log(aViewFilters);
 
     var url = '?'
         + (aViewFilters['tag'] ? '&tag=' + aViewFilters['tag'] : '')
@@ -189,8 +188,7 @@ function applyViewFilter() {
     $('#divwebs .divhost').show();
     $('#divsetup .divhost').show();
 
-    console.log("--- applyViewFilter()");
-    console.log(aViewFilters);
+    // console.log("--- applyViewFilter()"); console.log(aViewFilters);
     
     // filter by tag
     if (aViewFilters['tag']) {
@@ -241,8 +239,7 @@ function setTab(sFilter) {
 }
 function setTag(sFilter) {
     aViewFilters['tag'] = sFilter;
-    console.log("--- setTag("+sFilter+")");
-    console.log(aViewFilters);
+    // console.log("--- setTag("+sFilter+")"); console.log(aViewFilters);
     applyViewFilter();
 }
 function setTagClass(sClass) {

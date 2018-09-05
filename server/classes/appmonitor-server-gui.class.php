@@ -29,7 +29,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
-    var $_sTitle = "Appmonitor Server v0.55";
+    var $_sTitle = "Appmonitor Server v0.56";
 
     /**
      * html code for icons in the web gui
@@ -534,9 +534,14 @@ class appmonitorserver_gui extends appmonitorserver {
      * get html code for notification log page
      * @return string
      */
-    protected function _generateNoftificationlog() {
-        $aLogs = $this->oNotifcation->getLogdata();
-        rsort($aLogs);
+    protected function _generateNoftificationlog($aLogs=false) {
+        if($aLogs===false){
+            $aLogs = $this->oNotifcation->getLogdata();
+            rsort($aLogs);
+        }
+        if(!count($aLogs)){
+            return $this->_tr('Notifications-none');
+        }
 
         $sTable = $this->_generateTableHead(array(
                     $this->_tr('Result'),
@@ -698,7 +703,9 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<div style="clear: both;"></div></div>';
 
         // ----- one table per checked client
+        $iCounter=0;
         foreach ($this->_data as $sAppId => $aEntries) {
+            $iCounter++;
             $sId = 'divweb' . $sAppId;
             $sDivMoredetails='div-http-'.$sAppId;
             $sShowHide='<br><button class="btn" id="btn-plus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideDown(); $(this).hide(); $(\'#btn-minus-'.$sAppId.'\').show(); return false;"'
@@ -739,18 +746,30 @@ class appmonitorserver_gui extends appmonitorserver {
                     $sHtml.=$sValidationContent;
                     // --- /validation
 
-                    
-                    // $oHealth=new health($sAppId);
-                    // $sHtml .= '<pre>'.print_r($oHealth->get(10), 1).'</pre>';
-        
-
                     $sHtml .= '<h3>' . $this->_tr('Checks') . '</h3>'
-                            // TODO: create tabs
-                            . $this->_generateMonitorTable($aEntries["result"]["url"])
-                    // TODO: Info page for people that get notifications
-                    // TODO: Info page status changes
-                    // .'DEBUG: <pre>'.print_r($aEntries, 1).'</pre>'
-                    ;
+                        // TODO: create tabs
+                        . $this->_generateMonitorTable($aEntries["result"]["url"])
+                        // .'DEBUG: <pre>'.print_r($aEntries, 1).'</pre>'
+                        ;
+
+                    // --- chart
+                    $oResponsetime=new responsetimeRrd($sAppId);
+                    $sHtml .= '<h3>'.$this->_tr('Chart-graph').'</h3>'
+                        .'<p>'.$this->_tr('Chart-graph-description').'</p>'
+                        . $oResponsetime->renderGraph(array(
+                            'xLabel'=>$this->_tr('Chart-time'),
+                            'yLabel'=>$this->_tr('Chart-responsetime'),
+                            'iMax'=>100,
+                        ))
+                        ;
+
+                    // --- notifications for this webapp
+                    $aLogs = $this->oNotifcation->getLogdata(array('appid'=>$sAppId),10);
+                    rsort($aLogs);
+                    $sHtml .= '<h3>' . $this->_tr('Notifications') . '</h3>'
+                            // . '<pre>'.print_r($aLogs, 1).'</pre>'
+                            . $this->_generateNoftificationlog($aLogs).'<br>'
+                            ;
                 }
                 $sHtml .= $sShowHide
                         . '<div id="'.$sDivMoredetails.'" style="display: none;">'
@@ -959,6 +978,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 . $oCdn->getHtmlInclude("datatables/1.10.16/js/jquery.dataTables.min.js")
                 . $oCdn->getHtmlInclude("datatables/1.10.16/css/jquery.dataTables.min.css")
                 . $oCdn->getHtmlInclude("font-awesome/4.7.0/css/font-awesome.css")
+                . $oCdn->getHtmlInclude("Chart.js/2.7.2/Chart.min.js")
                 . '<script src="javascript/functions.js"></script>'
                 . '<link href="themes/' . $sTheme . '/screen.css" rel="stylesheet"/>'
                 . '</head>' . "\n"
