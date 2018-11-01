@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.57 2018-11-01
+    - lang text en: fix typo
+
 v0.56 2018-09-05
     - notification: getlogs - added filter and limit
     - added class to store response time infos

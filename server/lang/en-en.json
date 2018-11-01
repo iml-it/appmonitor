@@ -116,7 +116,7 @@
         "msgOK-Url-was-removed": "URL was removed: %s",
     
     
-        "msgErr-missing-section-checks":"There is no section &quot;checks&quot; in the response. This can be the result of a timout or an error.",
+        "msgErr-missing-section-checks":"There is no section &quot;checks&quot; in the response. This can be the result of a timeout or an error.",
         "msgErr-missing-key-checks-name":"checks > %s > name is not set - this check has no identifier.",
         "msgErr-missing-key-checks-result":"checks > %s > result is not set - this check has no result.",
         
@@ -156,8 +156,6 @@
         "changetype-3.email.message": "The webapp __URL__ was deleted in the appmonitor. You will not get notifications about status changes anymore. If this is an error, then contact the sysadmin.",
         
         "email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__.",
-        
-        "msgErr-missing-section-checks":"There is no section &quot;checks&quot; in the response. This can be the result of a timout or an error.",
         
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },
