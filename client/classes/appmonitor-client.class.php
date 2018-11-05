@@ -20,6 +20,7 @@
  * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  show version<br>
  * 2018-08-24  0.51  axel.hahn@iml.unibe.ch  method to show local status page<br>
  * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
+ * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * --------------------------------------------------------------------------------<br>
  * @version 0.52
  * @author Axel Hahn
@@ -35,7 +36,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    private $_sVersion = 'php-client-v0.52';
+    private $_sVersion = 'php-client-v0.58';
 
     /**
      * config: default ttl for server before requesting the client check again

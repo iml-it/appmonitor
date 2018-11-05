@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.58 2018-11-05
+    - appmonitor client: flag to show http reponse
+
 v0.57 2018-11-01
     - lang text en: fix typo
 

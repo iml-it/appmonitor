@@ -29,8 +29,9 @@ define("RESULT_ERROR", 3);
  * 2018-08-15  0.49  axel.hahn@iml.unibe.ch  cert check: added flag to skip verification<br>
  * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  replace mysqli connect with mysqli real connect (to use a timeout)<br>
  * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
+ * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.52
+ * @version 0.58
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -62,7 +63,7 @@ class appmonitorcheck {
     protected $_units = array( 'B', 'KB', 'MB', 'GB', 'TB');
     
     /**
-     * timout in sec for tcp socket connections
+     * timeout in sec for tcp socket connections
      * @var type 
      */
     protected $_iTimeoutTcp=5;
@@ -442,6 +443,7 @@ class appmonitorcheck {
      * array(
      *     "url"       url to fetch
      *     "contains"  string that must exist in response body
+     *     "content"   optional boolean flag: show response? default is false
      * )
      * @param integer $iTimeout  value in sec; default: 5sec
      */
@@ -451,6 +453,7 @@ class appmonitorcheck {
             header('HTTP/1.0 503 Service Unavailable');
             die("ERROR: PHP CURL module is not installed.");
         }
+        $bShowContent = (isset($aParams["content"]) && $aParams["content"]) ? true : false;
         $ch = curl_init($aParams["url"]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -462,9 +465,15 @@ class appmonitorcheck {
             $this->_setReturn(RESULT_ERROR, 'ERROR: failed to fetch ' . $aParams["url"] . '.');
         } else {
             if (!strpos($res, $aParams["contains"]) === false) {
-                $this->_setReturn(RESULT_OK, 'OK: The text "' . $aParams["contains"] . '" was found in response of ' . $aParams["url"] . '.');
+                $this->_setReturn(RESULT_OK, 
+                        'OK: The text "' . $aParams["contains"] . '" was found in response of ' . $aParams["url"] . '.'
+                        . ($bShowContent ? $res : '')
+                        );
             } else {
-                $this->_setReturn(RESULT_ERROR, 'ERROR: The text ' . $aParams["contains"] . ' was NOT found in response of ' . $aParams["url"] . '.');
+                $this->_setReturn(RESULT_ERROR, 
+                        'ERROR: The text ' . $aParams["contains"] . ' was NOT found in response of ' . $aParams["url"] . '.'
+                        . ($bShowContent ? $res : '')
+                        );
             }
         }
         return $res;

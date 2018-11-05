@@ -163,7 +163,7 @@ The client part of the monitoring.
 
    
    
-### Initialiasation ###
+### Initialisation ###
 
 Have a look to the example in ./client/index.sample.php
 
@@ -497,6 +497,7 @@ This check verifies if a given string exists in the reponse body of a given url.
                 "params" => array(
                     "url" => "http://[server]/[path]/",
                     "contains" => "hello",
+                    "content" => true
                 ),
             ),
         )
@@ -506,7 +507,8 @@ This check verifies if a given string exists in the reponse body of a given url.
 parameters:
 
 - url (string) url to fetch <span class="required">(*)</span>
-- contains (string) string that must exist in response body
+- contains (string) string that must exist in response body <span class="required">(*)</span>
+- content (boolean) optional flag: show response? default is false
 
 
 ### MysqlConnect ###
