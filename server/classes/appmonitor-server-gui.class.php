@@ -18,7 +18,7 @@ require_once 'appmonitor-server.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.55
+ * @version 0.59
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -29,7 +29,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
-    var $_sTitle = "Appmonitor Server v0.57";
+    var $_sTitle = "Appmonitor Server v0.59";
 
     /**
      * html code for icons in the web gui
@@ -289,7 +289,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
                     'more' => $sSleeping,
                 ))
-                . '<div style="clear: both;"></div>'
+                // . '<div style="clear: both;"></div>'
         ;
         return $sReturn;
     }
@@ -372,16 +372,12 @@ class appmonitorserver_gui extends appmonitorserver {
      * helper: generate list of websites with colored boxes based on site status
      * @return string
      */
-    private function _generateWeblist() {
+    public function _generateWeblist() {
         $sReturn = '';
         $iMiss = 0;
         if (!count($this->_data)) {
             return $this->_showWelcomeMessage();
         }
-        // echo '<pre>'.print_r($this->_data, 1).'</pre>';
-        $sReturn .= $this->_generateWebTiles()
-                . '<div id="divwebsfilter"></div><br>'
-                ;
 
         $aAllWebapps = array();
         foreach ($this->_data as $sAppId => $aEntries) {
@@ -686,21 +682,35 @@ class appmonitorserver_gui extends appmonitorserver {
     }
 
     /**
+     * load monitoring data ... if not done yet
+     * @return boolean
+     */
+    public function loadClientData(){
+        if (!count($this->_data)) {
+            $this->_getClientData();
+        }
+        return true;
+    }
+    /**
      * render html output of monitoring output (data only)
      * @return string
      */
     public function renderHtmlContent() {
-        if (!count($this->_data)) {
-            $this->_getClientData();
-        }
+        $this->loadClientData();
         $sHtml = '';
 
         // ----- boxes with all websites
         $sId = 'divwebs';
         $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                 . '<h2>' . $this->_aIco["allwebapps"] . ' ' . $this->_tr('All-webapps-header') . '</h2>'
-                . $this->_generateWeblist()
-                . '<div style="clear: both;"></div></div>';
+                .(!count($this->_data)
+                    ? $this->_showWelcomeMessage()
+                    : '<div class="overviewtiles">'.$this->_generateWebTiles().'</div>'
+                        . '<div id="divwebsfilter"></div><br>'
+                        . $this->_generateWeblist()
+                )
+                . '<div style="clear: both;"></div>'
+                . '</div>';
 
         // ----- one table per checked client
         $iCounter=0;
@@ -720,8 +730,8 @@ class appmonitorserver_gui extends appmonitorserver {
             ) {
                 $sHtml .= '<div class="outsegment" id="' . $sId . '">'
                         . '<h2>' . $this->_aIco['allwebapps'] . ' <a href="#divwebs">' . $this->_tr('All-webapps-header') . '</a>'
-                        . ' | '
-                        // . $this->_aIco['webapp']
+                        . ' '
+                        . $this->_aIco['webapp']
                         . (isset($aEntries['result']['website']) ? $aEntries['result']['website'] : '?')
                         . '</h2>'
                         . $this->_generateWebappTiles($sAppId)
@@ -912,15 +922,20 @@ class appmonitorserver_gui extends appmonitorserver {
         return false;
     }
 
+    /**
+     * render the dropdown with all application tags 
+     * 
+     * @return string
+     */
     protected function _renderTagfilter(){
         $sReturn='';
         $aTaglist=$this->_getClientTags();
         $sOptions='';
         foreach($aTaglist as $sTag){
-            $sOptions.='<option value="'.$this->_getCssclassForTag($sTag).'">'.$sTag.'</a>';
+            $sOptions.='<option value="'.$this->_getCssclassForTag($sTag).'">'.$sTag.'</option>';
             }
         if($sOptions){
-            $sReturn=$this->_aIco['filter'].' '.$this->_tr('Tag-filter').': <select id="selecttag" onchange="setTagClass(this.value)">'
+            $sReturn=$this->_aIco['filter'].' <span>'.$this->_tr('Tag-filter').': </span><select id="selecttag" onchange="setTagClass(this.value)">'
                     . '<option value="">---</option>'
                     . $sOptions
                     . '</select>';
@@ -928,6 +943,19 @@ class appmonitorserver_gui extends appmonitorserver {
         return $sReturn;
     }
 
+    /**
+     * render a single menu item for the top navigation
+     * 
+     * @param string $sHref   href atribute
+     * @param string $sclass  css class of a tag
+     * @param string $sIcon   icon of clickable label
+     * @param string $sLabel  label of the link (and title as well)
+     * @return string
+     */
+    protected function _renderMenuItem($sHref, $sclass, $sIcon, $sLabel){
+        return '<a href="' . $sHref . '" class="'.$sclass.'" title="'.$sLabel.'">' . $this->_aIco[$sIcon] . '<span> '.$sLabel.'</span></a>';
+    }
+    
     /**
      * render html output of monitoring output (whole page)
      * @return string
@@ -939,35 +967,24 @@ class appmonitorserver_gui extends appmonitorserver {
         $sNavi = '';
         $sTitle = $this->_sTitle;
 
-        $sNavi.='<span style="float: right; margin-right: 1.5em;">'.$this->_renderTagfilter().'</span>';
         $iReload = ((isset($this->_aCfg['pagereload']) && (int) $this->_aCfg['pagereload'] ) ? (int) $this->_aCfg['pagereload'] : 0);
-
-        $sNavi .= '<a href="#" class="reload" onclick="reloadPage()"'
+        $sNavi.='<span class="tagfilter">'.$this->_renderTagfilter().'</span>'
+                . '<nav>'
+                . '<a href="#" class="reload" onclick="reloadPage()"'
                 . ($iReload ? ' title="' . sprintf($this->_tr('Reload-every'), $iReload) . '"' : '')
                 . '>'
-                . $this->_aIco["reload"] . ' ' . $this->_tr('Reload') . ' ('.$this->_tr('age-of-page') . ': <span class="timer-age-in-sec">0</span> s)'
-                . ' </a>';
+                . $this->_aIco["reload"] . ' <span>' . $this->_tr('Reload') . ' ('.$this->_tr('age-of-page') . ': <span class="timer-age-in-sec">0</span> s)'
+                . ' </span></a>';
 
-        $sId = 'divwebs';
-        $sFirstDiv = $sId;
-        $sNavi .= '<a href="#' . $sId . '" class="allwebapps" >' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps') . '</a>';
-
-        $sId = 'divall';
-        $sNavi .= '<a href="#' . $sId . '" class="checks" >' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks') . '</a>';
-
-        $sId = 'divnotifications';
-        $sNavi .= '<a href="#' . $sId . '" class="checks" >' . $this->_aIco["notifications"] . ' ' . $this->_tr('Notifications') . '</a>';
-
-        $sId = 'divsetup';
-        $sNavi .= '<a href="#' . $sId . '" class="setup" >' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</a>';
-        
-        $sId = 'divabout';
-        $sNavi .= '<a href="#' . $sId . '" class="about" >' . $this->_aIco["about"] . ' ' . $this->_tr('About') . '</a>';
-
-        if ($this->_aCfg['debug']) {
-            $sId = 'divdebug';
-            $sNavi .= '<a href="#' . $sId . '"  class="debug" >' . $this->_aIco["debug"] . ' ' . $this->_tr('Debug') . '</a>';
-        }
+        $sNavi .= $this->_renderMenuItem('#divwebs',          'allwebapps', 'allwebapps',    $this->_tr('All-webapps'))
+                . $this->_renderMenuItem('#divnotifications', 'checks',     'notifications', $this->_tr('Notifications'))
+                . $this->_renderMenuItem('#divsetup',         'setup',      'setup',         $this->_tr('Setup'))
+                . $this->_renderMenuItem('#divabout',         'about',      'about',         $this->_tr('About'))
+                . ($this->_aCfg['debug']
+                    ? $this->_renderMenuItem('#divdebug',     'debug',      'debug',         $this->_tr('Debug'))
+                    : ''
+                )
+                . '</nav>';
 
         $sTheme = ( array_key_exists('theme', $this->_aCfg) && $this->_aCfg['theme'] ) ? $this->_aCfg['theme'] : 'default';
         $sHtml = '<!DOCTYPE html>' . "\n"

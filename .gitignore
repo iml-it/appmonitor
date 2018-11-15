@@ -12,3 +12,5 @@ nbproject
 /client/check-matomo.settings.php
 /server/javascript/functions.min.js
 /client/check-fs.php
+/client/check-limesurvey.php
+/client/check-limesurvey.settings.php
