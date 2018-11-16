@@ -145,7 +145,7 @@ class responsetimeRrd {
         $sCtx='ctxRg'.$iCounter;
         $sConfig='configRg'.$iCounter;
 
-        $sHtml = '<div class="tile" style="width:900px;">'
+        $sHtml = '<div class="graph">'
                 . '<canvas id="'.$sIdCanvas.'"></canvas>'
             . '</div><div style="clear: both;"></div>'
             . "<script>

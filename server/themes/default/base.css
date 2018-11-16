@@ -113,19 +113,40 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 .frmFilter{background: rgba(0,0,0,0.05); padding: 0.5em;}
 .tag{color:#669; font-size: 90%;}
 
+.graph{float: left; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); 
+     padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8.5em; width:95%; max-width: 1024px;}
 
 
 @media (max-device-width: 1024px) {
     h1{font-size:130%;}
+    .divmain{margin: 1em 0 2em;}
+    .outsegment{background: none; margin-top: 5.5em; padding: 0.2em;}
     .divtopnavi a span{display: none;}
     .divtopnavi .tagfilter span{display: none;}
     
-    .tile{display: none;}
-    .tile:first-of-type{display: block; min-height: auto; width: 10em;}
-    .overviewtiles{float: right;}
+    .tile{display: none;min-height: 7em; width: 10em;}
+    .overviewtiles{}
     .tile .count{font-size: 200%; opacity: 0.8; font-weigh1t: bold; padding: 0;}
     .tile .label{}
     .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
     
-    #divwebsfilter{clear: none;}
+    .divhost{height: 2em; margin: 0.2em;}
+    .divhost > div {margin: 0;}
+    .divhost > .icon {display: none;}
+    .divhost > div.details{display: none;}
+    .graph{width: 100%;}
+}
+@media (min-device-width: 300px) {
+    .tile:nth-child(1){display: block;}
+}
+
+@media (min-device-width: 500px) {
+    .tile:nth-child(2){display: block;}
+}
+@media (min-device-width: 700px) {
+    .tile:nth-child(3){display: block;}
+}
+@media (min-device-width: 900px) {
+    .tile:nth-child(4){display: block;}
+    .tile:nth-child(5){display: block;}
 }
