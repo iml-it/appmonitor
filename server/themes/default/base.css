@@ -117,16 +117,16 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
      padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8.5em; width:95%; max-width: 1024px;}
 
 
-@media (max-device-width: 1024px) {
-    h1{font-size:130%;}
+@media (max-width: 1024px) {
+    h1{font-size:150%;}
     .divmain{margin: 1em 0 2em;}
     .outsegment{background: none; margin-top: 5.5em; padding: 0.2em;}
     .divtopnavi a span{display: none;}
     .divtopnavi .tagfilter span{display: none;}
     
-    .tile{display: none;min-height: 7em; width: 10em;}
+    .tile{display: none; min-height: 6em; width: 10em;}
     .overviewtiles{}
-    .tile .count{font-size: 200%; opacity: 0.8; font-weigh1t: bold; padding: 0;}
+    .tile .count{font-size: 200%; opacity: 0.8; padding: 0;}
     .tile .label{}
     .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
     
@@ -136,17 +136,21 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
     .divhost > div.details{display: none;}
     .graph{width: 100%;}
 }
-@media (min-device-width: 300px) {
+@media (min-width: 250px) {
+    .divtopnavi a.active span{display: none;}
     .tile:nth-child(1){display: block;}
 }
 
-@media (min-device-width: 500px) {
+@media (min-width: 420px) {
     .tile:nth-child(2){display: block;}
 }
-@media (min-device-width: 700px) {
+@media (min-width: 600px) {
+    .divtopnavi a.active span{display: inline;}
     .tile:nth-child(3){display: block;}
 }
-@media (min-device-width: 900px) {
+@media (min-width: 800px) {
     .tile:nth-child(4){display: block;}
+}
+@media (min-width: 1000px) {
     .tile:nth-child(5){display: block;}
 }
