@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.62 2019-02-05
+    - appmonitor server: fix missing lang key in notification if no checks were found
+    - appmonitor notofications: send with high priority
+    - appmonitor notofications: remove client url and http header in message body
+
 v0.61 2018-11-16
     - appmonitor server: css - replace device-width with width
 

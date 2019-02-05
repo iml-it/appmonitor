@@ -614,8 +614,14 @@ class notificationhandler {
         $sEmailSubject=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.subject');
         $sEmailBody=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.message');
 
-        mail($sTo, $sEmailSubject, $sEmailBody, "From: " . $sFrom . "\r\n" .
-            "Reply-To: " . $sFrom . "\r\n"
+        mail($sTo, $sEmailSubject, $sEmailBody, 
+            "From: " . $sFrom . "\r\n" 
+            . "Reply-To: " . $sFrom . "\r\n"
+
+            . "X-Priority: 1 (Highest)\r\n"
+            . "X-MSMail-Priority: High\r\n"
+            . "Importance: High\r\n"
+
         );
         return true;
     }
