@@ -597,6 +597,33 @@ class appmonitorserver {
         );
     }
 
+    protected function _apiGetAppData($sKey=false, $sFilterAppId=false) {
+        $this->_getClientData();
+        $aReturn=array();
+        $aBasedata=($sFilterAppId && isset($this->_data[$sFilterAppId]) ? $this->_data[$sFilterAppId] : $this->_data );
+        print_r($aBasedata);
+        echo '<br>$sKey = '.$sKey.'<br>';
+        foreach($aBasedata as $sAppId=>$aData){
+            $aReturn[$sAppId]=$sKey 
+                    // ? (isset($aData[$sKey]) ? $aData[$sKey] : false) 
+                    ? $aData[$sKey] 
+                    : $aData;
+        }
+        return $aReturn;
+    }
+    
+    public function apiGetAppIds() {
+        $this->_getClientData();
+        return array_keys($this->_data);
+    }
+    public function apiGetAppAllData($sFilterAppId=false) {
+        return $this->_apiGetAppData(false, $sFilterAppId);
+    }
+    public function apiGetAppMeta($sFilterAppId=false) {
+        return $this->_apiGetAppData('meta',$sFilterAppId);
+    }
+
+    
     /**
      * get all client data and final result as array
      * @param   string  $sHost  filter by given hostname
@@ -642,9 +669,10 @@ class appmonitorserver {
                         $iMaxReturn = 3;
                     $aMessages[] = $this->_tr('msgErr-Http-request-failed') . ' (' . $aEntries["result"]["url"] . ')';
                 } else {
-                    if ($iMaxReturn < $aEntries["result"]["result"])
+                    if ($iMaxReturn < $aEntries["result"]["result"]){
                         $iMaxReturn = $aEntries["result"]["result"];
-                    $aMessages[] = $aEntries["result"]["host"] . ': ' . $aEntries["result"]["result"];
+                    }
+                    // $aMessages[] = $aEntries["result"]["host"] . ': ' . $aEntries["result"]["result"];
                     foreach ($aEntries["result"]["summary"] as $key => $value) {
                         if (!array_key_exists($key, $aResults)) {
                             $aResults[$key] = 0;

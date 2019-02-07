@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.63 2019-02-07
+    - appmonitor server: load content snippets with ajax request 
+      (not the whole content of all apps and views anymore)
+
 v0.62 2019-02-05
     - appmonitor server: fix missing lang key in notification if no checks were found
     - appmonitor notofications: send with high priority

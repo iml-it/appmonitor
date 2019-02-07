@@ -71,17 +71,20 @@ padding: 1em;}
 .tile .label{}
 .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
 
-.outsegment{min-height: 30em; display:none; margin-top: 7em; padding: 1em; border: 2px solid #fff; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #e8e8e8;}
+#content{transition: opacity 0.4s linear; }
+.outsegment{min-height: 30em; margin-top: 7em; padding: 1em; border: 2px solid #fff; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #e8e8e8;}
 
 .divhost{border: 1px solid rgba(0,0,0,0.01); float: left; padding: 0.4em; margin: 0 1em 1em 0; width: 21em; width: 21em; height: 4em;}
-.divhost>.icon{background: rgba(0,0,0,0.10); font-size: 200%; padding: 0.3em; display: block; float: left; margin-right: 0.3em; }
+.divhost .icon{background: rgba(255,255,255,0.3); font-size: 200%; padding: 0.3em; display: block; float: left; margin-right: 0.3em; width: 1.3em; text-align: center;}
+.divhost .icon a{color:#666;}
 .divhost>div{margin-left: 3.5em;}
 #divsetup .divhost{width: auto; height: auto;}
 
-.result0{background:#efe    !important; background: linear-gradient(#dfd,#cec)!important;}
+
+.result0{background:#dfd    !important; background: linear-gradient(#dfd,#cec)!important;}
 .result1{background:#eee    !important; background: linear-gradient(#eee,#ddd)!important;}
 .result2{background:#fff8d0 !important; background: linear-gradient(#fff0d0,#f0e0b0)!important;}
-.result3{background:#fdd    !important; background: linear-gradient(#fde,#fcd)!important;}
+.result3{background:#fcd    !important; background: linear-gradient(#fde,#fcd)!important;}
 
 tr.result0{background:rgba(220,240,220,0.4) !important; color:#385;}
 tr.result1{background:rgba(220,220,220,0.2) !important; color:#999;}
@@ -111,11 +114,13 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 #divwebsfilter{clear: both;}
 .highlight{background:#fc2;}
 .frmFilter{background: rgba(0,0,0,0.05); padding: 0.5em;}
-.tag{color:#669; font-size: 90%;}
+.tag{color:#669; font-size: 90%; text-decoration: none; border-bottom: 1px dashed; margin-right: 0.5em;}
 
 .graph{float: left; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); 
      padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8.5em; width:95%; max-width: 1024px;}
 
+#counter{border-bottom: 1px solid rgba(255,255,255,0.3); text-align: center; margin-right: 0.5em;}
+#counter div{background:#fc2; height: 1px; transition: width 0.8s linear ; bottom: 0;}
 
 @media (max-width: 1024px) {
     h1{font-size:150%;}

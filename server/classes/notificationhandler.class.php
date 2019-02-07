@@ -462,7 +462,7 @@ class notificationhandler {
             
         );
         if($this->_sServerurl){
-            $aReplace['__MONITORURL__']=$this->_sServerurl . '#divweb'.$this->_sAppId;
+            $aReplace['__MONITORURL__']=$this->_sServerurl . '#divweb-'.$this->_sAppId;
         }
         // echo '<pre>'.print_r($this->_aAppResult['checks'], 1).'</pre>';
         $sChecks='';

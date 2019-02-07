@@ -15,6 +15,8 @@
  * @type Number
  */
 var iStartTime = getUnixTS();
+var iReload = false; // will be set in appmonitorserver_gui->renderHtml()
+var iRefreshCounter = 0;
 
 /**
  * filter
@@ -28,12 +30,12 @@ var aViewFilters = {};
 
 // http://blog.mastykarz.nl/jquery-regex-filter/
 jQuery.extend(
-    jQuery.expr[':'], {
-        regex: function (a, i, m) {
-            var r = new RegExp(m[3], 'i');
-            return r.test(jQuery(a).text());
-        }
+        jQuery.expr[':'], {
+    regex: function (a, i, m) {
+        var r = new RegExp(m[3], 'i');
+        return r.test(jQuery(a).text());
     }
+}
 );
 
 /*
@@ -114,43 +116,19 @@ function getUnixTS() {
 }
 
 /**
- * reload the page and remove the query parameters
- * @returns {undefined}
- */
-function reloadPage() {
-    if (window.location.search) {
-        window.location.href = window.location.pathname + window.location.hash;
-    } else {
-        window.location.reload();
-    }
-}
-
-/**
  * manipulate url in the browser address bar
  * 
  * @returns {undefined}
  */
 function setAdressbar() {
-    // console.log("--- setAdressbar()"); console.log(aViewFilters);
 
     var url = '?'
-        + (aViewFilters['tag'] ? '&tag=' + aViewFilters['tag'] : '')
-        + (aViewFilters['divwebs'] ? '&webapp=' + aViewFilters['divwebs'] : '')
-        + aViewFilters['tab'];
+            + (aViewFilters['tag'] ? '&tag=' + aViewFilters['tag'] : '')
+            + (aViewFilters['divwebs'] ? '&webapp=' + aViewFilters['divwebs'] : '')
+            + aViewFilters['tab'];
     window.history.pushState('dummy', 'Title', url);
 }
 
-/**
- * update page content - but not on setup page
- * @returns {Boolean}
- */
-function updateContent() {
-    if (location.hash == '#divsetup') {
-        window.setTimeout("updateContent()", 1000);
-        return false;
-    }
-    location.reload();
-}
 
 
 // ----------------------------------------------------------------------
@@ -185,11 +163,7 @@ function applyViewFilter() {
 
     // show everything
     $('.tags').show();
-    $('#divwebs .divhost').show();
-    $('#divsetup .divhost').show();
 
-    // console.log("--- applyViewFilter()"); console.log(aViewFilters);
-    
     // filter by tag
     if (aViewFilters['tag']) {
         var sTagClass = getClassByClearnameTag(aViewFilters['tag']);
@@ -205,10 +179,7 @@ function applyViewFilter() {
     // filter hosts
     filterMonitors('divwebs');
     filterMonitors('divsetup');
-    
-    // show active tab
-    showDiv();
-    
+
     // update url int the browser
     setAdressbar();
 }
@@ -221,25 +192,25 @@ function applyViewFilter() {
  */
 function filterMonitors(sDiv) {
     var sTarget = '#' + sDiv + ' .divhost';
+    if (!sTarget) {
+        return false;
+    }
     var filter = aViewFilters[sDiv];
     $(sTarget).removeHighlight();
     if (filter) {
-        // $(sTarget+":regex('" + filter + "')").show();
         $(sTarget + ":not(:regex('" + filter + "'))").hide();
-        // $("tr").first().show();
-
         $(sTarget).highlight(filter);
-    } 
+    }
+    return true;
 }
 
 
 function setTab(sFilter) {
     aViewFilters['tab'] = sFilter;
-    applyViewFilter();
+    showDiv();
 }
 function setTag(sFilter) {
     aViewFilters['tag'] = sFilter;
-    // console.log("--- setTag("+sFilter+")"); console.log(aViewFilters);
     applyViewFilter();
 }
 function setTagClass(sClass) {
@@ -289,26 +260,97 @@ function getTagByClassname(sClassname) {
     return sReturn;
 }
 
+/**
+ * show a timer ad a
+ * @returns {undefined}
+ */
+function refreshTimer() {
+    if (iRefreshCounter == 0) {
+        $('#counter').html(
+            '<span>-</span><br>'
+            + '<div style="width:100%; float: left;">&nbsp;</div>'
+        );
+    }
+    if (
+        location.hash == '#divsetup'
+        || location.hash == '#divabout'
+    ) {
+        return false;
+    }
+    $('#counter span').html(iReload - iRefreshCounter + 's');
+    $('#counter div').css('width', (100 - (iRefreshCounter / iReload * 100)) + '%');
+    iRefreshCounter++;
+
+    if (iRefreshCounter > iReload) {
+        showDiv();
+    }
+}
+
+
 // ----------------------------------------------------------------------
 // FUNCTIONS for divs
 // ----------------------------------------------------------------------
 
 /**
- * switch the visible output div and update top navi item
- * @param {string} sDiv
+ * load content and update top navi item
  * @returns {undefined}
  */
-function showDiv(sDiv) {
-    sDiv = aViewFilters['tab'];
-    $(".outsegment").hide();
-    $(sDiv).show();
-    $(".divtopnavi a").removeClass("active");
-    $("a[href='" + sDiv + "']").addClass("active").blur();
-    if (sDiv.indexOf('divweb') > 0) {
-        $("a[href='#divwebs']").addClass("active");
-    }
-}
+function showDiv() {
 
+    var oOut = $('#content');
+    var url = './get.php?';
+
+    var sCfgViews = {
+        '#divabout': 'viewabout',
+        '#divdebug': 'viewdebug',
+        '#divnotifications': 'viewnotifications',
+        '#divsetup': 'viewsetup'
+    };
+
+    var item = 'viewweblist';
+    var appid = '';
+
+    var sDiv = aViewFilters['tab'];
+    if (sDiv && sDiv.indexOf('divweb-') > 0) {
+        item = 'viewweb';
+        appid = sDiv.replace(/\#.*\-/, '');
+    } else {
+        if (sCfgViews[sDiv]) {
+            item = sCfgViews[sDiv];
+        }
+
+    }
+    url += 'item=' + item + (appid ? '&appid=' + appid : '');
+
+    // var sInfo='new content<br>DIV: '+sDiv+'<br>appid: '+appid+'<br>URL: '+url+'<br><hr>';
+    var sInfo = '';
+    // oOut.html(sInfo);
+
+    iStartTime = getUnixTS();
+    iRefreshCounter = 0;
+
+    oOut.css('opacity', '0.2');
+    jQuery.ajax({
+        url: url,
+        // data: queryparams,
+        type: 'GET',
+        success: function (data) {
+            oOut.css('opacity', 1);
+            oOut.html(sInfo + data);
+            postLoad(false);
+        },
+        error: function (data) {
+            oOut.css('opacity', 1);
+            oOut.html(sInfo + 'Failed :-/' + data);
+            postLoad(false);
+            /*
+             $('#errorlog').html(
+             $('#errorlog').html('AJAX error: <a href="' + url + '?' + queryparams + '">' + url + '?' + queryparams + '</a>')
+             );
+             */
+        }
+    });
+}
 
 /**
  * let a counter update its age in sec
@@ -337,6 +379,30 @@ function timerAgeInSec() {
     });
 }
 
+function postLoad(bIsFirstload) {
+    if (bIsFirstload) {
+        return true;
+    }
+
+    var sDiv = aViewFilters['tab'];
+    $(".divtopnavi a").removeClass("active");
+    $("a[href='" + sDiv + "']").addClass("active");
+    $("nav a").blur();
+    if (sDiv.indexOf('divweb') > 0) {
+        $("a[href='#divwebs']").addClass("active");
+    }
+
+    addFilter4Webapps('divwebs');
+    addFilter4Webapps('divsetup');
+
+    applyViewFilter();
+
+    $('.datatable').dataTable({});
+    $('.datatable-checks').dataTable({"order": [[0, "desc"]]});
+    $('.datatable-hosts').dataTable({"order": [[0, "desc"]]});
+    $('.datatable-notifications').dataTable({'order': [[1, 'desc']]});
+
+}
 
 /**
  * initialize GUI elements: timer, set tag filter, set active tab+div
@@ -344,26 +410,29 @@ function timerAgeInSec() {
  */
 function initGuiStuff() {
 
-    // activate age timer on tiles
-    var oTimerAgeInSec = window.setInterval("timerAgeInSec();", 5000);
-
     aViewFilters = {
         'tag': getQueryVariable('tag') ? getQueryVariable('tag') : '',
         'tab': window.location.hash ? window.location.hash : '#divwebs',
         'divwebs': getQueryVariable('divwebs'),
         'divsetup': getQueryVariable('divsetup')
     };
-    addFilter4Webapps('divwebs');
-    addFilter4Webapps('divsetup');
-
-    applyViewFilter();
 
     // set onclick event for links (navigation bar)
     $("a[href^=\'#\']").click(function () {
-        if(this.hash) { 
-            setTab(this.hash); 
+        if (this.hash) {
+            setTab(this.hash);
         }
         return false;
     });
+
+    // show the content
+    showDiv();
+    
+    // reload timer
+    window.setInterval('refreshTimer()', 1000);
+
+    // activate age timer on tiles
+    window.setInterval("timerAgeInSec();", 5000);
+
 
 }

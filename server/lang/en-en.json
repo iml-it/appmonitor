@@ -99,8 +99,6 @@
 
         "msgErr-nocheck-welcome": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>To add an url to check go to the Setup.</p>",
         "msgErr-nocheck": "No check was defined yet.",
-        "msgErr-nodata": "ERROR: Sorry, no response from any website. See Tab <a href=#divall>Overview</a> for details.",
-        "msgErr-missedchecks": "ERROR: <strong>%d</strong> check(s) failed. The view is incomplete. See Tab <a href=#divall>Checks</a> for details.",
         "msgErr-demosite": "This is a demo website. Changing the config is not possible here.",
         "msgErr-missing-meta-website": "Missing &quot;meta&quot; - &quot;website&quot;",
 

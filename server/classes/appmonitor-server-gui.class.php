@@ -29,7 +29,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
-    var $_sTitle = "Appmonitor Server v0.62";
+    var $_sTitle = "Appmonitor Server v0.63";
 
     /**
      * html code for icons in the web gui
@@ -362,80 +362,12 @@ class appmonitorserver_gui extends appmonitorserver {
      */
     private function _showWelcomeMessage() {
         return '<div>'
-                . $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
-                . '<br>'
-                . '<a class="btn" href="#divsetup">' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>'
-                . '</div>';
+            . $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
+            . '<br>'
+            . '<a class="btn" href="#divsetup">' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>'
+        . '</div>';
     }
 
-    /**
-     * helper: generate list of websites with colored boxes based on site status
-     * @return string
-     */
-    public function _generateWeblist() {
-        $sReturn = '';
-        $iMiss = 0;
-        if (!count($this->_data)) {
-            return $this->_showWelcomeMessage();
-        }
-
-        $aAllWebapps = array();
-        foreach ($this->_data as $sAppId => $aEntries) {
-            $bHasData = true;
-            if (!isset($aEntries["result"]["host"])) {
-                $bHasData = false;
-                $iMiss++;
-            }
-
-            $aValidaion=$this->_checkClientResponse($sAppId);
-            $sValidatorinfo='';
-            if($aValidaion){
-                foreach($aValidaion as $sSection=>$aMessages){
-                    if (count($aValidaion[$sSection])){
-                        $sValidatorinfo.='<span class="ico'.$sSection.'" title="'.sprintf($this->_tr('Validator-'.$sSection.'-title'), count($aMessages)) .'">'.$this->_aIco[$sSection].'</span>';
-                    }
-                }
-            }
-            $sWebapp = isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
-            $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp.$sAppId;
-            $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
-            
-            $sOut = '<div '
-                    . 'class="divhost result' . $aEntries["result"]["result"] . ' tags '.$this->_getCssclassForTag($aTags).'" '
-                    // . ( $bHasData ? 'onclick="window.location.hash=\'#divweb' . $sKey . '\'; showDiv( \'#divweb' . $sKey . '\' )" style="cursor: pointer;"' : '')
-                    // . 'onclick="window.location.hash=\'#divweb' . $sAppId . '\'; showDiv( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
-                    . 'onclick="setTab( \'#divweb' . $sAppId . '\' )" style="cursor: pointer;"'
-                    . '>'
-                    . ($bHasData ? 
-                            '<span class="icon">'.$this->_aIco['webapp'].'</span>'
-                            . '<div>'
-                            . '<span style="float: right;">'
-                                .$this->_renderBadgesForWebsite($sAppId, true) 
-                                . $sValidatorinfo
-                            .'</span>'
-                            . '<a href="#divweb' . $sAppId . '">' . str_replace('.', '.&shy;', $sWebapp) . '</a><br>'
-                            . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' '
-                            .'</div>'
-                            . '<div class="details">'
-                            . ($aTags ? $this->_getTaglist($aTags) : '')
-                            . '</div>'
-                        : '<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
-                            . $this->_aIco['error'] . ' ' . $sWebapp . '<br>'
-                            . '</span>'
-                    )
-                    . '</div>';
-            $aAllWebapps[$sTilekey] = $sOut;
-        }
-        ksort($aAllWebapps);
-        // echo '<pre>'.htmlentities(print_r($aHosts, 1)).'</pre>'; die();
-        foreach ($aAllWebapps as $aWebapp) {
-            $sReturn .= $aWebapp;
-        }
-        if ($iMiss > 0) {
-            // $sReturn = '<div class="diverror">' . $this->_aIco["error"] . ' ' . sprintf($this->_tr('msgErr-missedchecks'), $iMiss) . '</div>' . $sReturn;
-        }
-        return $sReturn . '<div style="clear;"></div>';
-    }
 
     /**
      * helper: generate html code with all checks.
@@ -451,23 +383,24 @@ class appmonitorserver_gui extends appmonitorserver {
         }
 
         $sTableClass = $sUrl ? "datatable-hosts" : "datatable-checks";
-        $sReturn .= $sUrl ? $this->_generateTableHead(array(
-                    $this->_tr('Result'),
-                    // $this->_tr('TTL'),
-                    $this->_tr('Check'),
-                    $this->_tr('Description'),
-                    $this->_tr('Output'),
-                    $this->_tr('Time'),
-                )) : $this->_generateTableHead(array(
-                    $this->_tr('Result'),
-                    $this->_tr('Timestamp'),
-                    $this->_tr('Host'),
-                    $this->_tr('Webapp'),
-                    $this->_tr('TTL'),
-                    $this->_tr('Check'),
-                    $this->_tr('Description'),
-                    $this->_tr('Output'),
-                    $this->_tr('Time'),
+        $sReturn .= $sUrl 
+        ? $this->_generateTableHead(array(
+            $this->_tr('Result'),
+            // $this->_tr('TTL'),
+            $this->_tr('Check'),
+            $this->_tr('Description'),
+            $this->_tr('Output'),
+            $this->_tr('Time'),
+        )) : $this->_generateTableHead(array(
+            $this->_tr('Result'),
+            $this->_tr('Timestamp'),
+            $this->_tr('Host'),
+            $this->_tr('Webapp'),
+            $this->_tr('TTL'),
+            $this->_tr('Check'),
+            $this->_tr('Description'),
+            $this->_tr('Output'),
+            $this->_tr('Time'),
         ));
         $sReturn .= '<tbody>';
 
@@ -578,16 +511,7 @@ class appmonitorserver_gui extends appmonitorserver {
         for ($i = 0; $i <= 4; $i++) {
             $sMoreResults .= (isset($aResults[$i]) ? '<span class="result' . $i . '">' . $aResults[$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' : '');
         }
-        return
-                /*
-                 * a tile seems to be useless
-                  $this->_getTile(array(
-                  'count'=>count($aLogs),
-                  'label'=>$this->_tr('Notifications'),
-                  'more'=>$sMoreResults,
-                  ))
-                 */
-                $sTable;
+        return $sTable;
     }
 
     /**
@@ -674,51 +598,39 @@ class appmonitorserver_gui extends appmonitorserver {
         }
         return $sHtml;
     }
-
+    
     /**
-     * returns a readable result by given integer; i.e. 0=OK, 1=unknown, ...
+     * return html code for a about page
      * @return string
      */
-    public function getResultValue($i) {
-        return $this->_tr('Resulttype-' . $i);
+    public function generateViewAbout() {
+        $sHtml='<h2>' . $this->_aIco["about"] . ' ' . $this->_tr('About') . '</h2>'
+                . sprintf($this->_tr('About-title'), $this->_sTitle).'<br>'
+                . '<br>'
+                . $this->_tr('About-text').'<br>'
+                . '<br>'
+                . sprintf($this->_tr('About-projecturl'), $this->_sProjectUrl, $this->_sProjectUrl).'<br>'
+                . sprintf($this->_tr('About-docs'), $this->_sDocUrl).'<br>'
+                ;
+        return $sHtml;
     }
-
+    
     /**
-     * load monitoring data ... if not done yet
-     * @return boolean
-     */
-    public function loadClientData(){
-        if (!count($this->_data)) {
-            $this->_getClientData();
-        }
-        return true;
-    }
-    /**
-     * render html output of monitoring output (data only)
+     * return html code for a view of monitoring data for a single web app
+     * @param string  $sAppId  appid
      * @return string
      */
-    public function renderHtmlContent() {
-        $this->loadClientData();
+    public function generateViewApp($sAppId) {
+        // $this->loadClientData();
         $sHtml = '';
-
-        // ----- boxes with all websites
-        $sId = 'divwebs';
-        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                . '<h2>' . $this->_aIco["allwebapps"] . ' ' . $this->_tr('All-webapps-header') . '</h2>'
-                .(!count($this->_data)
-                    ? $this->_showWelcomeMessage()
-                    : '<div class="overviewtiles">'.$this->_generateWebTiles().'</div>'
-                        . '<div id="divwebsfilter"></div><br>'
-                        . $this->_generateWeblist()
-                )
-                . '<div style="clear: both;"></div>'
-                . '</div>';
+        if(!isset($this->_data[$sAppId])){
+            return 'ERROR: appid does not exist: '.htmlentities($sAppId);
+        }
 
         // ----- one table per checked client
         $iCounter=0;
-        foreach ($this->_data as $sAppId => $aEntries) {
+        $aEntries=$this->_data[$sAppId];
             $iCounter++;
-            $sId = 'divweb' . $sAppId;
             $sDivMoredetails='div-http-'.$sAppId;
             $sShowHide='<br><button class="btn" id="btn-plus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideDown(); $(this).hide(); $(\'#btn-minus-'.$sAppId.'\').show(); return false;"'
                         . '> '.$this->_aIco['plus'].' '.$this->_tr('btn-details').' </button>'
@@ -730,9 +642,9 @@ class appmonitorserver_gui extends appmonitorserver {
             if (true ||
                     array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
             ) {
-                $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                        . '<h2>' . $this->_aIco['allwebapps'] . ' <a href="#divwebs">' . $this->_tr('All-webapps-header') . '</a>'
-                        . ' <nobr>'
+                $sHtml .= ''
+                        . '<h2><a href="#divwebs" onclick="setTab(\'#divwebs\')"> ' . $this->_aIco['allwebapps'] . $this->_tr('All-webapps-header')
+                        . '</a> <nobr>'
                         . $this->_aIco['webapp'] .' '
                         . (isset($aEntries['result']['website']) ? $aEntries['result']['website'] : '?')
                         . '</nobr></h2>'
@@ -813,62 +725,154 @@ class appmonitorserver_gui extends appmonitorserver {
                                 . '</pre>';
                     }
                 }
-                $sHtml .= '</div></div>';
+                $sHtml .= '</div>';
             }
-        }
-
-        // ----- table with all checks from all clients
-        $sId = 'divall';
-        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                . '<h2>' . $this->_aIco["checks"] . ' ' . $this->_tr('Checks-header') . '</h2>'
-                . (count($this->_data) ? $this->_generateChecksTile() . '<div style="clear: both;"></div>' : '')
-                . $this->_generateMonitorTable()
-                . '</div>';
-
-        // ----- notifications page
-        $sId = 'divnotifications';
-        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                . '<h2>' . $this->_aIco["notifications"] . ' ' . $this->_tr('Notifications-header') . '</h2>'
+        return $sHtml;
+    }
+    /**
+     * return html code for debug page
+     * @return string
+     */
+    public function generateViewDebug() {
+        $sHtml='<h2>' . $this->_aIco["debug"] . ' ' . $this->_tr('Debug') . '</h2>'
+            . '<h3>' . $this->_tr('Debug-config') . '</h3>'
+            . '<pre>' . print_r($this->_aCfg, true) . '</pre>'
+            . '<h3>' . $this->_tr('Debug-urls') . '</h3>'
+            . '<pre>' . print_r($this->_urls, true) . '</pre>'
+                . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
+            . '<pre>' . print_r($this->_data, true) . '</pre>'
+            // . '<h3>' . $this->_tr('Debug-notificationlog') . '</h3>'
+            // . '<pre>' . print_r($this->oNotifcation->getLogdata(), true) . '</pre>'
+            . '</div>'
+        ;
+        return $sHtml;
+    }
+    /**
+     * return html code for notification page
+     * @return string
+     */
+    public function generateViewNotifications() {
+        $sHtml='<h2>' . $this->_aIco["notifications"] . ' ' . $this->_tr('Notifications-header') . '</h2>'
                 . $this->_generateNoftificationlog()
-                . '</div>';
-
-        // ----- settings page
-        $sId = 'divsetup';
-        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                . '<h2>' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</h2>'
+                ;
+        return $sHtml;
+    }
+    /**
+     * return html code for setup page
+     * @return string
+     */
+    public function generateViewSetup() {
+        $sHtml='<h2>' . $this->_aIco["setup"] . ' ' . $this->_tr('Setup') . '</h2>'
+                . '<div id="divsetup">'
                 . $this->_generateSetup()
-                . '</div>';
-
-        // ----- about page
-        $sId = 'divabout';
-        $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                . '<h2>' . $this->_aIco["about"] . ' ' . $this->_tr('About') . '</h2>'
-                . sprintf($this->_tr('About-title'), $this->_sTitle).'<br>'
-                . '<br>'
-                . $this->_tr('About-text').'<br>'
-                . '<br>'
-                . sprintf($this->_tr('About-projecturl'), $this->_sProjectUrl, $this->_sProjectUrl).'<br>'
-                . sprintf($this->_tr('About-docs'), $this->_sDocUrl).'<br>'
-                . '</div>';
-
-        // ----- debug tab
-        if ($this->_aCfg['debug']) {
-            $sId = 'divdebug';
-            $sHtml .= '<div class="outsegment" id="' . $sId . '">'
-                    . '<h2>' . $this->_aIco["debug"] . ' ' . $this->_tr('Debug') . '</h2>'
-                    . '<h3>' . $this->_tr('Debug-config') . '</h3>'
-                    . '<pre>' . print_r($this->_aCfg, true) . '</pre>'
-                    . '<h3>' . $this->_tr('Debug-urls') . '</h3>'
-                    . '<pre>' . print_r($this->_urls, true) . '</pre>'
-                        . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
-                    . '<pre>' . print_r($this->_data, true) . '</pre>'
-                    // . '<h3>' . $this->_tr('Debug-notificationlog') . '</h3>'
-                    // . '<pre>' . print_r($this->oNotifcation->getLogdata(), true) . '</pre>'
-                    . '</div>';
-        }
+                . '</div>'
+                ;
         return $sHtml;
     }
 
+    /**
+     * return html code for a view list of websites with colored boxes based on site status
+     * @return string
+     */
+    public function generateViewWeblist() {
+        $sReturn = '';
+        $sReturn.='<h2>' . $this->_aIco["allwebapps"] . ' ' . $this->_tr('All-webapps-header') . '</h2>'
+                .(!count($this->_data)
+                    ? $this->_showWelcomeMessage()
+                    : '<div class="overviewtiles">'.$this->_generateWebTiles().'</div>'
+                        . '<div id="divwebsfilter"></div><br>'
+                        // . $this->generateViewWeblist()
+                )
+                ;
+        if (!count($this->_data)) {
+            return $sReturn;
+        }
+        
+        $aAllWebapps = array();
+        foreach ($this->_data as $sAppId => $aEntries) {
+            $bHasData = true;
+            if (!isset($aEntries["result"]["host"])) {
+                $bHasData = false;
+            }
+
+            $aValidaion=$this->_checkClientResponse($sAppId);
+            $sValidatorinfo='';
+            if($aValidaion){
+                foreach($aValidaion as $sSection=>$aMessages){
+                    if (count($aValidaion[$sSection])){
+                        $sValidatorinfo.='<span class="ico'.$sSection.'" title="'.sprintf($this->_tr('Validator-'.$sSection.'-title'), count($aMessages)) .'">'.$this->_aIco[$sSection].'</span>';
+                    }
+                }
+            }
+            $sWebapp = isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
+            $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp.$sAppId;
+            $sDivId=$this->_getDivIdForApp($sAppId);    
+            $sAppLabel=str_replace('.', '.&shy;', $sWebapp);
+            $sAHref='<a href="'.$sDivId.'" onclick="setTab(\''.$sDivId.'\')">';
+            
+            $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
+            
+            $sOut = '<div class="divhost result' . $aEntries["result"]["result"] . ' tags '.$this->_getCssclassForTag($aTags).'">'
+                    . ($bHasData 
+                        ? 
+                            '<span class="icon">'.$sAHref.$this->_aIco['webapp'].'</a></span>'
+                            . '<div>'
+                                . '<span style="float: right;">'
+                                    .$this->_renderBadgesForWebsite($sAppId, true) 
+                                    . $sValidatorinfo
+                                .'</span>'
+                                . $sAHref. $sAppLabel.'</a><br>'
+                                . $this->_aIco['host'] . ' ' . $aEntries["result"]["host"] . ' '
+                            . '</div>'
+                            . '<div class="details">'
+                                . ($aTags ? $this->_getTaglist($aTags) : '')
+                            . '</div>'
+                        : '<span class="icon">'.$sAHref.$this->_aIco['error'].'</a></span>'.'<span title="' . $aEntries['result']['url'] . "\n" . str_replace('"', '&quot;', $aEntries['result']['error']) . '">'
+                            . $sAHref. $sAppLabel.'</a><br>'
+                            . '</span>'
+                    )
+                    . '</div>';
+            $aAllWebapps[$sTilekey] = $sOut;
+        }
+        ksort($aAllWebapps);
+        // echo '<pre>'.htmlentities(print_r($aHosts, 1)).'</pre>'; die();
+        foreach ($aAllWebapps as $aWebapp) {
+            $sReturn .= $aWebapp;
+        }
+        return '<div id="divwebs">'.$sReturn . '</div>';
+    }
+    
+    /**
+     * returns a readable result by given integer; i.e. 0=OK, 1=unknown, ...
+     * @return string
+     */
+    public function getResultValue($i) {
+        return $this->_tr('Resulttype-' . $i);
+    }
+
+    /**
+     * load monitoring data ... if not done yet
+     * @return boolean
+     */
+    public function loadClientData(){
+        if (!count($this->_data)) {
+            $this->_getClientData();
+        }
+        return true;
+    }
+
+
+    /**
+     * helper: get a name for the div of app data
+     * it is used to build an url; the "-" will be used to parse the app id
+     * 
+     * @param type $sAppid
+     * @return type
+     */
+    protected function _getDivIdForApp($sAppid) {
+        return '#divweb-'.$sAppid;
+    }
+    
     /**
      * get a flat array of tags sent from all clients
      * @return array
@@ -919,7 +923,7 @@ class appmonitorserver_gui extends appmonitorserver {
             $sReturn='';
             foreach($aTags as $sSingletag){
                 $sReturn.=($sReturn ? ' ' : '')
-                    . ' <a href="#" class="tag" title="'.$this->_tr('Tag-filter').': ' .$sSingletag.'" onclick="setTag(\''.$sSingletag.'\')">'.$this->_aIco['tag'] .' ' . $sSingletag.'</a>';
+                    . ' <a href="#" class="tag" title="'.$this->_tr('Tag-filter').': ' .$sSingletag.'" onclick="setTag(\''.$sSingletag.'\'); return false;">'.$this->_aIco['tag'] .' ' . $sSingletag.'</a>';
             }
             return $sReturn;
         }
@@ -967,18 +971,27 @@ class appmonitorserver_gui extends appmonitorserver {
     public function renderHtml() {
         require_once 'cdnorlocal.class.php';
         $oCdn = new axelhahn\cdnorlocal();
-        $sHtml = $this->renderHtmlContent();
+        $this->loadClientData(); // required to show tags
+        $sHtml = 'LOADING';
         $sNavi = '';
         $sTitle = $this->_sTitle;
 
         $iReload = ((isset($this->_aCfg['pagereload']) && (int) $this->_aCfg['pagereload'] ) ? (int) $this->_aCfg['pagereload'] : 0);
         $sNavi.='<span class="tagfilter">'.$this->_renderTagfilter().'</span>'
                 . '<nav>'
-                . '<a href="#" class="reload" onclick="reloadPage()"'
+                
+                . '<a href="#" class="reload" onclick="showDiv(); return false;"'
                 . ($iReload ? ' title="' . sprintf($this->_tr('Reload-every'), $iReload) . '"' : '')
                 . '>'
-                . $this->_aIco["reload"] . ' <span>' . $this->_tr('Reload') . ' ('.$this->_tr('age-of-page') . ': <span class="timer-age-in-sec">0</span> s)'
-                . ' </span></a>';
+                . $this->_aIco["reload"] 
+                . ' '
+                . '<span id="counter" style="display: inline-block; width: 2.5em;"></span>'
+                . '<span>' 
+                    . $this->_tr('Reload') 
+                    // . ' ('.$this->_tr('age-of-page') . ': <span class="timer-age-in-sec">0</span> s)'
+                . ' </span>'
+                . '</a>'
+                ;
 
         $sNavi .= $this->_renderMenuItem('#divwebs',          'allwebapps', 'allwebapps',    $this->_tr('All-webapps'))
                 . $this->_renderMenuItem('#divnotifications', 'checks',     'notifications', $this->_tr('Notifications'))
@@ -1016,20 +1029,18 @@ class appmonitorserver_gui extends appmonitorserver {
                 
                 . '<div class="divlog">' . $this->_renderLogs() . '</div>'
                 . '<div class="divmain">'
+                    . '<div class="outsegment" id="content">'
                     . '' . $sHtml . "\n"
+                    . '</div>'
                 . '</div>'
                 . '<div class="footer"><a href="' . $this->_sProjectUrl . '" target="_blank">' . $this->_sProjectUrl . '</a></div>'
 
                 . '<script>'
+                    . 'var iReload=' . $iReload . '; // reload time in server config is '.$iReload." s\n"
                     . '$(document).ready(function() {'
-                    . ' $(\'.datatable\').dataTable( { } ); '
-                    . ' $(\'.datatable-checks\').dataTable( { "order": [[ 0, "desc" ]] } ); '
-                    . ' $(\'.datatable-hosts\').dataTable( { "order": [[ 0, "desc" ]] } ); '
-                    . ' $(\'.datatable-notifications\').dataTable( { "order": [[ 1, "desc" ]] } ); '
-                    . 'initGuiStuff();'
-                    . ''
-                    . '} );'
-                    . ($iReload ? 'window.setTimeout("updateContent()",   ' . ($iReload * 1000) . ');' : '')
+                        . 'initGuiStuff();'
+                    . '} );'."\n"
+                    //. ($iReload ? 'window.setTimeout("updateContent()",   ' . ($iReload * 1000) . ');' : '')
                 . '</script>' . "\n"
                 . '</body></html>';
 
