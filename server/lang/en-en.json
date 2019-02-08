@@ -21,7 +21,7 @@
         "Setup": "Setup",
         "Setup-client-list": "List of existing Clients",
         "Setup-add-client": "Add client url",
-        "Setup-add-client-pretext": "Enter an appmonitor client url to add a new monitor:",
+        "Setup-add-client-pretext": "Enter an Appmonitor client url to add a new monitor:",
 
         "About": "About...",
         "About-title": "Name of this project <strong>%s</strong>.",
@@ -30,7 +30,7 @@
         "About-docs": "The <a href=\"%s\">Documentation</a> is available as markdown. You can read it online on the project url or as <em>readme.md</em> in the downloaded archive.",
 
         "Chart-graph": "Graph",
-        "Chart-graph-description": "Last reponse times of the monitoring request beginning with connect time up to finish of the transfer.",
+        "Chart-graph-description": "Last response times of the monitoring request beginning with connect time up to finish of the transfer.",
         "Chart-time": "Time",
         "Chart-responsetime": "Responsetime [ms]",
         
@@ -103,12 +103,12 @@
         "msgErr-missing-meta-website": "Missing &quot;meta&quot; - &quot;website&quot;",
 
 
-        "msgErr-Http-request-failed": "Http Request to appmonitor failed: host or service is unreachable.",
+        "msgErr-Http-request-failed": "Http Request to the appmonitor check failed: host or service is unreachable.",
         "msgErr-Http-error": "Http response header is not a 2xx code.",
-        "msgErr-Http-no-jsondata": "Server response does not contain json data.",
+        "msgErr-Http-no-jsondata": "Appmonitor client response does not contain JSON data.",
 
         "msgOK-Url-was-added": "URL added: %s",
-        "msgErr-Url-not-added-no-appmonitor": "URL not added: %s<br>it does not seems to be an app monitor url - no JSON data was found.<br>Http response header: %s",
+        "msgErr-Url-not-added-no-appmonitor": "URL not added: %s<br>it does not seems to be an Appmonitor url - no JSON data was found.<br>Http response header: %s",
         "msgErr-Url-was-added-already": "Skip. URL was added already: %s.",
         "msgErr-Url-not-removed-it-does-not-exist": "URL cannot be removed - it doees not exist in the config: %s.",
         "msgOK-Url-was-removed": "URL was removed: %s",
@@ -119,8 +119,8 @@
         "msgErr-missing-key-checks-result":"checks > %s > result is not set - this check has no result.",
         
         "msgWarn-missing-key-checks-description":"checks > %s > description is not set - this check has no description about its action/ reason.",
-        "msgWarn-missing-key-checks-value":"checks > %s > value is not set - the result of this check hast explaination of its result.",
-        "msgWarn-missing-key-checks-time":"checks > %s > time is not set - the check has no measurement data.",
+        "msgWarn-missing-key-checks-value":"checks > %s > value is not set - the result of this check has no explaination of its result.",
+        "msgWarn-missing-key-checks-time":"checks > %s > time is not set - the check has no measurement data. This is just a hint: measuring data are optional.",
     
 
         "msgErr-missing-section-meta":"There is no section &quot;meta&quot; in the response (request failed?).",
@@ -129,8 +129,8 @@
         "msgErr-missing-key-meta-result":"The check does not have a result in meta > result",
         
         "msgWarn-missing-key-meta-ttl":"No ttl value was set with meta > ttl. Using the default.",
-        "msgWarn-missing-key-meta-notifications":"No section meta > notifications was set. If an erroroccurs no notification will be sent to developers or product owners.",
-        "msgWarn-no-notifications":"In the section meta > notification > [target] is notifier. If an erroroccurs no notification will be sent to developers or product owners.",
+        "msgWarn-missing-key-meta-notifications":"No section meta > notifications was set. If an error occurs no notification will be sent to developers or product owners.",
+        "msgWarn-no-notifications":"In the section meta > notification > [target] is no notifier. If an error occurs no notification will be sent to developers or product owners.",
         "msgWarn-missing-key-meta-time":"No measurement - no value was set with meta > time.",
     
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
@@ -141,17 +141,17 @@
         "changetype-0.email.subject": "Webapp has no change: __URL__.",
         "changetype-0.email.message": "Webapp has no change: __URL__.",
         
-        "changetype-1.logmessage":    "Webapp was added to the appmonitor: __URL__.",
+        "changetype-1.logmessage":    "Webapp was added to the Appmonitor: __URL__.",
         "changetype-1.email.subject": "[Appmonitor] :: webapp was added: __URL__.",
-        "changetype-1.email.message": "Welcome! The webapp __URL__ was added in the appmonitor. From now on you will get notifications if the status changes.\n\nurl: __MONITORURL__\n\n__CHECKS__",
+        "changetype-1.email.message": "Welcome! The webapp __URL__ was added in the Appmonitor. From now on you will get notifications if the status changes.\n\nurl: __MONITORURL__\n\n__CHECKS__",
         
         "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__.",
         "changetype-2.email.subject": "[Appmonitor] :: __CHANGE__ __LAST-RESULT__ --> __RESULT__ - __URL__",
         "changetype-2.email.message": "__TIME__\nStatus has changed from __LAST-RESULT__ to __RESULT__.\n\nsee current status on: __MONITORURL__\n\n__CHECKS__",
         
-        "changetype-3.logmessage":    "Webapp was deleted from appmonitor: __URL__.",
+        "changetype-3.logmessage":    "Webapp was deleted from Appmonitor: __URL__.",
         "changetype-3.email.subject": "[Appmonitor] :: webapp was DELETED: __URL__.",
-        "changetype-3.email.message": "The webapp __URL__ was deleted in the appmonitor. You will not get notifications about status changes anymore. If this is an error, then contact the sysadmin.",
+        "changetype-3.email.message": "__TIME__\nThe webapp __URL__ was deleted in the Appmonitor. You will not get notifications about status changes anymore. If this is an error, then contact the sysadmin.",
         
         "email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__.",
 

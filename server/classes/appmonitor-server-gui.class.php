@@ -29,7 +29,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
-    var $_sTitle = "Appmonitor Server v0.63";
+    var $_sTitle = "Appmonitor Server v0.64";
 
     /**
      * html code for icons in the web gui
@@ -62,8 +62,8 @@ class appmonitorserver_gui extends appmonitorserver {
         'info' => '<i class="fa fa-info"></i>',
         'warning' => '<i class="fa fa-warning"></i>',
         'error' => '<i class="fa fa-flash"></i>',
-        'add' => '',
-        'del' => '',
+        'add' => '<i class="fa fa-plus"></i>',
+        'del' => '<i class="fa fa-minus"></i>',
         'plus' => '<i class="fa fa-plus"></i>',
         'close' => '<i class="fa fa-times"></i>',
     );
@@ -531,7 +531,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 . 'required="required" '
                 . '>'
                 // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
-                . '<input type="submit" class="btn btnadd" value="' . $this->_tr('btn-addUrl') . '">'
+                . '<button class="btn btnadd">' . $this->_aIco['add'].' '.$this->_tr('btn-addUrl') . '</button>'
                 . '</form><br>';
         $sReturn .= '<h3>' . $this->_tr('Setup-client-list') . '</h3>'
                 . '<div id="divsetupfilter"></div><br>';
@@ -549,9 +549,10 @@ class appmonitorserver_gui extends appmonitorserver {
                     . $sFormOpenTag
                     . '<input type="hidden" name="action" value="deleteurl">'
                     . '<input type="hidden" name="url" value="' . $sUrl . '">'
-                    . '<input type="submit" class="btn btndel" '
-                    . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
-                    . 'value="' . $this->_tr('btn-deleteUrl') . '">'
+                    . '<button class="btn btndel" '
+                        . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
+                        . '>' . $this->_aIco['del'].' '.$this->_tr('btn-deleteUrl') 
+                    . '</button>'
                     //. '<a href="#" class="btn btndel"><i class="fa fa-minus"></i> delete</a>'
                     . '</form>'
                     . '</div>'
@@ -643,7 +644,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
             ) {
                 $sHtml .= ''
-                        . '<h2><a href="#divwebs" onclick="setTab(\'#divwebs\')"> ' . $this->_aIco['allwebapps'] . $this->_tr('All-webapps-header')
+                        . '<h2><a href="#divwebs" onclick="setTab(\'#divwebs\')"> ' . $this->_aIco['allwebapps'] . ' '. $this->_tr('All-webapps-header')
                         . '</a> <nobr>'
                         . $this->_aIco['webapp'] .' '
                         . (isset($aEntries['result']['website']) ? $aEntries['result']['website'] : '?')
@@ -972,7 +973,7 @@ class appmonitorserver_gui extends appmonitorserver {
         require_once 'cdnorlocal.class.php';
         $oCdn = new axelhahn\cdnorlocal();
         $this->loadClientData(); // required to show tags
-        $sHtml = 'LOADING';
+        $sHtml = '. . .';
         $sNavi = '';
         $sTitle = $this->_sTitle;
 
@@ -1032,6 +1033,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     . '<div class="outsegment" id="content">'
                     . '' . $sHtml . "\n"
                     . '</div>'
+                    . '<div style="clear: both;"></div>'
                 . '</div>'
                 . '<div class="footer"><a href="' . $this->_sProjectUrl . '" target="_blank">' . $this->_sProjectUrl . '</a></div>'
 
