@@ -88,6 +88,7 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 
 
 /* ---------- override AdminLte */
+li.active a{background:rgba(127,127,127,0.2) !important;}
 .info-box a{color:#fff;}
 .info-box-text {
    text-transform: none; font-size:120%;
