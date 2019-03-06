@@ -1,6 +1,14 @@
 
 HISTORY
 
+v0.66 2019-03-06
+    - appmonitor server: webapp notification: show all (instead of max. 10)
+    - appmonitor server: webapp notification: added column for duration of a status
+    - appmonitor server: uptime - show since when it is calculated
+    - appmonitor server: adminLte skin and layout can be configured
+    - appmonitor server: remove background for graphs
+    - appmonitor server: update server/readme.md
+
 v0.65 2019-03-06
     - appmonitor server: gui uses adminLte now
     - appmonitor server: calculate uptime

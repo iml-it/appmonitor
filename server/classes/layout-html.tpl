@@ -22,7 +22,7 @@ desired effect
 |               | sidebar-mini                            |
 |---------------------------------------------------------|
 -->
-<body class="hold-transition skin-blue sidebar-mini">
+<body class="hold-transition {{PAGE_SKIN}} {{PAGE_LAYOUT}}">
 <div class="wrapper">
 
   <!-- Main Header -->

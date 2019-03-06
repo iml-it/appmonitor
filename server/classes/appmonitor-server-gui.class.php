@@ -19,7 +19,7 @@ require_once 'render-adminlte.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.61
+ * @version 0.66
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.65";
+    var $_sVersion = "0.66";
 
     /**
      * html code for icons in the web gui
@@ -594,6 +594,9 @@ class appmonitorserver_gui extends appmonitorserver {
 
     /**
      * get html code for notification log page
+     * 
+     * @param array   $aLogs         array with logs; if false then all logs will be fetched
+     * @param string  $sTableClass   custom classname for the datatable; for custom datatable settings (see functions.js)
      * @return string
      */
     protected function _generateNoftificationlog($aLogs=false, $sTableClass='datatable-notifications') {
@@ -608,6 +611,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $sTable = $this->_generateTableHead(array(
                     $this->_tr('Result'),
                     $this->_tr('Timestamp'),
+                    $this->_tr('Duration'),
                     $this->_tr('Change'),
                     $this->_tr('Message')
                 )) . "\n";
@@ -615,6 +619,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
         $aChanges = array();
         $aResults = array();
+        $iLastTimer=date("U");
         foreach ($aLogs as $aLogentry) {
 
             if (!isset($aChanges[$aLogentry['changetype']])) {
@@ -626,11 +631,14 @@ class appmonitorserver_gui extends appmonitorserver {
                 $aResults[$aLogentry['status']] = 0;
             }
             $aResults[$aLogentry['status']] ++;
+            $iDelta=$iLastTimer-$aLogentry['timestamp'];
+            $iLastTimer=$aLogentry['timestamp'];
 
             $aTags=isset($this->_data[$aLogentry['appid']]["meta"]["tags"]) ? $this->_data[$aLogentry['appid']]["meta"]["tags"] : false;
             $sTable .= '<tr class="result' . $aLogentry['status'] . ' tags '.$this->_getCssclassForTag($aTags).'">'
                     .'<td class="result' . $aLogentry['status'] . '"><span style="display: none;">'.$aLogentry['status'].'</span>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
                     . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
+                    . '<td>' . round($iDelta/60) . ' min</td>'
                     . '<td>' . $this->_tr('changetype-' . $aLogentry['changetype']) . '</td>'                    
                     . '<td>' . $aLogentry['message'] . '</td>'
                     . '</tr>';
@@ -891,7 +899,7 @@ class appmonitorserver_gui extends appmonitorserver {
             ;
 
             // --- notifications for this webapp
-            $aLogs = $this->oNotifcation->getLogdata(array('appid'=>$sAppId),10);
+            $aLogs = $this->oNotifcation->getLogdata(array('appid'=>$sAppId));
             rsort($aLogs);
             
             $aUptime=$this->_getUptime($aLogs);
@@ -915,24 +923,25 @@ class appmonitorserver_gui extends appmonitorserver {
                 // 'yLabel'=>$this->_tr('Chart-responsetime'),
                 'data'=>$aChartData,
             );
+            $iFirstentry=$aLogs[count($aLogs)-1]['timestamp'];
             $sUptime=($aUptime['total']
                     ? ''
                         . '<strong>'
-                        . $this->_tr('Resulttype-'.RESULT_OK) . ': ' . round($aUptime['counter'][RESULT_OK]*100 / $aUptime['total'], 3).' %'
+                            . $this->_tr('Resulttype-'.RESULT_OK) . ': ' . round($aUptime['counter'][RESULT_OK]*100 / $aUptime['total'], 3).' %'
                         . '</strong><br>'
                         . ($aUptime['counter'][RESULT_UNKNOWN] 
                             ? $this->_tr('Resulttype-'.RESULT_UNKNOWN) . ': ' . round($aUptime['counter'][RESULT_UNKNOWN]*100 / $aUptime['total'], 3).' %; '
-                                . ' ('.round($aUptime['counter'][RESULT_UNKNOWN]/60).' min) '
+                                . ' ('.round($aUptime['counter'][RESULT_UNKNOWN]/60).' min)<br>'
                             : ''
                           )
                         . ($aUptime['counter'][RESULT_WARNING] 
                             ? $this->_tr('Resulttype-'.RESULT_WARNING) . ': ' . round($aUptime['counter'][RESULT_WARNING]*100 / $aUptime['total'], 3).' %; '
-                                . ' ('.round($aUptime['counter'][RESULT_WARNING]/60).' min) '
+                                . ' ('.round($aUptime['counter'][RESULT_WARNING]/60).' min)<br>'
                             : ''
                           )
                         . ($aUptime['counter'][RESULT_ERROR]
                             ? $this->_tr('Resulttype-'.RESULT_ERROR) . ': ' . round($aUptime['counter'][RESULT_ERROR]*100 / $aUptime['total'], 3).' %'
-                                . ' ('.round($aUptime['counter'][RESULT_ERROR]/60).' min) '
+                                . ' ('.round($aUptime['counter'][RESULT_ERROR]/60).' min)<br>'
                             : ''
                         )
                     : '-'
@@ -945,7 +954,7 @@ class appmonitorserver_gui extends appmonitorserver {
                             $oA->getBox(array(
                                 // 'label'=>'I am a label.',
                                 // 'collapsable'=>true,
-                                'title'=>$this->_tr('Uptime'),
+                                'title'=>$this->_tr('Uptime') . ' ('.$this->_tr('since').' '.date('Y-m-d', $iFirstentry).'; ~'.round((date('U')-$iFirstentry)/60/60/24).' d)',
                                 'text'=> $sUptime
                             )),
                             4
@@ -1527,6 +1536,11 @@ class appmonitorserver_gui extends appmonitorserver {
         
 
         $aReplace=array();
+
+        // colorset and layout of adminlte
+        $aReplace['{{PAGE_SKIN}}']=isset($this->_aCfg['skin']) ? $this->_aCfg['skin'] : 'skin-purple';
+        $aReplace['{{PAGE_LAYOUT}}']=isset($this->_aCfg['layout']) ? $this->_aCfg['layout'] : 'sidebar-mini';
+        
         $aReplace['{{PAGE_HEADER}}']=$this->_aIco['title'] . ' ' . $sTitle;
         $aReplace['{{TOP_TITLE_MINI}}']='<b>A</b>M';
         $aReplace['{{TOP_TITLE}}']='<b>App</b>Monitor <span>v'.$this->_sVersion.'</span>';

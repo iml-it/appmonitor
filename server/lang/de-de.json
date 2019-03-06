@@ -15,6 +15,8 @@
         "Checks-on-webapp": "Checks einer Webapplikation",
         "Checks-total": "Checks gesamt",
 
+        "Duration": "Dauer",
+
         "Notifications": "Meldungen",
         "Notifications-header": "Protokoll der letzten Meldungen",
         "Notifications-none": "Es sind keine Meldungen vorhanden.",

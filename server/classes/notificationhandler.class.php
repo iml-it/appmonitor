@@ -23,7 +23,7 @@ define("RESULT_ERROR", 3);
 class notificationhandler {
 
     protected $_sCacheIdPrefix="notificationhandler";
-    protected $_iMaxLogentries=1000;
+    protected $_iMaxLogentries=5000;
     
     /**
      * logdata for detected changes and sent notifications
