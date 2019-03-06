@@ -110,14 +110,14 @@ The values are:
 
 | Key             | Description                                                           |
 |---              |---                                                                    |
-| _theme_         | \{string\} name of css to load (aka "skin") ... do not use anymore    |
-| _skin_          | \{string\} name of adminLte skin (skin-blue\|skin-black\|skin-purple(=default)\|skin-yellow\|skin-red\|skin-green ... and *-light) |
-| _layout_        | \{string\} name of adminLte layout (fixed\|layout-boxed\|layout-top-nav\|sidebar-mini(=default)\|sidebar-collapse) |
 | _debug_         | \{bool\} show debug tab with internal values                          |
-| _lang_          | \{string\} language                                                   |
-| _pagereload_    | \{integer\} auto refresh of server webgui in sec (0=off; default: 60) |
+| _lang_          | \{string\} language (en-en\|de-de)                                    |
+| _layout_        | \{string\} name of adminLte layout (one of fixed\|layout-boxed\|layout-top-nav\|sidebar-mini(=default)\|sidebar-collapse) |
 | _notifications_ | \{array\} notification setup                                          |
+| _pagereload_    | \{integer\} auto refresh of server webgui in sec (0=off; default: 60) |
 | _serverurl_     | \{string\} url of installation; it is used for notification only      |
+| _skin_          | \{string\} name of adminLte skin (one of skin-blue\|skin-black\|skin-purple(=default)\|skin-yellow\|skin-red\|skin-green ... and *-light) |
+| _theme_         | \{string\} name of css to load (aka "skin") ... do not use anymore    |
 | _urls_          | \{array\} list of urls                                                |
 
 Remarks:
