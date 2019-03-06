@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.65 2019-03-06
+    - appmonitor server: gui uses adminLte now
+    - appmonitor server: calculate uptime
+    - appmonitor server: class to store rrd items (to add counters later)
+
 v0.64 2019-02-08
     - appmonitor server: German lang file added
     - appmonitor server: small  fixes in English texts
