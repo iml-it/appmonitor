@@ -6,6 +6,7 @@
 
         "All-webapps": "Web applications",
         "All-webapps-header": "Web applications",
+        "All-webapps-hint": "In the section below you see a list of web applications. They are in alphabetic order grouped by the status (erros and warnings first).<br>Click on the labeltext to see details.<br>You can filter the view by typing in the freetext filter field or clicking a label.",
 
 
         "Checks": "Checks",
@@ -81,6 +82,8 @@
         
         "Time": "Time",
         "Time-for-all-checks": "time for all checks",
+
+        "Uptime": "Uptime",
 
         "Validator-ok": "Validation successful.",
         "Validator-error": "Validation errors",

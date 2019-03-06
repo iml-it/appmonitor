@@ -365,7 +365,15 @@ class appmonitorserver {
 
         // get results
         foreach ($aUrls as $sKey => $sUrl) {
-            list($sHeader, $sBody) = explode("\r\n\r\n", curl_multi_getcontent($curl_arr[$sKey]), 2);
+            $sHeader=''; 
+            $sBody='';
+            $aResponse=explode("\r\n\r\n", curl_multi_getcontent($curl_arr[$sKey]), 2);
+            list($sHeader, $sBody) = count($aResponse)>1
+                    ? $aResponse
+                    : array($aResponse[0], '')
+                ;
+            // list($sHeader, $sBody) = explode("\r\n\r\n", curl_multi_getcontent($curl_arr[$sKey]), 2);
+
             $aResult[$sKey] = array(
                 'url' => $sUrl,
                 'response_header' => $sHeader,

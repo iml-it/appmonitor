@@ -1,9 +1,3 @@
-body{background:#fff url('bg-beton.jpg') fixed; color:#555; font-family:"arial"; margin: 0; font-size: 1em;}
-a{color:#67c;}
-h1{color:#888; color:rgba(255,255,255,0.5); margin: 0 0.5em 0 0; float: left;}
-h2, h2 a{margin:0 0 0.5em; color:#777; border-bottom: 0px solid #ddd; }
-h2>i {font-size: 150% !important; color:#aaa; margin-right: 0.3em;}
-h3{margin: 2em 0 1em 0;}
 pre{padding: 0.5em; background: rgba(0,0,0,0.05); border: 2px solid rgba(0,0,0,0.1); }
 select, input{border: 1px solid rgba(0,0,0,0.1); border-radius: 0.3em; color:#444; padding: 0.3em;}
 table.dataTable{border-spacing: 1px; width: 100%;}
@@ -23,25 +17,6 @@ table.dataTable tbody th, table.dataTable tbody td{padding: 2px 6px;}
     padding: 0.5em; margin-right: 1em;
 }
 
-.divtop{position: fixed; top: 0; z-index: 1000; width: 100%; padding: 0; }
-.divtopheader, .divtopnavi,  .footer{background:#444; color:#eee; color: rgba(255,255,255,0.8);}
-.divtopheader{
-    opacity:1; 
-    padding: 0.3em 1em 1em; 
-    width: 100%; 
-}
-
-/* ---------- navigation on top */
-.divtopnavi{width: 100%; padding: 1em 1em 0.7em ; opacity:0.8; border-top: 0px solid #fca;}
-.divtopnavi a{color:#fff; text-decoration:none;padding: 0.7em 0.7em 0.7em; margin-right: 0.3em; border-radius: 0.5em 0.5em 0 0;transition: all ease 0.5s;}
-.divtopnavi a:hover{text-decoration: underline;}
-.divtopnavi a.active{background-color:#eee; background-color:rgba(255,255,255,0.3);}
-.divtopnavi a.reload{
-    background-color: #394;
-	border-radius: 0.2em;
-	padding: 0.4em;
-}
-.divtopnavi .tagfilter{float: right; margin-right: 1.5em;}
 
 .divmain{margin: 0 2% 5em;}
 .divsourceinfo{background:#ddd; padding: 1em; }
@@ -59,41 +34,37 @@ padding: 1em;}
 .divloginfo{background:#fff8d0; }
 .divlogerror{background:#fdd;}
 
-.footer{border-top: 1px solid rgba(0,0,0,0.1); margin-top: 20em; padding: 0.2em 1em; position: fixed; bottom: 0;width: 100%; }
-.footer a{color:#fff; text-decoration: none;}
-.footer a:hover{text-decoration: underline;}
-
-/* ---------- tiles on top */
+/* ---------- tiles on top 
 .tile{float: left; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); 
      padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8.5em; width: 10em;
 }
 .tile .count{font-size: 200%; opacity: 0.8; font-weigh1t: bold; padding: 0.3em 0;}
-.tile .label{}
+.tile .label{color:#666;}
 .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
+*/
+
+
 
 #content{transition: opacity 0.4s linear; }
-.outsegment{min-height: 30em; margin-top: 7em; padding: 1em; border: 2px solid #fff; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #e8e8e8;}
+.outsegment{min-height: 30em; margin-top: 0em; padding: 0em; border: 0px dashed #888; background: rgba(255,255,255,0.1);}
 
-.divhost{border: 1px solid rgba(0,0,0,0.01); float: left; padding: 0.4em; margin: 0 1em 1em 0; width: 21em; width: 21em; height: 4em;}
-.divhost .icon{background: rgba(255,255,255,0.3); font-size: 200%; padding: 0.3em; display: block; float: left; margin-right: 0.3em; width: 1.3em; text-align: center;}
-.divhost .icon a{color:#666;}
-.divhost>div{margin-left: 3.5em;}
+.divhost{}
 #divsetup .divhost{width: auto; height: auto;}
 
 
-.result0{background:#dfd    !important; background: linear-gradient(#dfd,#cec)!important;}
-.result1{background:#eee    !important; background: linear-gradient(#eee,#ddd)!important;}
-.result2{background:#fff8d0 !important; background: linear-gradient(#fff0d0,#f0e0b0)!important;}
-.result3{background:#fcd    !important; background: linear-gradient(#fde,#fcd)!important;}
+.result0{background:#dfd    !important; background: linear-gradient(#dfd,#cec)!important;       color:#080}
+.result1{background:#eee    !important; background: linear-gradient(#eee,#ddd)!important;       color:#666;}
+.result2{background:#fff8d0 !important; background: linear-gradient(#fff0d0,#f0e0b0)!important; color:#870;}
+.result3{background:#fcd    !important; background: linear-gradient(#fde,#fcd)!important;       color:#800;}
 
 tr.result0{background:rgba(220,240,220,0.4) !important; color:#385;}
 tr.result1{background:rgba(220,220,220,0.2) !important; color:#999;}
 tr.result2{background:rgba(250,240,220,0.4) !important; color:#a94;}
 tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 
-.badge{border: 1px solid rgba(0,0,0,0.2); padding: 0 0.5em; border-radius: 20%; margin-right: 0.2em;}
+.badge{border: 0px solid rgba(0,0,0,0.3); padding: 0.5em; border-radius: 20%; margin-right: 0.5em;}
 
-.btn{padding: 0.3em 0.5em; color:#eee; background:#888; border: 2px solid rgba(0,0,0,0.2); border-radius: 0.4em; box-shadowX: 0 0 0.5em #888; 
+.btn1{padding: 0.3em 0.5em; color:#eee; background:#888; border: 2px solid rgba(0,0,0,0.2); border-radius: 0.4em; box-shadowX: 0 0 0.5em #888; 
      text-decoration: none;
     transition: all ease 0.2s;
 }
@@ -114,13 +85,25 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 #divwebsfilter{clear: both;}
 .highlight{background:#fc2;}
 .frmFilter{background: rgba(0,0,0,0.05); padding: 0.5em;}
-.tag{color:#669; font-size: 90%; text-decoration: none; border-bottom: 1px dashed; margin-right: 0.5em;}
+.tag{color:#669; font-size: 90%; text-decoration: none; border-bottom: 0px dashed; margin-right: 0.5em;}
 
 .graph{float: left; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); 
      padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8.5em; width:95%; max-width: 1024px;}
 
 #counter{border-bottom: 1px solid rgba(255,255,255,0.3); text-align: center; margin-right: 0.5em;}
 #counter div{background:#fc2; height: 1px; transition: width 0.8s linear ; bottom: 0;}
+
+
+
+/* ---------- override AdminLte */
+.info-box a{color:#fff;}
+.info-box-text {
+   text-transform: none;
+}
+.logo-lg span{font-size: 70%; opacity: 0.7;}
+.tagfilter{color:#fff; opacity: 0.7;}
+.tagfilter>div{margin: 0.5em 1em 0 0;}
+
 
 @media (max-width: 1024px) {
     h1{font-size:150%;}
@@ -130,7 +113,6 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
     .divtopnavi .tagfilter span{display: none;}
     
     .tile{display: none; min-height: 6em; width: 10em;}
-    .overviewtiles{}
     .tile .count{font-size: 200%; opacity: 0.8; padding: 0;}
     .tile .label{}
     .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}

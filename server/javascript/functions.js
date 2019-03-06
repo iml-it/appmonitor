@@ -385,11 +385,16 @@ function postLoad(bIsFirstload) {
     }
 
     var sDiv = aViewFilters['tab'];
+    /*
     $(".divtopnavi a").removeClass("active");
     $("a[href='" + sDiv + "']").addClass("active");
     $("nav a").blur();
+    */
+    $(".sidebar-menu li").removeClass("active");
+    $("a[href='" + sDiv + "']").parent().addClass("active");
+    $("a").blur();
     if (sDiv.indexOf('divweb') > 0) {
-        $("a[href='#divwebs']").addClass("active");
+        $("a[href='#divwebs']").parent().addClass("active");
     }
 
     addFilter4Webapps('divwebs');
@@ -400,7 +405,8 @@ function postLoad(bIsFirstload) {
     $('.datatable').dataTable({});
     $('.datatable-checks').dataTable({"order": [[0, "desc"]]});
     $('.datatable-hosts').dataTable({"order": [[0, "desc"]]});
-    $('.datatable-notifications').dataTable({'order': [[1, 'desc']]});
+    $('.datatable-notifications-webapp').dataTable({'order': [[1, 'desc']]});
+    $('.datatable-notifications').dataTable({'order': [[1, 'desc']], "aLengthMenu":[[25,100,-1],[25,100,"---"]]});
 
 }
 
@@ -418,7 +424,7 @@ function initGuiStuff() {
     };
 
     // set onclick event for links (navigation bar)
-    $("a[href^=\'#\']").click(function () {
+    $(".sidebar-menu a[href^=\'#\']").click(function () {
         if (this.hash) {
             setTab(this.hash);
         }

@@ -6,6 +6,7 @@
 
         "All-webapps": "Web-Applikationen",
         "All-webapps-header": "Web-Applikationen",
+        "All-webapps-hint": "Nachfolgend Sehen Sie eine Liste von Web-Applikatione. Diese sind alphabetisch sortiert und nach Status gruppiert (Fehler und Warnungen zuerst).<br>Klicken Sie auf den Labeltext, um Details zu sehen.<br>Die Ansicht kann mit Eingabe im Freitextfilter und Klick auf ein Label gefiltert werden.",
 
 
         "Checks": "Checks",
@@ -59,7 +60,7 @@
         "Http-header": "Http-Antwort-Header",
         
         "Change": "&Auml;nderung", 
-        "Message": "nachricht", 
+        "Message": "Nachricht", 
         "Tag-filter": "Tag-Filter", 
 
         "Client-source-data": "Quelldaten des Appmonitor Clients",
@@ -81,6 +82,8 @@
         
         "Time": "Zeit",
         "Time-for-all-checks": "Zeiten aller Checks",
+        
+        "Uptime": "Uptime",
 
         "Validator-ok": "Validierung erfolgreich.",
         "Validator-error": "Validierungs-Fehler",
