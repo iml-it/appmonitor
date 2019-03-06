@@ -70,7 +70,8 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
 
 ``` json
 {
-    "theme": "default",
+    "skin": "skin-purple",
+    "layout": "sidebar-mini",
     "lang": "en-en",
     "debug": false,
     "pagereload": 60,
@@ -110,8 +111,8 @@ The values are:
 | Key             | Description                                                           |
 |---              |---                                                                    |
 | _theme_         | \{string\} name of css to load (aka "skin") ... do not use anymore    |
-| _skin_          | \{string\} name of adminLte skin (skin-blue|skin-black|skin-purple(=default)|skin-yellow|skin-red|skin-green ... and *-light) |
-| _layout_        | \{string\} name of adminLte layout (fixed|layout-boxed|layout-top-nav|sidebar-mini(=default)|sidebar-collapse) |
+| _skin_          | \{string\} name of adminLte skin (skin-blue\|skin-black\|skin-purple(=default)\|skin-yellow\|skin-red\|skin-green ... and *-light) |
+| _layout_        | \{string\} name of adminLte layout (fixed\|layout-boxed\|layout-top-nav\|sidebar-mini(=default)\|sidebar-collapse) |
 | _debug_         | \{bool\} show debug tab with internal values                          |
 | _lang_          | \{string\} language                                                   |
 | _pagereload_    | \{integer\} auto refresh of server webgui in sec (0=off; default: 60) |
