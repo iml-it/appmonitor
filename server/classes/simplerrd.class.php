@@ -50,7 +50,7 @@ class simpleRrd {
 
 
     // ----------------------------------------------------------------------
-    // private functions - handle cache of application checkdata
+    // protected functions - handle cache of application checkdata
     // ----------------------------------------------------------------------
     /**
      * helper function - limit log to N entries

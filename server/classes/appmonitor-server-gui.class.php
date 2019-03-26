@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.66";
+    var $_sVersion = "0.67";
 
     /**
      * html code for icons in the web gui
@@ -39,7 +39,7 @@ class appmonitorserver_gui extends appmonitorserver {
      * 
      * @var array
      */
-    private $_aIco = array(
+    protected $_aIco = array(
         'title' => '<i class="fa fa-th"></i>',
         'welcome' => '<i class="fa fa-flag-o" style="font-size: 500%;float: left; margin: 0 1em 10em 0;"></i>',
         'reload' => '<i class="fa fa-refresh"></i>',
@@ -71,14 +71,14 @@ class appmonitorserver_gui extends appmonitorserver {
     );
 
     // ----------------------------------------------------------------------
-    // private functions
+    // protected functions
     // ----------------------------------------------------------------------
 
     /**
      * get all messages as html output
      * @return string
      */
-    private function _renderLogs() {
+    protected function _renderLogs() {
         $sOut = '';
         if (count($this->_aMessages)) {
             foreach ($this->_aMessages as $aLogentry) {
@@ -327,9 +327,9 @@ class appmonitorserver_gui extends appmonitorserver {
         $aSlackChannels = $this->oNotifcation->getAppNotificationdata('slack', 1);
 
         // $aPeople=array('email1@example.com', 'email2@example.com');
-        $sMoreNotify = (count($aEmailNotifiers) ? '<span title="' . implode("\n", $aEmailNotifiers) . '">' . count($aEmailNotifiers) . ' x ' . $this->_aIco['notify-email'] . '</span>' : '')
+        $sMoreNotify = (count($aEmailNotifiers) ? '<span title="' . implode("\n", $aEmailNotifiers) . '">' . count($aEmailNotifiers) . ' x ' . $this->_aIco['notify-email'] . '</span> ' : '')
                 // .'<pre>'.print_r($this->oNotifcation->getAppNotificationdata(), 1).'</pre>'
-                . (count($aSlackChannels) ? '<span title="' . implode("\n", array_keys($aSlackChannels)) . '">' . count($aSlackChannels) . ' x ' . $this->_aIco['notify-slack'] . '</span>' : '')
+                . (count($aSlackChannels) ? '<span title="' . implode("\n", array_keys($aSlackChannels)) . '">' . count($aSlackChannels) . ' x ' . $this->_aIco['notify-slack'] . '</span> ' : '')
         ;
         $iNotifyTargets = count($aEmailNotifiers) + count($aSlackChannels);
         $sSleeping = $this->oNotifcation->isSleeptime();
@@ -492,7 +492,7 @@ class appmonitorserver_gui extends appmonitorserver {
      * get html code to show a welcome message if no webapp was setup so far.
      * @return string
      */
-    private function _showWelcomeMessage() {
+    protected function _showWelcomeMessage() {
         return $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
             . '<br>'
             . '<a class="btn" href="#divsetup" onclick="setTab(this.hash);">' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>'
@@ -507,7 +507,7 @@ class appmonitorserver_gui extends appmonitorserver {
      * @param  string  $sUrl  optional filter by url; default: all
      * @return string
      */
-    private function _generateMonitorTable($sUrl = false) {
+    protected function _generateMonitorTable($sUrl = false) {
         $sReturn = '';
         if (!count($this->_data)) {
             return $this->_showWelcomeMessage();
@@ -657,7 +657,7 @@ class appmonitorserver_gui extends appmonitorserver {
      * get html code for setup page
      * @return string
      */
-    private function _generateSetup() {
+    protected function _generateSetup() {
         $sReturn = '';
         $sFormOpenTag = '<form action="?" method="POST">';
         $sReturn .= '<h3>' . $this->_tr('Setup-add-client') . '</h3>'
@@ -719,7 +719,7 @@ class appmonitorserver_gui extends appmonitorserver {
      * @param bool   $bShort  display type short (counter only) or long (with texts)
      * @return string|boolean
      */
-    private function _renderBadgesForWebsite($sAppId, $bShort = false) {
+    protected function _renderBadgesForWebsite($sAppId, $bShort = false) {
         $iResult = $this->_data[$sAppId]["result"]["result"];
         if (!array_key_exists("summary", $this->_data[$sAppId]["result"])) {
             return false;
@@ -791,9 +791,6 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<button class="btn" id="btn-minus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideUp();   $(this).hide(); $(\'#btn-plus-'.$sAppId.'\').show(); return false;" style="display: none;"'
                 . '> '.$this->_aIco['close'].' '.$this->_tr('btn-hide-details').' </button>';
         
-        if (!isset($aEntries["result"]["website"])) {
-            // echo '<pre>'.print_r($aEntries, 1).'</pre>'; 
-        }
         if (true ||
                 array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
         ) {
@@ -1152,7 +1149,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     }
                 }
             }
-            $sWebapp = isset($aEntries["result"]["website"]) ? $aEntries["result"]["website"] : parse_url($aEntries['result']['url'], PHP_URL_HOST);
+            $sWebapp = $aEntries["result"]["website"];
             $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp.$sAppId;
             $sDivId=$this->_getDivIdForApp($sAppId);    
             $sAppLabel=str_replace('.', '.&shy;', $sWebapp);
@@ -1500,6 +1497,7 @@ class appmonitorserver_gui extends appmonitorserver {
             "Chart.js/2.7.2",
             "jquery-sparklines/2.1.2",
         ));
+        $oA=new renderadminlte();
 
         $this->loadClientData(); // required to show tags
         $sHtml = '. . .';
@@ -1533,7 +1531,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 ;
 
         $sTheme = ( array_key_exists('theme', $this->_aCfg) && $this->_aCfg['theme'] ) ? $this->_aCfg['theme'] : 'default';
-        
+                
 
         $aReplace=array();
 
@@ -1541,7 +1539,8 @@ class appmonitorserver_gui extends appmonitorserver {
         $aReplace['{{PAGE_SKIN}}']=isset($this->_aCfg['skin']) ? $this->_aCfg['skin'] : 'skin-purple';
         $aReplace['{{PAGE_LAYOUT}}']=isset($this->_aCfg['layout']) ? $this->_aCfg['layout'] : 'sidebar-mini';
         
-        $aReplace['{{PAGE_HEADER}}']=$this->_aIco['title'] . ' ' . $sTitle;
+        // $aReplace['{{PAGE_HEADER}}']=$oA->getSectionHead($this->_aIco['title'] . ' ' . $sTitle);
+        $aReplace['{{PAGE_HEADER}}']='';
         $aReplace['{{TOP_TITLE_MINI}}']='<b>A</b>M';
         $aReplace['{{TOP_TITLE}}']='<b>App</b>Monitor <span>v'.$this->_sVersion.'</span>';
         $aReplace['{{NAVI_TOP_RIGHT}}']='<li><span class="tagfilter">'.$this->_renderTagfilter().'</span></li>';

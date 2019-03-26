@@ -66,7 +66,7 @@ class renderadminlte {
      * @param string  $sType   type; key in $_aValidItems; one of color|type
      * @param string  $sValue  value to check
      */
-    private function _checkValue($sType, $sValue){
+    protected function _checkValue($sType, $sValue){
         if (!$sValue || !array_key_exists($sType, $this->_aValidItems)){
             return false;
         }

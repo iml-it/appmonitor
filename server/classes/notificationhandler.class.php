@@ -65,7 +65,7 @@ class notificationhandler {
         return true;
     }
     // ----------------------------------------------------------------------
-    // private functions - handle languages texts
+    // protected functions - handle languages texts
     // ----------------------------------------------------------------------
 
     protected function _initMessenger($aOptions){
@@ -94,7 +94,7 @@ class notificationhandler {
     }
 
     // ----------------------------------------------------------------------
-    // private functions - handle cache of application checkdata
+    // protected functions - handle cache of application checkdata
     // ----------------------------------------------------------------------
     
     /**
@@ -448,6 +448,9 @@ class notificationhandler {
             '__TIME__'           => date("Y-m-d H:i:s", (time())),
             '__URL__'            => isset($this->_aAppResult['result']['url']) ? $this->_aAppResult['result']['url'] 
                                         : (isset($this->_aAppLastResult['result']['url']) ? $this->_aAppLastResult['result']['url'] : $sMiss),
+            '__HOST__'           => isset($this->_aAppResult['result']['host']) ? $this->_aAppResult['result']['host'] : $sMiss,
+            '__WEBSITE__'        => isset($this->_aAppResult['result']['website']) ? $this->_aAppResult['result']['website'] : $sMiss,
+
             '__RESULT__'         => isset($this->_aAppResult['result']['result']) ? $this->_tr('Resulttype-'. $this->_aAppResult['result']['result']) : $sMiss,
             
             '__HEADER__'         => isset($this->_aAppResult['result']['header']) ? $this->_aAppResult['result']['header'] : $sMiss,

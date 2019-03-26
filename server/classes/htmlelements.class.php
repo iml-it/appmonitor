@@ -49,7 +49,7 @@ class htmlelements {
      * generate html attibutes with all internal attributes key -> values
      * @return string
      */
-    private function _addAttributes() {
+    protected function _addAttributes() {
         $sReturn = '';
         foreach ($this->_aAttributes as $sAttr => $sValue) {
             $sReturn .= ' '.$sAttr . '="' . $sValue . '"';
@@ -67,7 +67,7 @@ class htmlelements {
      * @param array $aAttributes
      * @return boolean
      */
-    private function _setAttributes($aAttributes){
+    protected function _setAttributes($aAttributes){
         $this->_sLabel='';
         if(isset($aAttributes['icon']) && $aAttributes['icon']){
             $this->_sLabel.=$this->getIcon($aAttributes['icon']);

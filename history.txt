@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.67 2019-03-26
+    - classfiles: replace private with protected
+    - classfiles: added __HOST__ + __WEBSITE__ placeholders for notifications
+    - appmonitor server: show error box if meta -> website was not set
+
 v0.66 2019-03-06
     - appmonitor server: webapp notification: show all (instead of max. 10)
     - appmonitor server: webapp notification: added column for duration of a status

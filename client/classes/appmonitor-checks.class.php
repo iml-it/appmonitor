@@ -47,13 +47,13 @@ class appmonitorcheck {
      * config container
      * @var array
      */
-    private $_aConfig = array();
+    protected $_aConfig = array();
 
     /**
      * data of all checks
      * @var array
      */
-    private $_aData = array();
+    protected $_aData = array();
     
 
     /**
@@ -87,13 +87,15 @@ class appmonitorcheck {
      * create basic array values for metadata
      * @return boolean
      */
-    private function _createDefaultMetadata() {
+    protected function _createDefaultMetadata() {
 
         $this->_aData = array(
             "name" => $this->_aConfig["name"],
             "description" => $this->_aConfig["description"],
             "result" => RESULT_UNKNOWN,
             "value" => false,
+            "counter" => false,
+            "time" => false,
         );
         return true;
     }
@@ -103,7 +105,7 @@ class appmonitorcheck {
      * @param type $iResult
      * @return type
      */
-    private function _setResult($iResult) {
+    protected function _setResult($iResult) {
         return $this->_aData["result"] = (int) $iResult;
     }
 
@@ -112,7 +114,7 @@ class appmonitorcheck {
      * @param type $iResult
      * @return type
      */
-    private function _setOutput($s) {
+    protected function _setOutput($s) {
         return $this->_aData["value"] = (string) $s;
     }
 
@@ -122,13 +124,13 @@ class appmonitorcheck {
      * @param type $s
      * @return boolean
      */
-    private function _setReturn($iResult, $s) {
+    protected function _setReturn($iResult, $s) {
         $this->_setResult($iResult);
         $this->_setOutput($s);
         return true;
     }
 
-    private function _checkArrayKeys($aConfig, $sKeyList) {
+    protected function _checkArrayKeys($aConfig, $sKeyList) {
         foreach (explode(",", $sKeyList) as $sKey) {
             if (!array_key_exists($sKey, $aConfig)) {
                 header('HTTP/1.0 503 Service Unavailable');
@@ -263,7 +265,7 @@ class appmonitorcheck {
      * )
      * @return boolean
      */
-    private function checkCert($aParams) {
+    protected function checkCert($aParams) {
         $sUrl = isset($aParams["url"]) 
                 ? $aParams["url"] 
                 : 'http'. ($_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] .':' . $_SERVER['SERVER_PORT']
@@ -326,7 +328,7 @@ class appmonitorcheck {
         }
         $power=0;
         foreach($this->_units as $sUnit){
-            if (preg_match('/^[0-9\.]*'.$sUnit.'/', $sValue)){
+            if (preg_match('/^[0-9\.\ ]*'.$sUnit.'/', $sValue)){
                 $i=preg_replace('/([0-9\.]*).*/', '$1', $sValue);
                 $iReal=$i*pow(1024, $power);
                 // die("FOUND: $sValue with unit ${sUnit} - 1024^$power * $i = $iReal");
@@ -349,7 +351,7 @@ class appmonitorcheck {
      * )
      * @return boolean
      */
-    private function checkDiskfree($aParams) {
+    protected function checkDiskfree($aParams) {
         $this->_checkArrayKeys($aParams, "directory", "critical");
         
         $sDirectory = $aParams["directory"];
@@ -402,7 +404,7 @@ class appmonitorcheck {
      * )
      * @return boolean
      */
-    private function checkFile($aParams) {
+    protected function checkFile($aParams) {
         $aOK = array();
         $aErrors = array();
         $this->_checkArrayKeys($aParams, "filename");
@@ -447,7 +449,7 @@ class appmonitorcheck {
      * )
      * @param integer $iTimeout  value in sec; default: 5sec
      */
-    private function checkHttpContent($aParams, $iTimeout = 5) {
+    protected function checkHttpContent($aParams, $iTimeout = 5) {
         $this->_checkArrayKeys($aParams, "url,contains");
         if (!function_exists("curl_init")) {
             header('HTTP/1.0 503 Service Unavailable');
@@ -490,7 +492,7 @@ class appmonitorcheck {
      *     "port"     <<< optional
      * )
      */
-    private function checkMysqlConnect($aParams) {
+    protected function checkMysqlConnect($aParams) {
         $this->_checkArrayKeys($aParams, "server,user,password,db");
         $mysqli=mysqli_init();
         if(!$mysqli){
@@ -526,7 +528,7 @@ class appmonitorcheck {
      *     "user" 
      * )
      */
-    private function checkPdoConnect($aParams) {
+    protected function checkPdoConnect($aParams) {
         $this->_checkArrayKeys($aParams, "connect,user,password");
 
         try{
@@ -562,7 +564,7 @@ class appmonitorcheck {
      * )
      * @return boolean
      */
-    private function checkPortTcp($aParams) {
+    protected function checkPortTcp($aParams) {
         $this->_checkArrayKeys($aParams, "port");
 
         $sHost = array_key_exists('host', $aParams) ? $aParams['host'] : '127.0.0.1';
@@ -599,16 +601,31 @@ class appmonitorcheck {
     }
 
     /**
-     * most simple check: set values
+     * most simple check: set given values
+     * Use this function to add a counter
+     * 
      * @param array $aParams
-     * array(
-     *     "result" integer; RESUL_nn
-     *     "value"  description text
-     * )
+     * array keys:
+     *     "result"   integer; RESULT_nn
+     *     "value"    description text
+     * 
+     *     brainstorming for a future release
+     * 
+     *     "counter"  optioal: array of counter values
+     *         - "label"  string: a label
+     *         - "value"  a number
+     *         - "unit"   string: unit, i.e. ms, MB/s
+     *         - "type"   one of counter | bars | bars-stacked | lines | ... ??
+     * 
      */
-    private function checkSimple($aParams) {
+    protected function checkSimple($aParams) {
         $this->_checkArrayKeys($aParams, "result,value");
-        return $this->_setReturn((int) $aParams["result"], $aParams["value"]);
+        $this->_setReturn((int) $aParams["result"], $aParams["value"]);
+        if(isset($aParams['counter']) && is_array($aParams['counter'])){
+            // TODO: checks
+            $this->_aData['counter']=$aParams['counter'];
+        }
+        return true;
     }
 
     /**
@@ -619,7 +636,7 @@ class appmonitorcheck {
      * )
      * @return boolean
      */
-    private function checkSqliteConnect($aParams) {
+    protected function checkSqliteConnect($aParams) {
         $this->_checkArrayKeys($aParams, "db");
         if (!file_exists($aParams["db"])) {
             $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database file " . $aParams["db"] . " does not exist.");

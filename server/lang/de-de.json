@@ -130,7 +130,7 @@
 
         "msgErr-missing-section-meta":"Es gibt keine Sektion &quot;meta&quot; in der Antwort (die Anfrage ist wom&ouml;glich gescheitert?).",
         "msgErr-missing-key-meta-host":"Es ist kein Hostname gesetzt unter meta > host",
-        "msgErr-missing-key-meta-website":"Es ist keine Webseite oder Applikationsname gesetzt via meta > website",
+        "msgErr-missing-key-meta-website":"Es ist keine Webseite oder kein Applikations-/ Servicename gesetzt via meta > website",
         "msgErr-missing-key-meta-result":"Der Check ent&auml;lt kein Ergebnis via meta > result",
         
         "msgWarn-missing-key-meta-ttl":"Es wurde kein TTL gesetzt via meta > ttl. Es wird der Default verwendet.",
@@ -152,7 +152,7 @@
         
         "changetype-2.logmessage":    "Der Status von __URL__ wechselte von __LAST-RESULT__ auf __RESULT__.",
         "changetype-2.email.subject": "[Appmonitor] :: __CHANGE__ __LAST-RESULT__ --> __RESULT__ - __URL__",
-        "changetype-2.email.message": "__TIME__\nDer Status wechselte von __LAST-RESULT__ auf __RESULT__.\n\nDer aktuelle Status ist einsehbar unter: __MONITORURL__\n\n__CHECKS__",
+        "changetype-2.email.message": "__TIME__\n__WEBSITE__ @ __HOST__\nDer Status wechselte von __LAST-RESULT__ auf __RESULT__.\n\nDer aktuelle Status ist einsehbar unter: __MONITORURL__\n\n__CHECKS__",
         
         "changetype-3.logmessage":    "Webapp wurde im Appmonitor entfernt: __URL__.",
         "changetype-3.email.subject": "[Appmonitor] :: Webapp wurde entfernt: __URL__.",

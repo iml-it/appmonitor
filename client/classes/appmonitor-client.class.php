@@ -36,34 +36,35 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    private $_sVersion = 'php-client-v0.58';
+    protected $_sVersion = 'php-client-v0.58';
 
     /**
      * config: default ttl for server before requesting the client check again
      * value is in seconds
      * @var int
      */
-    private $_iDefaultTtl = 300;
+    protected $_iDefaultTtl = 300;
 
     /**
      * internal counter: greatest return value of all checks
      * @var type 
      */
-    private $_iMaxResult = false;
+    protected $_iMaxResult = false;
 
     /**
      * responded metadata of a website
      * @see _createDefaultMetadata()
      * @var array
      */
-    private $_aMeta = array();
+    protected $_aMeta = array();
 
     /**
      * repended array of all checks
      * @see addCheck()
      * @var array
      */
-    private $_aChecks = array();
+    protected $_aChecks = array();
+    
     protected $_iStart = false;
 
     /**
@@ -74,14 +75,14 @@ class appmonitor {
     }
 
     // ----------------------------------------------------------------------
-    // private function
+    // protected function
     // ----------------------------------------------------------------------
 
     /**
      * create basic array values for metadata
      * @return boolean
      */
-    private function _createDefaultMetadata() {
+    protected function _createDefaultMetadata() {
         $this->_iStart = microtime(true);
         $this->_aMeta = array(
             "host" => false,
@@ -294,7 +295,7 @@ class appmonitor {
     /**
      * verify array values and abort with all found errors
      */
-    private function _checkData() {
+    protected function _checkData() {
         $aErrors = array();
 
         if (!count($this->_aChecks)) {

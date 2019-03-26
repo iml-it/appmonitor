@@ -1,0 +1,161 @@
+body{background:#fff url('bg-beton.jpg') fixed; color:#555; font-family:"arial"; margin: 0; font-size: 1em;}
+a{color:#67c;}
+h1{color:#888; color:rgba(255,255,255,0.5); margin: 0 0.5em 0 0; float: left;}
+h2, h2 a{margin:0 0 0.5em; color:#777; border-bottom: 0px solid #ddd; }
+h2>i {font-size: 150% !important; color:#aaa; margin-right: 0.3em;}
+h3{margin: 2em 0 1em 0;}
+pre{padding: 0.5em; background: rgba(0,0,0,0.05); border: 2px solid rgba(0,0,0,0.1); }
+select, input{border: 1px solid rgba(0,0,0,0.1); border-radius: 0.3em; color:#444; padding: 0.3em;}
+table.dataTable{border-spacing: 1px; width: 100%;}
+table.dataTable tbody tr:hover{background:rgba(255,255,255,0.2); }
+table th{ background:rgba(0,0,0,0.05);}
+table.dataTable thead .sorting, table.dataTable thead .sorting_asc, table.dataTable thead .sorting_desc, table.dataTable thead .sorting_asc_disabled, table.dataTable thead .sorting_desc_disabled,
+table.dataTable.no-footer{
+    border-bottom-color:rgba(0,0,0,0.2);
+}
+
+table th.sorting_asc, table th.sorting_desc{background: rgba(0,0,0,0.1);}
+table.dataTable tbody th, table.dataTable tbody td{padding: 2px 6px;}
+
+.inputtext{
+    border: 2px solid rgba(0,0,0,0.3);
+    border-radius: 0.5em;
+    padding: 0.5em; margin-right: 1em;
+}
+
+.divtop{position: fixed; top: 0; z-index: 1000; width: 100%; padding: 0; }
+.divtopheader, .divtopnavi,  .footer{background:#444; color:#eee; color: rgba(255,255,255,0.8);}
+.divtopheader{
+    opacity:1; 
+    padding: 0.3em 1em 1em; 
+    width: 100%; 
+}
+
+/* ---------- navigation on top */
+.divtopnavi{width: 100%; padding: 1em 1em 0.7em ; opacity:0.8; border-top: 0px solid #fca;}
+.divtopnavi a{color:#fff; text-decoration:none;padding: 0.7em 0.7em 0.7em; margin-right: 0.3em; border-radius: 0.5em 0.5em 0 0;transition: all ease 0.5s;}
+.divtopnavi a:hover{text-decoration: underline;}
+.divtopnavi a.active{background-color:#eee; background-color:rgba(255,255,255,0.3);}
+.divtopnavi a.reload{
+    background-color: #394;
+	border-radius: 0.2em;
+	padding: 0.4em;
+}
+.divtopnavi .tagfilter{float: right; margin-right: 1.5em;}
+
+.divmain{margin: 0 2% 5em;}
+.divsourceinfo{background:#ddd; padding: 1em; }
+#divmodal{
+    position: fixed; height: 100%; width: 100%; top:0; left:0;
+    background: #ccc; background: rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+.divlog{}
+.divdialog{background: #fff; position: absolute; margin-top: 20%; margin-left: 30%; z-index: 1000; 
+border: 2px solid rgba(0,0,0,0.4); border-radius: 1em; box-shadow: 0 0 1em #888;
+padding: 1em;}
+.divlog div{padding: 0.5em;}
+.divlogok{background:#afa; }
+.divloginfo{background:#fff8d0; }
+.divlogerror{background:#fdd;}
+
+.footer{border-top: 1px solid rgba(0,0,0,0.1); margin-top: 20em; padding: 0.2em 1em; position: fixed; bottom: 0;width: 100%; }
+.footer a{color:#fff; text-decoration: none;}
+.footer a:hover{text-decoration: underline;}
+
+/* ---------- tiles on top */
+.tile{float: left; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); 
+     padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8.5em; width: 10em;
+}
+.tile .count{font-size: 200%; opacity: 0.8; font-weigh1t: bold; padding: 0.3em 0;}
+.tile .label{}
+.tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
+
+#content{transition: opacity 0.4s linear; }
+.outsegment{min-height: 30em; margin-top: 7em; padding: 1em; border: 2px solid #fff; background: rgba(255,255,255,0.1);box-shadow: 0 0 1em #e8e8e8;}
+
+.divhost{border: 1px solid rgba(0,0,0,0.01); float: left; padding: 0.4em; margin: 0 1em 1em 0; width: 21em; width: 21em; height: 4em;}
+.divhost .icon{background: rgba(255,255,255,0.3); font-size: 200%; padding: 0.3em; display: block; float: left; margin-right: 0.3em; width: 1.3em; text-align: center;}
+.divhost .icon a{color:#666;}
+.divhost>div{margin-left: 3.5em;}
+#divsetup .divhost{width: auto; height: auto;}
+
+
+.result0{background:#dfd    !important; background: linear-gradient(#dfd,#cec)!important;}
+.result1{background:#eee    !important; background: linear-gradient(#eee,#ddd)!important;}
+.result2{background:#fff8d0 !important; background: linear-gradient(#fff0d0,#f0e0b0)!important;}
+.result3{background:#fcd    !important; background: linear-gradient(#fde,#fcd)!important;}
+
+tr.result0{background:rgba(220,240,220,0.4) !important; color:#385;}
+tr.result1{background:rgba(220,220,220,0.2) !important; color:#999;}
+tr.result2{background:rgba(250,240,220,0.4) !important; color:#a94;}
+tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
+
+.badge{border: 1px solid rgba(0,0,0,0.2); padding: 0 0.5em; border-radius: 20%; margin-right: 0.2em;}
+
+.btn{padding: 0.3em 0.5em; color:#eee; background:#888; border: 2px solid rgba(0,0,0,0.2); border-radius: 0.4em; box-shadowX: 0 0 0.5em #888; 
+     text-decoration: none;
+    transition: all ease 0.2s;
+}
+.btn:hover{box-shadowX: 0 0 0.3em #888; border: 2px solid rgba(0,0,0,0.05); cursor: pointer;}
+.btnadd{color:#383; background-color:#ada; background: linear-gradient(-45deg,#ada,#afa,#ada);}
+.btndel{color:#833; background-color:#faa; background: linear-gradient(-45deg,#d88,#ebb,#d88);}
+.divhost .btndel{margin-top: -0.4em;}
+.divdialog .btn{position: absolute; right: 1em;}
+
+.divok{margin: 0 0 2em; padding: 1em;}
+.divwarning{background:#fff0c0 !important; margin: 0 0 2em; padding: 1em;}
+.diverror{background:#fdd !important; background: linear-gradient(#fdd,#ecc) !important; margin: 0 0 2em; padding: 1em; border: 1px solid rgba(0,0,0,0.15);}
+
+.icook{color:#2a2;}
+.icowarning{color:#ea2;}
+.icoerror{color:#c22;}
+
+#divwebsfilter{clear: both;}
+.highlight{background:#fc2;}
+.frmFilter{background: rgba(0,0,0,0.05); padding: 0.5em;}
+.tag{color:#669; font-size: 90%; text-decoration: none; border-bottom: 1px dashed; margin-right: 0.5em;}
+
+.graph{float: left; background: rgba(255,255,255,0.1); border: 1px solid rgba(0,0,0,0.2); box-shadow: 0 0 5em #ddd inset; color: rgba(0,0,0,0.4); 
+     padding: 0.3em; margin: 0 1em 1em 0; text-align: center; min-height: 8.5em; width:95%; max-width: 1024px;}
+
+#counter{border-bottom: 1px solid rgba(255,255,255,0.3); text-align: center; margin-right: 0.5em;}
+#counter div{background:#fc2; height: 1px; transition: width 0.8s linear ; bottom: 0;}
+
+@media (max-width: 1024px) {
+    h1{font-size:150%;}
+    .divmain{margin: 1em 0 2em;}
+    .outsegment{background: none; margin-top: 5.5em; padding: 0.2em;}
+    .divtopnavi a span{display: none;}
+    .divtopnavi .tagfilter span{display: none;}
+    
+    .tile{display: none; min-height: 6em; width: 10em;}
+    .overviewtiles{}
+    .tile .count{font-size: 200%; opacity: 0.8; padding: 0;}
+    .tile .label{}
+    .tile .more{border-top: 1px solid #ccc; opacity: 0.9; margin-top: 0.5em; padding-top: 0.5em;}
+    
+    .divhost{height: 2em; margin: 0.2em;}
+    .divhost > div {margin: 0;}
+    .divhost > .icon {display: none;}
+    .divhost > div.details{display: none;}
+    .graph{width: 100%;}
+}
+@media (min-width: 250px) {
+    .divtopnavi a.active span{display: none;}
+    .tile:nth-child(1){display: block;}
+}
+
+@media (min-width: 420px) {
+    .tile:nth-child(2){display: block;}
+}
+@media (min-width: 600px) {
+    .divtopnavi a.active span{display: inline;}
+    .tile:nth-child(3){display: block;}
+}
+@media (min-width: 800px) {
+    .tile:nth-child(4){display: block;}
+}
+@media (min-width: 1000px) {
+    .tile:nth-child(5){display: block;}
+}

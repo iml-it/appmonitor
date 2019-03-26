@@ -83,7 +83,7 @@ class appmonitorserver {
     protected $_aMessages = array();
     protected $oLang = false;
     protected $_bIsDemo = false; // set true to disallow changing config in webgui
-    private static $curl_opts = array(
+    protected static $curl_opts = array(
         CURLOPT_HEADER => true,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 15,
@@ -105,7 +105,7 @@ class appmonitorserver {
     }
 
     // ----------------------------------------------------------------------
-    // private functions
+    // protected functions
     // ----------------------------------------------------------------------
 
     /**
@@ -471,6 +471,10 @@ class appmonitorserver {
                 $aClientData["result"]["httpstatus"] = $iHttpStatus;
                 $aClientData["result"]["error"] = $sError;
                 
+                if(!isset($aClientData["result"]["website"]) || !$aClientData["result"]["website"]){
+                    $aClientData["result"]["website"]=$this->_tr('unknown') . ' (' . parse_url($aResult['url'], PHP_URL_HOST) . ')';
+                }
+
                 // $aClientData["result"]["curlinfo"] = $aResult['curlinfo'];
                 
                 $oResponsetime=new responsetimeRrd($sKey);
@@ -569,7 +573,7 @@ class appmonitorserver {
     }
 
     /**
-     * helper function for overview of all web apps
+     * helper function for counters for overview over all web apps
      * 
      * @return type
      */
@@ -605,6 +609,13 @@ class appmonitorserver {
         );
     }
 
+    /**
+     * get array with application data 
+     * 
+     * @param string  $sKey           filter key i.e. "meta"; default false (all)
+     * @param string  $sFilterAppId   filter by app id; default false (all)
+     * @return array
+     */
     protected function _apiGetAppData($sKey=false, $sFilterAppId=false) {
         $this->_getClientData();
         $aReturn=array();
@@ -619,14 +630,29 @@ class appmonitorserver {
         }
         return $aReturn;
     }
-    
+
+    /**
+     * get a flat array with all application ids
+     * @return array
+     */
     public function apiGetAppIds() {
         $this->_getClientData();
         return array_keys($this->_data);
     }
+    
+    /**
+     * get an array of all client data; optional filteex by given app id 
+     * @param string  $sFilterAppId   filter by app id; default false (all)
+     * @return array
+     */
     public function apiGetAppAllData($sFilterAppId=false) {
         return $this->_apiGetAppData(false, $sFilterAppId);
     }
+    /**
+     * get an array of all client metadata; optional filteex by given app id 
+     * @param string  $sFilterAppId   filter by app id; default false (all)
+     * @return type
+     */
     public function apiGetAppMeta($sFilterAppId=false) {
         return $this->_apiGetAppData('meta',$sFilterAppId);
     }

@@ -23,6 +23,26 @@ $oMonitor->addTag('monitoring');
 
 $oMonitor->addCheck(
         array(
+            "name" => "Counter test",
+            "description" => "Counter",
+            "check" => array(
+                "function" => "Simple",
+                "params" => array(
+                    "result" => 0,
+                    "value" => "nothing here",
+                    "counter" => array(
+                        "label" => "Wind",
+                        "value" => rand(3, 9),
+                        "unit"  => "m/s",
+                        "type"  => "counter",
+                    ),
+                ),
+            ),
+        )
+);
+
+$oMonitor->addCheck(
+        array(
             "name" => "check tmp subdir",
             "description" => "Check cache storage",
             "check" => array(

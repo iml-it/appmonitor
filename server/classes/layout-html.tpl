@@ -122,12 +122,10 @@ desired effect
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-    <!-- Content Header (Page header) --
+    <!-- Content Header (Page header) -->
+    <!--
     <section class="content-header">
-      <h1>
-        {{PAGE_HEADER}}
-      </h1>
-      --
+      <h1>...</h1>
       
       BREADCRUMB TOP RIGHT
       
@@ -135,22 +133,24 @@ desired effect
         <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
         <li class="active">Here</li>
       </ol>
-      --
-    </section>
-
-    !-- Main content --
-    <section class="content container-fluid">
-
-      !--------------------------
-        | Your Page Content Here |
-        --------------------------
-        
-        {{PAGE_BODY}}
-
     </section>
     -->
-    
+      
+    {{PAGE_HEADER}}
+
+    <!-- Main content --
+    <section class="content container-fluid">
+
+       --------------------------
+       | Your Page Content Here |
+        ------------------------ --
+        
+    </section>
+    -->
+
     {{PAGE_BODY}}
+    
+    
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
