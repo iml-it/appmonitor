@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.68 2019-03-28
+    - adminlte: added alertbox, callout
+    - appmonitor server: remove bootstrap theme.css
+    - appmonitor server: show validation warnings + errors in Adminlte layout
+
 v0.67 2019-03-26
     - classfiles: replace private with protected
     - classfiles: added __HOST__ + __WEBSITE__ placeholders for notifications

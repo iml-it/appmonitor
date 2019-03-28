@@ -119,7 +119,7 @@
         "msgOK-Url-was-removed": "Die URL wurde entfernt: %s",
     
     
-        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Die kann bein einem Timeout oder einen Fehler auftreten.",
+        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Dies kann bein einem Timeout oder einen Fehler auftreten.",
         "msgErr-missing-key-checks-name":"checks > %s > name ist nicht gesetzt - dieser Check hat keine Bezeichnung.",
         "msgErr-missing-key-checks-result":"checks > %s > result ist nicht gesetzt - dieser Check hat keinen Status.",
         

@@ -63,15 +63,20 @@ class renderadminlte {
     
     /**
      * verify if an item has a correct value
-     * @param string  $sType   type; key in $_aValidItems; one of color|type
-     * @param string  $sValue  value to check
+     * it returns false if a key is not defined to be checked
+     * it returns true if it was validated successfully
+     * it dies with an errror, if a value check failed
+     * 
+     * @param string  $sType      type; key in $_aValidItems; one of color|type
+     * @param string  $sValue     value to check
+     * @param string  $sReferrer  optional: method that called this function
      */
-    protected function _checkValue($sType, $sValue){
+    protected function _checkValue($sType, $sValue, $sReferrer=false){
         if (!$sValue || !array_key_exists($sType, $this->_aValidItems)){
             return false;
         }
         if(array_search($sValue, $this->_aValidItems[$sType])===false){
-            die("ERROR: value [$sValue] is not a valid for type [$sType]; it must be one of ".implode("|", $this->_aValidItems[$sType]));
+            die("ERROR: ".($sReferrer ? $sReferrer.' - ' : '')."value [$sValue] is not a valid for type [$sType]; it must be one of ".implode("|", $this->_aValidItems[$sType]));
         }
         return true;
     }
@@ -82,6 +87,79 @@ class renderadminlte {
     // SIMPLE HTML ELEMENTS
     // 
     // ----------------------------------------------------------------------
+    
+    
+    /**
+     * return a alert box      
+     * https://adminlte.io/themes/AdminLTE/pages/UI/general.html
+     * @param type $aOptions  hash with keys for all options
+     *                          - type - one of [none]|danger|info|primary|success|warning
+     *                          - dismissible - if dismissible - one of true|false; default: false
+     *                          - title
+     *                          - text
+     * @return string
+     */
+    public function getAlert($aOptions){
+        foreach (array('type','dismissible', 'title', 'text') as $sKey){
+            if(!isset($aOptions[$sKey])){
+                $aOptions[$sKey]=false;
+            }
+            $this->_checkValue($sKey, $aOptions[$sKey]);
+        }
+        return '<div class="alert'
+                    .($aOptions['type'] ? ' alert-'.$aOptions['type'] : '')
+                    . ($aOptions['dismissible'] ? ' alert-dismissible' : '')
+                .'">'
+                
+                // div content
+                . ($aOptions['dismissible'] ? '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>' : '')
+                . ($aOptions['title'] ? '<h4>'.$aOptions['title'].'</h4>' : '')
+                . $aOptions['text']
+            . '</div>'
+            ;
+        
+        /*
+            <div class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-ban"></i> Alert!</h4>
+                Danger alert preview. This alert is dismissable. A wonderful serenity has taken possession of my entire
+                soul, like these sweet mornings of spring which I enjoy with my whole heart.
+            </div>         
+         */
+    }
+    /**
+     * return a callout box      
+     * https://adminlte.io/themes/AdminLTE/pages/UI/general.html
+     * @param type $aOptions  hash with keys for all options
+     *                          - type - one of [none]|danger|info|primary|success|warning
+     *                          - title
+     *                          - text
+     * @return string
+     */
+    public function getCallout($aOptions){
+        foreach (array('type', 'title', 'text') as $sKey){
+            if(!isset($aOptions[$sKey])){
+                $aOptions[$sKey]=false;
+            }
+            $this->_checkValue($sKey, $aOptions[$sKey]);
+        }
+        return '<div class="callout'
+                    .($aOptions['type'] ? ' callout-'.$aOptions['type'] : '')
+                .'">'
+                
+                // div content
+                . ($aOptions['title'] ? '<h4>'.$aOptions['title'].'</h4>' : '')
+                . ($aOptions['text'] ? '<p>'.$aOptions['text'].'</p>' : '')
+            . '</div>'
+            ;
+        
+        /*
+            <div class="callout callout-info">
+                <h4>I am an info callout!</h4>
+                <p>Follow the steps to continue to payment.</p>
+            </div>
+         */
+    }
     
     /**
      * return a content Box

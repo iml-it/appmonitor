@@ -217,10 +217,10 @@ class notificationhandler {
         if ($this->isSleeptime()){
             return false;
         }
-        $iChangetype=$this->_detectChangetype(); 
+        $iChangetype=$this->_detectChangetype();
         // $iResult=$this->_aAppResult['result']['result'];
         // $sLogMessage=$this->_generateMessage('changetype-'.$iChangetype.'.logmessage');
-        
+       
         switch ($iChangetype) {
             case CHANGETYPE_NOCHANGE:
                 // echo "DEBUG: ".__METHOD__." NO change detected\n";

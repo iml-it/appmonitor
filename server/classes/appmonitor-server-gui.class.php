@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.67";
+    var $_sVersion = "0.68";
 
     /**
      * html code for icons in the web gui
@@ -463,7 +463,7 @@ class appmonitorserver_gui extends appmonitorserver {
         }
         // ----- validate section with checks
         if (!isset($aData['checks'])){
-            $aErrors[]='msgErr-missing-section-checks';
+            $aErrors[]=$this->_tr('msgErr-missing-section-checks');
         } else {
             $iCheckCounter=0;
             foreach($aData['checks'] as $aSingleCheck){
@@ -803,7 +803,6 @@ class appmonitorserver_gui extends appmonitorserver {
                     . '</nobr>'
                     );
 
-            if (array_key_exists("host", $aEntries["result"])) {
 
                 // --- validation of items in client data array
                 $aValidatorResult=$this->_checkClientResponse($sAppId);
@@ -812,13 +811,21 @@ class appmonitorserver_gui extends appmonitorserver {
                         if(count($aMessageItems)){
                             $sDivContent='';
                             foreach($aMessageItems as $sSingleMessage){
-                                $sDivContent.=($sDivContent?'':'<strong class="ico'.$sSection.'">'.$this->_aIco[$sSection].' '.$this->_tr('Validator-'.$sSection).'</strong><br>')
-                                    . '- '.$sSingleMessage.'<br>';
+                                $sDivContent.= '- '.$sSingleMessage.'<br>';
                             }
-                            $sValidationContent.= $sDivContent ? '<div class="div'.$sSection.'">'.$sDivContent.'</div>' : '';
+                            $sValidationContent.= $sDivContent 
+                                ? $oA->getAlert(array(
+                                    'type'=>$sSection=='error' ? 'danger' : $sSection,
+                                    'dismissible'=>false,
+                                    'title'=>$this->_aIco[$sSection].' '.$this->_tr('Validator-'.$sSection),
+                                    'text'=>$sDivContent
+                                    ))
+                                : ''
+                            ;
                         }
                     }
                 }
+            if (array_key_exists("host", $aEntries["result"])) {
 
                 // --- table with checks
                 $sHtml .= 
@@ -920,7 +927,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 // 'yLabel'=>$this->_tr('Chart-responsetime'),
                 'data'=>$aChartData,
             );
-            $iFirstentry=$aLogs[count($aLogs)-1]['timestamp'];
+            $iFirstentry=count($aLogs)>1 ? $aLogs[count($aLogs)-1]['timestamp'] : date('U');
             $sUptime=($aUptime['total']
                     ? ''
                         . '<strong>'
@@ -1574,7 +1581,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
                 // Bootstrap    
                 . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('twitter-bootstrap').'/css/bootstrap.min.css') . '" rel="stylesheet">'
-                . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('twitter-bootstrap').'/css/bootstrap-theme.min.css') . '" rel="stylesheet">'
+                // . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('twitter-bootstrap').'/css/bootstrap-theme.min.css') . '" rel="stylesheet">'
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('twitter-bootstrap').'/js/bootstrap.min.js') . '" type="text/javascript"></script>'
                 
                 // Font awesome
