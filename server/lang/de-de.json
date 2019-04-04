@@ -160,7 +160,7 @@
         
         "email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__.",
 
-        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Die kann bein einem Timeout oder einen Fehler auftreten.",
+        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Die kann bei einem Timeout oder einem Fehler auftreten.",
         
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },

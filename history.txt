@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.69 2019-04-04
+    - adminlte: added allowed colors
+    - notfifications: fix typo in German message text
+    - notfifications: umlauts instead of html entities
+
 v0.68 2019-03-28
     - adminlte: added alertbox, callout
     - appmonitor server: remove bootstrap theme.css

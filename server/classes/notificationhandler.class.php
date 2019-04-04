@@ -500,7 +500,7 @@ class notificationhandler {
      */
     public function getReplacedMessage($sMessageId){
         $sTemplate=$this->_tr($sMessageId);
-        $sReturn = $this->_makeReplace($this->getMessageReplacements(), $sTemplate);
+        $sReturn = html_entity_decode($this->_makeReplace($this->getMessageReplacements(), $sTemplate));
         return $sReturn;
     }
     

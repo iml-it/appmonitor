@@ -19,9 +19,35 @@ class renderadminlte {
     var $_aValidItems=array(
         'bgcolor'=>array(
             'aqua', 
+            'aqua-active', 
+            'black', 
+            'black-active', 
+            'blue', 
+            'blue-active', 
+            'fuchsia', 
+            'fuchsia-active', 
             'green', 
+            'green-active', 
+            'light-blue', 
+            'light-blue-active', 
+            'lime', 
+            'lime-active', 
+            'maroon', 
+            'maroon-active', 
+            'navy', 
+            'navy-active', 
+            'olive', 
+            'olive-active', 
+            'orange', 
+            'orange-active', 
+            'purple', 
+            'purple-active', 
             'red', 
-            'yellow'
+            'red-active', 
+            'teal', 
+            'teal-active', 
+            'yellow', 
+            'yellow-active', 
         ),
         'color'=>array(
             'aqua', 
@@ -31,6 +57,7 @@ class renderadminlte {
         ),
         'type'=>array(
             'danger',   // red
+            'gray',     // gray
             'info',     // aqua
             'primary',  // blue
             'success',  // green
