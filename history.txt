@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.70 2019-04-04
+    - notfifications: fix umlauts 2
+
 v0.69 2019-04-04
     - adminlte: added allowed colors
     - notfifications: fix typo in German message text

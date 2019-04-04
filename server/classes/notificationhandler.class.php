@@ -500,7 +500,7 @@ class notificationhandler {
      */
     public function getReplacedMessage($sMessageId){
         $sTemplate=$this->_tr($sMessageId);
-        $sReturn = html_entity_decode($this->_makeReplace($this->getMessageReplacements(), $sTemplate));
+        $sReturn = $this->_makeReplace($this->getMessageReplacements(), $sTemplate);
         return $sReturn;
     }
     
@@ -617,7 +617,9 @@ class notificationhandler {
         $sEmailSubject=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.subject');
         $sEmailBody=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.message');
 
-        mail($sTo, $sEmailSubject, $sEmailBody, 
+        mail($sTo,  
+            utf8_decode(html_entity_decode($sEmailSubject)), 
+            utf8_decode(html_entity_decode($sEmailBody)),
             "From: " . $sFrom . "\r\n" 
             . "Reply-To: " . $sFrom . "\r\n"
 
