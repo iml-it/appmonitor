@@ -96,6 +96,9 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
         "slack": {
             "#sysadmin-channel": "https:\/\/hooks.slack.com\/services\/AAAAA\/BBBBB\/CCCCCC"
             }
+        },
+        "messages": {
+            "[text-id]": "[Custom message text using placeholders.]"
         }
     },
     "urls":[
@@ -137,7 +140,7 @@ Remarks:
 	- other examples
 	- "/2018<span class="mark">-</span>08<span class="mark">-</span>01/" --> disable notification on complete 1st of August 2018 (Swiss holiday)
 	- "/[0-9]{4}<span class="mark">-</span>12<span class="mark">-</span>/" --> 4 digits is a year then "minus" + month 12 --> disables notification in December of each year
-	
+  - "messages": override default notification messages (see next chapter)
 
 
   
@@ -145,11 +148,17 @@ Remarks:
 
 ## Message texts ##
 
-The sent messages are language dependent texts.
-In the language file they are defined in the subkey "notifications".
+The sent messages are language dependent texts and the appmonitor is
+shipped with a default. In the language file they are defined in the subkey 
+"notifications".
+
+You can override the defaults with defining the keys in the server config
+in the section notifications -> messages.
+
+These are the message keys:
 - changetype-[N].logmessage
 - changetype-[N].email.message
-- email.subject
+- changetype-[N].email.subject
 
 [N] is an integer value between 0..3 (for change type)
 

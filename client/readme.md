@@ -650,11 +650,50 @@ parameters:
 	
 ## Additional Metadata ##
 
+In the meta section will be set the values with the following methods.
+
 The appmonitor client has 
 - add* functions to add values - "as many as you want" by repeating the method
 - set* function to set a single attribute - by repeating the method the value will be overwritten
 
 
+### host ###
+
+Set the physical hostname where the application runs.
+If no host is given then php_uname("n") will be used to set one.
+
+    // automatic
+    $oMonitor->setHost();
+
+    // set a host manually
+    $oMonitor->setHost("web-01.example.com");
+
+
+### website ###
+
+Set a name for this website or application and its environment (dev, test, prod).
+If you have several application in subdirectories, i.e. /blog,  /shop...
+then you should the path or any description to identify them too
+
+If no argument is given the name of HTTP_HOST will be used.
+
+
+    // set the application manually
+    $oMonitor->setHost("www.example.com - My Wordpress blog");
+    $oMonitor->setHost("dev.example.com/shop");
+
+    // set the application  domain manually
+    $oMonitor->setHost("Wordpress blog");
+
+### TTL ###
+
+Set a ttl value in seconds to define how long a server should not ask again for a new status of this instance.
+
+You can start with 60 (=1 min) or 300 (5 min).
+
+    $oMonitor->setTTL(60);
+
+	
 ### Notification ###
 
 You have these notification possibilities to get informed if a service is down ... or available again.
@@ -685,15 +724,65 @@ In the Appmonitor webgui will be dropdown with all tags in alphabetic order. The
      $oMonitor->addTag("monitoring");
 
 
-TODO:
-	 
-setHost()
 
-setResult()
+### Set total result value ###
 
-setTTL()
+Each added check has a result. The Method setResult() sets the total result
+value for the application. The most simple variant is giving no value. 
+then it sets the biggest (worst) value of any check: if one of the check has 
+two warnings and one ended in an error then tho total value is an error.
 
-setWebsite()
+    $oMonitor->setResult();
 
-renderHtmloutput()
+If you you want you can finetune your total result.
+
+Example: you make a check for a job that runs in the night or once per week. 
+If the check for reachability of a target to send a report fails (=error)
+but other checks sy that the application runs fine - the override the error
+with a new total result
+
+    $oMonitor->setResult(2);
+
+Remark: Use $oMonitor->getResults() to get all checks and thir results to 
+write your custom logic.
+
+
+## Send the response ##
+
+### Send JSON ###
+
+After making all checks and setting the total result there is a method to send
+the json response:
+
+    $oMonitor->render();
+
+This method supports 2 parameters
+
+
+| #  | variable | Description |
+|--- |---          |---                                                                    |
+| 1  | bPretty     | \{bool\} use pretty print; default: false |
+| 2  | bHighlight  | \{bool\} use highligthed html instead of json; default: false; if true the response is tex/html and no valid JSON anymore |
+
+
+### Snippet: show status locally (without appmonitor server) ###
+
+To show the status page on the application server have a look to the snippet 
+below. It can be used to show the current status to the users.
+This variant is possible if you don't want to give access to the 
+Appmonitor server. 
+
+It does not send any notification. And this simple snippet does not care about the TTL ("yet": you need to build it).
+
+    $_SERVER['REMOTE_ADDR']='127.0.0.1';
+
+    // execute checks
+    ob_start();
+    require __DIR__ . '/../../../appmonitor/index.php';
+    $sJson=ob_get_contents();
+    ob_end_clean();
+
+    // render
+    $oMonitor->renderHtmloutput($sJson);
+
 

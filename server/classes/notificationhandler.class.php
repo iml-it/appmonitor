@@ -52,6 +52,14 @@ class notificationhandler {
     // __construct
     // ----------------------------------------------------------------------
 
+    /**
+     * init
+     * @param array  $aOptions  options array with the keys
+     *                          - {string} lang       language of the GUI
+     *                          - {string} serverurl  base url of the web app to build an url to an app specific page
+     *                          - {string} notifications  appmionitor config settings in notification settings (for sleeptime and messages)
+     * @return boolean
+     */
     public function __construct($aOptions=array()) {
         if(isset($aOptions['lang'])){
             $this->_loadLangTexts($aOptions['lang']);
@@ -80,12 +88,16 @@ class notificationhandler {
     
     /**
      * load language texts
+     * 
+     * @param string  $sLang  language; i.e. "en-en"
+     * @return type
      */
     protected function _loadLangTexts($sLang) {
         return $this->oLang = new lang($sLang);
     }
     /**
-     * translate a text with language file
+     * translate a text with language file inside section "notifications"
+     * 
      * @param string $sWord
      * @return string
      */
@@ -115,6 +127,7 @@ class notificationhandler {
     /**
      * get current or last stored client notification data
      * this method also stores current notification data on change
+     * 
      * @return array
      */
     protected function _getAppNotifications(){
@@ -460,7 +473,7 @@ class notificationhandler {
             '__DELTA-TIME__'     => isset($this->_aAppLastResult['result']['ts']) ? 
                     round((time() - $this->_aAppLastResult['result']['ts'])/ 60)." min "
                     . "(".round((time() - $this->_aAppLastResult['result']['ts'])/ 60/60*4)/4 ." h)"
-                    : $sMiss
+                    : $sMiss    
                     ,
             
         );
@@ -499,7 +512,11 @@ class notificationhandler {
      * @return integer
      */
     public function getReplacedMessage($sMessageId){
-        $sTemplate=$this->_tr($sMessageId);
+        $sTemplate=isset($this->_aNotificationOptions['messages'][$sMessageId]) && $this->_aNotificationOptions['messages'][$sMessageId]
+                ? $this->_aNotificationOptions['messages'][$sMessageId]
+                : $this->_tr($sMessageId)
+                ;
+        // $sTemplate=$this->_tr($sMessageId);
         $sReturn = $this->_makeReplace($this->getMessageReplacements(), $sTemplate);
         return $sReturn;
     }

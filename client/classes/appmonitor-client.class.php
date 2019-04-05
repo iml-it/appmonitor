@@ -105,7 +105,9 @@ class appmonitor {
     // ----------------------------------------------------------------------
 
     /**
-     * set a host for metadata
+     * set the physical hostname for metadata; if no host is given then
+     * the php_uname("n") will be used to set one.
+     * 
      * @param string $s  hostname
      * @return bool
      */
@@ -117,7 +119,14 @@ class appmonitor {
     }
 
     /**
-     * set a vhost for metadata
+     * set a name for this website or application and its environment 
+     * (dev, test, prod); 
+     * 
+     * If you have several application in subdirectories, i.e. /blog,  /shop...
+     * then you should the path or any description to identify them too
+     * 
+     * if no argument is given the name of HTTP_HOST will be used
+     * 
      * @param string $sNewHost  hostname
      * @return bool
      */
@@ -129,7 +138,9 @@ class appmonitor {
     }
 
     /**
-     * set a ttl value for 
+     * set a ttl value in seconds to define how long a server should not
+     * ask again for a new status of this instance
+     * 
      * @param int $iTTl TTL value in sec
      * @return boolean
      */

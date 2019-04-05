@@ -119,7 +119,7 @@
         "msgOK-Url-was-removed": "Die URL wurde entfernt: %s",
     
     
-        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Dies kann bein einem Timeout oder einen Fehler auftreten.",
+        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Dies kann bei einem Timeout oder einem Fehler auftreten.",
         "msgErr-missing-key-checks-name":"checks > %s > name ist nicht gesetzt - dieser Check hat keine Bezeichnung.",
         "msgErr-missing-key-checks-result":"checks > %s > result ist nicht gesetzt - dieser Check hat keinen Status.",
         
@@ -142,9 +142,9 @@
     },
     "notifications":{
         
-        "changetype-0.logmessage":    "Webapp ist unver&aumLndert: __URL__.",
-        "changetype-0.email.subject": "Webapp ist unver&aumLndert: __URL__.",
-        "changetype-0.email.message": "Webapp ist unver&aumLndert: __URL__.",
+        "changetype-0.logmessage":    "Webapp ist unver&auml;ndert: __URL__.",
+        "changetype-0.email.subject": "Webapp ist unver&auml;ndert: __URL__.",
+        "changetype-0.email.message": "Webapp ist unver&auml;ndert: __URL__.",
         
         "changetype-1.logmessage":    "Webapp wurde im Appmonitor hinzugefügt: __URL__.",
         "changetype-1.email.subject": "[Appmonitor] :: Webapp hinzugefuegt: __URL__.",
@@ -157,8 +157,6 @@
         "changetype-3.logmessage":    "Webapp wurde im Appmonitor entfernt: __URL__.",
         "changetype-3.email.subject": "[Appmonitor] :: Webapp wurde entfernt: __URL__.",
         "changetype-3.email.message": "Die Webapp __URL__ wurde im Appmonitor entfernt. Sie werden fortan keine Benachrichtigungen bei Statuswechsel mehr erhalten. Wenn dies ein Fehler war, kontaktieren Sie den Sysadmin.",
-        
-        "email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__.",
 
         "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Die kann bei einem Timeout oder einem Fehler auftreten.",
         

@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.71 2019-04-05
+    - notification: override texts with server config entries
+    - texts: remove email.subject; fix typos
+    - update docs
+
 v0.70 2019-04-04
     - notfifications: fix umlauts 2
 

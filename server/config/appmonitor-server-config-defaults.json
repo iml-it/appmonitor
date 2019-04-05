@@ -2,7 +2,7 @@
     "theme": "default",
     "lang": "en-en",
     "debug": false,
-    "serverurl": false,
+    "serverurl": "https:\/\/monitorserver\/appmonitor\/server\/",
     "pagereload": 60,
     "notifications":{
         "from": {
