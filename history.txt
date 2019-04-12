@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.73 2019-04-12
+    - backend: beautify setup page
+
 v0.72 2019-04-12
     - client: fix cert check if a host is one of the DNS names
     - backend: update fontawesome 4.x -> 5.8.1

@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.72";
+    var $_sVersion = "0.73";
 
     /**
      * html code for icons in the web gui
@@ -46,6 +46,7 @@ class appmonitorserver_gui extends appmonitorserver {
         'allwebapps' => '<i class="fas fa-globe"></i>',
         'webapp' => '<i class="fas fa-box-open"></i>',
         'host' => '<i class="far fa-hdd"></i>',
+        'url' => '<i class="fas fa-globe"></i>',
         'check' => '<i class="fas fa-check"></i>',
         'checks' => '<i class="fas fa-list"></i>',
         'notifications' => '<i class="far fa-bell"></i>',
@@ -659,57 +660,76 @@ class appmonitorserver_gui extends appmonitorserver {
      */
     protected function _generateSetup() {
         $sReturn = '';
+        $oA=new renderadminlte();
         $sFormOpenTag = '<form action="?" method="POST">';
-        $sReturn .= '<h3>' . $this->_tr('Setup-add-client') . '</h3>'
-                . '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
-                . $sFormOpenTag
-                . '<input type="hidden" name="action" value="addurl">'
-                . '<input type="text" class="inputtext" name="url" size="70" value="" '
-                . 'placeholder="http://[domain]/appmonitor/client/" '
-                . 'pattern="http.*://..*" '
-                . 'required="required" '
-                . '>'
-                // . '<a href="?#" class="btn btnadd" onclick="this.parentNode.submit(); return false;"><i class="fa fa-plus"></i> add</a>'
-                . '<button class="btn btnadd">' . $this->_aIco['add'].' '.$this->_tr('btn-addUrl') . '</button>'
-                . '</form><br>';
-        $sReturn .= '<h3>' . $this->_tr('Setup-client-list') . '</h3>'
-                . '<div id="divsetupfilter"></div><br>';
-        
+                
+        $sHostlist='';
         foreach ($this->_data as $sAppId => $aData) {
             $iResult = array_key_exists("result", $aData["result"]) ? $aData["result"]["result"] : 3;
             $sUrl = $aData["result"]["url"];
             $sWebsite = array_key_exists("website", $aData["result"]) ? $aData["result"]["website"] : $this->_tr('unknown') . ' (' . $sUrl . ')';
             $sHost = array_key_exists("host", $aData["result"]) ? $aData["result"]["host"] : $this->_tr('unknown');
 
-            $sIdDetails = 'setupdetail' . md5($sAppId);
             $aTags=isset($aData["meta"]["tags"]) ? $aData["meta"]["tags"] : false;
-            $sReturn .= '<div class="divhost result' . $iResult . ' tags '.$this->_getCssclassForTag($aTags).'" style="float: none; ">'
-                    . '<div style="float: right;">'
-                    . $sFormOpenTag
-                    . '<input type="hidden" name="action" value="deleteurl">'
-                    . '<input type="hidden" name="url" value="' . $sUrl . '">'
-                    . '<button class="btn btndel" '
-                        . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
-                        . '>' . $this->_aIco['del'].' '.$this->_tr('btn-deleteUrl') 
-                    . '</button>'
-                    //. '<a href="#" class="btn btndel"><i class="fa fa-minus"></i> delete</a>'
-                    . '</form>'
-                    . '</div>'
-                    . '<button class="btn" onclick="$(\'#' . $sIdDetails . '\').toggle(); return false;">' . $this->_tr('btn-details') . '</button>'
-                    . ' ' . $this->_aIco['webapp'] . ' ' . $this->_tr('Webapp') . ' '
-                    . $sWebsite
-                    . '... '
-                    . $this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $sHost . ' '
-                    . '<div id="' . $sIdDetails . '" style="display: none;">'
-                    . $this->_tr('Url') . ' '
-                    . '<a href="' . $sUrl . '" target="_blank">'
-                    . $sUrl
-                    . '</a><br>'
-                    // . '<pre>'.($aData['result']['header'] ? $aData['result']['header'] : $aData['result']['error']).'</pre>'
-                    // . '<pre>'.print_r($aData, 1).'</pre>'
-                    . '</div>'
-                    . '</div>';
+            $sHostlist .= $oA->getSectionRow($oA->getSectionColumn(
+                '<div class="divhost result' . $iResult . ' tags '.$this->_getCssclassForTag($aTags).'" style="float: none; ">'
+                . $oA->getBox(array(
+                    'title'=>''
+                        . $this->_aIco['webapp'] . ' ' . $sWebsite,
+                    'text'=>''
+                        // Button DELETE
+                        . '<div style="float: right;">'
+                        . $sFormOpenTag
+                            . '<input type="hidden" name="action" value="deleteurl">'
+                            . '<input type="hidden" name="url" value="' . $sUrl . '">'
+                            . '<button class="btn btndel" '
+                                . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
+                                . '>' . $this->_aIco['del'].' '.$this->_tr('btn-deleteUrl') 
+                            . '</button>'
+                            //. '<a href="#" class="btn btndel"><i class="fa fa-minus"></i> delete</a>'
+                        . '</form>'
+                        . '</div>'
+                        // /DELETE
+
+                        .$this->_aIco['url'] . ' <a href="' . $sUrl . '" target="_blank">'. $sUrl. '</a><br>'
+                        .$this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $sHost . '<br>'
+                ))
+                .'</div>',
+                12
+            ))
+            ;
+            
         }
+        $sReturn.=''
+            . $oA->getSectionRow($oA->getSectionColumn(
+                $oA->getBox(array(
+                    'title'=>$this->_tr('Setup-add-client'),
+                    'text'=> '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
+                        . $sFormOpenTag
+                        . '<input type="hidden" name="action" value="addurl">'
+                        . '<input type="text" class="inputtext" name="url" size="100" value="" '
+                            . 'placeholder="http://[domain]/appmonitor/client/" '
+                            . 'pattern="http.*://..*" '
+                            . 'required="required" '
+                        . '>'
+                        . '<button class="btn btnadd">' . $this->_aIco['add'].' '.$this->_tr('btn-addUrl') . '</button>'
+                        . '</form><br>'
+
+                )),
+                12
+            ))
+            . $oA->getSectionRow($oA->getSectionColumn(
+                $oA->getBox(array(
+                    'title'=>$this->_tr('Setup-client-list'),
+                    'text'=> '<div id="divsetupfilter"></div><br>'
+                    . '<div id="divsetup">'
+                        .$sHostlist
+                    . '</div>'
+                )),
+                12
+            ))
+            ;
+        
         return $sReturn;
     }
 
@@ -1055,42 +1075,41 @@ class appmonitorserver_gui extends appmonitorserver {
                     . '<td>' . htmlentities($sHtmlcode) . '</td>'
                     . '</tr>';
         }
-        
-        $sHtml=''
-
-            . '<h3>' . $this->_tr('Debug-icons') . '</h3>'
-            . '<table><tr>'
-                . '<th>#</th>'
-                . '<th>' . $this->_tr('Debug-icons-preview') . '</th>'
-                . '<th>' . $this->_tr('Debug-icons-html') . '</th>'
-                . '</tr>'.$sAlIcons.'</table>'
-
-            . '<h3>' . $this->_tr('Debug-config') . '</h3>'
-            . '<pre>' . print_r($this->_aCfg, true) . '</pre>'
-
-            . '<h3>' . $this->_tr('Debug-urls') . '</h3>'
-            . '<pre>' . print_r($this->_urls, true) . '</pre>'
-
-            . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
-            . '<pre>' . print_r($this->_data, true) . '</pre>'
-
-            // . '<pre>' . print_r($this->_data, true) . '</pre>'
-
-            // . '<h3>' . $this->_tr('Debug-notificationlog') . '</h3>'
-            // . '<pre>' . print_r($this->oNotifcation->getLogdata(), true) . '</pre>'
-            // . '</div>'
-        ;
-        // return $sHtml;
         return $oA->getSectionHead($this->_aIco["debug"] . ' ' . $this->_tr('Debug'))
                 . '<section class="content">'
                 . $oA->getSectionRow($oA->getSectionColumn(
                         $oA->getBox(array(
-                            'title'=>$this->_tr('Debug'),
-                            'text'=>$sHtml
+                            'title'=>$this->_tr('Debug-icons'),
+                            'text'=>'<table><tr>'
+                                . '<th>#</th>'
+                                . '<th>' . $this->_tr('Debug-icons-preview') . '</th>'
+                                . '<th>' . $this->_tr('Debug-icons-html') . '</th>'
+                                . '</tr>'.$sAlIcons.'</table>'
                         )),
                         12
-                    )).'
-                </section>'
+                    ))
+                . $oA->getSectionRow($oA->getSectionColumn(
+                        $oA->getBox(array(
+                            'title'=>$this->_tr('Debug-config'),
+                            'text'=>'<pre>' . print_r($this->_aCfg, true) . '</pre>'
+                        )),
+                        12
+                    ))
+                . $oA->getSectionRow($oA->getSectionColumn(
+                        $oA->getBox(array(
+                            'title'=>$this->_tr('Debug-urls'),
+                            'text'=>'<pre>' . print_r($this->_urls, true) . '</pre>'
+                        )),
+                        12
+                    ))
+                . $oA->getSectionRow($oA->getSectionColumn(
+                        $oA->getBox(array(
+                            'title'=>$this->_tr('Debug-clientdata'),
+                            'text'=>'<pre>' . print_r($this->_data, true) . '</pre>'
+                        )),
+                        12
+                    ))
+                .'</section>'
                 ;
     }
     /**
@@ -1124,6 +1143,8 @@ class appmonitorserver_gui extends appmonitorserver {
         $oA=new renderadminlte();
         return $oA->getSectionHead($this->_aIco["setup"] . ' ' . $this->_tr('Setup'))
                 . '<section class="content">'
+                . $this->_generateSetup()
+                /*
                 . $oA->getSectionRow($oA->getSectionColumn(
                         $oA->getBox(array(
                             'title'=>$this->_tr('Setup'),
@@ -1133,7 +1154,9 @@ class appmonitorserver_gui extends appmonitorserver {
                         )),
                         12
                     )).'
-                </section>'
+                 * 
+                 */
+                .'</section>'
                 ;
     }
 
