@@ -31,7 +31,7 @@ define("RESULT_ERROR", 3);
  * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
  * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.58
+ * @version 0.72
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -281,7 +281,7 @@ class appmonitorcheck {
         }
         
         $sDNS=isset($certinfo['extensions']['subjectAltName']) ? $certinfo['extensions']['subjectAltName'] : false;
-        $sHost=parse_url($url,PHP_URL_HOST);
+        $sHost=parse_url($sUrl,PHP_URL_HOST);
         if(strstr($sDNS, 'DNS:'.$sHost)===false){
             $this->_setReturn(RESULT_ERROR, 'Wrong certificate: '.$sHost.' is not listed as DNS alias in ['.$sDNS.']  ' . $sMessage);
             return true;

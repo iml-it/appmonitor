@@ -40,7 +40,10 @@
         "Debug": "Debug",
         "Debug-config": "Konfiguration",
         "Debug-urls": "Urls",
-        "Debug-clientdata": "Client -Daten",
+        "Debug-clientdata": "Client-Daten",
+        "Debug-icons": "Icons",
+        "Debug-icons-html": "Html-code",
+        "Debug-icons-preview": "Vorschau",
         "Debug-notificationlog": "Letzte Meldungen",
 
         "Appstatus": "Status der Webapplikation",

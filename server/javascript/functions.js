@@ -369,8 +369,9 @@ function timerAgeInSec() {
         iStart = $(oStartValue[0]).html() / 1;
 
         iCurrent = (iStart + Math.floor(getUnixTS() - iStartTime));
-        if (iCurrent > 5) {
+        if (iCurrent > 10) {
             iCurrent = Math.floor(iCurrent / 5) * 5;
+            // iCurrent = iCurrent;
         }
         oNewValue = $(this).find("span.current");
 
@@ -438,7 +439,7 @@ function initGuiStuff() {
     window.setInterval('refreshTimer()', 1000);
 
     // activate age timer on tiles
-    window.setInterval("timerAgeInSec();", 5000);
+    window.setInterval("timerAgeInSec();", 1000);
 
 
 }

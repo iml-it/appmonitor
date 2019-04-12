@@ -22,7 +22,7 @@
  * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
  * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.52
+ * @version 0.72
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -36,7 +36,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    protected $_sVersion = 'php-client-v0.58';
+    protected $_sVersion = 'php-client-v0.72';
 
     /**
      * config: default ttl for server before requesting the client check again

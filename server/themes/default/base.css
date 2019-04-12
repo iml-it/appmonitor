@@ -88,6 +88,13 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 
 
 /* ---------- override AdminLte */
+/* HACK: remove menu icon ... it is in the template classes/layout-html.tpl :-/ */
+.main-header .sidebar-toggle::before {
+    content: "";
+}
+.box, .info-box{box-shadow: 0 0.2em 1em #ccc;}
+.content-wrapper{background: url('bg-rauschen.jpg') fixed;}
+
 li.active a{background:rgba(127,127,127,0.2) !important;}
 .info-box a{color:#fff;}
 .info-box-text {

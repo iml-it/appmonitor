@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.71";
+    var $_sVersion = "0.72";
 
     /**
      * html code for icons in the web gui
@@ -40,34 +40,34 @@ class appmonitorserver_gui extends appmonitorserver {
      * @var array
      */
     protected $_aIco = array(
-        'title' => '<i class="fa fa-th"></i>',
-        'welcome' => '<i class="fa fa-flag-o" style="font-size: 500%;float: left; margin: 0 1em 10em 0;"></i>',
-        'reload' => '<i class="fa fa-refresh"></i>',
-        'allwebapps' => '<i class="fa fa-globe"></i>',
-        'webapp' => '<i class="fa fa-cube"></i>',
-        'host' => '<i class="fa fa-hdd-o"></i>',
-        'check' => '<i class="fa fa-check"></i>',
-        'checks' => '<i class="fa fa-list"></i>',
-        'notifications' => '<i class="fa fa-bell-o"></i>',
-        'setup' => '<i class="fa fa-wrench"></i>',
-        'about' => '<i class="fa fa-info-circle"></i>',
-        'notify-email' => '<i class="fa fa-envelope-o"></i>',
-        'notify-slack' => '<i class="fa fa-slack"></i>',
-        'sleepmode-on' => '<i class="fa fa-bed"></i>',
-        'sleepmode-off' => '<i class="fa fa-bullhorn"></i>',
-        'filter' => '<i class="fa fa-filter"></i>',
-        'age' => '<i class="fa fa-clock-o"></i>',
-        'time' => '<i class="fa fa-clock-o"></i>',
-        'tag' => '<i class="fa fa-tag"></i>',
-        'debug' => '<i class="fa fa-bug"></i>',
-        'ok' => '<i class="fa fa-check"></i>',
-        'info' => '<i class="fa fa-info"></i>',
-        'warning' => '<i class="fa fa-warning"></i>',
-        'error' => '<i class="fa fa-flash"></i>',
-        'add' => '<i class="fa fa-plus"></i>',
-        'del' => '<i class="fa fa-minus"></i>',
-        'plus' => '<i class="fa fa-plus"></i>',
-        'close' => '<i class="fa fa-times"></i>',
+        'title' => '<i class="fas fa-th"></i>',
+        'welcome' => '<i class="far fa-flag" style="font-size: 500%;float: left; margin: 0 1em 10em 0;"></i>',
+        'reload' => '<i class="fas fa-sync"></i>',
+        'allwebapps' => '<i class="fas fa-globe"></i>',
+        'webapp' => '<i class="fas fa-box-open"></i>',
+        'host' => '<i class="far fa-hdd"></i>',
+        'check' => '<i class="fas fa-check"></i>',
+        'checks' => '<i class="fas fa-list"></i>',
+        'notifications' => '<i class="far fa-bell"></i>',
+        'setup' => '<i class="fas fa-wrench"></i>',
+        'about' => '<i class="fas fa-info-circle"></i>',
+        'notify-email' => '<i class="far fa-envelope"></i>',
+        'notify-slack' => '<i class="fab fa-slack-hash"></i>',
+        'sleepmode-on' => '<i class="fas fa-bed"></i>',
+        'sleepmode-off' => '<i class="fas fa-bullhorn"></i>',
+        'filter' => '<i class="fas fa-filter"></i>',
+        'age' => '<i class="far fa-clock"></i>',
+        'time' => '<i class="far fa-clock"></i>',
+        'tag' => '<i class="fas fa-tag"></i>',
+        'debug' => '<i class="fas fa-bug"></i>',
+        'ok' => '<i class="fas fa-check"></i>',
+        'info' => '<i class="fas fa-info"></i>',
+        'warning' => '<i class="fas fa-exclamation-triangle"></i>',
+        'error' => '<i class="fas fa-bolt"></i>',
+        'add' => '<i class="fas fa-plus"></i>',
+        'del' => '<i class="fas fa-minus"></i>',
+        'plus' => '<i class="fas fa-plus"></i>',
+        'close' => '<i class="fas fa-times"></i>',
     );
 
     // ----------------------------------------------------------------------
@@ -1046,16 +1046,39 @@ class appmonitorserver_gui extends appmonitorserver {
      */
     public function generateViewDebug() {
         $oA=new renderadminlte();
+        
+        $sAlIcons='';
+        foreach ($this->_aIco as $sKey=>$sHtmlcode){
+            $sAlIcons.='<tr>'
+                    . '<td><strong>'.$sKey.'</strong></td>'
+                    . '<td align="center">'.preg_replace('/style=\"(.*)\"/u', '', $sHtmlcode).'</td>'
+                    . '<td>' . htmlentities($sHtmlcode) . '</td>'
+                    . '</tr>';
+        }
+        
         $sHtml=''
+
+            . '<h3>' . $this->_tr('Debug-icons') . '</h3>'
+            . '<table><tr>'
+                . '<th>#</th>'
+                . '<th>' . $this->_tr('Debug-icons-preview') . '</th>'
+                . '<th>' . $this->_tr('Debug-icons-html') . '</th>'
+                . '</tr>'.$sAlIcons.'</table>'
+
             . '<h3>' . $this->_tr('Debug-config') . '</h3>'
             . '<pre>' . print_r($this->_aCfg, true) . '</pre>'
+
             . '<h3>' . $this->_tr('Debug-urls') . '</h3>'
             . '<pre>' . print_r($this->_urls, true) . '</pre>'
-                . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
+
+            . '<h3>' . $this->_tr('Debug-clientdata') . '</h3>'
             . '<pre>' . print_r($this->_data, true) . '</pre>'
+
+            // . '<pre>' . print_r($this->_data, true) . '</pre>'
+
             // . '<h3>' . $this->_tr('Debug-notificationlog') . '</h3>'
             // . '<pre>' . print_r($this->oNotifcation->getLogdata(), true) . '</pre>'
-            . '</div>'
+            // . '</div>'
         ;
         // return $sHtml;
         return $oA->getSectionHead($this->_aIco["debug"] . ' ' . $this->_tr('Debug'))
@@ -1172,7 +1195,7 @@ class appmonitorserver_gui extends appmonitorserver {
                         ? 
                             $oA->getWidget(array(
                                 'bgcolor'=>$this->_getAdminLteColorByResult($aEntries["result"]["result"]),
-                                'icon' => $this->_getIconClass($this->_aIco['host']),
+                                'icon' => $this->_getIconClass($this->_aIco['webapp']),
                                 'number' => $aEntries['result']['summary']['total'],
                                 'text' => $sAHref. $sAppLabel.'</a><br>',
                                 'progressvalue' => false,
@@ -1219,6 +1242,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<section class="content">
                     
                     '.$oA->getSectionRow($sTileList)
+                    . '<br>'
 
                     . $oA->getSectionRow(
                         $oA->getSectionColumn(
@@ -1566,6 +1590,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<html>' . "\n"
                 . '<head>' . "\n"
                 . '<title>' . $sTitle . '</title>'
+                . '<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>'
                 
                 // jQuery
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('jquery')."/jquery.min.js") . '"></script>' . "\n"
@@ -1585,7 +1610,8 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('twitter-bootstrap').'/js/bootstrap.min.js') . '" type="text/javascript"></script>'
                 
                 // Font awesome
-                . '<link href="' . $oCdn->getFullUrl('font-awesome/4.7.0/css/font-awesome.min.css') . '" rel="stylesheet">'
+                // . '<link href="' . $oCdn->getFullUrl('font-awesome/4.7.0/css/font-awesome.min.css') . '" rel="stylesheet">'
+                . '<link href="' . $oCdn->getFullUrl('font-awesome/5.8.1/css/all.min.css') . '" rel="stylesheet">'
 
                 // Chart.js
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('Chart.js').'/Chart.min.js') . '" type="text/javascript"></script>'
