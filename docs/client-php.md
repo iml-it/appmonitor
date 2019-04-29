@@ -27,7 +27,7 @@ https://github.com/iml-it/appmonitor
 The project package contains the PHP client and the server. The PHP client is used for the Appmonitor server to verify its own installation. You should start with the server installation.
 see [Server](server.md)
 
-To use the 
+To use the client in any of your installations you need the files from the "client" subdir only.
 
 1) Below a document root of a website create a directory [webroot]/appmonitor/
 2) copy all files of [package]/client/ into [webroot]/appmonitor/

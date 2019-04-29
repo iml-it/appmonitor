@@ -27,7 +27,7 @@ Server webgui
 - Notification as email, Slack message (respecting sleep times i.e. during the night)
 - CLI tool for automation of the server config (with Puppet, Ansible, ...)
 
-**more**: [Overview](docs/overview.md)
+**Continue**: [Overview](docs/overview.md)
 
 Remark: For ready to use client checks for a few products see
 https://github.com/iml-it/appmonitor-clients/
