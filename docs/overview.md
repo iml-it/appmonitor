@@ -39,14 +39,16 @@ For PHP applications a client with pre defined checks is delivered.
 
 For Non-PHP clients you need to write your own checks and create a response in the pre defined syntax.
 
+**more**: [Client](client.md)
+
 ![Client](images/appmonitor-overview-client.png "Client")
 
-[Client](client.md)
 
 # Server #
 
 After collecting all results it stores the results. It renders a web gui and sends notifications.
 
+**more**: [Server](server.md)
+
 ![Client](images/appmonitor-overview-server.png "Server")
 
-[Server](server.md)
