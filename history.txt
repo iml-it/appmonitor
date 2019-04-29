@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.74 2019-04-29
+    - appmonitor client: removed unnecessary check; added check for ssl cert
+    - update docs: added docs directory
+    - client: update general_include.sample; added index.sample.php
+
 v0.73 2019-04-12
     - backend: beautify setup page
 

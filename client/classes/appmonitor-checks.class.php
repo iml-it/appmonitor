@@ -94,7 +94,7 @@ class appmonitorcheck {
             "description" => $this->_aConfig["description"],
             "result" => RESULT_UNKNOWN,
             "value" => false,
-            "counter" => false,
+            "type" => false,
             "time" => false,
         );
         return true;

@@ -1,16 +1,29 @@
 <?php
-
-/*
- * this is a sample file for the appmonitor client
- * copy the sample file to index.php and modify it as needed (see ../readme.md).
+/* ______________________________________________________________________
+ * 
+ * A P P M O N I T O R  ::  CLIENT - CHECK
+ * ______________________________________________________________________
+ * 
+ * This is the check file for the appmonitor server installation
+ * Have a look to the docs/client-php.md and index.sample.php
+ * to write your own checks
+ * 
+ * @author: Axel Hahn
+ * ----------------------------------------------------------------------
+ * 2019-04-29  aded check for ssl cert; removed a check
  */
 
 require_once('classes/appmonitor-client.class.php');
 $oMonitor = new appmonitor();
 $oMonitor->setWebsite('Appmonitor server');
-$oMonitor->setTTL(10);
 
 
+// how often the server should ask for updates
+$oMonitor->setTTL(300);
+
+// a general include ... the idea is to a file with the same actions on all
+// installations and hosts that can be deployed by a software delivery service 
+// (Puppet, Ansible, ...)
 @include 'general_include.php';
 
 $sApproot = str_replace('\\', '/', dirname(__DIR__));
@@ -20,26 +33,6 @@ $sApproot = str_replace('\\', '/', dirname(__DIR__));
 $oMonitor->addTag('monitoring');
 
 // ----------------------------------------------------------------------
-
-$oMonitor->addCheck(
-        array(
-            "name" => "Counter test",
-            "description" => "Counter",
-            "check" => array(
-                "function" => "Simple",
-                "params" => array(
-                    "result" => 0,
-                    "value" => "nothing here",
-                    "counter" => array(
-                        "label" => "Wind",
-                        "value" => rand(3, 9),
-                        "unit"  => "m/s",
-                        "type"  => "counter",
-                    ),
-                ),
-            ),
-        )
-);
 
 $oMonitor->addCheck(
         array(
@@ -83,6 +76,17 @@ $oMonitor->addCheck(
             ),
         )
 );
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
+    $oMonitor->addCheck(
+        array(
+            "name" => "Certificate check",
+            "description" => "Check if SSL cert is valid and does not expire soon",
+            "check" => array(
+                "function" => "Cert",
+            ),
+        )
+    );
+}
 
 // ----------------------------------------------------------------------
 
