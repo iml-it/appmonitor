@@ -25,7 +25,7 @@ The appmonitor is a monitoring tool that consists of 2 parts
 The server should run as a deamon (but this is not a must).
 It collects all monitoring data from all your web apps by sending an http(s) request.
 
-![Overview](images/appmonitor-request-to-clients.png "Overview")
+![Overview](images/appmonitor-request-to-clients.gif "Overview")
 
 The health-check is done from the view of the application server.
 
