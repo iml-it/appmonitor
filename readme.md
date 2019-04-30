@@ -29,5 +29,3 @@ Server webgui
 
 **Continue**: [Overview](docs/overview.md)
 
-Remark: For ready to use client checks for a few products see
-https://github.com/iml-it/appmonitor-clients/
