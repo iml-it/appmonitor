@@ -186,7 +186,7 @@ parameters:
 
 
 You can use the simple check to verify anything that has no pre defined function
-yet.
+yet. Set a value for the text that should be visible and the result code.
 
 
 ### Cert ###

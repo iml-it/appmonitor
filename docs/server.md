@@ -15,7 +15,7 @@ https://github.com/iml-it/appmonitor
 
 # Requirements #
 
-- PHP7 (up to PHP 7.2; runs on php5 but is not supported)
+- PHP7 (up to PHP 7.3; runs on php5 but is not supported)
 - php-curl
 
 The server uses 
@@ -25,17 +25,19 @@ The server uses
 - [cdnorlocal] (https://www.axel-hahn.de/docs/cdnorlocal/index.htm)
 
 ... and loads from CDNJS (but could be stored locally too):
-- [jquery] (http://jquery.com/)
-- [datatables plugin] (http://datatables.net/)
-- [font-awesome] (http://fortawesome.github.io/Font-Awesome/)
+- [AdminLTE] (https://adminlte.io/)
+- [chartJs] (https://www.chartjs.org/)
+- [jQuery] (https://jquery.com/)
+- [Datatables plugin] (https://datatables.net/)
+- [Font Awesome] (https://fontawesome.com/)
 
 
 # Features #
 
-- very small installation (100 kB zip file)
+- very small installation (200 kB zip file)
 - fast web interface using a single html page
 - notifications can be sent as email and as slack message
-- sleep time to be quiet
+- respect sleep time to be quiet
 
 # Installation #
 
