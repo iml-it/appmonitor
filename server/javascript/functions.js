@@ -461,8 +461,9 @@ function initGuiStuff() {
             $('#content').html(event.state.content);
             postLoad();
         }
+        // TODO: load pages of app detail view
         if(event.state===null){
-            location.reload();
+            // location.reload();
         }
     });
 }
