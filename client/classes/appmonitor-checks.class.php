@@ -31,7 +31,7 @@ define("RESULT_ERROR", 3);
  * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
  * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.72
+ * @version 0.76
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -621,7 +621,7 @@ class appmonitorcheck {
     protected function checkSimple($aParams) {
         $this->_checkArrayKeys($aParams, "result,value");
         $this->_setReturn((int) $aParams["result"], $aParams["value"]);
-        foreach(array('type', 'visual') as $sMyKey){
+        foreach(array('type', 'count', 'visual') as $sMyKey){
             if(isset($aParams[$sMyKey])){
                 $this->_aData[$sMyKey]=$aParams[$sMyKey];
             }

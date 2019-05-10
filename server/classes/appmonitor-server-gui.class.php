@@ -19,7 +19,7 @@ require_once 'render-adminlte.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.75
+ * @version 0.76
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.75";
+    var $_sVersion = "0.76";
 
     /**
      * html code for icons in the web gui
@@ -604,6 +604,7 @@ class appmonitorserver_gui extends appmonitorserver {
             $this->_tr('Check'),
             $this->_tr('Description'),
             $this->_tr('Output'),
+            $this->_tr('Count'),
             $this->_tr('Time'),
         )) : $this->_generateTableHead(array(
             $this->_tr('Result'),
@@ -665,6 +666,7 @@ class appmonitorserver_gui extends appmonitorserver {
                                 '<td>' . $aCheck["name"] . '</td>'
                                 . '<td>' . $aCheck["description"] . '</td>'
                                 . '<td>' . $aCheck["value"] . '</td>'
+                                . '<td>' . (isset($aCheck["count"]) ? $aCheck["count"] : '-') . '</td>'
                                 . '<td>' . (isset($aCheck["time"]) ? $aCheck["time"] : '-') . '</td>'
                                 . '</tr>';
                     }
@@ -1657,7 +1659,6 @@ class appmonitorserver_gui extends appmonitorserver {
         }
         $iCounter++;
         $bIsPie=($aOptions['type']==='pie');
-        
         $aOptions['xLabel']=isset($aOptions['xLabel']) ? $aOptions['xLabel'] : '';
         $aOptions['yLabel']=isset($aOptions['yLabel']) ? $aOptions['yLabel'] : '';
         $aOptions['xValue']=isset($aOptions['xValue']) ? $aOptions['xValue'] : ($bIsPie ? false : true);

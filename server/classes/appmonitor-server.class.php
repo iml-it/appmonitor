@@ -501,7 +501,7 @@ class appmonitorserver {
                             'status'=>$aCheck['result'], 
                             'value'=>str_replace('ms', '', $aCheck['time'])
                         ));
-                        if(isset($aCheck['type']) && $aCheck['type']==='counter'){
+                        if(isset($aCheck['count']) || (isset($aCheck['type']) && $aCheck['type']==='counter')){
                             $sCounterId='check-'.$sIdSuffix;
                             // $oCounters->setCounter($sCounterId);
                             $oCounters->setCounter($sCounterId, array(
@@ -510,7 +510,7 @@ class appmonitorserver {
                             ));
                             $oCounters->add(array(
                                 'status'=>$aCheck['result'], 
-                                'value'=>$aCheck['value']
+                                'value'=>isset($aCheck['count']) ? $aCheck['count'] : $aCheck['value']
                             ));
                         }
                     }

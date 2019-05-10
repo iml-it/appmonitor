@@ -69,7 +69,7 @@ returns JSON answers with the conventions described below.
             "result": [{integer}: 0..3]
             "value": "[{string}: result in words or {float} value for type=counter]",
             "time": "[{float} value]ms"
-            "type": "[{string} counter]"
+            "count": "[{float} counter value]"
             "visual": "[{string} bar|line|simple[,options]]"
         },
         ...
@@ -79,7 +79,7 @@ returns JSON answers with the conventions described below.
             "result": [integer: 0..3]
             "value": "[{string}: result in words]" 
             "time": "[value]ms"
-            "type": "[{string} counter]"
+            "count": "[{float} counter value]"
             "visual": "[{string} bar|line|simple[,options]]"
         }
     ] 
@@ -151,16 +151,14 @@ Each check must have these keys:
   i.e. 
   - OK, database was connected successfully
   - ERROR: no write permission on file XY
-  OR
-  a float value (if type = counter)
 - *"time"*: "[value]ms" <span class="optional">(optional)</span>\
   time that was used for the single check. The value must be a float in milliseconds plus additional "ms" (without space). \
   Example: `"time": "0.628ms"`
-- *"type"*: "[string: counter]" <span class="optional">(optional)</span>\
-  type of the return value in the field "value". Default is a string and will show the message in a table.\
-  if it is set to "counter" in the appnmonitor server additionally will render a tile with a graph. The type of graph is set with "visual" value.\
-  If a check is marked es counter then the server stores "a few" values to be able to render a graph the last items. The value in "name" will be used as identifier of the stored items.
-  Example: `"type": "counter"`
+- *"count"*: "[float: counter value]" <span class="optional">(optional)</span>\
+  The value must be a float. If it is set then the server will store these values to render a graph with the last data items.\
+  The value in "name" will be used as identifier of the stored items.\
+  The type of graph is set with "visual" value.\
+  Example: `"count": 12.84`
 - *"visual"*: "[string: bar|line|simple[,[width,[count]]]]" <span class="optional">(optional)</span>\
   The visual value works for type=counter only.\
   A tile with a counter shows a tile with "description", a strong item "value" and a graph
@@ -193,27 +191,27 @@ Here is an example output of 3 styles and its source from the client.
 				"name": "Counter test",
 				"description": "Test for visual: line",
 				"result": 0,
-				"value": "7.6",
-				"type": "counter",
-				"time": "0.048ms",
+				"value": "I am a counter",
+				"time": "0.040ms",
+				"count": 8.1,
 				"visual": "line"
 			},
 			{
 				"name": "Counter 2",
-				"description": "Test for visual: bar,3,200",
+				"description": "Test for visual: bar,3,100",
 				"result": 0,
-				"value": "7.5",
-				"type": "counter",
-				"time": "0.018ms",
-				"visual": "bar,3,200"
+				"value": "I want bars",
+				"time": "0.019ms",
+				"count": 4.5,
+				"visual": "bar,3,100"
 			},
 			{
 				"name": "Counter 3",
 				"description": "Test for visual: simple",
 				"result": 0,
-				"value": "5",
-				"type": "counter",
-				"time": "0.016ms",
+				"value": "Make it simple",
+				"time": "0.020ms",
+				"count": 5.5,
 				"visual": "simple"
 			}
 		]

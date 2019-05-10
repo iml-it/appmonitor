@@ -57,6 +57,7 @@
         "Description": "Beschreibung", 
         "Result": "Resultat", 
         "Output": "Ausgabe",
+        "Count": "Counter",
         "Url": "Url", 
 
         "Error-message": "Fehlermeldung",

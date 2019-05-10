@@ -1,10 +1,13 @@
 
 HISTORY
 
+v0.76 2019-05-10
+    - client+server: remove type=counter ... replaced with count=[value]
+
 v0.75 2019-05-10
     - backend: added support for browsers history back and forward (WIP)
     - backend: added spinning reload icon during load
-    - frontend: added counters
+    - client: added counters
     - backend: configure visible tiles
 
 v0.74 2019-04-29
