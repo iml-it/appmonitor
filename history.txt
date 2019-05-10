@@ -2,7 +2,7 @@
 HISTORY
 
 v0.75 2019-05-10
-    - backend: added support for browsers history back and forward
+    - backend: added support for browsers history back and forward (WIP)
     - backend: added spinning reload icon during load
     - frontend: added counters
     - backend: configure visible tiles
