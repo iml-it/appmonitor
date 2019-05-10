@@ -6,13 +6,13 @@
 
         "All-webapps": "Web-Applikationen",
         "All-webapps-header": "Web-Applikationen",
-        "All-webapps-hint": "Nachfolgend Sehen Sie eine Liste von Web-Applikatione. Diese sind alphabetisch sortiert und nach Status gruppiert (Fehler und Warnungen zuerst).<br>Klicken Sie auf den Labeltext, um Details zu sehen.<br>Die Ansicht kann mit Eingabe im Freitextfilter und Klick auf ein Label gefiltert werden.",
+        "All-webapps-hint": "Nachfolgend Sehen Sie eine Liste von Web-Applikationen. Diese sind alphabetisch sortiert und nach Status gruppiert (Fehler und Warnungen zuerst).<br>Klicken Sie auf den Labeltext, um Details zu sehen.<br>Die Ansicht kann mit Eingabe im Freitextfilter und Klick auf ein Label gefiltert werden.",
 
 
         "Checks": "Checks",
         "Checks-header": "&Uuml;bersicht mit allen Checks",
         
-        "Checks-on-webapp": "Checks einer Webapplikation",
+        "Checks-on-webapp": "Checks zur Applikation",
         "Checks-total": "Checks gesamt",
 
         "Duration": "Dauer",
@@ -20,6 +20,7 @@
         "Notifications": "Meldungen",
         "Notifications-header": "Protokoll der letzten Meldungen",
         "Notifications-none": "Es sind keine Meldungen vorhanden.",
+        "Notify-address": "Empf&auml;nger der Meldungen",
 
         "Setup": "Einstellungen",
         "Setup-client-list": "Liste der vorhandenen Web-Applikationen",
@@ -33,7 +34,6 @@
         "About-docs": "Die <a href=\"%s\">Dokumentation</a> ist als Markdown verf&uuml;gbar. Sie k&ouml;nnen es online lesen und sie ist mit der <em>readme.md</em> im Download Archiv enthalten.",
 
         "Chart-graph": "Grafik",
-        "Chart-graph-description": "Letzte Antwortzeiten der Monitoring Anfragen beginnend mit dem Aufbau der Verbindung bis zum Abschluss der &Uuml;bertragung.",
         "Chart-time": "Zeit",
         "Chart-responsetime": "Antwortzeit [ms]",
         

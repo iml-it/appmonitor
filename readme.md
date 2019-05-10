@@ -16,11 +16,10 @@ The application monitor is an additional tool to the classic monitoring of a ser
 # Features #
 
 - PHP 7 on server (clients can be implemented in other languages too)
-- small: 200 kb download; no database required
+- small: 400 kb + docs; no database required
 
 
 Server webgui
-- Themes :-)
 - Filter the view by selecting tags
 - Multi language (English ang German language file so far)
 - Optional service for permanent check and notification 24/7

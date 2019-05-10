@@ -12,6 +12,23 @@
         "email":[],
         "slack":[]
     },
+    "view": {
+        "overview":{
+            "webapps": true,
+            "hosts": true,
+            "checks": true,
+            "notification": true
+        },
+        "appdetails":{
+            "appstatus": true,
+            "httpcode": true,
+            "age": true,
+            "checks": true,
+            "times": false,
+            "receiver": false,
+            "notification": false
+        }
+    },
     "urls": {
     }
 }

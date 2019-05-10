@@ -19,7 +19,7 @@ require_once 'render-adminlte.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.66
+ * @version 0.75
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.74";
+    var $_sVersion = "0.75";
 
     /**
      * html code for icons in the web gui
@@ -184,12 +184,13 @@ class appmonitorserver_gui extends appmonitorserver {
      * get html code for a tile widget
      * 
      * @param array  $aOptions  options array with these keys
-     *                          - color   string   for adminlte; can be false if result is given
+     *                          - bgcolor string   for adminlte; color name
+     *                          - color   string   for adminlte; color name
      *                          - icon    string   valid $this->_aIco[] or false to use result
      *                          - label   string   text
      *                          - count   integer  counter value
      *                          - more    string   value for bottom line
-     *                          - result  string   check result
+     *                          - result  string   check result; 
      *                          - progressvalue  integer  value 0..100 for progress bar
      * @param string   $sIcon   icon before label
      * @param string   $sLabel  label
@@ -206,6 +207,7 @@ class appmonitorserver_gui extends appmonitorserver {
         }
         $sReturn = ''
                 . $sDiv . $oA->getWidget(array(
+                    'bgcolor'=>isset($aOptions['bgcolor']) ? $aOptions['bgcolor'] : false,
                     'color'=>$this->_getAdminLteColorByResult($aOptions['result'], $aOptions['color']),
                     'icon' => $this->_getIconClass($aOptions['icon'], $aOptions['result']),
                     'number' => $aOptions['count'],
@@ -277,31 +279,6 @@ class appmonitorserver_gui extends appmonitorserver {
         return $aReturn;
     }
 
-    /**
-     * get html code for tiles of a single webapp
-     * 
-     * @return string
-     */
-    protected function _generateChecksTile() {
-        $sReturn = '';
-        $aCounter = $this->_getCounter();
-        // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre>';
-
-        $sMoreChecks = '';
-        $iResultChecks=false;
-        foreach ($this->_getResultDefs(true) as $i) {
-            $sMoreChecks .= ($aCounter['checkresults'][$i] ? '<span class="badge result' . $i . '" title="'.$aCounter['checkresults'][$i] .' x '.$this->_tr('Resulttype-' . $i).'">' . $aCounter['checkresults'][$i] . '</span>' : '');
-            if($aCounter['checkresults'][$i] && $iResultChecks===false){
-                $iResultChecks=$i;
-            }
-        }
-        return $this->_getTile(array(
-                    'result' => $iResultChecks,
-                    'count' => $aCounter['checks'],
-                    'label' => $this->_aIco['check'] . ' ' . $this->_tr('Checks-total'),
-                    'more' => $sMoreChecks
-        ));
-    }
 
     /**
      * get html code for tiles of a single webapp
@@ -312,8 +289,6 @@ class appmonitorserver_gui extends appmonitorserver {
     protected function _generateWebappTiles($sAppId) {
         $aHostdata = $this->_data[$sAppId]['result'];
         $this->oNotifcation->setApp($sAppId);
-        $aLast = $this->oNotifcation->getAppLastResult();
-        $sSince = $aLast && (int) $aLast['result']['ts'] ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['result']['ts']) : '';
         $sReturn = '';
         // $sReturn.='<pre>'.print_r($aHostdata, 1).'</pre>';
 
@@ -323,61 +298,111 @@ class appmonitorserver_gui extends appmonitorserver {
                 $sMoreChecks .= ($aHostdata['summary'][$i] ? '<span class="badge result' . $i . '" title="' . $aHostdata['summary'][$i] . ' x ' . $this->_tr('Resulttype-' . $i) . '">' . $aHostdata['summary'][$i] . '</span>' : '');
             }
         }
-        $aEmailNotifiers = $this->oNotifcation->setApp($sAppId, $this->_data[$sAppId]);
-        $aEmailNotifiers = $this->oNotifcation->getAppNotificationdata('email');
-        $aSlackChannels = $this->oNotifcation->getAppNotificationdata('slack', 1);
 
-        // $aPeople=array('email1@example.com', 'email2@example.com');
-        $sMoreNotify = (count($aEmailNotifiers) ? '<span title="' . implode("\n", $aEmailNotifiers) . '">' . count($aEmailNotifiers) . ' x ' . $this->_aIco['notify-email'] . '</span> ' : '')
-                // .'<pre>'.print_r($this->oNotifcation->getAppNotificationdata(), 1).'</pre>'
-                . (count($aSlackChannels) ? '<span title="' . implode("\n", array_keys($aSlackChannels)) . '">' . count($aSlackChannels) . ' x ' . $this->_aIco['notify-slack'] . '</span> ' : '')
-        ;
-        $iNotifyTargets = count($aEmailNotifiers) + count($aSlackChannels);
-        $sSleeping = $this->oNotifcation->isSleeptime();
-        $sReturn .= ''
-                . (isset($aHostdata['result']) ? $this->_getTile(array(
-                    'result' => $aHostdata['result'],
-                    'count' => $this->_tr('Resulttype-' . $aHostdata['result']),
-                    'label' => $this->_tr('Appstatus'),
-                    'more' => $sSince
-                )) : '')
-                . $this->_getTile(array(
-                    'result' => ($aHostdata['httpstatus'] && $aHostdata['httpstatus'] >= 400) ? RESULT_ERROR : false,
-                    'count' => $aHostdata['httpstatus'],
-                    'label' => $this->_tr('Http-status'),
-                ))
-                . $this->_getTile(array(
-                    'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
-                    'icon' => $this->_aIco['age'],
-                    'label' => $this->_tr('age-of-result'),
-                    'more' => $this->_tr('TTL') . '=' . $aHostdata['ttl'] . 's',
-                ))
-                . (isset($aHostdata['summary']['total']) ? $this->_getTile(array(
-                    'count' => $aHostdata['summary']['total'],
-                    'icon' => $this->_aIco['check'],
-                    'label' => $this->_tr('Checks-on-webapp'),
-                    'more' => $sMoreChecks
-                )) : '')
-                . (isset($this->_data[$sAppId]['meta']['time']) ? $this->_getTile(array(
-                    'count' => $this->_data[$sAppId]['meta']['time'],
-                    'icon' => $this->_aIco['time'],
-                    'label' => $this->_tr('Time-for-all-checks'),
-                )) : '')
-                . $this->_getTile(array(
-                    'result' => $iNotifyTargets ? false : RESULT_WARNING,
-                    'count' => $iNotifyTargets,
-                    'icon' => $this->_aIco['notifications'],
-                    'label' => $this->_tr('Notifications'),
-                    'more' => $sMoreNotify
-                ))
-                . $this->_getTile(array(
-                    'result' => ($sSleeping ? RESULT_WARNING : false),
-                    'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
-                    'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
-                    'more' => $sSleeping,
-                ))
-                . '<div style="clear: both;"></div>'
-        ;
+        foreach($this->_aCfg['view']['appdetails'] as $key=>$bVisibility){
+            switch ($key) {
+                case 'appstatus':
+                    $aLast = $this->oNotifcation->getAppLastResult();
+                    $sSince = $aLast && (int) $aLast['result']['ts'] ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['result']['ts']) : '';
+                    $sReturn .= (isset($aHostdata['result']) && $bVisibility 
+                        ? $this->_getTile(array(
+                            'result' => $aHostdata['result'],
+                            'count' => $this->_tr('Resulttype-' . $aHostdata['result']),
+                            'label' => $this->_tr('Appstatus'),
+                            'more' => $sSince   
+                        )) 
+                        : ''
+                    );
+                break;
+                case 'httpcode':
+                    $sReturn.= $bVisibility 
+                        ? $this->_getTile(array(
+                                'result' => ($aHostdata['httpstatus'] && $aHostdata['httpstatus'] >= 400) ? RESULT_ERROR : false,
+                                'count' => $aHostdata['httpstatus'],
+                                'label' => $this->_tr('Http-status'),
+                            )) 
+                        : ''
+                    ;
+                break;
+                case 'age':
+                    $sReturn.= $bVisibility 
+                        ? $this->_getTile(array(
+                            'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
+                            'icon' => $this->_aIco['age'],
+                            'label' => $this->_tr('age-of-result'),
+                            'more' => $this->_tr('TTL') . '=' . $aHostdata['ttl'] . 's',
+                        ))
+                        : ''
+                    ;
+                break;
+                case 'checks':
+                    $sReturn.= $bVisibility && isset($aHostdata['summary']['total'])
+                        ? $this->_getTile(array(
+                            'count' => $aHostdata['summary']['total'],
+                            'icon' => $this->_aIco['check'],
+                            'label' => $this->_tr('Checks-on-webapp'),
+                            'more' => $sMoreChecks
+                        ))
+                        : ''
+                    ;
+                break;
+                case 'times':
+                    $sReturn.= $bVisibility && isset($this->_data[$sAppId]['meta']['time']) 
+                        ? $this->_getTile(array(
+                            'count' => $this->_data[$sAppId]['meta']['time'],
+                            'icon' => $this->_aIco['time'],
+                            'label' => $this->_tr('Time-for-all-checks'),
+                        ))
+                        : ''
+                    ;
+                break;
+                case 'receiver':
+                    $this->oNotifcation->setApp($sAppId, $this->_data[$sAppId]);
+                    $aEmailNotifiers = $this->oNotifcation->getAppNotificationdata('email');
+                    $aSlackChannels = $this->oNotifcation->getAppNotificationdata('slack', 1);
+
+                    // $aPeople=array('email1@example.com', 'email2@example.com');
+                    $sMoreNotify = (count($aEmailNotifiers) ? '<span title="' . implode("\n", $aEmailNotifiers) . '">' . count($aEmailNotifiers) . ' x ' . $this->_aIco['notify-email'] . '</span> ' : '')
+                            // .'<pre>'.print_r($this->oNotifcation->getAppNotificationdata(), 1).'</pre>'
+                            . (count($aSlackChannels) ? '<span title="' . implode("\n", array_keys($aSlackChannels)) . '">' . count($aSlackChannels) . ' x ' . $this->_aIco['notify-slack'] . '</span> ' : '')
+                    ;
+                    $iNotifyTargets = count($aEmailNotifiers) + count($aSlackChannels);
+                    $sReturn.= $bVisibility 
+                        ? $this->_getTile(array(
+                            'result' => $iNotifyTargets ? false : RESULT_WARNING,
+                            'count' => $iNotifyTargets,
+                            'icon' => $this->_aIco['notifications'],
+                            'label' => $this->_tr('Notify-address'),
+                            'more' => $sMoreNotify
+                        ))
+                        : ''
+                    ;
+                break;
+                case 'notification':
+                    $sSleeping = $this->oNotifcation->isSleeptime();
+                    $sReturn.= $bVisibility 
+                        ? $this->_getTile(array(
+                            'result' => ($sSleeping ? RESULT_WARNING : false),
+                            'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
+                            'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
+                            'more' => $sSleeping,
+                        ))
+                        : ''
+                    ;
+                break;
+
+                default:
+                    $sReturn .= $this->_getTile(array(
+                            'result' => RESULT_ERROR,
+                            'label' => 'ERROR: unknown tile',
+                            'count' => $key,
+                            'more' => 'config -> view -> appdetails',
+                        ))
+                        ;
+                    break;
+            }
+        }
+        $sReturn .= '<div style="clear: both;"></div>';
         return $sReturn;
     }
 
@@ -400,30 +425,87 @@ class appmonitorserver_gui extends appmonitorserver {
             }
         }
         // $sReturn.='<pre>'.print_r($aCounter, 1).'</pre><br>$iResultApps = '.$iResultApps.'<br>$iResultChecks = '.$iResultChecks.'<br>';
+        /*
+            "view": {
+                "overview":{
+                    "webapps": true,
+                    "hosts": true,
+                    "checks": true,
+                    "notification": true
+                },
+        */        
+        
+        foreach($this->_aCfg['view']['overview'] as $key=>$bVisibility){
+            switch ($key) {
+                case 'webapps':
+                    $sReturn .= $bVisibility
+                        ? $this->_getTile(array(
+                            'result' => $iResultApps,
+                            'count' => $aCounter['apps'],
+                            'icon' => $this->_aIco['webapp'],
+                            'label' => $this->_tr('Webapps'),
+                            'more' => $sMoreHosts
+                        ))
+                        : ''
+                    ;
+                    break;
+                case 'hosts':
+                    $sReturn .= $bVisibility
+                        ? $this->_getTile(array(
+                            'count' => $aCounter['hosts'],
+                            'icon' => $this->_aIco['host'],
+                            'label' => $this->_tr('Hosts'),
+                        ))
+                        : ''
+                    ;
+                    break;
+                case 'checks':
+                    $aCounter = $this->_getCounter();
 
-        $sSleeping = $this->oNotifcation->isSleeptime();
-        $sReturn .= ''
-                . $this->_getTile(array(
-                    'result' => $iResultApps,
-                    'count' => $aCounter['apps'],
-                    'icon' => $this->_aIco['webapp'],
-                    'label' => $this->_tr('Webapps'),
-                    'more' => $sMoreHosts
-                ))
-                . $this->_getTile(array(
-                    'count' => $aCounter['hosts'],
-                    'icon' => $this->_aIco['host'],
-                    'label' => $this->_tr('Hosts'),
-                ))
-                . $this->_generateChecksTile()
-                . $this->_getTile(array(
-                    'result' => ($sSleeping ? RESULT_WARNING : false),
-                    'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
-                    'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
-                    'more' => $sSleeping,
-                ))
-                // . '<div style="clear: both;"></div>'
-        ;
+                    $sMoreChecks = '';
+                    $iResultChecks=false;
+                    foreach ($this->_getResultDefs(true) as $i) {
+                        $sMoreChecks .= ($aCounter['checkresults'][$i] ? '<span class="badge result' . $i . '" title="'.$aCounter['checkresults'][$i] .' x '.$this->_tr('Resulttype-' . $i).'">' . $aCounter['checkresults'][$i] . '</span>' : '');
+                        if($aCounter['checkresults'][$i] && $iResultChecks===false){
+                            $iResultChecks=$i;
+                        }
+                    }
+                    $sReturn.= $bVisibility 
+                        ? $this->_getTile(array(
+                            'result' => $iResultChecks,
+                            'count' => $aCounter['checks'],
+                            'label' => $this->_aIco['check'] . ' ' . $this->_tr('Checks-total'),
+                            'more' => $sMoreChecks
+                        ))
+                        : ''
+                    ;
+                break;
+                case 'notification':
+                    $sSleeping = $this->oNotifcation->isSleeptime();
+                    $sReturn.= $bVisibility 
+                        ? $this->_getTile(array(
+                            'result' => ($sSleeping ? RESULT_WARNING : false),
+                            'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
+                            'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
+                            'more' => $sSleeping,
+                        ))
+                        : ''
+                    ;
+                break;
+
+                default:
+                    $sReturn .= $this->_getTile(array(
+                            'result' => RESULT_ERROR,
+                            'label' => 'ERROR: unknown tile',
+                            'count' => $key,
+                            'more' => 'config -> view -> appdetails',
+                        ))
+                        ;
+                    break;
+            }
+        }
+        $sReturn .= '<div style="clear: both;"></div>';
+        
         return $sReturn;
     }
 
@@ -758,6 +840,108 @@ class appmonitorserver_gui extends appmonitorserver {
         }
         return $sHtml;
     }
+
+    /**
+     * get html code to render a counter tile with bars / line / simple
+     * 
+     * @param string  $sAppId      name of the app
+     * @param string  $sCounterId  name of the counter
+     * @param array   $aOptions    rendering options with these keys
+     *                             - type   string   one of bar|line|simple
+     *                             - label  string   label of the counter
+     *                             - size   integer  size in rows in adminlte template; default=2
+     *                             - items  integer  max. count of rows to show in chart; default=size x 10
+     * @return string
+     */
+    protected function _renderCounter($sAppId, $sCounterId, $aOptions=array()){
+        $oA=new renderadminlte();
+        $oCounters=new counteritems($sAppId, $sCounterId);
+
+        $aOptions['type']=$aOptions['type']?$aOptions['type']:'bar';
+        $aOptions['label']=isset($aOptions['label']) && $aOptions['label']     ? $aOptions['label']    : '';
+        $aOptions['size']=isset($aOptions['size'])   && (int)$aOptions['size'] ?(int)$aOptions['size'] : 2;
+        $aOptions['items']=isset($aOptions['items']) && (int)$aOptions['items']?(int)$aOptions['items']: $aOptions['size']*10;
+                            
+        $aResponseTimeData=$oCounters->get($aOptions['items']);
+        $aChartData=array(
+            'label'=>array(),
+            'value'=>array(),
+            'color'=>array(),
+        );
+        foreach ($aResponseTimeData as $aItem){
+            if(isset($aItem['data']['value'])){
+                array_unshift($aChartData['label'], date("Y-m-d H:i:s", $aItem['timestamp']));
+                array_unshift($aChartData['value'], $aItem['data']['value']);
+                array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($aItem['data']['status']));
+                // array_unshift($aChartColor, $aColor[rand(0, 3)]);
+            }
+        }
+
+        $sInnerTile='';
+        // print_r($aResponseTimeData[0]);
+        $iTtl=isset($this->_data[$sAppId]["result"]["ttl"]) ? $this->_data[$sAppId]["result"]["ttl"] : 300;
+        $iAge=date('U')-$aResponseTimeData[0]['timestamp'];
+        
+        // if timer is outdated then delete it
+        if($iAge>$iTtl*6){
+            $oCounters->deleteCounter($sCounterId);
+            return false;
+        }
+        
+        $iLast=$aResponseTimeData[0]['data']['value'];
+        $sTopLabel=(isset($aOptions['label']) && $aOptions['label'] ? $aOptions['label'].'<br>' : '') 
+            // . '('.$iAge.' - '.$iTtl.')'
+            ;
+        switch($aOptions['type']){
+            case 'simple':
+                $sInnerTile.=$sTopLabel.'<br>'
+                    . '<div class="graph">'
+                        . '<br>'
+                        . '<strong>'.$iLast.'</strong><br>'
+                        . '<br>'
+                    . '</div>';
+                break;
+            case 'bar':
+            case 'line':
+                $aChart=array(
+                    'type'=>$aOptions['type'],
+
+                    'xGrid'=>false,
+                    // 'xLabel'=>$this->_tr('Chart-time'),
+                    'xLabel'=>false,
+                    'xValue'=>false,
+
+                    'yGrid'=>false,
+                    'yLabel'=>$aOptions['label'],
+                    'yLabel'=>false,
+                    'yValue'=>false,
+
+                    'data'=>$aChartData,
+                );
+                $sInnerTile.= $sTopLabel
+                        . '<strong>'.$iLast.'</strong>'
+                        . $this->_renderGraph($aChart)
+                        ;
+                break;
+            default:
+                $sInnerTile.= $sTopLabel
+                    . '<strong>'.$iLast.'</strong><br>'
+                    . '?? type = &quot;'.htmlentities($aOptions['type']).'&quot;'
+                    ;
+        }
+        return $oA->getSectionColumn(
+                
+                '<div class="box counter"'
+                    .(($iAge>$iTtl*2) ? ' style="opacity: '.(0.9-($iAge/$iTtl)*0.05).'"' : '')
+                .'>'
+                    . '<div class="box-body">'
+                        . $sInnerTile
+                    . '</div>'
+                . '</div>'
+            ,
+            (int)$aOptions['size']?(int)$aOptions['size']:2
+        );
+    }
     
     /**
      * return html code for a about page
@@ -846,6 +1030,33 @@ class appmonitorserver_gui extends appmonitorserver {
                     }
                 }
             if (array_key_exists("host", $aEntries["result"])) {
+                // echo '<pre>'.print_r($aEntries["result"], 1).'</pre>';
+
+                // --- Counter and graphs
+                $oCounters=new counteritems($sAppId);
+                $aCounters=$oCounters->getCounters();
+                $sCounters='';
+                if(count($aCounters)){
+                    foreach($aCounters as $sCounterId=>$aMeta){
+                        if(strpos($sCounterId, 'time')!==0){
+                            // echo '<pre>'.print_r($oCounters->get(1), 1).'</pre>';
+                            
+                            $aMeta['visual']=isset($aMeta['visual']) ? $aMeta['visual'] : 'bar';
+                            $aTmp=explode(',', $aMeta['visual']);
+                            
+                            $sCounters.=$this->_renderCounter($sAppId, $sCounterId, 
+                                array(
+                                    'type'=>isset($aTmp[0]) ? $aTmp[0] : 'bar',
+                                    'size'=>isset($aTmp[1]) ? $aTmp[1] : false,
+                                    'items'=>isset($aTmp[2]) ? $aTmp[2] : false,
+                                    'label'=>isset($aMeta['title']) ? $aMeta['title'] : $sCounterId,
+                                )
+                            );
+                        }
+                    }
+                }
+
+                $sHtml .= $oA->getSectionRow($sCounters);
 
                 // --- table with checks
                 $sHtml .= 
@@ -862,67 +1073,9 @@ class appmonitorserver_gui extends appmonitorserver {
                 ;
             }
 
-            // --- http status code and chart of response times
-            $oResponsetime=new responsetimeRrd($sAppId);
-            
-            $aResponseTimeData=$oResponsetime->get(200);
-            $aChartData=array(
-                'label'=>array(),
-                'value'=>array(),
-                'color'=>array(),
-            );
-            foreach ($aResponseTimeData as $aItem){
-                array_unshift($aChartData['label'], date("Y-m-d H:i:s", $aItem['timestamp']));
-                array_unshift($aChartData['value'], $aItem['data']['time']);
-                array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($aItem['data']['status']));
-                // array_unshift($aChartColor, $aColor[rand(0, 3)]);
-            }
-            
-            $aChart=array(
-                'type'=>'bar',
-                'xLabel'=>$this->_tr('Chart-time'),
-                'yLabel'=>$this->_tr('Chart-responsetime'),
-                'data'=>$aChartData,
-            );
-            // echo '<pre>'.print_r($aChart, 1).'</pre>';
-            
-            $sHtml .= 
-                    $oA->getSectionRow(
-                        $oA->getSectionColumn(
-                            $oA->getBox(array(
-                                // 'label'=>'I am a label.',
-                                // 'collapsable'=>true,
-                                'title'=>$this->_tr('Http-details'),
-                                'text'=> ($aEntries['result']['error'] ? '<div class="result'.RESULT_ERROR.'">' . $this->_tr('Error-message') . ': ' . $aEntries['result']['error'] . '</div><br>' : '')
-                                    . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
-                                    . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
-                                    . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
-                            )),
-                            4
-                        )
-                        .$oA->getSectionColumn(
-                            $oA->getBox(array(
-                                // 'label'=>'I am a label.',
-                                // 'collapsable'=>true,
-                                'title'=>$this->_tr('Chart-graph'),
-                                'text'=>'<p>'.$this->_tr('Chart-graph-description').'</p>'
-                                    . $this->_renderGraph($aChart)
-                                    /*
-                                    . $oResponsetime->renderGraph(array(
-                                        'xLabel'=>$this->_tr('Chart-time'),
-                                        'yLabel'=>$this->_tr('Chart-responsetime'),
-                                        'iMax'=>200,
-                                    ))
-                                     * 
-                                     */
-                            )),
-                            8
-                        )
-                    )
 
-            ;
 
-            // --- notifications for this webapp
+            // --- notifications & uptime for this webapp
             $aLogs = $this->oNotifcation->getLogdata(array('appid'=>$sAppId));
             rsort($aLogs);
             
@@ -981,7 +1134,7 @@ class appmonitorserver_gui extends appmonitorserver {
                                 'title'=>$this->_tr('Uptime') . ' ('.$this->_tr('since').' '.date('Y-m-d', $iFirstentry).'; ~'.round((date('U')-$iFirstentry)/60/60/24).' d)',
                                 'text'=> $sUptime
                             )),
-                            4
+                            3
                         )
                         .$oA->getSectionColumn(
                             $oA->getBox(array(
@@ -990,11 +1143,70 @@ class appmonitorserver_gui extends appmonitorserver {
                                 'title'=>$this->_tr('Notifications'),
                                 'text'=> $this->_generateNoftificationlog($aLogs, 'datatable-notifications-webapp')
                             )),
-                            8
+                            9
                         )
                     );
 
+            // --- http status code and chart of response times
+            /*
+            $oResponsetime=new counteritems($sAppId, '_responsetime');
+            
+            $aResponseTimeData=$oResponsetime->get(50);
+            $aChartData=array(
+                'label'=>array(),
+                'value'=>array(),
+                'color'=>array(),
+            );
+            foreach ($aResponseTimeData as $aItem){
+                if(isset($aItem['data']['value'])){
+                    array_unshift($aChartData['label'], date("Y-m-d H:i:s", $aItem['timestamp']));
+                    array_unshift($aChartData['value'], $aItem['data']['value']);
+                    array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($aItem['data']['status']));
+                    // array_unshift($aChartColor, $aColor[rand(0, 3)]);
+                }
+            }
+            
+            $aChart=array(
+                'type'=>'bar',
+                'xLabel'=>$this->_tr('Chart-time'),
+                'yLabel'=>$this->_tr('Chart-responsetime'),
+                'data'=>$aChartData,
+            );
+            // echo '<pre>'.print_r($aChart, 1).'</pre>';
+             * 
+             */
+            
+            $sHtml .= 
+                    $oA->getSectionRow(
+                        $oA->getSectionColumn(
+                            $oA->getBox(array(
+                                // 'label'=>'I am a label.',
+                                // 'collapsable'=>true,
+                                'title'=>$this->_tr('Http-details'),
+                                'text'=> ($aEntries['result']['error'] ? '<div class="result'.RESULT_ERROR.'">' . $this->_tr('Error-message') . ': ' . $aEntries['result']['error'] . '</div><br>' : '')
+                                    . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
+                                    . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
+                                    . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
+                            )),
+                            4
+                        )
+                        /*
+                        .$oA->getSectionColumn(
+                            $oA->getBox(array(
+                                // 'label'=>'I am a label.',
+                                // 'collapsable'=>true,
+                                'title'=>$this->_tr('Chart-graph'),
+                                'text'=>''
+                                    . '<p>'.$this->_tr('Chart-graph-description').'</p>'
+                                    . $this->_renderGraph($aChart)
+                            )),
+                            6
+                        )
+                         * 
+                         */
+                    )
 
+            ;
             // --- debug infos 
             if ($this->_aCfg['debug']) {
                 $this->oNotifcation->setApp($sAppId);
@@ -1426,8 +1638,12 @@ class appmonitorserver_gui extends appmonitorserver {
      * 
      * @param array $aOptions
      *                  - type   (string)  one of bar|pie|...
+     *                  - xValue (bool)    flag: show grif on x axis
+     *                  - yValue (bool)    flag: show grif on y axis
      *                  - xLabel (string)  label x-axis 
      *                  - yLabel (string)  label y-axis
+     *                  - xValue (bool)    flag: show x values on axis
+     *                  - yValue (bool)    flag: show y values on axis
      *                  - data   (array)   data items
      *                       - label  (string)
      *                       - value  (float)
@@ -1440,32 +1656,39 @@ class appmonitorserver_gui extends appmonitorserver {
             $iCounter=0;
         }
         $iCounter++;
+        $bIsPie=($aOptions['type']==='pie');
         
-        $sXlabel=isset($aOptions['xLabel']) ? $aOptions['xLabel'] : '';
-        $sYlabel=isset($aOptions['yLabel']) ? $aOptions['yLabel'] : '';
+        $aOptions['xLabel']=isset($aOptions['xLabel']) ? $aOptions['xLabel'] : '';
+        $aOptions['yLabel']=isset($aOptions['yLabel']) ? $aOptions['yLabel'] : '';
+        $aOptions['xValue']=isset($aOptions['xValue']) ? $aOptions['xValue'] : ($bIsPie ? false : true);
+        $aOptions['yValue']=isset($aOptions['yValue']) ? $aOptions['yValue'] : ($bIsPie ? false : true);
+        $aOptions['xGrid']=isset($aOptions['xGrid']) ? $aOptions['xGrid'] : ($bIsPie ? false : true);
+        $aOptions['yGrid']=isset($aOptions['yGrid']) ? $aOptions['yGrid'] : ($bIsPie ? false : true);
         
         $sIdCanvas='canvasChartJs'.$iCounter;
         $sCtx='ctxChartJsRg'.$iCounter;
         $sConfig='configChartJsRg'.$iCounter;
 
-        $sScale=$sXlabel.$sYlabel
-                ? ",scales: {
+        $sScale=",scales: {
                             xAxes: [{
-                                display: true,
+                                display: ".($aOptions['xGrid']||$aOptions['xLabel']||$aOptions['xValue'] ? 'true' : 'false').",
+                                gridLines: { ".($aOptions['xGrid'] ? 'display: true, drawOnChartArea: true' : 'display: false, drawBorder: false ')." },
+                                ".(!$aOptions['xValue'] ? 'ticks: { callback: function(dataLabel, index) { return \'\' } },' : '')."
                                 scaleLabel: {
-                                    display: true,
-                                    labelString: '$sYlabel'
+                                    display: ".($aOptions['xLabel'] ? 'true':'false') .",
+                                    labelString: '".$aOptions['xLabel']."'
                                 }
                             }],
                             yAxes: [{
-                                display: true,
+                                display: ".($aOptions['yGrid']||$aOptions['yLabel']||$aOptions['yValue'] ? 'true' : 'false').",
+                                gridLines: { ".($aOptions['yGrid'] ? 'display: true, drawOnChartArea: true' : 'display: false, drawBorder: false ')." },
+                                ".(!$aOptions['yValue'] ? 'ticks: { callback: function(dataLabel, index) { return \'\' } },' : '')."
                                 scaleLabel: {
-                                    display: true,
-                                    labelString: '$sYlabel'
+                                    display: ".($aOptions['yLabel'] ? 'true':'false') .",
+                                    labelString: '".$aOptions['yLabel']."'
                                 }
                             }]
                         }"
-                : ''
                 ;
         
                         
@@ -1477,10 +1700,13 @@ class appmonitorserver_gui extends appmonitorserver {
                 var ".$sConfig." = {
                     type: '".$aOptions['type']."',
                     data: {
-                        labels: ". json_encode(array_values($aOptions['data']['label'])).",
+                        "
+                        .(isset($aOptions['data']['label']) ? "labels: ". json_encode(array_values($aOptions['data']['label'])).", ": "")
+                        ."
                         datasets: [{
-                                label: 'Response time',
+                                label: '".$aOptions['yLabel']."',
                                 backgroundColor: ". json_encode(array_values($aOptions['data']['color'])).",
+                                borderColor: ". json_encode(array_values($aOptions['data']['color'])).",
                                 data: ". json_encode(array_values($aOptions['data']['value'])).",
                                 pointRadius: 0,
                                 fill: false
@@ -1524,7 +1750,7 @@ class appmonitorserver_gui extends appmonitorserver {
         </script>";
         // --- /chart
         return ''
-            // .htmlentities($sHtml)
+            // .'<pre>'.htmlentities($sHtml).'</pre>'
             .$sHtml
         ;
     }

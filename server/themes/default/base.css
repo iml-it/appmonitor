@@ -92,6 +92,21 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 .main-header .sidebar-toggle::before {
     content: "";
 }
+/* sidebar color */
+        /*
+    .skin-purple .wrapper, .skin-purple .main-sidebar, .skin-purple .left-side{
+        background: #222d32; 
+        background: #222d32; 
+        background: url('sidebar-rauschen.jpg') fixed;
+        background: url('sidebar-rauschen-transparent.png') fixed;
+        background: #222d32 url('sidebar-lights.jpg') no-repeat;
+    }
+    .skin-purple .sidebar-menu > li.header{
+        background: none;
+    }
+        */
+
+
 .box, .info-box{box-shadow: 0 0.2em 1em #ccc;}
 .content-wrapper{background: url('bg-rauschen.jpg') fixed;}
 
@@ -103,4 +118,17 @@ li.active a{background:rgba(127,127,127,0.2) !important;}
 .logo-lg span{font-size: 70%; opacity: 0.7;}
 .tagfilter{color:#fff; opacity: 0.7;}
 .tagfilter>div{margin: 0.5em 1em 0 0;}
+
+div.counter{
+    text-align: center;
+}
+div.counter strong{
+    font-size: 300%;
+    left: 0;
+    opacity: 0.6;
+}
+div.counter .graph{
+    background:#f8f8f8;
+    border: 1px solid #eee;
+}
 

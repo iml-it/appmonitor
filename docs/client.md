@@ -41,42 +41,46 @@ returns JSON answers with the conventions described below.
 
     {
     "meta": {
-        "host": "[string: name of the computer]", 
-        "website": "[string: description of the webapp]", 
-        "ttl": [integer: ttl for the server gui],
-        "result": [integer: 0..3],
+        "host": "[{string} name of the computer]", 
+        "website": "[{string} description of the webapp]", 
+        "ttl": [{integer} ttl for the server gui],
+        "result": [{integer}: 0..3],
         "tags": [
-            "[tag 1]",
-            "[tag N]"
+            "[{string} tag 1]",
+            "[{string} tag N]"
         ],
-        "time": "[value]ms",
+        "time": "[{float} value]ms",
         "notifications": {
             "email": [
-                "email_1@example.com",
-                "email_N@example.com"
+                "[{string} email_1@example.com]",
+                "[{string} email_N@example.com]"
             ],
             "slack": {
-                "#dev-channel": "https:\/\/hooks.slack.com\/services\/AAAAA\/BBBBB\/CCCCCC",
-                "#productowner-channel": "https:\/\/hooks.slack.com\/services\/XXXXXX\/YYYYYY\/ZZZZZ"
+                "#dev-channel": "[{string} https:\/\/hooks.slack.com\/services\/AAAAA\/BBBBB\/CCCCCC]",
+                "#productowner-channel": "[{string} https:\/\/hooks.slack.com\/services\/XXXXXX\/YYYYYY\/ZZZZZ]"
                 }
             }
         }
     }, 
     "checks": [
         {
-            "name": "[string: short name of the test 1]", 
-            "description": "[string: a description what the test is verifying]", 
-            "result": [integer: 0..3]
-            "value": "[string: result in words]",
-            "time": "[value]ms"
+            "name": "[{string}: short name of the test 1]", 
+            "description": "[{string}: a description what the test is verifying]", 
+            "result": [{integer}: 0..3]
+            "value": "[{string}: result in words or {float} value for type=counter]",
+            "time": "[{float} value]ms"
+            "type": "[{string} counter]"
+            "visual": "[{string} bar|line|simple[,options]]"
         },
         ...
         {
-            "name": "[string: short name of the test N]", 
-            "description": "[string: a description what the test N is verifying]", 
+            "name": "[{string}: short name of the test N]", 
+            "description": "[{string}: a description what the test N is verifying]", 
             "result": [integer: 0..3]
-            "value": "[string: result in words]" 
+            "value": "[{string}: result in words]" 
             "time": "[value]ms"
+            "type": "[{string} counter]"
+            "visual": "[{string} bar|line|simple[,options]]"
         }
     ] 
     }
@@ -147,8 +151,70 @@ Each check must have these keys:
   i.e. 
   - OK, database was connected successfully
   - ERROR: no write permission on file XY
+  OR
+  a float value (if type = counter)
 - *"time"*: "[value]ms" <span class="optional">(optional)</span>\
   time that was used for the single check. The value must be a float in milliseconds plus additional "ms" (without space). \
   Example: `"time": "0.628ms"`
+- *"type"*: "[string: counter]" <span class="optional">(optional)</span>\
+  type of the return value in the field "value". Default is a string and will show the message in a table.\
+  if it is set to "counter" in the appnmonitor server additionally will render a tile with a graph. The type of graph is set with "visual" value.\
+  If a check is marked es counter then the server stores "a few" values to be able to render a graph the last items. The value in "name" will be used as identifier of the stored items.
+  Example: `"type": "counter"`
+- *"visual"*: "[string: bar|line|simple[,[width,[count]]]]" <span class="optional">(optional)</span>\
+  The visual value works for type=counter only.\
+  A tile with a counter shows a tile with "description", a strong item "value" and a graph
+  If missing the default is "bar" with a width of 2 colums showing the last 20 values.\
+  Allowed types are
+  - bar: show bars of thwe last n values. Each bar is colored by the result value of the check
+  - line: shows a line graph of the last values. the line has a single color only.
+  - simple: shows the value only without a graph
+
+Behind the type can follow an integer for the width where the page width is 12 columns. The default is 2.\
+The last
 
 <span class="required">(*)</span> The keys "name", "description", "value" and "result" are required.
+
+## Counter examples ##
+
+The tile reponse time appears automatically without any configuration.
+All other tiles are the checks marked with "type": "counter".
+
+Here is an example output of 3 styles and its source from the client.
+
+![Client](images/appmonitor-counter-tiles.png "Client")
+
+	{
+		"meta": {
+			(...)
+		},
+		"checks": [
+			{
+				"name": "Counter test",
+				"description": "Test for visual: line",
+				"result": 0,
+				"value": "7.6",
+				"type": "counter",
+				"time": "0.048ms",
+				"visual": "line"
+			},
+			{
+				"name": "Counter 2",
+				"description": "Test for visual: bar,3,200",
+				"result": 0,
+				"value": "7.5",
+				"type": "counter",
+				"time": "0.018ms",
+				"visual": "bar,3,200"
+			},
+			{
+				"name": "Counter 3",
+				"description": "Test for visual: simple",
+				"result": 0,
+				"value": "5",
+				"type": "counter",
+				"time": "0.016ms",
+				"visual": "simple"
+			}
+		]
+	}

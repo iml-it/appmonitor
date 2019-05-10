@@ -621,9 +621,10 @@ class appmonitorcheck {
     protected function checkSimple($aParams) {
         $this->_checkArrayKeys($aParams, "result,value");
         $this->_setReturn((int) $aParams["result"], $aParams["value"]);
-        if(isset($aParams['counter']) && is_array($aParams['counter'])){
-            // TODO: checks
-            $this->_aData['counter']=$aParams['counter'];
+        foreach(array('type', 'visual') as $sMyKey){
+            if(isset($aParams[$sMyKey])){
+                $this->_aData[$sMyKey]=$aParams[$sMyKey];
+            }
         }
         return true;
     }

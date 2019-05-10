@@ -122,11 +122,22 @@ function getUnixTS() {
  */
 function setAdressbar() {
 
-    var url = '?'
+    var url = location.protocol 
+            + '//'+ location.hostname
+            + (location.port ? ':'+location.port : '')
+            + location.pathname
+            + '?'
             + (aViewFilters['tag'] ? '&tag=' + aViewFilters['tag'] : '')
             + (aViewFilters['divwebs'] ? '&webapp=' + aViewFilters['divwebs'] : '')
             + aViewFilters['tab'];
-    window.history.pushState('dummy', 'Title', url);
+    
+    if(url!==location.href){
+        window.history.pushState({
+            url: location.hash,
+            content: $('#content').html(),
+            filter: aViewFilters
+        }, 'Title', url);
+    }
 }
 
 
@@ -330,6 +341,7 @@ function showDiv() {
     iRefreshCounter = 0;
 
     oOut.css('opacity', '0.2');
+    $('a.reload i').addClass('fa-spin');
     jQuery.ajax({
         url: url,
         // data: queryparams,
@@ -391,6 +403,7 @@ function postLoad(bIsFirstload) {
     $("a[href='" + sDiv + "']").addClass("active");
     $("nav a").blur();
     */
+    $('a.reload i').removeClass('fa-spin');
     $(".sidebar-menu li").removeClass("active");
     $("a[href='" + sDiv + "']").parent().addClass("active");
     $("a").blur();
@@ -441,5 +454,15 @@ function initGuiStuff() {
     // activate age timer on tiles
     window.setInterval("timerAgeInSec();", 1000);
 
-
+    // Revert to a previously saved state
+    window.addEventListener('popstate', function(event) {
+        if(event.state && event.state.filter){
+            aViewFilters=event.state.filter;
+            $('#content').html(event.state.content);
+            postLoad();
+        }
+        if(event.state===null){
+            location.reload();
+        }
+    });
 }

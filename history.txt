@@ -1,6 +1,12 @@
 
 HISTORY
 
+v0.75 2019-05-10
+    - backend: added support for browsers history back and forward
+    - backend: added spinning reload icon during load
+    - frontend: added counters
+    - backend: configure visible tiles
+
 v0.74 2019-04-29
     - appmonitor client: removed unnecessary check; added check for ssl cert
     - update docs: added docs directory

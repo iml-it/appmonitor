@@ -103,6 +103,23 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
             "[text-id]": "[Custom message text using placeholders.]"
         }
     },
+    "view": {
+        "overview":{
+            "webapps": true,
+            "hosts": true,
+            "checks": true,
+            "notification": true
+        },
+        "appdetails":{
+            "appstatus": true,
+            "httpcode": true,
+            "age": true,
+            "checks": true,
+            "times": false,
+            "receiver": false,
+            "notification": false
+        }
+    },	
     "urls":[
         "http://localhost/appmonitor/client/",
         "http://server1/appmonitor/client/",
@@ -123,6 +140,7 @@ The values are:
 | _serverurl_     | \{string\} url of installation; it is used for notification only      |
 | _skin_          | \{string\} name of adminLte skin (one of skin-blue\|skin-black\|skin-purple(=default)\|skin-yellow\|skin-red\|skin-green ... and *-light) |
 | _theme_         | \{string\} name of css to load (aka "skin") ... do not use anymore    |
+| _view_          | \{array\} show/ hide elements on ouput pages                          |
 | _urls_          | \{array\} list of urls                                                |
 
 Remarks:

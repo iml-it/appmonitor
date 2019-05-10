@@ -2,7 +2,7 @@
 
 require_once 'cache.class.php';
 require_once 'lang.class.php';
-require_once 'responsetimerrd.class.php';
+require_once 'counteritems.class.php';
 require_once 'notificationhandler.class.php';
 
 /**
@@ -477,10 +477,44 @@ class appmonitorserver {
 
                 // $aClientData["result"]["curlinfo"] = $aResult['curlinfo'];
                 
-                $oResponsetime=new responsetimeRrd($sKey);
-                $oResponsetime->add($aClientData["result"]["result"], floor($aResult['curlinfo']['total_time']*1000), $sError ? $sError : $this->_tr('Resulttype-0'));
+                $oCounters=new counteritems($sKey);
+                $oCounters->setCounter('_responsetime', array(
+                    'title'=>$this->_tr('Chart-responsetime'),
+                    'visual'=>'bar',
+                ));
+                $oCounters->add(array(
+                        'status'=>$aClientData["result"]["result"], 
+                        'value'=>floor($aResult['curlinfo']['total_time']*1000)
+                ));
 
-
+                // find counters in a check result
+                if(isset($aClientData['checks']) && count($aClientData['checks'])){
+                    // echo '<pre>'.print_r($aClientData['checks'], 1).'</pre>';
+                    foreach($aClientData['checks'] as $aCheck){
+                        $sIdSuffix=preg_replace('/[^a-zA-Z0-9]/', '', $aCheck['name']).'-'.md5($aCheck['name']);
+                        $sTimerId='time-'.$sIdSuffix;
+                        $oCounters->setCounter($sTimerId, array(
+                            'title'=>'timer for['.$aCheck['description'].'] in [ms]',
+                            'visual'=>'bar'
+                        ));
+                        $oCounters->add(array(
+                            'status'=>$aCheck['result'], 
+                            'value'=>str_replace('ms', '', $aCheck['time'])
+                        ));
+                        if(isset($aCheck['type']) && $aCheck['type']==='counter'){
+                            $sCounterId='check-'.$sIdSuffix;
+                            // $oCounters->setCounter($sCounterId);
+                            $oCounters->setCounter($sCounterId, array(
+                                'title'=>$aCheck['description'],
+                                'visual'=>(isset($aCheck['visual']) ? $aCheck['visual'] : false),
+                            ));
+                            $oCounters->add(array(
+                                'status'=>$aCheck['result'], 
+                                'value'=>$aCheck['value']
+                            ));
+                        }
+                    }
+                }
                 // write cache
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($aResult['url']));
                 $oCache->write($aClientData, $iTtl);

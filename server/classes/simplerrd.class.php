@@ -114,7 +114,7 @@ class simpleRrd {
      * get array with stored items
      * 
      * @param integer  $iMax  optional: limit
-     * @return boolean
+     * @return array
      */
     public function get($iMax=false){
         $aReturn=array();
@@ -123,6 +123,7 @@ class simpleRrd {
         if (!is_array($aTmp) || !count($aTmp)){
             return array();
         }
+        $iMax=$iMax ? $iMax : count($aTmp);
         $iMax=min($iMax, count($aTmp));
         for($i=0; $i<$iMax; $i++){
             $aReturn[]=array_pop($aTmp);

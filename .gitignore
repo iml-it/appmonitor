@@ -14,3 +14,4 @@ nbproject
 /client/check-fs.php
 /client/check-limesurvey.php
 /client/check-limesurvey.settings.php
+/server/classes/__unused_ responsetimerrd.class.php

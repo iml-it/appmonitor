@@ -20,6 +20,7 @@
         "Notifications": "Notifications",
         "Notifications-header": "Log of last changes",
         "Notifications-none": "No messages available.",
+        "Notify-address": "Notify addresses",
 
         "Setup": "Setup",
         "Setup-client-list": "List of existing Clients",
