@@ -554,7 +554,7 @@ parameters:
 
 | key      | type     | description |
 |---       |---       |---
-|conNect   |(string)  |connect string, i.e. 'mysql:host=localhost;port=3306;dbname=mydatabase;' <span class="required">(*)</span>
+|connect   |(string)  |connect string, i.e. 'mysql:host=localhost;port=3306;dbname=mydatabase;' <span class="required">(*)</span>
 |user      |(string)  |mysql username <span class="required">(*)</span>
 |password  |(string)  |password <span class="required">(*)</span>
 
