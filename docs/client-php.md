@@ -465,9 +465,6 @@ Parameters:
 
 | key      | type     | description |
 |---       |---       |---
-| | |
-| | |
-
 |url               |(string)  |url to fetch <span class="required">(*)</span>
 |headeronly        |(boolean) |optional flag to fetch http response herader only (HEAD request); default: false = returns header and body; 
 |follow            |(boolean) |optional flag to follow a location; default: false = do not follow; If you set it to true it ries to follow (but this is not a safe method)
