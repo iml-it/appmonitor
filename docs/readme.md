@@ -39,7 +39,7 @@ For PHP applications a client with pre defined checks is delivered.
 
 For Non-PHP clients you need to write your own checks and create a response in the pre defined syntax.
 
-**more**: [Client](client.md)
+**more**: [Client](client.md) | [PHP-Client](client-php.md)
 
 ![Client](images/appmonitor-overview-client.png "Client")
 

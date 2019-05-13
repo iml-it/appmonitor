@@ -38,8 +38,8 @@ You can implement a client in other languages.
 If you dont use php on your webserver you can create your own client that 
 returns JSON answers with the conventions described below.
 
-
-    {
+```json
+{
     "meta": {
         "host": "[{string} name of the computer]", 
         "website": "[{string} description of the webapp]", 
@@ -83,7 +83,8 @@ returns JSON answers with the conventions described below.
             "visual": "[{string} bar|line|simple[,options]]"
         }
     ] 
-    }
+}
+```
 
 The response has 2 keys:
 
@@ -182,6 +183,7 @@ Here is an example output of 3 styles and its source from the client.
 
 ![Client](images/appmonitor-counter-tiles.png "Client")
 
+```json
 	{
 		"meta": {
 			(...)
@@ -216,3 +218,4 @@ Here is an example output of 3 styles and its source from the client.
 			}
 		]
 	}
+```
