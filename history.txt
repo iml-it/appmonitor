@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.78 2019-05-13
+    - backend: if there is no connect - show red tile or http status
+    - backend: (WIP) replace buttons
+
 v0.77 2019-05-13
     - client: http check - see its params in docs/client-php.md
 

@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.77";
+    var $_sVersion = "0.78";
 
     /**
      * html code for icons in the web gui
@@ -66,7 +66,7 @@ class appmonitorserver_gui extends appmonitorserver {
         'warning' => '<i class="fas fa-exclamation-triangle"></i>',
         'error' => '<i class="fas fa-bolt"></i>',
         'add' => '<i class="fas fa-plus"></i>',
-        'del' => '<i class="fas fa-minus"></i>',
+        'del' => '<i class="fas fa-trash"></i>',
         'plus' => '<i class="fas fa-plus"></i>',
         'close' => '<i class="fas fa-times"></i>',
     );
@@ -317,8 +317,11 @@ class appmonitorserver_gui extends appmonitorserver {
                 case 'httpcode':
                     $sReturn.= $bVisibility 
                         ? $this->_getTile(array(
-                                'result' => ($aHostdata['httpstatus'] && $aHostdata['httpstatus'] >= 400) ? RESULT_ERROR : false,
-                                'count' => $aHostdata['httpstatus'],
+                                'result' => ((int)$aHostdata['httpstatus'] == 0 || $aHostdata['httpstatus'] >= 400 ) 
+                                    ? RESULT_ERROR 
+                                    : false
+                                ,
+                                'count' => $aHostdata['httpstatus'] ? $aHostdata['httpstatus'] : '??',
                                 'label' => $this->_tr('Http-status'),
                             )) 
                         : ''
@@ -327,6 +330,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 case 'age':
                     $sReturn.= $bVisibility 
                         ? $this->_getTile(array(
+                            'result' => RESULT_UNKNOWN,
                             'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
                             'icon' => $this->_aIco['age'],
                             'label' => $this->_tr('age-of-result'),
@@ -766,7 +770,7 @@ class appmonitorserver_gui extends appmonitorserver {
                         . $sFormOpenTag
                             . '<input type="hidden" name="action" value="deleteurl">'
                             . '<input type="hidden" name="url" value="' . $sUrl . '">'
-                            . '<button class="btn btndel" '
+                            . '<button class="btn btn-danger" '
                                 . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
                                 . '>' . $this->_aIco['del'].' '.$this->_tr('btn-deleteUrl') 
                             . '</button>'
@@ -796,7 +800,7 @@ class appmonitorserver_gui extends appmonitorserver {
                             . 'pattern="http.*://..*" '
                             . 'required="required" '
                         . '>'
-                        . '<button class="btn btnadd">' . $this->_aIco['add'].' '.$this->_tr('btn-addUrl') . '</button>'
+                        . '<button class="btn btn-success">' . $this->_aIco['add'].' '.$this->_tr('btn-addUrl') . '</button>'
                         . '</form><br>'
 
                 )),
