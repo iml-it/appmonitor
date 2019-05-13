@@ -3,7 +3,7 @@
 	.optional{color:#888;}
 </style>
 
-# [APPMONITOR](../readme.md) > SERVER #
+# [APPMONITOR](readme.md) > SERVER #
 
 OPEN SOURCE from University of Bern :: IML - Institute of Medical Education
 

@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.77 2019-05-13
+    - client: http check - see its params in docs/client-php.md
+
 v0.76 2019-05-10
     - client+server: remove type=counter ... replaced with count=[value]
 

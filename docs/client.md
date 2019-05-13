@@ -4,7 +4,7 @@
 </style>
 
 
-# [APPMONITOR](../readme.md) > CLIENT #
+# [APPMONITOR](readme.md) > CLIENT #
 
 Free software and Open Source from University of Bern :: IML - Institute of Medical Education
 
