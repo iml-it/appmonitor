@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.79 2019-05-14
+    - backend: more clear message on client error/ no connect
+    - backend: improve labeling of webapps
+    - docs: update
+
 v0.78 2019-05-13
     - backend: if there is no connect - show red tile or http status
     - backend: (WIP) replace buttons

@@ -19,7 +19,7 @@ require_once 'render-adminlte.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.77
+ * @version 0.79
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.78";
+    var $_sVersion = "0.79";
 
     /**
      * html code for icons in the web gui
@@ -93,7 +93,7 @@ class appmonitorserver_gui extends appmonitorserver {
         if ($sOut) {
             $sOut = '<div id="divmodal"><div class="divdialog">'
                     . $sOut
-                    . '<br><a href="#" class="btn " onclick="location.href=\'?\';">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a><br><br>'
+                    . '<br><a href="#" class="btn btn-default" onclick="location.href=\'?\';">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a><br><br>'
                     . '</a></div>';
         }
         return $sOut;
@@ -330,7 +330,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 case 'age':
                     $sReturn.= $bVisibility 
                         ? $this->_getTile(array(
-                            'result' => RESULT_UNKNOWN,
+                            // 'result' => RESULT_UNKNOWN,
                             'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
                             'icon' => $this->_aIco['age'],
                             'label' => $this->_tr('age-of-result'),
@@ -582,7 +582,7 @@ class appmonitorserver_gui extends appmonitorserver {
     protected function _showWelcomeMessage() {
         return $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
             . '<br>'
-            . '<a class="btn" href="#divsetup" onclick="setTab(this.hash);">' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>'
+            . '<a class="btn btn-primary" href="#divsetup" onclick="setTab(this.hash);">' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>'
         ;
     }
 
@@ -763,7 +763,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 '<div class="divhost result' . $iResult . ' tags '.$this->_getCssclassForTag($aTags).'" style="float: none; ">'
                 . $oA->getBox(array(
                     'title'=>''
-                        . $this->_aIco['webapp'] . ' ' . $sWebsite,
+                        . $this->_getAppLabel($sAppId),
                     'text'=>''
                         // Button DELETE
                         . '<div style="float: right;">'
@@ -774,7 +774,6 @@ class appmonitorserver_gui extends appmonitorserver {
                                 . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
                                 . '>' . $this->_aIco['del'].' '.$this->_tr('btn-deleteUrl') 
                             . '</button>'
-                            //. '<a href="#" class="btn btndel"><i class="fa fa-minus"></i> delete</a>'
                         . '</form>'
                         . '</div>'
                         // /DELETE
@@ -996,9 +995,9 @@ class appmonitorserver_gui extends appmonitorserver {
         $iCounter++;       
         $sValidationContent='';
         $sDivMoredetails='div-http-'.$sAppId;
-        $sShowHide='<br><button class="btn" id="btn-plus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideDown(); $(this).hide(); $(\'#btn-minus-'.$sAppId.'\').show(); return false;"'
+        $sShowHide='<br><button class="btn btn-default" id="btn-plus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideDown(); $(this).hide(); $(\'#btn-minus-'.$sAppId.'\').show(); return false;"'
                     . '> '.$this->_aIco['plus'].' '.$this->_tr('btn-details').' </button>'
-                . '<button class="btn" id="btn-minus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideUp();   $(this).hide(); $(\'#btn-plus-'.$sAppId.'\').show(); return false;" style="display: none;"'
+                . '<button class="btn btn-default" id="btn-minus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideUp();   $(this).hide(); $(\'#btn-plus-'.$sAppId.'\').show(); return false;" style="display: none;"'
                 . '> '.$this->_aIco['close'].' '.$this->_tr('btn-hide-details').' </button>';
         
         if (true ||
@@ -1009,263 +1008,263 @@ class appmonitorserver_gui extends appmonitorserver {
                         . '> ' . $this->_aIco['allwebapps'] . ' '. $this->_tr('All-webapps-header')
                     .'</a> > <nobr>'
                     . $this->_aIco['webapp'] .' '
-                    . (isset($aEntries['result']['website']) ? $aEntries['result']['website'] : '?')
+                    . $this->_getAppLabel($sAppId)
                     . '</nobr>'
                     );
 
+            
+            // --- validation of items in client data array
+            $aValidatorResult=$this->_checkClientResponse($sAppId);
+            
+            // check if request failed
+            if (isset($aEntries['result']['error']) && $aEntries['result']['error']){
+                $sValidationContent.= $oA->getAlert(array(
+                    'type'=>'danger',
+                    'dismissible'=>false,
+                    'title'=>$this->_aIco['error'].' '.$this->_tr('Validator-request-error'),
+                    'text'=>$aEntries['result']['error']
+                    ));
+            }
 
-                // --- validation of items in client data array
-                $aValidatorResult=$this->_checkClientResponse($sAppId);
-                if($aValidatorResult){
-                    foreach($aValidatorResult as $sSection=>$aMessageItems){
-                        if(count($aMessageItems)){
-                            $sDivContent='';
-                            foreach($aMessageItems as $sSingleMessage){
-                                $sDivContent.= '- '.$sSingleMessage.'<br>';
-                            }
-                            $sValidationContent.= $sDivContent 
-                                ? $oA->getAlert(array(
-                                    'type'=>$sSection=='error' ? 'danger' : $sSection,
-                                    'dismissible'=>false,
-                                    'title'=>$this->_aIco[$sSection].' '.$this->_tr('Validator-'.$sSection),
-                                    'text'=>$sDivContent
-                                    ))
-                                : ''
-                            ;
+            if(!$sValidationContent && $aValidatorResult){
+                foreach($aValidatorResult as $sSection=>$aMessageItems){
+                    if(count($aMessageItems)){
+                        $sDivContent='';
+                        foreach($aMessageItems as $sSingleMessage){
+                            $sDivContent.= '- '.$sSingleMessage.'<br>';
                         }
+                        $sValidationContent.= $sDivContent 
+                            ? $oA->getAlert(array(
+                                'type'=>$sSection=='error' ? 'danger' : $sSection,
+                                'dismissible'=>false,
+                                'title'=>$this->_aIco[$sSection].' '.$this->_tr('Validator-'.$sSection),
+                                'text'=>$sDivContent
+                                ))
+                            : ''
+                        ;
                     }
                 }
-            if (array_key_exists("host", $aEntries["result"])) {
-                // echo '<pre>'.print_r($aEntries["result"], 1).'</pre>';
+            }
+        if (array_key_exists("host", $aEntries["result"])) {
+            // echo '<pre>'.print_r($aEntries["result"], 1).'</pre>';
 
-                // --- Counter and graphs
-                $oCounters=new counteritems($sAppId);
-                $aCounters=$oCounters->getCounters();
-                $sCounters='';
-                if(count($aCounters)){
-                    foreach($aCounters as $sCounterId=>$aMeta){
-                        if(strpos($sCounterId, 'time')!==0){
-                            // echo '<pre>'.print_r($oCounters->get(1), 1).'</pre>';
-                            
-                            $aMeta['visual']=isset($aMeta['visual']) ? $aMeta['visual'] : 'bar';
-                            $aTmp=explode(',', $aMeta['visual']);
-                            
-                            $sCounters.=$this->_renderCounter($sAppId, $sCounterId, 
-                                array(
-                                    'type'=>isset($aTmp[0]) ? $aTmp[0] : 'bar',
-                                    'size'=>isset($aTmp[1]) ? $aTmp[1] : false,
-                                    'items'=>isset($aTmp[2]) ? $aTmp[2] : false,
-                                    'label'=>isset($aMeta['title']) ? $aMeta['title'] : $sCounterId,
-                                )
-                            );
-                        }
+            // --- Counter and graphs
+            $oCounters=new counteritems($sAppId);
+            $aCounters=$oCounters->getCounters();
+            $sCounters='';
+            if(count($aCounters)){
+                foreach($aCounters as $sCounterId=>$aMeta){
+                    if(strpos($sCounterId, 'time')!==0){
+                        // echo '<pre>'.print_r($oCounters->get(1), 1).'</pre>';
+
+                        $aMeta['visual']=isset($aMeta['visual']) ? $aMeta['visual'] : 'bar';
+                        $aTmp=explode(',', $aMeta['visual']);
+
+                        $sCounters.=$this->_renderCounter($sAppId, $sCounterId, 
+                            array(
+                                'type'=>isset($aTmp[0]) ? $aTmp[0] : 'bar',
+                                'size'=>isset($aTmp[1]) ? $aTmp[1] : false,
+                                'items'=>isset($aTmp[2]) ? $aTmp[2] : false,
+                                'label'=>isset($aMeta['title']) ? $aMeta['title'] : $sCounterId,
+                            )
+                        );
                     }
                 }
+            }
 
-                $sHtml .= $oA->getSectionRow($sCounters);
+            $sHtml .= $oA->getSectionRow($sCounters);
 
-                // --- table with checks
-                $sHtml .= 
-                    $oA->getSectionRow(
-                        $oA->getSectionColumn(
-                            $oA->getBox(array(
-                                // 'label'=>'I am a label.',
-                                // 'collapsable'=>true,
-                                'title'=>$this->_tr('Checks'),
-                                'text'=>$this->_generateMonitorTable($aEntries["result"]["url"])
-                            ))
-                        )
+            // --- table with checks
+            $sHtml .= 
+                $oA->getSectionRow(
+                    $oA->getSectionColumn(
+                        $oA->getBox(array(
+                            // 'label'=>'I am a label.',
+                            // 'collapsable'=>true,
+                            'title'=>$this->_tr('Checks'),
+                            'text'=>$this->_generateMonitorTable($aEntries["result"]["url"])
+                        ))
                     )
-                ;
-            }
-
-
-
-            // --- notifications & uptime for this webapp
-            $aLogs = $this->oNotifcation->getLogdata(array('appid'=>$sAppId));
-            rsort($aLogs);
-            
-            $aUptime=$this->_getUptime($aLogs);
-            // echo '<pre>'.print_r($aUptime, 1).'</pre>';
-            
-            $aChartData=array(
-                'label'=>array(),
-                'value'=>array(),
-                'color'=>array(),
-            );
-            foreach ($aUptime['counter'] as $iResult=>$iResultCount){
-                array_unshift($aChartData['label'], $this->_tr('Resulttype-'.$iResult));
-                array_unshift($aChartData['value'], $iResultCount);
-                array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($iResult));
-                // array_unshift($aChartColor, $aColor[rand(0, 3)]);
-            }
-            
-            $aChartUptime=array(
-                'type'=>'pie',
-                // 'xLabel'=>$this->_tr('Chart-time'),
-                // 'yLabel'=>$this->_tr('Chart-responsetime'),
-                'data'=>$aChartData,
-            );
-            $iFirstentry=count($aLogs)>1 ? $aLogs[count($aLogs)-1]['timestamp'] : date('U');
-            $sUptime=($aUptime['total']
-                    ? ''
-                        . '<strong>'
-                            . $this->_tr('Resulttype-'.RESULT_OK) . ': ' . round($aUptime['counter'][RESULT_OK]*100 / $aUptime['total'], 3).' %'
-                        . '</strong><br>'
-                        . ($aUptime['counter'][RESULT_UNKNOWN] 
-                            ? $this->_tr('Resulttype-'.RESULT_UNKNOWN) . ': ' . round($aUptime['counter'][RESULT_UNKNOWN]*100 / $aUptime['total'], 3).' %; '
-                                . ' ('.round($aUptime['counter'][RESULT_UNKNOWN]/60).' min)<br>'
-                            : ''
-                          )
-                        . ($aUptime['counter'][RESULT_WARNING] 
-                            ? $this->_tr('Resulttype-'.RESULT_WARNING) . ': ' . round($aUptime['counter'][RESULT_WARNING]*100 / $aUptime['total'], 3).' %; '
-                                . ' ('.round($aUptime['counter'][RESULT_WARNING]/60).' min)<br>'
-                            : ''
-                          )
-                        . ($aUptime['counter'][RESULT_ERROR]
-                            ? $this->_tr('Resulttype-'.RESULT_ERROR) . ': ' . round($aUptime['counter'][RESULT_ERROR]*100 / $aUptime['total'], 3).' %'
-                                . ' ('.round($aUptime['counter'][RESULT_ERROR]/60).' min)<br>'
-                            : ''
-                        )
-                    : '-'
                 )
-                .$this->_renderGraph($aChartUptime)
-                ;
-            
-            $sHtml .= $oA->getSectionRow(
-                        $oA->getSectionColumn(
-                            $oA->getBox(array(
-                                // 'label'=>'I am a label.',
-                                // 'collapsable'=>true,
-                                'title'=>$this->_tr('Uptime') . ' ('.$this->_tr('since').' '.date('Y-m-d', $iFirstentry).'; ~'.round((date('U')-$iFirstentry)/60/60/24).' d)',
-                                'text'=> $sUptime
-                            )),
-                            3
-                        )
-                        .$oA->getSectionColumn(
-                            $oA->getBox(array(
-                                // 'label'=>'I am a label.',
-                                // 'collapsable'=>true,
-                                'title'=>$this->_tr('Notifications'),
-                                'text'=> $this->_generateNoftificationlog($aLogs, 'datatable-notifications-webapp')
-                            )),
-                            9
-                        )
-                    );
+            ;
+        }
 
-            // --- http status code and chart of response times
+
+
+        // --- notifications & uptime for this webapp
+        $aLogs = $this->oNotifcation->getLogdata(array('appid'=>$sAppId));
+        rsort($aLogs);
+
+        $aUptime=$this->_getUptime($aLogs);
+        // echo '<pre>'.print_r($aUptime, 1).'</pre>';
+
+        $aChartData=array(
+            'label'=>array(),
+            'value'=>array(),
+            'color'=>array(),
+        );
+        foreach ($aUptime['counter'] as $iResult=>$iResultCount){
+            array_unshift($aChartData['label'], $this->_tr('Resulttype-'.$iResult));
+            array_unshift($aChartData['value'], $iResultCount);
+            array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($iResult));
+            // array_unshift($aChartColor, $aColor[rand(0, 3)]);
+        }
+
+        $aChartUptime=array(
+            'type'=>'pie',
+            // 'xLabel'=>$this->_tr('Chart-time'),
+            // 'yLabel'=>$this->_tr('Chart-responsetime'),
+            'data'=>$aChartData,
+        );
+        $iFirstentry=count($aLogs)>1 ? $aLogs[count($aLogs)-1]['timestamp'] : date('U');
+        $sUptime=($aUptime['total']
+                ? ''
+                    . '<strong>'
+                        . $this->_tr('Resulttype-'.RESULT_OK) . ': ' . round($aUptime['counter'][RESULT_OK]*100 / $aUptime['total'], 3).' %'
+                    . '</strong><br>'
+                    . ($aUptime['counter'][RESULT_UNKNOWN] 
+                        ? $this->_tr('Resulttype-'.RESULT_UNKNOWN) . ': ' . round($aUptime['counter'][RESULT_UNKNOWN]*100 / $aUptime['total'], 3).' %; '
+                            . ' ('.round($aUptime['counter'][RESULT_UNKNOWN]/60).' min)<br>'
+                        : ''
+                      )
+                    . ($aUptime['counter'][RESULT_WARNING] 
+                        ? $this->_tr('Resulttype-'.RESULT_WARNING) . ': ' . round($aUptime['counter'][RESULT_WARNING]*100 / $aUptime['total'], 3).' %; '
+                            . ' ('.round($aUptime['counter'][RESULT_WARNING]/60).' min)<br>'
+                        : ''
+                      )
+                    . ($aUptime['counter'][RESULT_ERROR]
+                        ? $this->_tr('Resulttype-'.RESULT_ERROR) . ': ' . round($aUptime['counter'][RESULT_ERROR]*100 / $aUptime['total'], 3).' %'
+                            . ' ('.round($aUptime['counter'][RESULT_ERROR]/60).' min)<br>'
+                        : ''
+                    )
+                : '-'
+            )
+            .$this->_renderGraph($aChartUptime)
+            ;
+
+        $sHtml .= $oA->getSectionRow(
+                    $oA->getSectionColumn(
+                        $oA->getBox(array(
+                            // 'label'=>'I am a label.',
+                            // 'collapsable'=>true,
+                            'title'=>$this->_tr('Uptime') . ' ('.$this->_tr('since').' '.date('Y-m-d', $iFirstentry).'; ~'.round((date('U')-$iFirstentry)/60/60/24).' d)',
+                            'text'=> $sUptime
+                        )),
+                        3
+                    )
+                    .$oA->getSectionColumn(
+                        $oA->getBox(array(
+                            // 'label'=>'I am a label.',
+                            // 'collapsable'=>true,
+                            'title'=>$this->_tr('Notifications'),
+                            'text'=> $this->_generateNoftificationlog($aLogs, 'datatable-notifications-webapp')
+                        )),
+                        9
+                    )
+                );
+
+        // --- http status code
+        $sStatusIcon=$aEntries['result']['httpstatus']
+                ? $aEntries['result']['httpstatus']>=400 
+                    ? $this->_aIco['error']
+                    : $aEntries['result']['httpstatus']>=300 
+                        ? $this->_aIco['warning']
+                        : $this->_aIco['ok']
+                : $this->_aIco['error']
+                ;
+                
+        $sHtml .= 
+                $oA->getSectionRow(
+                    $oA->getSectionColumn(
+                        $oA->getBox(array(
+                            // 'label'=>'I am a label.',
+                            // 'collapsable'=>true,
+                            'title'=>$this->_tr('Http-details'),
+                            'text'=> ($aEntries['result']['error'] 
+                                        ? $oA->getAlert(array(
+                                            'type'=>'danger',
+                                            'dismissible'=>false,
+                                            // 'title'=>$this->_aIco['error'].' '.$this->_tr('Validator-request-error'),
+                                            'text'=>$aEntries['result']['error']
+                                        ))
+                                        : ''
+                                    )
+                                . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
+                                . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $sStatusIcon . ' ' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
+                                . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
+                        )),
+                        4
+                    )
+                    /*
+                    .$oA->getSectionColumn(
+                        $oA->getBox(array(
+                            // 'label'=>'I am a label.',
+                            // 'collapsable'=>true,
+                            'title'=>$this->_tr('Chart-graph'),
+                            'text'=>''
+                                . '<p>'.$this->_tr('Chart-graph-description').'</p>'
+                                . $this->_renderGraph($aChart)
+                        )),
+                        6
+                    )
+                     * 
+                     */
+                )
+
+        ;
+        // --- debug infos 
+        if ($this->_aCfg['debug']) {
+            $this->oNotifcation->setApp($sAppId);
+            $sDebugContent='';
+
             /*
-            $oResponsetime=new counteritems($sAppId, '_responsetime');
-            
-            $aResponseTimeData=$oResponsetime->get(50);
-            $aChartData=array(
-                'label'=>array(),
-                'value'=>array(),
-                'color'=>array(),
-            );
-            foreach ($aResponseTimeData as $aItem){
-                if(isset($aItem['data']['value'])){
-                    array_unshift($aChartData['label'], date("Y-m-d H:i:s", $aItem['timestamp']));
-                    array_unshift($aChartData['value'], $aItem['data']['value']);
-                    array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($aItem['data']['status']));
-                    // array_unshift($aChartColor, $aColor[rand(0, 3)]);
-                }
-            }
-            
-            $aChart=array(
-                'type'=>'bar',
-                'xLabel'=>$this->_tr('Chart-time'),
-                'yLabel'=>$this->_tr('Chart-responsetime'),
-                'data'=>$aChartData,
-            );
-            // echo '<pre>'.print_r($aChart, 1).'</pre>';
+            $sDebugContent .= 
+                     '<h3>' . $this->_tr('Preview-of-messages') . '</h3>'
+                    . '<h4>' . $this->_tr('Preview-replacements') . '</h4>'
+                    . '<pre>' . htmlentities(print_r($this->oNotifcation->getMessageReplacements(), 1)) . '</pre>'
+                    . '<h4>' . $this->_tr('Preview-emails') . '</h4>'
+            ;
              * 
              */
-            
-            $sHtml .= 
-                    $oA->getSectionRow(
-                        $oA->getSectionColumn(
-                            $oA->getBox(array(
-                                // 'label'=>'I am a label.',
-                                // 'collapsable'=>true,
-                                'title'=>$this->_tr('Http-details'),
-                                'text'=> ($aEntries['result']['error'] ? '<div class="result'.RESULT_ERROR.'">' . $this->_tr('Error-message') . ': ' . $aEntries['result']['error'] . '</div><br>' : '')
-                                    . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
-                                    . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
-                                    . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
-                            )),
-                            4
-                        )
-                        /*
-                        .$oA->getSectionColumn(
-                            $oA->getBox(array(
-                                // 'label'=>'I am a label.',
-                                // 'collapsable'=>true,
-                                'title'=>$this->_tr('Chart-graph'),
-                                'text'=>''
-                                    . '<p>'.$this->_tr('Chart-graph-description').'</p>'
-                                    . $this->_renderGraph($aChart)
-                            )),
-                            6
-                        )
-                         * 
-                         */
-                    )
+            foreach ($this->_getResultDefs() as $i) {
+                $sMgIdPrefix = 'changetype-' . $i;
+                $sDebugContent .= $this->_tr('changetype-' . $i)
+                        . '<pre>'
+                        . '' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.logmessage'), 1)) . '<hr>'
+                        . 'TO: ' . implode('; ', $this->oNotifcation->getAppNotificationdata('email')) . '<br>'
+                        . '<strong>' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.email.subject'), 1)) . '</strong><br>'
+                        . '' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.email.message'), 1)) . '<br>'
+                        . '</pre>';
+            }
 
-            ;
-            // --- debug infos 
-            if ($this->_aCfg['debug']) {
-                $this->oNotifcation->setApp($sAppId);
-                $sDebugContent='';
-
-                /*
-                $sDebugContent .= 
-                         '<h3>' . $this->_tr('Preview-of-messages') . '</h3>'
-                        . '<h4>' . $this->_tr('Preview-replacements') . '</h4>'
-                        . '<pre>' . htmlentities(print_r($this->oNotifcation->getMessageReplacements(), 1)) . '</pre>'
-                        . '<h4>' . $this->_tr('Preview-emails') . '</h4>'
-                ;
-                 * 
-                 */
-                foreach ($this->_getResultDefs() as $i) {
-                    $sMgIdPrefix = 'changetype-' . $i;
-                    $sDebugContent .= $this->_tr('changetype-' . $i)
-                            . '<pre>'
-                            . '' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.logmessage'), 1)) . '<hr>'
-                            . 'TO: ' . implode('; ', $this->oNotifcation->getAppNotificationdata('email')) . '<br>'
-                            . '<strong>' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.email.subject'), 1)) . '</strong><br>'
-                            . '' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.email.message'), 1)) . '<br>'
-                            . '</pre>';
-                }
-                
-                $sHtml .= $sShowHide. '<div id="'.$sDivMoredetails.'" style="display: none;">'
-                    . $oA->getSectionRow(
-                        $oA->getSectionColumn(
-                            $oA->getBox(array(
-                                // 'label'=>'I am a label.',
-                                // 'collapsable'=>true,
-                                // 'collapsed'=>false,
-                                'title'=>$this->_tr('Client-source-data'),
-                                'text'=>'<pre>' . htmlentities(print_r($aEntries, 1)) . '</pre>'
-                            )),
-                            12
-                        )
+            $sHtml .= $sShowHide. '<div id="'.$sDivMoredetails.'" style="display: none;">'
+                . $oA->getSectionRow(
+                    $oA->getSectionColumn(
+                        $oA->getBox(array(
+                            // 'label'=>'I am a label.',
+                            // 'collapsable'=>true,
+                            // 'collapsed'=>false,
+                            'title'=>$this->_tr('Client-source-data'),
+                            'text'=>'<pre>' . htmlentities(print_r($aEntries, 1)) . '</pre>'
+                        )),
+                        12
                     )
-                    .$oA->getSectionRow($oA->getSectionColumn(
-                        $oA->getBox(array(
-                                'title'=>$this->_tr('Preview-of-messages'),
-                                'text'=>'<pre>' . htmlentities(print_r($this->oNotifcation->getMessageReplacements(), 1)) . '</pre>'
-                            
-                        ))
-                        , 12))
-                    .$oA->getSectionRow($oA->getSectionColumn(
-                        $oA->getBox(array(
-                                'title'=>$this->_tr('Preview-emails'),
-                                'text'=>$sDebugContent
-                            
-                        ))
-                        , 12))
-                    .'</div>';
+                )
+                .$oA->getSectionRow($oA->getSectionColumn(
+                    $oA->getBox(array(
+                            'title'=>$this->_tr('Preview-of-messages'),
+                            'text'=>'<pre>' . htmlentities(print_r($this->oNotifcation->getMessageReplacements(), 1)) . '</pre>'
+
+                    ))
+                    , 12))
+                .$oA->getSectionRow($oA->getSectionColumn(
+                    $oA->getBox(array(
+                            'title'=>$this->_tr('Preview-emails'),
+                            'text'=>$sDebugContent
+
+                    ))
+                    , 12))
+                .'</div>';
             }
         }
         return $sTopHeadline 
@@ -1423,7 +1422,7 @@ class appmonitorserver_gui extends appmonitorserver {
             $sWebapp = $aEntries["result"]["website"];
             $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp.$sAppId;
             $sDivId=$this->_getDivIdForApp($sAppId);    
-            $sAppLabel=str_replace('.', '.&shy;', $sWebapp);
+            $sAppLabel=str_replace('.', '.&shy;', $this->_getAppLabel($sAppId));
             $sAHref='<a href="'.$sDivId.'" onclick="setTab(\''.$sDivId.'\')">';
             
             $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
@@ -1552,7 +1551,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $aTags = array_unique($aTags);
         return $aTags;
     }
-    
+
     /**
      * get name for css class of a tag
      * 

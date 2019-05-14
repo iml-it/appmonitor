@@ -421,6 +421,25 @@ class appmonitorserver {
         $aReturn["summary"] = $aResults;
         return $aReturn;
     }
+    /**
+     * get a label for the web application
+     * @param type $sAppId
+     * @return string
+     */
+    protected function _getAppLabel($sAppId){
+        if(!isset($this->_data[$sAppId])){
+            return '??';
+        }
+        $aEntries = $this->_data[$sAppId];
+        $sWebapp = $aEntries["result"]["website"];
+        $sVHost = parse_url($aEntries["result"]["url"], PHP_URL_HOST);
+        $sHost = isset($aEntries["result"]["host"]) && $aEntries["result"]["host"] 
+                ? $this->_aIco['host'].' '.$aEntries["result"]["host"]
+                : '@'.$sVHost
+            ;
+        return '<span title="'.$sWebapp."\n".$aEntries["result"]["url"].'">'.$sWebapp.' '.$sHost.'</span>';
+    }
+    
 
     /**
      * get all client data; it fetches all given urls
@@ -472,7 +491,7 @@ class appmonitorserver {
                 $aClientData["result"]["error"] = $sError;
                 
                 if(!isset($aClientData["result"]["website"]) || !$aClientData["result"]["website"]){
-                    $aClientData["result"]["website"]=$this->_tr('unknown') . ' (' . parse_url($aResult['url'], PHP_URL_HOST) . ')';
+                    $aClientData["result"]["website"]=$this->_tr('unknown');
                 }
 
                 // $aClientData["result"]["curlinfo"] = $aResult['curlinfo'];

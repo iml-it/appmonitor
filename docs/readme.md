@@ -18,6 +18,11 @@ The appmonitor is a monitoring tool that consists of 2 parts
   - collects all JSON data and presents an overview over all checks and websites
   - sends notifications to server admins (read from server config) plus developers and product owners (coming from clients metadata)
 
+# Installation #
+
+
+Go to page [Server](server.md) to install the server that contains the server and client components.
+
 
 # Workflow #
 

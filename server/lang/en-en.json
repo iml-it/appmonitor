@@ -96,6 +96,7 @@
         "Validator-error": "Validation errors",
         "Validator-error-title": "Found validation errors: %s",
         "Validator-warning": "Validation warnings",
+        "Validator-request-error": "Request error",
         "Validator-warning-title": "Found validation warnings: %s",
         
         "btn-addUrl": "add",
@@ -114,8 +115,8 @@
 
 
         "msgErr-Http-request-failed": "Http Request to the appmonitor check failed: host or service is unreachable.",
-        "msgErr-Http-error": "Http response header is not a 2xx code.",
-        "msgErr-Http-no-jsondata": "Appmonitor client response does not contain JSON data.",
+        "msgErr-Http-error": "The response contains an error code: the Http status code is not a 2xx.",
+        "msgErr-Http-no-jsondata": "The Appmonitor client sent a response but this is no JSON.",
 
         "msgOK-Url-was-added": "URL added: %s",
         "msgErr-Url-not-added-no-appmonitor": "URL not added: %s<br>it does not seems to be an Appmonitor url - no JSON data was found.<br>Http response header: %s",

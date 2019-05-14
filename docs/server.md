@@ -32,23 +32,25 @@ The server uses
 - [Font Awesome] (https://fontawesome.com/)
 
 
-# Features #
-
-- very small installation (200 kB zip file)
-- fast web interface using a single html page
-- notifications can be sent as email and as slack message
-- respect sleep time to be quiet
-
 # Installation #
 
+## Install the server ##
 Below a document root of a website create a directory [webroot]/appmonitor/
 - copy all files of the archive into [webroot]/appmonitor/
 - verify the installation with your browser 
   http://localhost/appmonitor/server/
-  You should see a welcome message.
+  You will see a welcome message.
 - Go to the setup.
 - Add the url http://localhost/appmonitor/client/check-appmonitor-server.php to integrate a first check.
 
+## Other clients ##
+The next step is creating client checks thats urls you can add in the setup.
+See [Client](client.md) for general introduction. For PHP applications see [PHP-Client](client-php.md).
+
+
+## Production use ##
+
+If you are happy with the first tests then read the sections below.
 
 
 # Configuration #

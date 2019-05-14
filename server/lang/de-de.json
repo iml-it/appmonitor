@@ -94,6 +94,7 @@
         "Validator-ok": "Validierung erfolgreich.",
         "Validator-error": "Validierungs-Fehler",
         "Validator-error-title": "Gefundene Validierungs-Fehler: %s",
+        "Validator-request-error": "Request-Fehler",
         "Validator-warning": "Validierungs-Warnungen",
         "Validator-warning-title": "Gefundene Validierungs-Warnungen: %s",
         
@@ -113,8 +114,8 @@
 
 
         "msgErr-Http-request-failed": "Die Http Anfrage zu einem Appmonitor-Check ist fehlgeschlagen: Der Host oder der Webservice sind nicht erreichbar.",
-        "msgErr-Http-error": "Der Http Antwort-Header enth&auml;lt keinen 2xx Statuscode.",
-        "msgErr-Http-no-jsondata": "Die Antwort des Appmonitor Client enth&auml;lt keine JSON Daten.",
+        "msgErr-Http-error": "Die Antwort meldet einen Fehler: der Http Statuscode ist kein 200er Wert.",
+        "msgErr-Http-no-jsondata": "Fehlerhaftes Format: die Antwort des Appmonitor Client ist kein JSON.",
 
         "msgOK-Url-was-added": "URL hinzugef&uml;gt: %s",
         "msgErr-Url-not-added-no-appmonitor": "URL nicht hinzugef&uml;gt: %s<br>Dies scheint keine Appmonitor url zu sein - es wurden keine JSON Daten gefunden.<br>Http Antwort-Header: %s",
