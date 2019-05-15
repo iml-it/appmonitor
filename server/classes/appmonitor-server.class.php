@@ -479,7 +479,7 @@ class appmonitorserver {
             $aAllHttpdata = $this->_multipleHttpGet($aUrls);
             foreach ($aAllHttpdata as $sKey => $aResult) {
                 $aClientData = json_decode($aResult['response_body'], true);
-                $iTtl = $this->_iTtl;
+                // $iTtl = $this->_iTtl;
                 if (!is_array($aClientData)) {
                     $iTtl = $this->_iTtlOnError;
                     $aClientData = array();
@@ -551,6 +551,10 @@ class appmonitorserver {
                 }
                 // write cache
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($aResult['url']));
+
+                // randomize cachetime of appmonitor client response: ttl + 2..30 sec
+                $iTtl = $iTtl + rand(2, min(5+$iTtl/3, 30));
+
                 $oCache->write($aClientData, $iTtl);
 
                 $aClientData["result"]["fromcache"] = false;
