@@ -1,6 +1,13 @@
 
 HISTORY
 
+v0.80 2019-05-15
+    - backend: input fields changed to admin lte style
+    - backend: fix delete button in tag filter
+    - notifications: added new replacement item __ERROR__
+    - notifications: save full response array
+    - backend: uptime chart skips 0 values (less flickering on mouseover)
+
 v0.79 2019-05-14
     - backend: more clear message on client error/ no connect
     - backend: improve labeling of webapps

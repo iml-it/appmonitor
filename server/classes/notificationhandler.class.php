@@ -293,22 +293,23 @@ class notificationhandler {
     /**
      * add a new item in notification log
      * 
-     * @param string  $sChangetype
-     * @param integer $sNewstatus
-     * @param string  $sAppId
-     * @param string  $sMessage
+     * @param integer  $iChangetype  type of change; see CHANGETYPE_ constants
+     * @param integer  $sNewstatus   resultcode; see RESULT_ constants
+     * @param string   $sAppId       application id
+     * @param string   $sMessage     message text
+     * @param array    $aResult      response ($this->_aAppResult)
      * @return type
      */
-    protected function addLogitem($sChangetype, $sNewstatus, $sAppId, $sMessage){
+    protected function addLogitem($iChangetype, $sNewstatus, $sAppId, $sMessage, $aResult){
         // reread because service and webgui could change it
         $aData=$this->loadLogdata();
-        // echo "DEBUG: ".__METHOD__." start\n";
         $this->_aLog[]=array(
             'timestamp'=> time(),
-            'changetype'=> $sChangetype,
+            'changetype'=> $iChangetype,
             'status'=> $sNewstatus,
             'appid'=> $sAppId,
             'message'=> $sMessage,
+            'result'=> $aResult,
         );
         
         $this->cutLogitems();
@@ -351,12 +352,15 @@ class notificationhandler {
      * 
      * @param array   $aFilter  filter with possible keys timestamp|changetype|status|appid|message (see addLogitem())
      * @param integer $iLimit
+     * @param boolean $bRsort   flag to reverse sort logs; default is true (=newset entry first)
      * @return array
      */
-    public function getLogdata($aFilter=array(), $iLimit=false){
+    public function getLogdata($aFilter=array(), $iLimit=false, $bRsort=true){
         $aReturn=array();
         $aData=$this->loadLogdata();
-        rsort($aData);
+        if($bRsort){
+            rsort($aData);
+        }
         
         // filter
         if (count($aFilter)>0){
@@ -465,6 +469,8 @@ class notificationhandler {
             '__WEBSITE__'        => isset($this->_aAppResult['result']['website']) ? $this->_aAppResult['result']['website'] : $sMiss,
 
             '__RESULT__'         => isset($this->_aAppResult['result']['result']) ? $this->_tr('Resulttype-'. $this->_aAppResult['result']['result']) : $sMiss,
+            '__ERROR__'         => isset($this->_aAppResult['result']['error']) && $this->_aAppResult['result']['error'] 
+                                        ? $this->_aAppResult['result']['error'] : '',
             
             '__HEADER__'         => isset($this->_aAppResult['result']['header']) ? $this->_aAppResult['result']['header'] : $sMiss,
             
@@ -531,7 +537,7 @@ class notificationhandler {
             return false;
         }
 
-        // write entry in message log
+        // take template for log message and current result type
         $sLogMessage=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.logmessage');
         
         // set result: 
@@ -540,8 +546,8 @@ class notificationhandler {
         $iResult=($this->_iAppResultChange==CHANGETYPE_DELETE) ? RESULT_UNKNOWN 
                 : (isset($this->_aAppResult['result']['result']) ? $this->_aAppResult['result']['result'] : RESULT_UNKNOWN)
                 ;
-        // TODO: activate
-        $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage);
+
+        $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
         
         $this->_sendEmailNotifications();
         $this->_sendSlackNotifications();

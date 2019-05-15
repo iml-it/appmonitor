@@ -154,13 +154,25 @@ function setAdressbar() {
  */
 function addFilter4Webapps(sTarget) {
     var sValue = aViewFilters[sTarget];
-    var sForm = '<form class="frmFilter">\n\
-        <i class="fa fa-filter"></i>  <input type="text" id="eFilter" class="inputtext" size="20" value="' + sValue + '" \n\
-            onkeypress="setTextfilter(\'' + sTarget + '\', this.value);" \n\
-            onkeyup="setTextfilter(\'' + sTarget + '\', this.value);" \n\
-            onchange="setTextfilter(\'' + sTarget + '\', this.value);">\n\
-        <span class="tagfilterinfo"></span>\n\
-        </span>\n\
+    var sForm = '<form class="form-horizontal frmFilter">\n\
+        <div class="col-xs-3">\n\
+            <div class="input-group">\n\
+                <div class="input-group-addon">\n\
+                    <i class="fa fa-filter"></i>\n\
+                </div>\n\
+                <input type="text" class="form-control" id="eFilter" class="inputtext" value="' + sValue + '" \n\
+                    onkeypress="setTextfilter(\'' + sTarget + '\', this.value);" \n\
+                    onkeyup="setTextfilter(\'' + sTarget + '\', this.value);" \n\
+                    onchange="setTextfilter(\'' + sTarget + '\', this.value);"\n\
+                >\n\
+            </div>\n\
+        </div>\n\
+        \n\
+        <div class="col-xs-9">\n\
+            <span class="tagfilterinfo"></span>\n\
+        </div>\n\
+        <div style="clear: both;">\n\
+    </form>\n\
     ';
     $('#' + sTarget + 'filter').html(sForm);
 }
@@ -185,7 +197,7 @@ function applyViewFilter() {
         });
     }
     // filter by tag
-    $('.tagfilterinfo').html(aViewFilters['tag'] ? '<i class="fa fa-tag"></i> ' + aViewFilters['tag'] + ' <a href="#" class="btn btndel" onclick="setTagClass(\'\'); return false;">x</a>' : '');
+    $('.tagfilterinfo').html(aViewFilters['tag'] ? '<i class="fa fa-tag"></i> ' + aViewFilters['tag'] + ' <a href="#" class="btn btn-danger" onclick="setTagClass(\'\'); return false;">x</a>' : '');
 
     // filter hosts
     filterMonitors('divwebs');

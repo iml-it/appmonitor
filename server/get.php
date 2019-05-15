@@ -13,6 +13,7 @@ $bDebug=true;
 $sMode='html';
 $sItem=isset($_GET['item']) && $_GET['item'] ? $_GET['item'] : false;
 $sAppId=isset($_GET['appid']) && $_GET['appid'] ? $_GET['appid'] : false;
+// TODO: id for notification $sId=isset($_GET['id']) && $_GET['id'] ? $_GET['id'] : false;
 
 $sHtml='';
 
@@ -25,6 +26,7 @@ $oMonitor->loadClientData();
 
 switch ($sItem){
     
+    // ---------- TODO
     case 'apps':
         $sHtml.='<pre>'.print_r($oMonitor->apiGetAppIds(), 1).'</pre>';
         break;
@@ -46,6 +48,13 @@ switch ($sItem){
     case 'viewdebug':
         $sHtml.=$oMonitor->generateViewDebug();
         break;
+    /*
+     * TODO
+    case 'viewnotificationdetails':
+        $sHtml.=$oMonitor->generateViewNotification($sId);
+        break;
+     * 
+     */
     case 'viewnotifications':
         $sHtml.=$oMonitor->generateViewNotifications();
         break;

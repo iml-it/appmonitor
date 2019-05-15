@@ -191,6 +191,7 @@ These texts can contain placeholders.
 | _\_\_APPID___        | id of application                                          |
 | _\_\_CHANGE___       | one of new\|no change\|change\|deleted (1)                 |
 | _\_\_DELTA-TIME___   | delta since last state change i.e. NN min (HH h) (2)       |
+| _\_\_ERROR___        | Error message of a failed response                         |
 | _\_\_HEADER___       | Http response header (maybe for an email message)          |
 | _\_\_HOST___         | hostname (from client meta -> host)                        |
 | _\_\_LAST-RESULT___  | result of last check; see RESULT (2)                       |

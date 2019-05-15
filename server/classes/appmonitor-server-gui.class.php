@@ -19,7 +19,7 @@ require_once 'render-adminlte.class.php';
  * TODO:
  * - GUI uses cached data only
  * --------------------------------------------------------------------------------<br>
- * @version 0.79
+ * @version 0.80
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -31,7 +31,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.79";
+    var $_sVersion = "0.80";
 
     /**
      * html code for icons in the web gui
@@ -688,10 +688,9 @@ class appmonitorserver_gui extends appmonitorserver {
      * @param string  $sTableClass   custom classname for the datatable; for custom datatable settings (see functions.js)
      * @return string
      */
-    protected function _generateNoftificationlog($aLogs=false, $sTableClass='datatable-notifications') {
+    protected function _generateNotificationlog($aLogs=false, $sTableClass='datatable-notifications') {
         if($aLogs===false){
             $aLogs = $this->oNotifcation->getLogdata();
-            rsort($aLogs);
         }
         if(!count($aLogs)){
             return $this->_tr('Notifications-none');
@@ -723,6 +722,7 @@ class appmonitorserver_gui extends appmonitorserver {
             $iDelta=$iLastTimer-$aLogentry['timestamp'];
             $iLastTimer=$aLogentry['timestamp'];
 
+            // TODO maybe use $this->_getAdminLteColorByResult()
             $aTags=isset($this->_data[$aLogentry['appid']]["meta"]["tags"]) ? $this->_data[$aLogentry['appid']]["meta"]["tags"] : false;
             $sTable .= '<tr class="result' . $aLogentry['status'] . ' tags '.$this->_getCssclassForTag($aTags).'">'
                     .'<td class="result' . $aLogentry['status'] . '"><span style="display: none;">'.$aLogentry['status'].'</span>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
@@ -749,7 +749,7 @@ class appmonitorserver_gui extends appmonitorserver {
     protected function _generateSetup() {
         $sReturn = '';
         $oA=new renderadminlte();
-        $sFormOpenTag = '<form action="?" method="POST">';
+        $sFormOpenTag = '<form action="?" class="form-horizontal" method="POST">';
                 
         $sHostlist='';
         foreach ($this->_data as $sAppId => $aData) {
@@ -793,13 +793,20 @@ class appmonitorserver_gui extends appmonitorserver {
                     'title'=>$this->_tr('Setup-add-client'),
                     'text'=> '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
                         . $sFormOpenTag
-                        . '<input type="hidden" name="action" value="addurl">'
-                        . '<input type="text" class="inputtext" name="url" size="100" value="" '
-                            . 'placeholder="http://[domain]/appmonitor/client/" '
-                            . 'pattern="http.*://..*" '
-                            . 'required="required" '
-                        . '>'
-                        . '<button class="btn btn-success">' . $this->_aIco['add'].' '.$this->_tr('btn-addUrl') . '</button>'
+                        . '<div class="input-group">'
+                            . '<div class="input-group-addon">'
+                                . $this->_aIco['url']
+                            . '</div>'
+                            . '<input type="hidden" name="action" value="addurl">'
+                            . '<input type="text" class="form-control" name="url" size="100" value="" '
+                                . 'placeholder="https://[domain]/appmonitor/client/" '
+                                . 'pattern="http.*://..*" '
+                                . 'required="required" '
+                            . '>'
+                            . '<span class="input-group-btn">'
+                                . '<button class="btn btn-success">' . $this->_aIco['add'].' '.$this->_tr('btn-addUrl') . '</button>'
+                            . '</span>'
+                        . '</div>'
                         . '</form><br>'
 
                 )),
@@ -1093,7 +1100,6 @@ class appmonitorserver_gui extends appmonitorserver {
 
         // --- notifications & uptime for this webapp
         $aLogs = $this->oNotifcation->getLogdata(array('appid'=>$sAppId));
-        rsort($aLogs);
 
         $aUptime=$this->_getUptime($aLogs);
         // echo '<pre>'.print_r($aUptime, 1).'</pre>';
@@ -1104,10 +1110,12 @@ class appmonitorserver_gui extends appmonitorserver {
             'color'=>array(),
         );
         foreach ($aUptime['counter'] as $iResult=>$iResultCount){
-            array_unshift($aChartData['label'], $this->_tr('Resulttype-'.$iResult));
-            array_unshift($aChartData['value'], $iResultCount);
-            array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($iResult));
-            // array_unshift($aChartColor, $aColor[rand(0, 3)]);
+            if($iResultCount){
+                array_unshift($aChartData['label'], $this->_tr('Resulttype-'.$iResult));
+                array_unshift($aChartData['value'], $iResultCount);
+                array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($iResult));
+                // array_unshift($aChartColor, $aColor[rand(0, 3)]);
+            }
         }
 
         $aChartUptime=array(
@@ -1137,9 +1145,9 @@ class appmonitorserver_gui extends appmonitorserver {
                             . ' ('.round($aUptime['counter'][RESULT_ERROR]/60).' min)<br>'
                         : ''
                     )
+                    .$this->_renderGraph($aChartUptime)
                 : '-'
             )
-            .$this->_renderGraph($aChartUptime)
             ;
 
         $sHtml .= $oA->getSectionRow(
@@ -1157,7 +1165,7 @@ class appmonitorserver_gui extends appmonitorserver {
                             // 'label'=>'I am a label.',
                             // 'collapsable'=>true,
                             'title'=>$this->_tr('Notifications'),
-                            'text'=> $this->_generateNoftificationlog($aLogs, 'datatable-notifications-webapp')
+                            'text'=> $this->_generateNotificationlog($aLogs, 'datatable-notifications-webapp')
                         )),
                         9
                     )
@@ -1337,7 +1345,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $oA=new renderadminlte();
         $sHtml=''
                 // . '<h2>' . $this->_aIco["notifications"] . ' ' . $this->_tr('Notifications-header') . '</h2>'
-                . $this->_generateNoftificationlog()
+                . $this->_generateNotificationlog()
                 ;
         // return $sHtml;
         return $oA->getSectionHead($this->_aIco["notifications"] . ' ' . $this->_tr('Notifications-header'))
