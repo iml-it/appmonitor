@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.81 2019-05-15
+    - backend: added config "servicecache" to use cache in web interface
+    - backend: set unknown status if the last request is outdated
+
 v0.80 2019-05-15
     - backend: input fields changed to admin lte style
     - backend: fix delete button in tag filter

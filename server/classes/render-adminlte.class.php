@@ -26,6 +26,8 @@ class renderadminlte {
             'blue-active', 
             'fuchsia', 
             'fuchsia-active', 
+            'gray', 
+            'gray-active', 
             'green', 
             'green-active', 
             'light-blue', 
@@ -51,6 +53,8 @@ class renderadminlte {
         ),
         'color'=>array(
             'aqua', 
+            'black', 
+            'gray', 
             'green', 
             'red', 
             'yellow'

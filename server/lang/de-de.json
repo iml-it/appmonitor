@@ -116,6 +116,7 @@
         "msgErr-Http-request-failed": "Die Http Anfrage zu einem Appmonitor-Check ist fehlgeschlagen: Der Host oder der Webservice sind nicht erreichbar.",
         "msgErr-Http-error": "Die Antwort meldet einen Fehler: der Http Statuscode ist kein 200er Wert.",
         "msgErr-Http-no-jsondata": "Fehlerhaftes Format: die Antwort des Appmonitor Client ist kein JSON.",
+        "msgErr-Http-outdated": "Die Informationen zum Zustand der Applikation sind veraltet.",
 
         "msgOK-Url-was-added": "URL hinzugef&uml;gt: %s",
         "msgErr-Url-not-added-no-appmonitor": "URL nicht hinzugef&uml;gt: %s<br>Dies scheint keine Appmonitor url zu sein - es wurden keine JSON Daten gefunden.<br>Http Antwort-Header: %s",

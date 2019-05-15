@@ -446,17 +446,32 @@ class appmonitorserver {
      * @return boolean
      */
     protected function _getClientData() {
-        $this->_data = array();
+    $ForceCache=isset($_SERVER['REQUEST_METHOD']) && isset($this->_aCfg['servicecache']) && $this->_aCfg['servicecache'];
+    $this->_data = array();
         $aUrls = array();
         foreach ($this->_urls as $sKey => $sUrl) {
             $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
-            if ($oCache->isExpired()) {
+            if ($oCache->isExpired() && !$ForceCache) {
                 // Cache does not exist or is expired
                 $aUrls[$sKey] = $sUrl;
             } else {
                 // age is bel['result']['error']ow ttl ... read from Cache 
                 $this->_data[$sKey] = $oCache->read();
                 $this->_data[$sKey]["result"]["fromcache"] = true;
+                
+                $iAge=(time() - $this->_data[$sKey]["result"]["ts"]);
+                if($iAge>2*$this->_data[$sKey]["result"]["ttl"]){
+                    $this->_data[$sKey]["result"]["error"] = $this->_tr('msgErr-Http-outdated');
+                    $this->_data[$sKey]["result"]["result"] = RESULT_UNKNOWN;
+                    if(!isset($this->_data[$sKey]["result"]["outdated"])){
+                        $this->_data[$sKey]["result"]["outdated"] = true;
+                        
+                        // write to cache that notification class can read from it
+                        $oCache->write($this->_data[$sKey], 0);
+                        $this->oNotifcation->setApp($sKey);
+                        $this->oNotifcation->notify();
+                    }
+                }
             }
         }
         // fetch all non cached items

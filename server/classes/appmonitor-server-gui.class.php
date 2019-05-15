@@ -16,10 +16,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * TODO:
- * - GUI uses cached data only
- * --------------------------------------------------------------------------------<br>
- * @version 0.80
+ * @version 0.81
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -31,7 +28,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.80";
+    var $_sVersion = "0.81";
 
     /**
      * html code for icons in the web gui
@@ -64,6 +61,7 @@ class appmonitorserver_gui extends appmonitorserver {
         'ok' => '<i class="fas fa-check"></i>',
         'info' => '<i class="fas fa-info"></i>',
         'warning' => '<i class="fas fa-exclamation-triangle"></i>',
+        'unknown' => '<i class="fas fa-exclamation-triangle"></i>',
         'error' => '<i class="fas fa-bolt"></i>',
         'add' => '<i class="fas fa-plus"></i>',
         'del' => '<i class="fas fa-trash"></i>',
@@ -146,7 +144,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $aAdminLteColorMapping=array(
             RESULT_ERROR=>'red',
             RESULT_WARNING=>'yellow',
-            RESULT_UNKNOWN=>'',
+            RESULT_UNKNOWN=>'gray',
             RESULT_OK=>'green',
         );
         return isset($aAdminLteColorMapping[$iResult]) 
@@ -158,7 +156,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $aMapping=array(
             RESULT_ERROR=>'error',
             RESULT_WARNING=>'warning',
-            RESULT_UNKNOWN=>'',
+            RESULT_UNKNOWN=>'unknown',
             RESULT_OK=>'ok',
         );
         return isset($aMapping[$iResult])
@@ -328,9 +326,10 @@ class appmonitorserver_gui extends appmonitorserver {
                     ;
                 break;
                 case 'age':
+                    $bOutdated=isset($aHostdata["outdated"]) && $aHostdata["outdated"];
                     $sReturn.= $bVisibility 
                         ? $this->_getTile(array(
-                            // 'result' => RESULT_UNKNOWN,
+                            'result' => $bOutdated ? RESULT_ERROR : RESULT_OK,
                             'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
                             'icon' => $this->_aIco['age'],
                             'label' => $this->_tr('age-of-result'),

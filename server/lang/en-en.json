@@ -117,6 +117,7 @@
         "msgErr-Http-request-failed": "Http Request to the appmonitor check failed: host or service is unreachable.",
         "msgErr-Http-error": "The response contains an error code: the Http status code is not a 2xx.",
         "msgErr-Http-no-jsondata": "The Appmonitor client sent a response but this is no JSON.",
+        "msgErr-Http-outdated": "The information about the application is out of date.",
 
         "msgOK-Url-was-added": "URL added: %s",
         "msgErr-Url-not-added-no-appmonitor": "URL not added: %s<br>it does not seems to be an Appmonitor url - no JSON data was found.<br>Http response header: %s",

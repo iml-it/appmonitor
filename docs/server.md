@@ -140,6 +140,7 @@ The values are:
 | _notifications_ | \{array\} notification setup                                          |
 | _pagereload_    | \{integer\} auto refresh of server webgui in sec (0=off; default: 60) |
 | _serverurl_     | \{string\} url of installation; it is used for notification only      |
+| _servicecache_  | \{bool\} flag for caching; if using service then web gui uses cached data only |
 | _skin_          | \{string\} name of adminLte skin (one of skin-blue\|skin-black\|skin-purple(=default)\|skin-yellow\|skin-red\|skin-green ... and *-light) |
 | _theme_         | \{string\} name of css to load (aka "skin") ... do not use anymore    |
 | _view_          | \{array\} show/ hide elements on ouput pages                          |
