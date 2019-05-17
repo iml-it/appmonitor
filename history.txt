@@ -1,6 +1,19 @@
 
 HISTORY
 
+v0.82 2019-05-17
+    - backend: update used components
+          jQuery 3.4.1)
+          chartJs (2.8.0)
+          AdminLte (2.4.10)
+          twitter-bootstrap (3.4.1)
+    - backend: added x-editable
+    - backend: hide column "duration" for notification of all apps
+    - backend-config: added curl->timeout in config to allow longer client checks
+    - backend: badges are shown in non-OK tiles only
+    - backend: larger counter in the tiles
+    - client: appminitor selfcheck shows count of webapps in a tile
+
 v0.81 2019-05-15
     - backend: added config "servicecache" to use cache in web interface
     - backend: set unknown status if the last request is outdated

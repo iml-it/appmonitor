@@ -20,12 +20,13 @@
         "Notifications": "Notifications",
         "Notifications-header": "Log of last changes",
         "Notifications-none": "No messages available.",
-        "Notify-address": "Notify addresses",
+        "Notify-address": "Addresses to notify",
 
         "Setup": "Setup",
-        "Setup-client-list": "List of existing Clients",
         "Setup-add-client": "Add client url",
         "Setup-add-client-pretext": "Enter an Appmonitor client url to add a new monitor:",
+        "Setup-client-list": "List of existing Clients",
+        "Setup-configuration": "Configuration",
 
         "About": "About...",
         "About-title": "Name of this project <strong>%s</strong>.",

@@ -13,10 +13,13 @@
  * 2019-04-29  aded check for ssl cert; removed a check
  */
 
+require_once(__DIR__.'/../server/classes/appmonitor-server.class.php');
 require_once('classes/appmonitor-client.class.php');
 $oMonitor = new appmonitor();
 $oMonitor->setWebsite('Appmonitor server');
 
+$oServer=new appmonitorserver();
+$iCount=count($oServer->apiGetAppIds());
 
 // how often the server should ask for updates
 $oMonitor->setTTL(300);
@@ -35,46 +38,61 @@ $oMonitor->addTag('monitoring');
 // ----------------------------------------------------------------------
 
 $oMonitor->addCheck(
-        array(
-            "name" => "check tmp subdir",
-            "description" => "Check cache storage",
-            "check" => array(
-                "function" => "File",
-                "params" => array(
-                    "filename" => $sApproot . "/server/tmp",
-                    "dir" => true,
-                    "writable" => true,
-                ),
+    array(
+        "name" => "check tmp subdir",
+        "description" => "Check cache storage",
+        "check" => array(
+            "function" => "File",
+            "params" => array(
+                "filename" => $sApproot . "/server/tmp",
+                "dir" => true,
+                "writable" => true,
             ),
-        )
+        ),
+    )
 );
 $oMonitor->addCheck(
-        array(
-            "name" => "check config subdir",
-            "description" => "Check config target directory",
-            "check" => array(
-                "function" => "File",
-                "params" => array(
-                    "filename" => $sApproot . "/server/config",
-                    "dir" => true,
-                    "writable" => true,
-                ),
+    array(
+        "name" => "check config subdir",
+        "description" => "Check config target directory",
+        "check" => array(
+            "function" => "File",
+            "params" => array(
+                "filename" => $sApproot . "/server/config",
+                "dir" => true,
+                "writable" => true,
             ),
-        )
+        ),
+    )
 );
 $oMonitor->addCheck(
-        array(
-            "name" => "check config file",
-            "description" => "The config file must be writable",
-            "check" => array(
-                "function" => "File",
-                "params" => array(
-                    "filename" => $sApproot . "/server/config/appmonitor-server-config.json",
-                    "file" => true,
-                    "writable" => true,
-                ),
+    array(
+        "name" => "check config file",
+        "description" => "The config file must be writable",
+        "check" => array(
+            "function" => "File",
+            "params" => array(
+                "filename" => $sApproot . "/server/config/appmonitor-server-config.json",
+                "file" => true,
+                "writable" => true,
             ),
-        )
+        ),
+    )
+);
+$oMonitor->addCheck(
+    array(
+        "name" => "appcounter",
+        "description" => "Monitored apps",
+        "check" => array(
+            "function" => "Simple",
+            "params" => array(
+                "result" => RESULT_OK,
+                "value" => "Found monitored web apps: $iCount",
+                "count" => $iCount,
+                "visual" => "simple",
+            ),
+        ),
+    )
 );
 if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
     $oMonitor->addCheck(

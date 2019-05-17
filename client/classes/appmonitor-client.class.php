@@ -1,7 +1,21 @@
 <?php
 
 /**
- * APPMONITOR CLIENT<br>
+ * ____________________________________________________________________________
+ * 
+ *  _____ _____ __                   _____         _ _           
+ * |     |     |  |      ___ ___ ___|     |___ ___|_| |_ ___ ___ 
+ * |-   -| | | |  |__   | .'| . | . | | | | . |   | |  _| . |  _|
+ * |_____|_|_|_|_____|  |__,|  _|  _|_|_|_|___|_|_|_|_| |___|_|  
+ *                          |_| |_|                              
+ *                           _ _         _                                            
+ *                       ___| |_|___ ___| |_                                          
+ *                      |  _| | | -_|   |  _|                                         
+ *                      |___|_|_|___|_|_|_|   
+ *                                                               
+ * ____________________________________________________________________________
+ * 
+ * APPMONITOR :: CLASS FOR CLIENT CHECKS<br>
  * <br>
  * THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE <br>
  * LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR <br>

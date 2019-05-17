@@ -1,12 +1,28 @@
 <?php
 
-define("RESULT_OK", 0);
-define("RESULT_UNKNOWN", 1);
-define("RESULT_WARNING", 2);
-define("RESULT_ERROR", 3);
+if(!defined('RESULT_OK')){
+    define("RESULT_OK", 0);
+    define("RESULT_UNKNOWN", 1);
+    define("RESULT_WARNING", 2);
+    define("RESULT_ERROR", 3);
+}
 
 /**
- * APPMONITOR CLIENT CHECKS<br>
+ * ____________________________________________________________________________
+ * 
+ *  _____ _____ __                   _____         _ _           
+ * |     |     |  |      ___ ___ ___|     |___ ___|_| |_ ___ ___ 
+ * |-   -| | | |  |__   | .'| . | . | | | | . |   | |  _| . |  _|
+ * |_____|_|_|_|_____|  |__,|  _|  _|_|_|_|___|_|_|_|_| |___|_|  
+ *                          |_| |_|                              
+ *                           _ _         _                                            
+ *                       ___| |_|___ ___| |_                                          
+ *                      |  _| | | -_|   |  _|                                         
+ *                      |___|_|_|___|_|_|_|   
+ *                                                               
+ * ____________________________________________________________________________
+ * 
+ * APPMONITOR :: CLASS FOR CLIENT TEST FUNCTIONS<br>
  * <br>
  * THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE <br>
  * LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR <br>

@@ -6,6 +6,20 @@ require_once 'counteritems.class.php';
 require_once 'notificationhandler.class.php';
 
 /**
+ * ____________________________________________________________________________
+ * 
+ *  _____ _____ __                   _____         _ _           
+ * |     |     |  |      ___ ___ ___|     |___ ___|_| |_ ___ ___ 
+ * |-   -| | | |  |__   | .'| . | . | | | | . |   | |  _| . |  _|
+ * |_____|_|_|_|_____|  |__,|  _|  _|_|_|_|___|_|_|_|_| |___|_|  
+ *                          |_| |_|                              
+ *                                                                                                                             
+ *                       ___ ___ ___ _ _ ___ ___                                      
+ *                      |_ -| -_|  _| | | -_|  _|                                     
+ *                      |___|___|_|  \_/|___|_|                                       
+ *                                                               
+ * ____________________________________________________________________________
+ * 
  * APPMONITOR SERVER<br>
  * <br>
  * THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE <br>
@@ -23,17 +37,7 @@ require_once 'notificationhandler.class.php';
  * - GUI uses cached data only
  * - NAGIOS output
  * --------------------------------------------------------------------------------<br>
- * <br>
- * --- HISTORY:<br>
- * 2018-06-22  0.15  axel.hahn@iml.unibe.ch   split server class<br>
- * 2018-06-21  0.14  axel.hahn@iml.unibe.ch   use multicurl with parrallel requests; fetch http header; added tiles<br>
- * 2017-06-20  0.12  axel.hahn@iml.unibe.ch   use POST instead of GET<br>
- * 2015-01-20  0.8   axel.hahn@iml.unibe.ch   fixed icons, nagios check<br>
- * 2014-11-27  0.7   axel.hahn@iml.unibe.ch   added icons, lang texts, ...<br>
- * 2014-11-21  0.6   axel.hahn@iml.unibe.ch   added setup functions<br>
- * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
- * --------------------------------------------------------------------------------<br>
- * @version 0.15
+ * @version 0.82
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -83,7 +87,7 @@ class appmonitorserver {
     protected $_aMessages = array();
     protected $oLang = false;
     protected $_bIsDemo = false; // set true to disallow changing config in webgui
-    protected static $curl_opts = array(
+    protected $curl_opts = array(
         CURLOPT_HEADER => true,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 15,
@@ -158,6 +162,10 @@ class appmonitorserver {
                 $this->addUrl($sUrl);
             }
         }
+        if (isset($this->_aCfg['curl']['timeout'])) {
+            $this->curl_opts[CURLOPT_TIMEOUT]=(int)$this->_aCfg['curl']['timeout'];
+        }
+
         $this->oNotifcation = new notificationhandler(array(
             'lang' => $this->_aCfg['lang'],
             'serverurl' => $this->_aCfg['serverurl'],
@@ -343,13 +351,7 @@ class appmonitorserver {
         $curl_arr = array();
         foreach ($aUrls as $sKey => $sUrl) {
             $curl_arr[$sKey] = curl_init($sUrl);
-            curl_setopt_array($curl_arr[$sKey], self::$curl_opts);
-            /*
-              if (array_key_exists('userpwd', $aData)) {
-              curl_setopt($curl_arr[$i], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-              curl_setopt($curl_arr[$i], CURLOPT_USERPWD, $aData['userpwd']);
-              }
-             */
+            curl_setopt_array($curl_arr[$sKey], $this->curl_opts);
             curl_multi_add_handle($master, $curl_arr[$sKey]);
         }
 
@@ -372,7 +374,6 @@ class appmonitorserver {
                     ? $aResponse
                     : array($aResponse[0], '')
                 ;
-            // list($sHeader, $sBody) = explode("\r\n\r\n", curl_multi_getcontent($curl_arr[$sKey]), 2);
 
             $aResult[$sKey] = array(
                 'url' => $sUrl,
@@ -443,10 +444,13 @@ class appmonitorserver {
 
     /**
      * get all client data; it fetches all given urls
+     * @param boolean  $ForceCache  flag: use cache; default: false (=automatic selection by source and config "servicecache")
      * @return boolean
      */
-    protected function _getClientData() {
-    $ForceCache=isset($_SERVER['REQUEST_METHOD']) && isset($this->_aCfg['servicecache']) && $this->_aCfg['servicecache'];
+    protected function _getClientData($ForceCache=false) {
+    if(!$ForceCache){
+        $ForceCache=isset($_SERVER['REQUEST_METHOD']) && isset($this->_aCfg['servicecache']) && $this->_aCfg['servicecache'];
+    }
     $this->_data = array();
         $aUrls = array();
         foreach ($this->_urls as $sKey => $sUrl) {
@@ -708,7 +712,7 @@ class appmonitorserver {
      * @return array
      */
     public function apiGetAppIds() {
-        $this->_getClientData();
+        $this->_getClientData(true);
         return array_keys($this->_data);
     }
     

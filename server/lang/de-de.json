@@ -23,9 +23,10 @@
         "Notify-address": "Empf&auml;nger der Meldungen",
 
         "Setup": "Einstellungen",
-        "Setup-client-list": "Liste der vorhandenen Web-Applikationen",
         "Setup-add-client": "Url einer Applikation hinzuf&uuml;gen",
         "Setup-add-client-pretext": "Geben Sie eine Url eines Appmonitor-Clients ein, um diese hinzuzuf&uuml;gen:",
+        "Setup-client-list": "Liste der vorhandenen Web-Applikationen",
+        "Setup-configuration": "Konfiguration",
 
         "About": "&Uuml;ber...",
         "About-title": "Projektname <strong>%s</strong>.",

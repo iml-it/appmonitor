@@ -78,6 +78,10 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
     "layout": "sidebar-mini",
     "lang": "en-en",
     "debug": false,
+    "servicecache": false,
+    "curl":{
+        "timeout": 15
+    },
     "pagereload": 60,
     "serverurl": "http:\/\/monitor.example.com\/appmonitor\/server\/",
     "notifications": {
@@ -134,6 +138,7 @@ The values are:
 
 | Key             | Description                                                           |
 |---              |---                                                                    |
+| _curl_          | \{array\} curl settings for fetching client results                   |
 | _debug_         | \{bool\} show debug tab with internal values                          |
 | _lang_          | \{string\} language (en-en\|de-de)                                    |
 | _layout_        | \{string\} name of adminLte layout (one of fixed\|layout-boxed\|layout-top-nav\|sidebar-mini(=default)\|sidebar-collapse) |
@@ -148,6 +153,9 @@ The values are:
 
 Remarks:
 
+- "curl": curl settings \
+  Here can be the subkeys 
+  - "timeout": integer value in seconds; default is 15. If you use a service then you can tweak: set servicecache to true and a higher timeout in curl -> timeout
 - _urls_ is a flat list of urls
 - "notifications": notification targets (optional) \
   Here can be the subkeys 
@@ -183,7 +191,7 @@ These are the message keys:
 - changetype-[N].email.message
 - changetype-[N].email.subject
 
-[N] is an integer value between 0..3 (for change type)
+[N] is an integer value between 0..3 (for result type)
 
 These texts can contain placeholders.
 

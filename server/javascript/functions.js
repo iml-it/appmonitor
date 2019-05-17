@@ -430,7 +430,7 @@ function postLoad(bIsFirstload) {
 
     $('.datatable').dataTable({});
     $('.datatable-checks').dataTable({"order": [[0, "desc"]]});
-    $('.datatable-hosts').dataTable({"order": [[0, "desc"]]});
+    $('.datatable-hosts').dataTable({"order": [[0, "desc"]], "aLengthMenu":[[50,-1],[50,"---"]]});
     $('.datatable-notifications-webapp').dataTable({'order': [[1, 'desc']]});
     $('.datatable-notifications').dataTable({'order': [[1, 'desc']], "aLengthMenu":[[25,100,-1],[25,100,"---"]]});
 

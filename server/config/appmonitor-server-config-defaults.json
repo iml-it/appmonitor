@@ -4,6 +4,10 @@
     "debug": false,
     "serverurl": "https:\/\/monitorserver\/appmonitor\/server\/",
     "pagereload": 60,
+    "servicecache": false,
+    "curl":{
+        "timeout": 15
+    },
     "notifications":{
         "from": {
             "email":"sysadmin@example.com",
@@ -24,9 +28,9 @@
             "httpcode": true,
             "age": true,
             "checks": true,
-            "times": false,
-            "receiver": false,
-            "notification": false
+            "times": true,
+            "receiver": true,
+            "notification": true
         }
     },
     "urls": {

@@ -8,14 +8,28 @@ define("CHANGETYPE_NEW", 1);
 define("CHANGETYPE_CHANGE", 2);
 define("CHANGETYPE_DELETE", 3);
 
-
-define("RESULT_OK", 0);
-define("RESULT_UNKNOWN", 1);
-define("RESULT_WARNING", 2);
-define("RESULT_ERROR", 3);
-
+if(!defined('RESULT_OK')){
+    define("RESULT_OK", 0);
+    define("RESULT_UNKNOWN", 1);
+    define("RESULT_WARNING", 2);
+    define("RESULT_ERROR", 3);
+}
 
 /**
+ * ____________________________________________________________________________
+ * 
+ *  _____ _____ __                   _____         _ _           
+ * |     |     |  |      ___ ___ ___|     |___ ___|_| |_ ___ ___ 
+ * |-   -| | | |  |__   | .'| . | . | | | | . |   | |  _| . |  _|
+ * |_____|_|_|_|_____|  |__,|  _|  _|_|_|_|___|_|_|_|_| |___|_|  
+ *                          |_| |_|                              
+ *                                                                                                                             
+ *                       ___ ___ ___ _ _ ___ ___                                      
+ *                      |_ -| -_|  _| | | -_|  _|                                     
+ *                      |___|___|_|  \_/|___|_|                                       
+ *                                                               
+ * ____________________________________________________________________________
+ * 
  * notificationhandler
  *
  * @author hahn

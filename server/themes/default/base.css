@@ -10,13 +10,6 @@ table.dataTable.no-footer{
 table th.sorting_asc, table th.sorting_desc{background: rgba(0,0,0,0.1);}
 table.dataTable tbody th, table.dataTable tbody td{padding: 2px 6px;}
 
-.inputtext{
-    border: 2px solid rgba(0,0,0,0.3);
-    border-radius: 0.5em;
-    padding: 0.5em; margin-right: 1em;
-}
-
-
 .divmain{margin: 0 2% 5em;}
 .divsourceinfo{background:#ddd; padding: 1em; }
 #divmodal{
@@ -101,8 +94,9 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 li.active a{background:rgba(127,127,127,0.2) !important;}
 .info-box a{color:#fff;}
 .info-box-text {
-   text-transform: none; font-size:120%;
+   text-transform: none; font-size:100%;
 }
+.info-box-number{font-size:170%;}
 .logo-lg span{font-size: 70%; opacity: 0.7;}
 .tagfilter{color:#fff; opacity: 0.7;}
 .tagfilter>div{margin: 0.5em 1em 0 0;}
