@@ -35,9 +35,41 @@ To use the client in any of your installations you need the files from the "clie
    http://localhost/appmonitor/client/check-appmonitor-server.php
    You should see some JSON output
 
+To start with a first check of another web application I suggest 
+1) start with a single "simple" check and response just an OK. Then add the client url in the appminitor server backend. The most primitive check in the monitoring is better than no monitoring. 
+2) Step by step add more checks to verify that all needed things and services for the application work. 
+3) Add tags and notifications.
+4) Finetuning: check some edge cases and security checks.
+
+**Suggestions**
+
+If you don't know how to continue after the first simple check and  and what else to check ... 
+- check if a pre defined check exists in https://github.com/iml-it/appmonitor-clients/tree/master/client
+- locate the config
+  - try to load the config - check their values.
+  - if there is a class with methods to access config data use the application way
+
+To write your own checks ... these are some ideas you can pick from:
+- file check: 
+  - is a (config) file readable AND writable
+  - is a upload directory writeable?
+  - if the maintenance page is triggered by a file: does the maintenance file NOT exist
+  - verify security: is a sensitive (config) file or a temp a temp directory writeable but not accessible by http? (requires 2 checks: file and http)
+- database checks (PDO)
+  - check database connections (remark: read your config for credentials) ... to master and slaves
+- http checks
+  - check if a remote page (or web api) answers ... and optionally contains given text/ regex
+  - check if page sends the correct redirect location
+  - check if a request contains the wanted non-OK-status code, i.e. redirect with 307 or a config is NOT accessible and sends a 403 response
+- tcp checks
+  - do very basic network checks if you don't make a authenticated connect, i.e. to LDAP, SSH, ...
+- certificate
+  - use the snippet for the certificate check: this check is active if https is used only.
+
+
+# Docs with code snippets #
    
-   
-### Initialisation ###
+## Initialisation ##
 
 Have a look to the example in ./client/index.sample.php
 
@@ -54,7 +86,7 @@ This will set these default of client metadata with
 - ttl of 300 sec (= 5 min)
 
 
-### Security ###
+## Security ##
 
 You should protect internal data about your application.
 The php client offers 2 possibilities:
@@ -82,7 +114,7 @@ You can define a token that the server must send in the GET request. Without or 
 http://localhost/appmonitor/client/mycheck.php?token=12345678
 
 	
-### Notifications ###
+## Notifications ##
 
 You can add add notification targets. At the beginning emails and Slack will be supported. 
 Here are 2 methods to add the targets:
@@ -96,7 +128,7 @@ $oMonitor->addSlackWebhook(array("dev-webhook"=> "https://hooks.slack.com/servic
 The notification is done on the appmonitor server.
 
 
-### Add checks ###
+## Add checks ##
 
 
 You can add several checks with the class that
@@ -114,7 +146,7 @@ $oMonitor->addCheck(
     "name" => "[short name of the check]",
     "description" => "[an a bit longer description]",
     "check" => [Array for the check],
-	"worstresult" => RESULT_WARNING
+    "worstresult" => RESULT_WARNING
   )
 );
 ```
@@ -124,13 +156,47 @@ $oMonitor->addCheck(
 |name        |(string)  | "id" if the check <span class="required">(*)</span>|
 |description |(string)  | a short description <span class="required">(*)</span>|
 |check       |(array)   | check to perform <span class="required">(*)</span>|
-|worstresult |(integer) | optional: limit maximum error level if the check fails;  |
+|worstresult |(integer) | optional: limit maximum error level if the check fails<br>if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING.|
 
 
 The check contains 2 keys:
 
 	"function" => "[Name of a defined check]",
 	"params" => [key->value array; count and keys depend on the function]
+
+See the next chapter for the available checks.
+
+
+## Set total result ##
+
+Set the value meta->result for the total status for your webapp.
+There is an automatic function that sets the total result to the worst status of any check: If one check ist on warning, 1 on error - then the total result will be an error. For this simple case you can use 
+
+```php
+$oMonitor->setResult();
+```
+
+
+If you made several checks then not each failure maybe critical to have a runnable application. Example: you write data to an external host once per week, but this host not reachable and the check status is error.
+For that constellation you need to calculate the result by yourselfs and set it by
+
+```php
+$oMonitor->setResult([your value; 0..3]);
+```
+
+	
+## Render output ##
+
+This method echoes all information as JSON
+
+```php
+$oMonitor->render();
+```
+
+
+# Check functions in detail #
+
+## Introduction ##
 
 The checks are defined in appmonitor-checks.class.php as private functions.
 To see all defined checks:
@@ -149,43 +215,7 @@ print_r($oMonitor->listChecks());
 - checkSimple
 - checkSqliteConnect
 
-
-### Set total result ###
-
-Set the value meta->result for the total status for your webapp.
-There is an automatic function that sets the total result to the worst status of any check: If one check ist on warning, 1 on error - then the total result will be an error. For this simple case you can use 
-
-```php
-$oMonitor->setResult();
-```
-
-
-If you made several checks then not each failure maybe critical to have a runnable application. Example: you write data to an external host once per week, but this host not reachable and the check status is error.
-For that constellation you need to calculate the result by yourselfs and set it by
-
-```php
-$oMonitor->render([your value; 0..3]);
-```
-
-	
-### Render output ###
-
-This method echoes all information as JSON
-
-```php
-$oMonitor->render();
-```
-
-If you wish to read it then you can use true as param. This feature requires PHP 5.4 or higher.
-
-```php
-$oMonitor->render(true);
-```
-
-## Check functions ##
-
-### Simple ###
-
+## Simple ##
 
 The most simple variant is direct call with the resultcode and output text. 
 
@@ -211,16 +241,16 @@ Parameters:
 
 | key        | type     | description |
 |---         |---       |---
-|result      |(integer) | result code <span class="required">(*)</span><br>After loading the client class you can use constants to keep the code more readable<br>RESULT_OK (0) = OK <br>RESULT_UKNOWN (1) = unknown<br>RESULT_WARNING (2) = Warning<br>RESULT_ERROR (3) = Error |
+|result      |(integer) | result code <span class="required">(*)</span><br>After loading the client class you can use constants to keep the code more readable<br>RESULT_OK = OK (0)<br>RESULT_UKNOWN = unknown (1)<br>RESULT_WARNING = Warning (2) <br>RESULT_ERROR = Error (3) |
 |value       |(string)  | ouput text to describe the result <span class="required">(*)</span> |
 |count       |(float)   | ptional; if a count exists in a check then a tile will be rendered |
 |visual      |(string)  | optional; used if a "count" was given. see counter description [Client](client.md)|
 
-You can use the simple check to verify anything that has no pre defined function
-yet. Set a value for the text that should be visible and the result code.
+You can use the simple check to verify just anything that has no pre defined function
+yet. Set a value for the text that should be visible and the result code (you should use the constants from table above to keep it more readable).
 
 
-### Cert ###
+## Cert ##
 
 Check if a SSL certificate is still valid ... and does not expire soon.
 
@@ -285,7 +315,7 @@ $oMonitor->addCheck(
 ```
 
 
-### Diskfree ###
+## Diskfree ##
 
 Check if a given filesystem / directory that it has enough space.
 
@@ -340,7 +370,7 @@ Example for Diskfree size params:
 ```
 	
 
-### File ###
+## File ##
 
 Check if a file for file, link or directory. Use the parameter "filename" to set the full filename.
 
@@ -401,7 +431,7 @@ Parameters:
 |writable  |(boolean) |flag is writable
 
 
-### HttpContent ###
+## HttpContent ##
 
 This check verifies if a given url can be requested. Optionally you can test if it follows wanted rules:
 * specific http status code
@@ -491,7 +521,7 @@ The checks for text strings are case sensitive. If you need a case insensitive t
 
 
 
-### MysqlConnect ###
+## MysqlConnect ##
 
 verify a database connection with mysqli real connect function.
 
@@ -534,7 +564,7 @@ Remark:
 The idea is not to enter credentials in the parameters. You should parse the config of your application and insert its variables.
 
 
-### PdoConnect ###
+## PdoConnect ##
 
 verify a database connection with PDO connect.
 
@@ -573,7 +603,7 @@ The idea is not to enter credentials in the parameters. You should parse the con
 
 
 
-### PortTcp ###
+## PortTcp ##
 
 Check if the local server is listening to a given port number.
 
@@ -631,7 +661,7 @@ foreach($aPorts as $iPort=>$aDescr){
 ```
 
 
-### SqliteConnect ###
+## SqliteConnect ##
 
 Make a database connection to a sqlite database.
 The function fails if the filename does not exist or the PDO cannot open it
@@ -648,7 +678,7 @@ Parameters:
 |db        |(string)  |full path of the sqlite database file <span class="required">(*)</span>
 
 	
-## Additional Metadata ##
+# Additional Metadata #
 
 In the meta section will be set the values with the following methods.
 
@@ -657,7 +687,7 @@ The appmonitor client has
 - set* function to set a single attribute - by repeating the method the value will be overwritten
 
 
-### host ###
+## host ##
 
 Set the physical hostname where the application runs.
 If no host is given then php_uname("n") will be used to set one.
@@ -671,7 +701,7 @@ $oMonitor->setHost("web-01.example.com");
 ```
 
 
-### website ###
+## website ##
 
 Set a name for this website or application and its environment (dev, test, prod).
 If you have several application in subdirectories, i.e. /blog,  /shop...
@@ -689,22 +719,27 @@ $oMonitor->setHost("dev.example.com/shop");
 $oMonitor->setHost("Wordpress blog");
 ```
 
+**Suggestion**
+- Verify the displayed name in the starting page of the server web gui: if names too similiar then set something more unique.
 
-### TTL ###
+## TTL ##
 
 Set a ttl value in seconds to define how long a server should not ask again for a new status of this instance.
-
-You can start with 60 (=1 min) or 300 (5 min).
 
 ```php
 $oMonitor->setTTL(60);
 ```
+
+**Suggestions**
+- You can start with 60 (=1 min) or 300 (5 min).
+- If you test new checks then set it temporarely to something small, i.e. 5 to get a fresh view with every browser refresh.
 	
-### Notification ###
+	
+## Notification ##
 
 You have these notification possibilities to get informed if a service is down ... or available again.
 
-**Email**
+### Email ###
 
 Add an E-Mail address.
 
@@ -715,7 +750,7 @@ $oMonitor->addEmail("[your-email-address]");
 
 To add several email addresses you need this command with each email address you want to add.
 
-**Slack**
+### Slack ###
 
 You need to create a webhook in slack first. Each webhook has an url like https://hooks.slack.com/services/AAAAA/BBBBB/CCCCCC and will send a message to (exactly) one specific channel.
 With the method addSlackWebhook you can add a slack channel where to post the notification. Because the url is not readable you can set a label for better reading (I suggest to set the channel name here).
@@ -727,18 +762,25 @@ $oMonitor->addSlackWebhook("[Label]", "https://hooks.slack.com/services/AAAAA/BB
 
 If you would like to notify several Slack channels you need to create an additional Slack Webhook and add it with addSlackWebhook().
 
-### Tags ###
+## Tags ##
 
 Add a tag to describe the type of the application, the environment, department, dev team, ... whatever.
-In the Appmonitor webgui will be dropdown with all tags in alphabetic order. There you can filter monitor checks.
+In the Appmonitor webgui will be dropdown with all tags in alphabetic order. There - or in the tile of the application - you can filter by a tag to get a relevant view for a target group.
 
 ```php
 $oMonitor->addTag("production");
 $oMonitor->addTag("monitoring");
 ```
 
+**Suggestions**
+- set the environment: dev, preview, stage, production
+- set name of departments or teams
+- set something functional
+- use several tags - it's allowed
+- discuss conventions between the teams
 
-### Set total result value ###
+
+## Set total result value ##
 
 Each added check has a result. The Method setResult() sets the total result
 value for the application. The most simple variant is giving no value. 
@@ -763,10 +805,13 @@ $oMonitor->setResult(2);
 Remark: Use $oMonitor->getResults() to get all checks and thir results to 
 write your custom logic.
 
+**Suggestion**
+- before hartcoding something for setResult([new value]) use param "worstresult" in method addCheck()
 
-## Send the response ##
 
-### Send JSON ###
+# Send the response #
+
+## Send JSON ##
 
 After making all checks and setting the total result there is a method to send
 the json response:
@@ -775,8 +820,7 @@ the json response:
 $oMonitor->render();
 ```
 
-
-This method supports 2 parameters
+DEPRECATED: This method supports 2 parameters 
 
 | \#  | variable    | Description |
 |--- |---          |---                                        |
@@ -784,7 +828,7 @@ This method supports 2 parameters
 | 2  | bHighlight  | \{bool\} use highligthed html instead of json; default: false; if true the response is tex/html and no valid JSON anymore |
 
 
-### Snippet: show status locally (without appmonitor server) ###
+## Snippet: show status locally (without appmonitor server) ##
 
 To show the status page on the application server have a look to the snippet 
 below. It can be used to show the current status to the users.
