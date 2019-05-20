@@ -114,9 +114,18 @@ $oMonitor->addCheck(
     "name" => "[short name of the check]",
     "description" => "[an a bit longer description]",
     "check" => [Array for the check],
+	"worstresult" => RESULT_WARNING
   )
 );
 ```
+
+| key        | type     | description |
+|---         |---       |---
+|name        |(string)  | "id" if the check <span class="required">(*)</span>|
+|description |(string)  | a short description <span class="required">(*)</span>|
+|check       |(array)   | check to perform <span class="required">(*)</span>|
+|worstresult |(integer) | optional: limit maximum error level if the check fails;  |
+
 
 The check contains 2 keys:
 
@@ -200,12 +209,12 @@ $oMonitor->addCheck(
 
 Parameters:
 
-| key      | type     | description |
-|---       |---       |---
-|result    |(integer) | result code <span class="required">(*)</span><br>After loading the client class you can use constants to keep the code more readable<br>RESULT_OK (0) = OK <br>RESULT_UKNOWN (1) = unknown<br>RESULT_WARNING (2) = Warning<br>RESULT_ERROR (3) = Error |
-|value     |(string)  | ouput text to describe the result <span class="required">(*)</span> |
-|count     |(float)   | ptional; if a count exists in a check then a tile will be rendered |
-|visual    |(string)  | optional; used if a "count" was given. see counter description [Client](client.md)|
+| key        | type     | description |
+|---         |---       |---
+|result      |(integer) | result code <span class="required">(*)</span><br>After loading the client class you can use constants to keep the code more readable<br>RESULT_OK (0) = OK <br>RESULT_UKNOWN (1) = unknown<br>RESULT_WARNING (2) = Warning<br>RESULT_ERROR (3) = Error |
+|value       |(string)  | ouput text to describe the result <span class="required">(*)</span> |
+|count       |(float)   | ptional; if a count exists in a check then a tile will be rendered |
+|visual      |(string)  | optional; used if a "count" was given. see counter description [Client](client.md)|
 
 You can use the simple check to verify anything that has no pre defined function
 yet. Set a value for the text that should be visible and the result code.
@@ -769,8 +778,7 @@ $oMonitor->render();
 
 This method supports 2 parameters
 
-
-| #  | variable    | Description |
+| \#  | variable    | Description |
 |--- |---          |---                                        |
 | 1  | bPretty     | \{bool\} use pretty print; default: false |
 | 2  | bHighlight  | \{bool\} use highligthed html instead of json; default: false; if true the response is tex/html and no valid JSON anymore |

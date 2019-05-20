@@ -189,9 +189,16 @@ class appmonitor {
         $oCheck = new appmonitorcheck();
         // print_r($aJob); die();
         $aCheck = $oCheck->makecheck($aJob);
+        
+        // limit error code
+        // echo "DEBUG ".$aCheck["name"].": ".$aCheck["result"]."\n";
+        $iMyResult=isset($aJob['worstresult']) 
+                ? min($aCheck["result"], $aJob['worstresult'])
+                : $aCheck["result"]
+                ;
 
-        if (!$this->_iMaxResult || $aCheck["result"] > $this->_iMaxResult) {
-            $this->_iMaxResult = $aCheck["result"];
+        if (!$this->_iMaxResult || $iMyResult > $this->_iMaxResult) {
+            $this->_iMaxResult = $iMyResult;
         }
         return $this->_aChecks[] = $aCheck;
     }

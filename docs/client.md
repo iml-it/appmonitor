@@ -38,7 +38,7 @@ You can implement a client in other languages.
 If you dont use php on your webserver you can create your own client that 
 returns JSON answers with the conventions described below.
 
-```json
+```
 {
     "meta": {
         "host": "[{string} name of the computer]", 

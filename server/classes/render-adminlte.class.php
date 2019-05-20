@@ -56,7 +56,12 @@ class renderadminlte {
             'black', 
             'gray', 
             'green', 
+            'orange', 
+            'maroon', 
+            'navy', 
+            'purple', 
             'red', 
+            'teal', 
             'yellow'
         ),
         'type'=>array(
@@ -156,6 +161,37 @@ class renderadminlte {
                 Danger alert preview. This alert is dismissable. A wonderful serenity has taken possession of my entire
                 soul, like these sweet mornings of spring which I enjoy with my whole heart.
             </div>         
+         */
+    }
+
+    /**
+     * 
+     * @param type $aOptions  hash with keys for all options
+     *                          - type    - one of [none]|danger|info|primary|success|warning
+     *                          - bgcolor - background color (without prefix "bg")
+     *                          - class - css class
+     *                          - text
+     * @param type $aOptions
+     */
+    public function getBadge($aOptions){
+        foreach (array('bgcolor', 'title', 'text', 'type') as $sKey){
+            if(!isset($aOptions[$sKey])){
+                $aOptions[$sKey]=false;
+            }
+            $this->_checkValue($sKey, $aOptions[$sKey]);
+        }
+        return '<small class="label'
+                    . ($aOptions['type']  ? ' label-'.$aOptions['type'] : '')
+                    . ($aOptions['bgcolor'] ? ' bg-'.$aOptions['bgcolor']   : '')
+                .'"'
+                . (isset($aOptions['title'])  ? ' title="'.$aOptions['title'].'"' : '')
+                . '>'
+                . $aOptions['text']
+            . '</small>'
+            ;
+        /*
+         <small class="label pull-right bg-yellow">12</small>
+         <span class="label label-danger">Delivered</span>
          */
     }
     /**
@@ -291,7 +327,8 @@ class renderadminlte {
      * return a small Box
      * @param type $aOptions  hash with keys for all options
      *                          - type - icon color one of [none]|aqua|green|yellow|red
-     *                          - color - icon color one of [none]|aqua|green|yellow|red
+     *                          - bgcolor - background color one of [none]|aqua|green|yellow|red
+     *                          - color - icon color one of [none]|aqua|black|gray|green|orange|maroon|navy|purple|red|teal|yellow
      *                          - title
      *                          - text
      *                          - icon - icon on the right
@@ -326,7 +363,7 @@ class renderadminlte {
      * return a widget
      * @param type $aOptions  hash with keys for all options
      *                          - bgcolor - icon color one of aqua|green|yellow|red
-     *                          - color - icon color one of aqua|green|yellow|red
+     *                          - color - icon color one of aqua|black|gray|green|orange|maroon|navy|purple|red|teal|yellow
      *                          - icon
      *                          - text
      *                          - number
@@ -371,8 +408,10 @@ class renderadminlte {
      * @param integer  $iColums   optional: count of columns; defauklt is 12 (full width)
      * @return string
      */
-    public function getSectionColumn($sContent=false, $iColums=12){
-        return '<div class="col-md-'.$iColums.'">'.$sContent.'</div>';
+    public function getSectionColumn($sContent=false, $iColums=12, $sFloat=false){
+        return '<div class="col-md-'.$iColums.'"'
+                .($sFloat ? ' style="float: '.$sFloat.';"' : '')
+                .'>'.$sContent.'</div>';
     }
     
     /**

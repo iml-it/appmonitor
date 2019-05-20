@@ -11,15 +11,12 @@
  * @author: Axel Hahn
  * ----------------------------------------------------------------------
  * 2019-04-29  aded check for ssl cert; removed a check
+ * 2019-05-17  aded check http to config- and tmp dir
  */
 
-require_once(__DIR__.'/../server/classes/appmonitor-server.class.php');
 require_once('classes/appmonitor-client.class.php');
 $oMonitor = new appmonitor();
 $oMonitor->setWebsite('Appmonitor server');
-
-$oServer=new appmonitorserver();
-$iCount=count($oServer->apiGetAppIds());
 
 // how often the server should ask for updates
 $oMonitor->setTTL(300);
@@ -29,14 +26,15 @@ $oMonitor->setTTL(300);
 // (Puppet, Ansible, ...)
 @include 'general_include.php';
 
-$sApproot = str_replace('\\', '/', dirname(__DIR__));
 
 // ----------------------------------------------------------------------
 
 $oMonitor->addTag('monitoring');
 
 // ----------------------------------------------------------------------
-
+// files and dirs
+// ----------------------------------------------------------------------
+$sApproot = str_replace('\\', '/', dirname(__DIR__));
 $oMonitor->addCheck(
     array(
         "name" => "check tmp subdir",
@@ -79,6 +77,38 @@ $oMonitor->addCheck(
         ),
     )
 );
+// ----------------------------------------------------------------------
+// protect dirs against web access
+// specialty: if the test results in an error, the total result switches
+// to WARNING -> see worstresult value
+// ----------------------------------------------------------------------
+$sBaseUrl = 'http'.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] ? 's' : '')
+        .'://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT']
+        .dirname(dirname($_SERVER['REQUEST_URI']));
+
+foreach(array('server/config', 'server/tmp') as $sMyDir){
+    $oMonitor->addCheck(
+        array(
+            "name" => "deny http to $sMyDir",
+            "description" => "Check if the $sMyDir directory is not accessible (counts as warning on fail)",
+            "check" => array(
+                "function" => "HttpContent",
+                "params" => array(
+                    "url" => $sBaseUrl . "/$sMyDir/readme.md",
+                    "status" => 403,
+                ),
+            ),
+            "worstresult" => RESULT_WARNING
+        )
+    );
+}
+
+// ----------------------------------------------------------------------
+// count of current projects
+// ----------------------------------------------------------------------
+require_once(__DIR__.'/../server/classes/appmonitor-server.class.php');
+$oServer=new appmonitorserver();
+$iCount=count($oServer->apiGetAppIds());
 $oMonitor->addCheck(
     array(
         "name" => "appcounter",
@@ -94,6 +124,9 @@ $oMonitor->addCheck(
         ),
     )
 );
+// ----------------------------------------------------------------------
+// check certificate if https is used
+// ----------------------------------------------------------------------
 if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
     $oMonitor->addCheck(
         array(

@@ -1,6 +1,13 @@
 
 HISTORY
 
+v0.83 2019-05-20
+    - php-client: added param worstresult in method addCheck
+    - added docs in config and tmp dir
+    - client-check: added check if config and tmp are not accessible by http
+    - backend: warning bars are orange instead of yellow
+    - backend: render bagdes with adminlte layout
+
 v0.82 2019-05-17
     - backend: update used components
           jQuery 3.4.1)
