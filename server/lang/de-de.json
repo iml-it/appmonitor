@@ -30,7 +30,7 @@
 
         "About": "&Uuml;ber...",
         "About-title": "Projektname <strong>%s</strong>.",
-        "About-text": "Dies ist OpenSource software.<br>Lizenz: GNU Lesser General Public License v3.0<br>Universit&auml;t Bern :: IML - Institut f&uuml;r Medizinische Lehre.<br><br>Eine <strong>Client</strong>-Komponente erledigt auf Anwendungsseite frei definierbare Checks und erzeugt einen Status in JSON Syntax.<br>Die <strong>Server</strong>-Komponente sammelt die Monitoring Daten aller Applikationen ein, erzeugt eine Gesamtansicht und kann Benachrichtigungen an die betroffenen Teams senden.",
+        "About-text": "Dies ist Freie Software und OpenSource.<br>Lizenz: GNU Lesser General Public License v3.0<br>Universit&auml;t Bern :: IML - Institut f&uuml;r Medizinische Lehre.<br><br>Eine <strong>Client</strong>-Komponente erledigt auf Anwendungsseite frei definierbare Checks und erzeugt einen Status in JSON Syntax.<br>Die <strong>Server</strong>-Komponente sammelt die Monitoring Daten aller Applikationen ein, erzeugt eine Gesamtansicht und kann Benachrichtigungen an die betroffenen Teams senden.",
         "About-projecturl": "Das Projekt ist &ouml;ffentlich und abrufbar unter <a href=\"%s\">%s</a>.",
         "About-docs": "Die <a href=\"%s\">Dokumentation</a> ist als Markdown verf&uuml;gbar. Sie k&ouml;nnen es online lesen und sie ist mit der <em>readme.md</em> im Download Archiv enthalten.",
 
@@ -119,8 +119,8 @@
         "msgErr-Http-no-jsondata": "Fehlerhaftes Format: die Antwort des Appmonitor Client ist kein JSON.",
         "msgErr-Http-outdated": "Die Informationen zum Zustand der Applikation sind veraltet.",
 
-        "msgOK-Url-was-added": "URL hinzugef&uml;gt: %s",
-        "msgErr-Url-not-added-no-appmonitor": "URL nicht hinzugef&uml;gt: %s<br>Dies scheint keine Appmonitor url zu sein - es wurden keine JSON Daten gefunden.<br>Http Antwort-Header: %s",
+        "msgOK-Url-was-added": "URL hinzugef&uuml;gt: %s",
+        "msgErr-Url-not-added-no-appmonitor": "URL nicht hinzugef&uuml;gt: %s<br>Dies scheint keine Appmonitor url zu sein - es wurden keine JSON Daten gefunden.<br>Http Antwort-Header: %s",
         "msgErr-Url-was-added-already": "Skip. Die URL wurde bereits hinzugef&uuml;gt: %s.",
         "msgErr-Url-not-removed-it-does-not-exist": "Die URL konnte nicht entfernt werden - sie existiert nicht in der Konfiguration: %s.",
         "msgOK-Url-was-removed": "Die URL wurde entfernt: %s",

@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.84 2019-05-21
+    - backend: uptime table - show minutes and format percent (again)
+    - backend: use adminlte alerts for popup messages
+    - backend: place badges on the right
+
 v0.83 2019-05-20
     - php-client: added param worstresult in method addCheck
     - added docs in config and tmp dir

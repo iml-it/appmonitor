@@ -18,7 +18,7 @@ table.dataTable tbody th, table.dataTable tbody td{padding: 2px 6px;}
     z-index: 1000;
 }
 .divlog{}
-.divdialog{background: #fff; position: absolute; margin-top: 20%; margin-left: 30%; z-index: 1000; 
+.divdialog{background: #fff; position: absolute; margin-top: 10%; margin-left: 30%; z-index: 1000; 
 border: 2px solid rgba(0,0,0,0.4); border-radius: 1em; box-shadow: 0 0 1em #888;
 padding: 1em;}
 .divlog div{padding: 0.5em;}
@@ -33,10 +33,10 @@ padding: 1em;}
 #divsetup .divhost{width: auto; height: auto;}
 
 
-.result0{background:#dfd    !important; background: linear-gradient(#dfd,#cec)!important;       color:#080}
+.result0{background:#dfd    !important; background: linear-gradient(#dfd,#beb)!important;       color:#080}
 .result1{background:#eee    !important; background: linear-gradient(#eee,#ddd)!important;       color:#666;}
-.result2{background:#fff8d0 !important; background: linear-gradient(#fff0d0,#f0e0b0)!important; color:#870;}
-.result3{background:#fcd    !important; background: linear-gradient(#fde,#fcd)!important;       color:#800;}
+.result2{background:#fff8d0 !important; background: linear-gradient(#fff0d0,#ffe0a0)!important; color:#870;}
+.result3{background:#fcd    !important; background: linear-gradient(#fcd,#faa)!important;       color:#800;}
 
 tr.result0{background:rgba(220,240,220,0.4) !important; color:#385;}
 tr.result1{background:rgba(220,220,220,0.2) !important; color:#999;}
@@ -89,9 +89,13 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 
 
 .box, .info-box{box-shadow: 0 0.2em 1em rgba(0,0,0,0.2);}
+
+/* set background image in main area */
 .content-wrapper{background: url('bg-rauschen.jpg') fixed;}
 
+/* set another menu highlight color */
 li.active a{background:rgba(127,127,127,0.2) !important;}
+
 .info-box a{color:#fff;}
 .info-box-text {
    text-transform: none; font-size:100%;

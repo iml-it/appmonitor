@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.83
+ * @version 0.84
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.83";
+    var $_sVersion = "0.84";
 
     /**
      * html code for icons in the web gui
@@ -93,20 +93,27 @@ class appmonitorserver_gui extends appmonitorserver {
      */
     protected function _renderLogs() {
         $sOut = '';
+        $oA=new renderadminlte();
         if (count($this->_aMessages)) {
             foreach ($this->_aMessages as $aLogentry) {
-                $sOut .= '<div class="divlog' . $aLogentry["level"] . '">'
-                        . $this->_aIco[$aLogentry["level"]] . ' '
-                        . $aLogentry["message"]
-                        . ' (' . $aLogentry["level"] . ')'
-                        . '</div>';
+                $sOut .= $oA->getAlert(array(
+                        'type'=>$this->_getAdminLteClassByLoglevel($aLogentry["level"]),
+                        'dismissible'=>false,
+                        'title'=>$this->_aIco[$aLogentry["level"]],
+                        'text'=>$aLogentry["message"]
+                        ))
+                    ;
             }
         }
         if ($sOut) {
-            $sOut = '<div id="divmodal"><div class="divdialog">'
-                    . $sOut
-                    . '<br><a href="#" class="btn btn-default" onclick="location.href=\'?\';">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a><br><br>'
-                    . '</a></div>';
+            $sOut = '<div id="divmodal">'
+                        . '<div class="divdialog">'
+                            . $sOut
+                            . '<div style="text-align: center">'
+                                . '<a href="#" class="btn btn-primary" onclick="$(\'#divmodal\').hide();return false;">' . $this->_aIco["close"] . ' ' . $this->_tr('btn-close') . '</a><br><br>'
+                            . '</div>'
+                        . '</div>'
+                    . '</div>';
         }
         return $sOut;
     }
@@ -154,6 +161,30 @@ class appmonitorserver_gui extends appmonitorserver {
     }
 
     
+    protected function _getAdminLteClassByLoglevel($iResult, $sDefault='') {
+        $aAdminLteColorMapping=array(
+            'error'=>'danger',
+            'warning'=>'warning',
+            'info'=>'info',
+            'ok'=>'success',
+        );
+        return isset($aAdminLteColorMapping[$iResult]) 
+            ? $aAdminLteColorMapping[$iResult]
+            : $sDefault
+            ;
+    }
+    protected function _getAdminLteClassByResult($iResult, $sDefault='') {
+        $aAdminLteColorMapping=array(
+            RESULT_ERROR=>'danger',
+            RESULT_WARNING=>'warning',
+            RESULT_UNKNOWN=>'gray',
+            RESULT_OK=>'success',
+        );
+        return isset($aAdminLteColorMapping[$iResult]) 
+            ? $aAdminLteColorMapping[$iResult]
+            : $sDefault
+            ;
+    }
     protected function _getAdminLteColorByResult($iResult, $sDefault='') {
         $aAdminLteColorMapping=array(
             RESULT_ERROR=>'red',
@@ -256,6 +287,7 @@ class appmonitorserver_gui extends appmonitorserver {
         if(count($aLog)){
             foreach($aLog as $aLogItem){
                 $aItem=$aLogItem;
+                unset($aItem['result']);
                 $iDelta=$iLastTimer-$aItem['timestamp'];
                 $iLastTimer=$aItem['timestamp'];
                 
@@ -296,6 +328,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     );
                     //     '<span class="badge result' . $i . '" title="' . $aHostdata['summary'][$i] . ' x ' . $this->_tr('Resulttype-' . $i) . '">' . $aHostdata['summary'][$i] . '</span>' : '');
             }
+            $sMoreChecks=$sMoreChecks? '<span style="float: right">'.$sMoreChecks.'</span>' : '';
         }
 
         foreach($this->_aCfg['view']['appdetails'] as $key=>$bVisibility){
@@ -437,6 +470,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 $iResultApps=$i;
             }
         }
+        $sMoreHosts=$sMoreHosts ? '<span style="float: right;">'.$sMoreHosts.'</span>' : '';
         
         foreach($this->_aCfg['view']['overview'] as $key=>$bVisibility){
             switch ($key) {
@@ -444,7 +478,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     $sReturn .= $bVisibility
                         ? $this->_getTile(array(
                             'result' => $iResultApps,
-                            'count' => $aCounter['apps'].($iResultApps === RESULT_OK ? '' : ' '.$sMoreHosts),
+                            'count' => ($iResultApps === RESULT_OK ? '' : ' '.$sMoreHosts). $aCounter['apps'],
                             'icon' => $this->_aIco['webapp'],
                             'label' => $this->_tr('Webapps'),
                         ))
@@ -478,6 +512,7 @@ class appmonitorserver_gui extends appmonitorserver {
                             $iResultChecks=$i;
                         }
                     }
+                    $sMoreChecks=$sMoreChecks ? '<span style="float: right">'.$sMoreChecks.'</span>' : '';
                     $sReturn.= $bVisibility 
                         ? $this->_getTile(array(
                             'result' => $iResultChecks,
@@ -738,7 +773,7 @@ class appmonitorserver_gui extends appmonitorserver {
     }
 
     /**
-     * gt html code for badged list with errors, warnings, unknown, ok
+     * get html code for badged list with errors, warnings, unknown, ok
      * @param string $sAppId  id of app to show
      * @param bool   $bShort  display type short (counter only) or long (with texts)
      * @return string|boolean
@@ -767,7 +802,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 }
             }
         }
-        return $sHtml;
+        return $sHtml ? '<span style="float: right">'.$sHtml.'</span>' : '';
     }
 
     /**
@@ -1059,7 +1094,8 @@ class appmonitorserver_gui extends appmonitorserver {
                     ?
                     '<tr class="result'.$i.'">'
                         . '<td class="result'.$i.'">'. $this->_tr('Resulttype-'.$i) . '</td>'
-                        . '<td> ' . round($aUptime['counter'][$i]*100 / $aUptime['total'], 3).' %</td>'
+                        . '<td style="text-align: right">' . round($aUptime['counter'][$i] / 60).' min</td>'
+                        . '<td style="text-align: right"> ' .  number_format($aUptime['counter'][$i]*100 / $aUptime['total'], 3).' %</td>'
                     . '</tr>'
                     : ''
                 ;
@@ -1238,7 +1274,7 @@ class appmonitorserver_gui extends appmonitorserver {
      */
     public function generateViewSetup() {
         $oA=new renderadminlte();
-        $sFormOpenTag = '<form action="?" class="form-horizontal" method="POST">';
+        $sFormOpenTag = '<form action="?#divsetup" class="form-horizontal" method="POST">';
         
         // list of all clients
         $sHostlist='';
@@ -1394,6 +1430,8 @@ class appmonitorserver_gui extends appmonitorserver {
                                 'number' => $aEntries['result']['summary']['total']
                                                 . ($aEntries["result"]["result"] === RESULT_OK ? '' : ' '.$this->_renderBadgesForWebsite($sAppId, true)),
                                 'text' => $sAHref. $sAppLabel.'</a><br>',
+                                'number' => ($aEntries["result"]["result"] === RESULT_OK ? '' : ' '.$this->_renderBadgesForWebsite($sAppId, true))
+                                            . $aEntries['result']['summary']['total'],
                                 'progressvalue' => false,
                                 'progresstext' => '&nbsp;&nbsp;' 
                                     . $sValidatorinfo
@@ -1581,7 +1619,7 @@ class appmonitorserver_gui extends appmonitorserver {
      * @return string
      */
     protected function _renderMenuItem($sHref, $sclass, $sIcon, $sLabel){
-        return '<li><a href="' . $sHref . '" class="'.$sclass.'" title="'.strip_tags($sLabel).'">' . $this->_aIco[$sIcon] . '<span> '.$sLabel.'</span></a></li>';
+        return '<li><a href="' . $sHref . '" class="'.$sclass.'" title="'.strip_tags($sLabel).'">' . $this->_aIco[$sIcon] . '<span>&nbsp; '.$sLabel.'</span></a></li>';
     }
 
 
@@ -1786,7 +1824,14 @@ class appmonitorserver_gui extends appmonitorserver {
                 ;
         
         $aReplace['{{PAGE_FOOTER_LEFT}}']='<a href="' . $this->_sProjectUrl . '" target="_blank">' . $this->_sProjectUrl . '</a>';
-        $aReplace['{{PAGE_FOOTER_RIGHT}}']='';
+        $aReplace['{{PAGE_FOOTER_RIGHT}}']=''
+                .'<script>'
+                    . 'var iReload=' . $iReload . '; // reload time in server config is '.$iReload." s\n"
+                    . '$(document).ready(function() {'
+                        . 'initGuiStuff();'
+                    . '} );'."\n"
+                . '</script>' . "\n"
+                ;
         
         $sHtml = '<!DOCTYPE html>' . "\n"
                 . '<html>' . "\n"
@@ -1832,13 +1877,9 @@ class appmonitorserver_gui extends appmonitorserver {
                         file_get_contents(__DIR__ . '/layout-html.tpl')
                   )
 
-                . '<script>'
-                    . 'var iReload=' . $iReload . '; // reload time in server config is '.$iReload." s\n"
-                    . '$(document).ready(function() {'
-                        . 'initGuiStuff();'
-                    . '} );'."\n"
-                . '</script>' . "\n"
-                . '</body></html>';
+
+                // . '</body></html>'
+                ;
 
         return $sHtml;
     }
