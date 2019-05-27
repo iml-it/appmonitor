@@ -849,3 +849,18 @@ ob_end_clean();
 // render
 $oMonitor->renderHtmloutput($sJson);
 ```
+
+## Abort a check ##
+
+If you process the checks and need to exit the client with a critcal error
+you can use the method abort().
+
+This triggers a 503 service unavailable error with a given message.
+
+This method should be used if a basic element is missed to perform a useful
+check, i.e. a config file is not found.
+
+```php
+$oMonitor->abort([{string} message]);
+```
+

@@ -9,8 +9,7 @@ https://github.com/iml-it/appmonitor
 
 # Description #
 
-The application monitor is an additional tool to the classic monitoring of a servers and its services. It makes checks from the point of view of the application. With its credentials and permissions.
-
+The application monitor is an additional tool to the classic system monitoring of a servers and its services. It makes checks from the point of view of the application. With its credentials and permissions started on the application hosts.
 
 
 # Features #
@@ -22,9 +21,13 @@ The application monitor is an additional tool to the classic monitoring of a ser
 Server webgui
 - Filter the view by selecting tags
 - Multi language (English ang German language file so far)
-- Optional service for permanent check and notification 24/7
+- Optional service for permanent checks and notification 24/7
 - Notification as email, Slack message (respecting sleep times i.e. during the night)
-- CLI tool for automation of the server config (with Puppet, Ansible, ...)
+- CLI tool to automate settings in the server config (with Puppet, Ansible, ...)
 
 **Continue**: [Overview](docs/readme.md)
 
+
+**Screenshot**:
+
+![Client](docs/images/screenshot-view-client.png "Client view in monitor web gui")

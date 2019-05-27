@@ -36,7 +36,7 @@
  * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
  * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.83
+ * @version 0.85
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -50,7 +50,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    protected $_sVersion = 'php-client-v0.83';
+    protected $_sVersion = 'php-client-v0.85';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -79,8 +79,12 @@ class appmonitor {
      */
     protected $_aChecks = array();
     
+    /**
+     * for time measurements: start time
+     * @var type 
+     */
     protected $_iStart = false;
-
+    
     /**
      * constructor: init data
      */
@@ -338,19 +342,28 @@ class appmonitor {
             $aErrors[] = "method setResult was not used to set a final result for all checks.";
         }
 
-
         if (count($aErrors)) {
-            header('HTTP/1.0 503 Service Unavailable');
-            echo "<h1>Errors detected</h1><ol><li>" . implode("<li>", $aErrors) . "</ol><hr>";
-            echo "<pre>" . print_r($this->getResults(), true) . "</pre><hr>";
-            die("ABORT");
+            $this->abort(
+                '<h2>Error: client check is not complete</h2><p>Found errors:</p><ol><li>' . implode('<li>', $aErrors) . '</ol><br><br>'
+                // .'Dump of your data so far:<pre>' . json_encode($this->getResults(), JSON_PRETTY_PRINT) . '</pre><hr>'
+            );
         }
+        return true;
     }
 
     // ----------------------------------------------------------------------
     // output
     // ----------------------------------------------------------------------
 
+    /**
+     * stop processing the client checks and abort with an error
+     * @param string $sMessage
+     */
+    public function abort($sMessage){
+        header('HTTP/1.0 503 Service Unavailable');
+        die('<h1>503 Service Unavailable</h1>'.$sMessage);
+    }
+    
     /**
      * get full array for response with metadata and Checks
      * @return type

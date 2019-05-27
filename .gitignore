@@ -15,3 +15,5 @@ nbproject
 /client/check-limesurvey.php
 /client/check-limesurvey.settings.php
 /server/classes/__unused_ responsetimerrd.class.php
+/client/check-ilias.php
+/client/check-ilias.settings.php

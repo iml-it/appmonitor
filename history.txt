@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.85 2019-05-27
+    - backend: fix uptime (now visible with just one notification entry)
+    - client: added abort method
+    - docs: added screenshot; update client
+
 v0.84 2019-05-21
     - backend: uptime table - show minutes and format percent (again)
     - backend: use adminlte alerts for popup messages

@@ -11,12 +11,15 @@ https://github.com/iml-it/appmonitor
 
 The appmonitor is a monitoring tool that consists of 2 parts
 - **client** (for each webapplication to check)
+  - is executed on a incoming http request (there is no agent)
   - makes necessary checks for the full functionality of a website 
   - uses the credentials of the application
   - responds information as JSON
+  - more: [Client](client.md) | [PHP-Client](client-php.md)
 - **server** instance
   - collects all JSON data and presents an overview over all checks and websites
   - sends notifications to server admins (read from server config) plus developers and product owners (coming from clients metadata)
+  - more: [Server](server.md)
 
 # Installation #
 
