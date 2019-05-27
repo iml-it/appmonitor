@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.86 2019-05-27
+    - server: fix wrong message if adding a new monitor
+
 v0.85 2019-05-27
     - backend: fix uptime (now visible with just one notification entry)
     - client: added abort method

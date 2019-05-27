@@ -37,7 +37,7 @@ require_once 'notificationhandler.class.php';
  * - GUI uses cached data only
  * - NAGIOS output
  * --------------------------------------------------------------------------------<br>
- * @version 0.82
+ * @version 0.86
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -463,8 +463,8 @@ class appmonitorserver {
                 $this->_data[$sKey] = $oCache->read();
                 $this->_data[$sKey]["result"]["fromcache"] = true;
                 
-                $iAge=(time() - $this->_data[$sKey]["result"]["ts"]);
-                if($iAge>2*$this->_data[$sKey]["result"]["ttl"]){
+                $iAge=isset($this->_data[$sKey]["result"]["ts"]) ? (time() - $this->_data[$sKey]["result"]["ts"]) : 0;
+                if($iAge && $iAge>2*$this->_data[$sKey]["result"]["ttl"]){
                     $this->_data[$sKey]["result"]["error"] = $this->_tr('msgErr-Http-outdated');
                     $this->_data[$sKey]["result"]["result"] = RESULT_UNKNOWN;
                     if(!isset($this->_data[$sKey]["result"]["outdated"])){
