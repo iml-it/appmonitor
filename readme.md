@@ -7,7 +7,7 @@ https://github.com/iml-it/appmonitor
 
 - - -
 
-Continue ... online: https://iml-it.github.io/appmonitor/ 
+Continue ... read the docs online: https://iml-it.github.io/appmonitor/ 
 or have a look to the [docs](docs/readme.md) subdirectory.
 
 # Description #
