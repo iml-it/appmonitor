@@ -35,20 +35,6 @@ $oMonitor->addTag('monitoring');
 // files and dirs
 // ----------------------------------------------------------------------
 $sApproot = str_replace('\\', '/', dirname(__DIR__));
-$oMonitor->addCheck(
-	array(
-		"name" => "HttpContent 1",
-		"description" => "check if the example website sends a response",
-		"check" => array(
-			"function" => "HttpContent",
-			"params" => array(
-                            "url" => "https://stage.player.iml.unibe.ch/doccom_ivpl.html",
-                            'bodycontains'=>'AnnotatedVideo',
-                            'timeout'=>1,
-			),
-		),
-	)
-);
 
 $oMonitor->addCheck(
     array(
