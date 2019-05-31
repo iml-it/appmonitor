@@ -505,6 +505,7 @@ Parameters:
 | key      | type     | description |
 |---       |---       |---
 |url               |(string)  |url to fetch <span class="required">(*)</span>
+|timeout           |(integer) |optional timeout in sec; default: 5
 |headeronly        |(boolean) |optional flag to fetch http response herader only (HEAD request); default: false = returns header and body; 
 |follow            |(boolean) |optional flag to follow a location; default: false = do not follow; If you set it to true it ries to follow (but this is not a safe method)
 |status            |(integer) |test for an expected http status code; if none is given then test fails on status 400 and greater
@@ -559,6 +560,7 @@ Parameters:
 |password  |(string)  |password <span class="required">(*)</span>
 |db        |(string)  |database name / scheme to connect <span class="required">(*)</span>
 |port      |(integer) |database port; optional
+|timeout   |(integer) |optional timeout in sec; default: 5
 
 Remark:  
 The idea is not to enter credentials in the parameters. You should parse the config of your application and insert its variables.
@@ -596,6 +598,7 @@ parameters:
 |connect   |(string)  |connect string, i.e. 'mysql:host=localhost;port=3306;dbname=mydatabase;' <span class="required">(*)</span>
 |user      |(string)  |mysql username <span class="required">(*)</span>
 |password  |(string)  |password <span class="required">(*)</span>
+|timeout   |(integer) |optional timeout in sec; default: 5
 
 Remark:  
 The idea is not to enter credentials in the parameters. You should parse the config of your application and insert its variables.
@@ -629,6 +632,7 @@ parameters:
 |---       |---       |---
 |port      |(integer) |port to check <span class="required">(*)</span>
 |host      |(string)  |optional: hostname to connect to; if unavailable 127.0.0.1 will be tested
+|timeout   |(integer) |optional timeout in sec; default: 5
 
 ... and an additional code snippet for a multiple port check:
 
@@ -676,6 +680,7 @@ Parameters:
 | key      | type     | description |
 |---       |---       |---
 |db        |(string)  |full path of the sqlite database file <span class="required">(*)</span>
+|timeout   |(integer) |optional timeout in sec; default: 5
 
 	
 # Additional Metadata #

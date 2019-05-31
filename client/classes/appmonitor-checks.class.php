@@ -46,8 +46,9 @@ if(!defined('RESULT_OK')){
  * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  replace mysqli connect with mysqli real connect (to use a timeout)<br>
  * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
  * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
+ * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.77
+ * @version 0.87
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -493,6 +494,7 @@ class appmonitorcheck {
      * @param array $aParams
      * array(
      *     url                 string   url to fetch
+     *     timeout             integer  optional timeout in sec; default: 5
      *     headeronly          boolean  optional flag to fetch http response herader only; default: false = returns header and body
      *     follow              boolean  optional flag to follow a location; default: false = do not follow
      *     status              integer  test for an expected http status code; if none is given then test fails on status 400 and greater
@@ -503,9 +505,8 @@ class appmonitorcheck {
      *     bodynotcontains     string   test for a string in the http response body; it returns OK if the text was not found
      *     bodyregex           string   test for a regex in the http response body; it returns OK if the regex matches; example: "headerregex"=>"/lowercasematch/i"
      * )
-     * @param integer $iTimeout  value in sec; default: 5sec
      */
-    protected function checkHttpContent($aParams, $iTimeout = 5) {
+    protected function checkHttpContent($aParams) {
         $this->_checkArrayKeys($aParams, "url");
         if (!function_exists("curl_init")) {
             header('HTTP/1.0 503 Service Unavailable');
@@ -519,7 +520,7 @@ class appmonitorcheck {
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, isset($aParams["follow"]) && $aParams["follow"]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $iTimeout);
+        curl_setopt($ch, CURLOPT_TIMEOUT, (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp);
         $res = curl_exec($ch);
 
         if (!$res) {
@@ -560,7 +561,7 @@ class appmonitorcheck {
                     )
 
                 [primary_port] => 443
-                [local_ip] => 130.92.79.49
+                [local_ip] => 10.1.30.49
                 [local_port] => 63597
             )
          */
@@ -686,11 +687,12 @@ class appmonitorcheck {
      * check mysql connection to a database using mysqli realconnect
      * @param array $aParams
      * array(
-     *     "server" 
-     *     "user" 
-     *     "password" 
-     *     "db" 
-     *     "port"     <<< optional
+     *     server              string   database hostname / ip address
+     *     user                string   db user
+     *     password            string   password for db user
+     *     db                  string   schema / database name
+     *     port                integer  optional: port
+     *     timeout             integer  optional timeout in sec; default: 5
      * )
      */
     protected function checkMysqlConnect($aParams) {
@@ -700,7 +702,7 @@ class appmonitorcheck {
             $this->_setReturn(RESULT_ERROR, 'ERROR: mysqli_init failed.');
             return false;
         }
-        if (!$mysqli->options(MYSQLI_OPT_CONNECT_TIMEOUT, $this->_iTimeoutTcp)) {
+        if (!$mysqli->options(MYSQLI_OPT_CONNECT_TIMEOUT, (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp)) {
             $this->_setReturn(RESULT_ERROR, 'ERROR: setting mysqli_init failed.');
             return false;
         }
@@ -724,9 +726,10 @@ class appmonitorcheck {
      * 
      * @param array $aParams
      * array(
-     *     "connect" 
-     *     "password" 
-     *     "user" 
+     *     connect             string   connect string
+     *     user                string   db user
+     *     password            string   password for db user
+     *     timeout             integer  optional timeout in sec; default: 5
      * )
      */
     protected function checkPdoConnect($aParams) {
@@ -742,7 +745,7 @@ class appmonitorcheck {
                     
                     // timeout
                     // Not all drivers support this option; mysqli does
-                    PDO::ATTR_TIMEOUT => $this->_iTimeoutTcp,                  
+                    PDO::ATTR_TIMEOUT => (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp,                  
                     // mssql
                     // PDO::SQLSRV_ATTR_QUERY_TIMEOUT => $this->_iTimeoutTcp,  
                 )
@@ -760,8 +763,9 @@ class appmonitorcheck {
      * check if system is listening to a given port
      * @param array $aParams
      * array(
-     *     "port" 
-     *     "host"  (optional: 127.0.0.1 is default)
+     *     port                integer  port
+     *     host                string   optional hostname to connect; default: 127.0.0.1
+     *     timeout             integer  optional timeout in sec; default: 5
      * )
      * @return boolean
      */
@@ -784,7 +788,7 @@ class appmonitorcheck {
             SOL_SOCKET,  // socket level
             SO_SNDTIMEO, // timeout option
             array(
-              "sec"=>$this->_iTimeoutTcp, // timeout in seconds
+              "sec"=>(isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp, // timeout in seconds
               "usec"=>0
               )
             );
@@ -807,16 +811,15 @@ class appmonitorcheck {
      * 
      * @param array $aParams
      * array keys:
-     *     "result"   integer; RESULT_nn
-     *     "value"    description text
+     *     value               string   description text
+     *     result              integer  RESULT_nn
      * 
      *     brainstorming for a future release
      * 
      *     "counter"  optioal: array of counter values
-     *         - "label"  string: a label
-     *         - "value"  a number
-     *         - "unit"   string: unit, i.e. ms, MB/s
-     *         - "type"   one of counter | bars | bars-stacked | lines | ... ??
+     *         - label         string   a label
+     *         - value         float    a number
+     *         - type          string   one of simple | bar | line
      * 
      */
     protected function checkSimple($aParams) {
@@ -834,7 +837,8 @@ class appmonitorcheck {
      * check sqlite connection
      * @param array $aParams
      * array(
-     *     "db"  full path of sqlite file 
+     *     db                  string   full path of sqlite file 
+     *     timeout             integer  optional timeout in sec; default: 5
      * )
      * @return boolean
      */
@@ -847,7 +851,11 @@ class appmonitorcheck {
         try {
             // $db = new SQLite3($sqliteDB);
             // $db = new PDO("sqlite:".$sqliteDB);
-            $o = new PDO("sqlite:" . $aParams["db"]);
+            $o = new PDO("sqlite:" . $aParams["db"],
+                array(
+                    PDO::ATTR_TIMEOUT => (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp,                  
+                )
+            );
             $this->_setReturn(RESULT_OK, "OK: Sqlite database " . $aParams["db"] . " was connected");
             return true;
         } catch (Exception $e) {
