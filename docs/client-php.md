@@ -66,6 +66,9 @@ To write your own checks ... these are some ideas you can pick from:
 - certificate
   - use the snippet for the certificate check: this check is active if https is used only.
 
+All built in functions are documented in this page. Additionally you can write custom checks as plugins. 
+See [PHP-plugins](client-php-plugins.md) for details.
+
 
 # Docs with code snippets #
    

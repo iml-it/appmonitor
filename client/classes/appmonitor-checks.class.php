@@ -47,8 +47,9 @@ if(!defined('RESULT_OK')){
  * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
  * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
+ * 2019-06-05  0.88  axel.hahn@iml.unibe.ch  add plugins<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.87
+ * @version 0.88
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -84,6 +85,12 @@ class appmonitorcheck {
      * @var type 
      */
     protected $_iTimeoutTcp=5;
+    
+    /**
+     * point to the plugin directory
+     * @var string
+     */
+    protected $_sPluginDir=__DIR__.'/../plugins';
 
     // ----------------------------------------------------------------------
     // CONSTRUCTOR
@@ -95,13 +102,13 @@ class appmonitorcheck {
     public function __construct() {
         
     }
-
+    
     // ----------------------------------------------------------------------
     // PRIVATE FUNCTIONS
     // ----------------------------------------------------------------------
 
     /**
-     * create basic array values for metadata
+     * internal: create basic array values for metadata
      * @return boolean
      */
     protected function _createDefaultMetadata() {
@@ -134,19 +141,43 @@ class appmonitorcheck {
     protected function _setOutput($s) {
         return $this->_aData["value"] = (string) $s;
     }
-
+    
     /**
-     * set result and output
-     * @param type $iResult
-     * @param type $s
+     * put counter data to result set
+     * @param type $aParams
      * @return boolean
      */
-    protected function _setReturn($iResult, $s) {
-        $this->_setResult($iResult);
-        $this->_setOutput($s);
+    protected function _setCounter($aParams){
+        if(count($aParams)){
+            foreach(array('type', 'count', 'visual') as $sMyKey){
+                if(isset($aParams[$sMyKey])){
+                    $this->_aData[$sMyKey]=$aParams[$sMyKey];
+                }
+            }
+        }
         return true;
     }
 
+    /**
+     * set result and output 
+     * @param integer  $iResult   value; use a RESULT_XYZ constant
+     * @param string   $s         message text
+     * @param array    $aCounter  optional: counter with array keys type, count, visual
+     * @return boolean
+     */
+    protected function _setReturn($iResult, $s, $aCounter=array()) {
+        $this->_setResult($iResult);
+        $this->_setOutput($s);
+        $this->_setCounter($aCounter);
+        return true;
+    }
+    
+    /**
+     * check a given array if it contains wanted keys
+     * @param array  $aConfig   array to verify
+     * @param string $sKeyList  key or keys as comma seprated list 
+     * @return boolean
+     */
     protected function _checkArrayKeys($aConfig, $sKeyList) {
         foreach (explode(",", $sKeyList) as $sKey) {
             if (!array_key_exists($sKey, $aConfig)) {
@@ -189,37 +220,52 @@ class appmonitorcheck {
         $this->_aConfig = $aConfig;
         $this->_createDefaultMetadata();
 
-        $sCheck = "check" . $this->_aConfig["check"]["function"];
-        if (!method_exists($this, $sCheck)) {
-            header('HTTP/1.0 503 Service Unavailable');
-            die(__CLASS__ . " check not found: $sCheck <pre>" . print_r($aConfig, true));
-        }
+        $sCheck = "check" . preg_replace('/[^a-zA-Z0-9]/', '', $this->_aConfig["check"]["function"]);
         $aParams = array_key_exists("params", $this->_aConfig["check"]) ? $this->_aConfig["check"]["params"] : array();
-
-        // call the check ...
-        call_user_func(array($this, $sCheck), $aParams);
+        if (method_exists($this, $sCheck)) {
+            // load as internal function
+            call_user_func(array($this, $sCheck), $aParams);
+        } else {
+            // load as plugin
+            $sPluginFile=$this->_sPluginDir.'/'.$sCheck.'.php';
+            if (file_exists($sPluginFile)) {
+                
+                require_once($sPluginFile);
+                $oPlogin = new $sCheck;
+                $this->_setReturn($oPlogin->run($aParams));
+                
+            } else {
+                header('HTTP/1.0 503 Service Unavailable');
+                die(__CLASS__ . " check not found: $sCheck <pre>" . print_r($aConfig, true));
+            }
+        }
 
         $this->_aData['time'] = number_format((microtime(true) - $this->_iStart) * 1000, 3) . 'ms';
-        // echo "<pre>"; print_r($this->listChecks()); die();
         // ... and send response 
         return $this->respond();
     }
 
     /**
-     * list all available check functions. This is a helper class you cann call
-     * to get an overview overbuilt in functions. You get a flat array with
-     * all function names.
+     * list all available check functions. This is a helper class you can call
+     * to get an overview over built in functions and plugins. 
+     * You get a flat array with all function names.
      * @return array
      */
     public function listChecks() {
         $aReturn = array();
+        // return internal protected fuctions named "check[whatever]"
         $class = new ReflectionClass($this);
-        foreach ($class->getMethods(ReflectionMethod::IS_PRIVATE) as $oReflectionMethod) {
+        foreach ($class->getMethods(ReflectionMethod::IS_PROTECTED) as $oReflectionMethod) {
             if (strpos($oReflectionMethod->name, "check") === 0) {
-                $aReturn[] = (string) $oReflectionMethod->name;
+                $aReturn[(string) $oReflectionMethod->name]=1;
             }
         }
-        return $aReturn;
+        // return checks from plugins subdir
+        foreach(glob($this->_sPluginDir.'/check*.php') as $sPluginFile){
+            $aReturn[str_replace('.php', '', basename($sPluginFile))] = 1;
+        }
+        ksort($aReturn);
+        return array_keys($aReturn);
     }
 
     /**
@@ -231,7 +277,7 @@ class appmonitorcheck {
     }
 
     // ----------------------------------------------------------------------
-    // CHECK FUNCTIONS (private)
+    // CHECK FUNCTIONS (protected)
     // ----------------------------------------------------------------------
 
     /**

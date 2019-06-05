@@ -45,7 +45,7 @@ Below a document root of a website create a directory [webroot]/appmonitor/
 
 ## Other clients ##
 The next step is creating client checks thats urls you can add in the setup.
-See [Client](client.md) for general introduction. For PHP applications see [PHP-Client](client-php.md).
+See [Client](client.md) for general introduction. For PHP applications see [PHP-Client](client-php.md) + [PHP-plugins](client-php-plugins.md).
 
 
 ## Production use ##

@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.88 2019-06-05
+    - client: added plugins including a hello world demo: plugins/checkHello.php
+    - client: fix method listChecks()
+
 v0.87 2019-05-31
     - client: add timeout as param in connective checks (http, tcp, databases)
 

@@ -28,7 +28,7 @@ An application check finally creates a JSON in a predefined structure.
 
 For the delivered PHP client:
 - PHP7 (up to PHP 7.3; runs on php5 but is not supported) \
-  see [PHP-Client](client-php.md)
+  see [PHP-Client](client-php.md) + [PHP-plugins](client-php-plugins.md)
 
 You can implement a client in other languages.
 

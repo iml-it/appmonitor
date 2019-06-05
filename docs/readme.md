@@ -21,7 +21,7 @@ The application monitor is an additional tool to the classic system monitoring o
 
 Server webgui
 - Filter the view by selecting tags
-- Multi language (English ang German language file so far)
+- Multi language (English and German language file so far)
 - Optional service for permanent checks and notification 24/7
 - Notification as email, Slack message (respecting sleep times i.e. during the night)
 - CLI tool to automate settings in the server config (with Puppet, Ansible, ...)
@@ -39,7 +39,7 @@ The appmonitor is a monitoring tool that consists of 2 parts
   - makes necessary checks for the full functionality of a website 
   - uses the credentials of the application
   - responds information as JSON
-  - more: [Client](client.md) | [PHP-Client](client-php.md)
+  - more: [Client](client.md) , [PHP-Client](client-php.md)
 - **server** instance
   - collects all JSON data and presents an overview over all checks and websites
   - sends notifications to server admins (read from server config) plus developers and product owners (coming from clients metadata)
