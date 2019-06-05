@@ -35,8 +35,9 @@
  * 2018-08-24  0.51  axel.hahn@iml.unibe.ch  method to show local status page<br>
  * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
  * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
+ * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.85
+ * @version 0.88
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -50,7 +51,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    protected $_sVersion = 'php-client-v0.85';
+    protected $_sVersion = 'php-client-v0.88';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -191,11 +192,9 @@ class appmonitor {
 
         require_once 'appmonitor-checks.class.php';
         $oCheck = new appmonitorcheck();
-        // print_r($aJob); die();
         $aCheck = $oCheck->makecheck($aJob);
         
-        // limit error code
-        // echo "DEBUG ".$aCheck["name"].": ".$aCheck["result"]."\n";
+        // limit result code
         $iMyResult=isset($aJob['worstresult']) 
                 ? min($aCheck["result"], $aJob['worstresult'])
                 : $aCheck["result"]
@@ -314,7 +313,7 @@ class appmonitor {
 
     /**
      * list all available check functions. This is a helper class you cann call
-     * to get an overview overbuilt in functions. You get a flat array with
+     * to get an overview over built in functions. You get a flat array with
      * all function names.
      * @return array
      */
@@ -329,7 +328,7 @@ class appmonitor {
     // ----------------------------------------------------------------------
 
     /**
-     * verify array values and abort with all found errors
+     * verify array values and in case of an error abort and show all found errors
      */
     protected function _checkData() {
         $aErrors = array();
