@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.90 2019-06-06
+    - server: server overview gets more clickable area to reach server detail page
+
 v0.89 2019-06-06
     - client: added plugin Loadmeter
 

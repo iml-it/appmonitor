@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.87
+ * @version 0.90
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.87";
+    var $_sVersion = "0.90";
 
     /**
      * html code for icons in the web gui
@@ -1414,7 +1414,8 @@ class appmonitorserver_gui extends appmonitorserver {
             $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp.$sAppId;
             $sDivId=$this->_getDivIdForApp($sAppId);    
             $sAppLabel=str_replace('.', '.&shy;', $this->_getAppLabel($sAppId));
-            $sAHref='<a href="'.$sDivId.'" onclick="setTab(\''.$sDivId.'\')">';
+            $sOnclick='setTab(\''.$sDivId.'\')';
+            $sAHref='<a href="'.$sDivId.'" onclick="'.$sOnclick.'">';
             
             $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
             
@@ -1425,11 +1426,12 @@ class appmonitorserver_gui extends appmonitorserver {
                     . ($bHasData 
                         ? 
                             $oA->getWidget(array(
+                                'onclick'=>$sOnclick,
                                 'bgcolor'=>$this->_getAdminLteColorByResult($aEntries["result"]["result"]),
                                 'icon' => $this->_getIconClass($this->_aIco['webapp']),
                                 'number' => $aEntries['result']['summary']['total']
                                                 . ($aEntries["result"]["result"] === RESULT_OK ? '' : ' '.$this->_renderBadgesForWebsite($sAppId, true)),
-                                'text' => $sAHref. $sAppLabel.'</a><br>',
+                                'text' => $sAppLabel.'<br>',
                                 'number' => ($aEntries["result"]["result"] === RESULT_OK ? '' : ' '.$this->_renderBadgesForWebsite($sAppId, true))
                                             . $aEntries['result']['summary']['total'],
                                 'progressvalue' => false,
@@ -1440,10 +1442,11 @@ class appmonitorserver_gui extends appmonitorserver {
                             ))
                         : 
                             $oA->getWidget(array(
+                                'onclick'=>$sOnclick,
                                 'bgcolor'=>$this->_getAdminLteColorByResult(RESULT_ERROR),
                                 'icon' => $this->_getIconClass($this->_aIco['host']),
                                 'number' => $this->_renderBadgesForWebsite($sAppId, true),
-                                'text' => $sAHref. $sAppLabel.'</a><br>',
+                                'text' => $sAppLabel.'<br>',
                                 'progressvalue' => false,
                                 'progresstext' => '&nbsp;&nbsp;' 
                                     .($aTags ? $this->_getTaglist($aTags) : '')

@@ -378,8 +378,18 @@ class renderadminlte {
             }
             $this->_checkValue($sKey, $aOptions[$sKey]);
         }
+        
+        // if onclick is available then add a a-tag to all labels that do not contain a link yet
+        $sApre=isset($aOptions['onclick']) && $aOptions['onclick'] ? '<a href="#" onclick="'.$aOptions['onclick'].'">' : '';
+        $sAsuf=$sApre ? '</a>' : '';
+        
+        $aOptions['icon']=$this->_oHtml->getIcon($aOptions['icon']);
+        foreach(array('icon', 'text', 'number', 'progresstext') as $sKey){
+            $aOptions[$sKey]=strstr($aOptions[$sKey], '<a')===false ? $sApre.$aOptions[$sKey].$sAsuf : $aOptions[$sKey];
+        }
+        
         return '<div class="info-box bg-'.$aOptions['bgcolor'].'">
-            <span class="info-box-icon bg-'.$aOptions['color'].'">'.($this->_oHtml->getIcon($aOptions['icon'])).'</span>
+            <span class="info-box-icon bg-'.$aOptions['color'].'">'.$aOptions['icon'].'</span>
 
             <div class="info-box-content">
               <span class="info-box-text">'.$aOptions['text'].'</span>
