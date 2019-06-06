@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.89 2019-06-06
+    - client: added plugin Loadmeter
+
 v0.88 2019-06-05
     - client: added plugins including a hello world demo: plugins/checkHello.php
     - client: fix method listChecks()

@@ -49,7 +49,7 @@ if(!defined('RESULT_OK')){
  * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * 2019-06-05  0.88  axel.hahn@iml.unibe.ch  add plugins<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.88
+ * @version 0.89
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -232,7 +232,19 @@ class appmonitorcheck {
                 
                 require_once($sPluginFile);
                 $oPlogin = new $sCheck;
-                $this->_setReturn($oPlogin->run($aParams));
+                $aResponse=$oPlogin->run($aParams); 
+                if(!is_array($aResponse)){
+                    header('HTTP/1.0 503 Service Unavailable');
+                    die(__CLASS__ . " plugin : $sCheck does not responses an array<pre>" . print_r($aResponse, true));
+                }
+                if(count($aResponse)<2){
+                    header('HTTP/1.0 503 Service Unavailable');
+                    die(__CLASS__ . " plugin : $sCheck does not responses the minimum of 2 array values<pre>" . print_r($aResponse, true));
+                }
+                if(!isset($aResponse[2])){
+                    $aResponse[2]=array();
+                }
+                $this->_setReturn($aResponse[0], $aResponse[1], $aResponse[2]);
                 
             } else {
                 header('HTTP/1.0 503 Service Unavailable');

@@ -36,23 +36,6 @@ $oMonitor->addTag('monitoring');
 // ----------------------------------------------------------------------
 $sApproot = str_replace('\\', '/', dirname(__DIR__));
 
-/*
- * 
- * AS A DEMO: using a custom plugin:
- * 
-$oMonitor->addCheck(
-    array(
-        "name" => "check plugin",
-        "description" => "test an external plugin plugins/checkHello.php",
-        "check" => array(
-            "function" => "Hello",
-            "params" => array(
-                "message" => "Here I am",
-            ),
-        ),
-    )
-);
-*/
 
 $oMonitor->addCheck(
     array(
@@ -157,6 +140,41 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
         )
     );
 }
+
+// ----------------------------------------------------------------------
+// plugin test
+// ----------------------------------------------------------------------
+/*
+ * 
+ * AS A DEMO: using a custom plugin:
+ * 
+*/
+$oMonitor->addCheck(
+    array(
+        "name" => "plugin test",
+        "description" => "minimal test of the plugin plugins/checkHello.php",
+        "check" => array(
+            "function" => "Hello",
+            "params" => array(
+                "message" => "Here I am",
+            ),
+        ),
+    )
+);
+$oMonitor->addCheck(
+    array(
+        "name" => "plugin Load",
+        "description" => "check current load",
+        "check" => array(
+            "function" => "Loadmeter",
+            "params" => array(
+                "warning" => 1.0,
+                "error" => 3,
+            ),
+        ),
+        "worstresult" => RESULT_OK
+    )
+);
 
 // ----------------------------------------------------------------------
 

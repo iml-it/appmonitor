@@ -51,7 +51,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    protected $_sVersion = 'php-client-v0.88';
+    protected $_sVersion = 'php-client-v0.89';
 
     /**
      * config: default ttl for server before requesting the client check again
