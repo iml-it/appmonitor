@@ -175,6 +175,20 @@ $oMonitor->addCheck(
         "worstresult" => RESULT_OK
     )
 );
+$oMonitor->addCheck(
+    array(
+        "name" => "plugin ApacheProcesses",
+        "description" => "check count running Apache processes",
+        "check" => array(
+            "function" => "ApacheProcesses",
+            "params" => array(
+                "warning" => 50,
+                "error" => 100,
+            ),
+        ),
+        "worstresult" => RESULT_OK
+    )
+);
 
 // ----------------------------------------------------------------------
 

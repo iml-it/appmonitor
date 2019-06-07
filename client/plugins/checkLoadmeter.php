@@ -127,7 +127,7 @@ class checkLoadmeter extends appmonitorcheck{
                 : array(
                     'type'=>'counter',
                     'count'=>$fLoad,
-                    'type'=>'line',
+                    'visual'=>'line',
                 )
             )
         );

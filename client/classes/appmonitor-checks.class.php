@@ -49,7 +49,7 @@ if(!defined('RESULT_OK')){
  * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * 2019-06-05  0.88  axel.hahn@iml.unibe.ch  add plugins<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.89
+ * @version 0.91
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -906,10 +906,18 @@ class appmonitorcheck {
             $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database file " . $aParams["db"] . " does not exist.");
             return false;
         }
+        if(!isset($aParams['user'])){
+            $aParams['user']='';
+        }
+        if(!isset($aParams['password'])){
+            $aParams['password']='';
+        }
         try {
             // $db = new SQLite3($sqliteDB);
             // $db = new PDO("sqlite:".$sqliteDB);
             $o = new PDO("sqlite:" . $aParams["db"],
+                $aParams['user'], 
+                $aParams['password'], 
                 array(
                     PDO::ATTR_TIMEOUT => (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp,                  
                 )

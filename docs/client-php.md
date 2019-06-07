@@ -674,7 +674,7 @@ Make a database connection to a sqlite database.
 The function fails if the filename does not exist or the PDO cannot open it
 
 ```php
-$o = new PDO("sqlite:".$aParams["db"]);
+$o = new PDO("sqlite:".$aParams["db"],(...));
 ```
 
 
@@ -683,6 +683,8 @@ Parameters:
 | key      | type     | description |
 |---       |---       |---
 |db        |(string)  |full path of the sqlite database file <span class="required">(*)</span>
+|user      |(string)  |optional: username; default: empty
+|password  |(string)  |optional: password; default: empty
 |timeout   |(integer) |optional timeout in sec; default: 5
 
 	
