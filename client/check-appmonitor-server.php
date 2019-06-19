@@ -182,8 +182,6 @@ $oMonitor->addCheck(
         "check" => array(
             "function" => "ApacheProcesses",
             "params" => array(
-                "warning" => 50,
-                "error" => 100,
             ),
         ),
         "worstresult" => RESULT_OK

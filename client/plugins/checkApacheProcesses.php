@@ -33,8 +33,8 @@
  *             "function" => "ApacheProcesses",
  *             "params" => array(
  *                 "url" => "https://localhost/status",
- *                 "warning" => 30,
- *                 "error" => 50,
+ *                 "warning" => 75,
+ *                 "error" => 90,
  *             ),
  *         ),
  *         "worstresult" => RESULT_OK
@@ -106,12 +106,18 @@ class checkApacheProcesses extends appmonitorcheck{
         if($iActive===false){
             $iResult=RESULT_UNKNOWN;
         } else {
+            $sComment='';
+            $iTotal=$aProcesses['total'];
             $iResult=RESULT_OK;
-            if($iActive>$this->_iWarn){
+            if(($iActive/$iTotal*100)>$this->_iWarn){
                 $iResult=RESULT_WARNING;
+                $sComment='more than warning level '.$this->_iWarn.'%';
+            } else {
+                $sComment='less than warning level '.$this->_iWarn.'%';
             }
-            if($iActive>$this->_iError){
+            if(($iActive/$iTotal*100)>$this->_iError){
                 $iResult=RESULT_ERROR;
+                $sComment='more than error level '.$this->_iError.'%';
             }
         }
 
@@ -129,7 +135,7 @@ class checkApacheProcesses extends appmonitorcheck{
         //           
         return array(
             $iResult, 
-            ($iActive===false ? 'Apache httpd server status is not available' : 'apache processes: '.print_r($aProcesses, 1)),
+            ($iActive===false ? 'Apache httpd server status is not available' : 'apache processes: '.print_r($aProcesses, 1)).' '.$sComment,
             ($iActive===false 
                 ? array()
                 : array(

@@ -4,7 +4,7 @@
 </style>
 
 
-# [APPMONITOR](readme.md) > [CLIENT](client.md) > PHP plugins #
+# [APPMONITOR](readme.md) > [CLIENT](client.md) > [PHP-Client](client-php.md) > Write PHP plugins #
 
 Free software and Open Source from University of Bern :: IML - Institute of Medical Education
 

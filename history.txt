@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.92 2019-06-19
+    - client: ApacheProcesses - use percent values
+    - docs: moved checks to a single page each
+    - docs: added ApacheProcesses and LoadMeter
+
 v0.91 2019-06-07
     - client: fix sqlite PDO connect
     - client: add plugin: active apache processes
