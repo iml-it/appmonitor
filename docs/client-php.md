@@ -41,30 +41,12 @@ To start with a first check of another web application I suggest
 3) Add tags and notifications.
 4) Finetuning: check some edge cases and security checks.
 
-**Suggestions**
 
 If you don't know how to continue after the first simple check and  and what else to check ... 
 - check if a pre defined check exists in https://github.com/iml-it/appmonitor-clients/tree/master/client
 - locate the config
   - try to load the config - check their values.
   - if there is a class with methods to access config data use the application way
-
-To write your own checks ... these are some ideas you can pick from:
-- file check: 
-  - is a (config) file readable AND writable
-  - is a upload directory writeable?
-  - if the maintenance page is triggered by a file: does the maintenance file NOT exist
-  - verify security: is a sensitive (config) file or a temp a temp directory writeable but not accessible by http? (requires 2 checks: file and http)
-- database checks (PDO)
-  - check database connections (remark: read your config for credentials) ... to master and slaves
-- http checks
-  - check if a remote page (or web api) answers ... and optionally contains given text/ regex
-  - check if page sends the correct redirect location
-  - check if a request contains the wanted non-OK-status code, i.e. redirect with 307 or a config is NOT accessible and sends a 403 response
-- tcp checks
-  - do very basic network checks if you don't make a authenticated connect, i.e. to LDAP, SSH, ...
-- certificate
-  - use the snippet for the certificate check: this check is active if https is used only.
 
    
 # Initialisation #
@@ -221,44 +203,6 @@ $oMonitor->addTag("monitoring");
 
 # Add Checks #
 
-## General include of a check ##
-
-
-You can add several checks with the class that
-was initialized on top of the file.
-
-The class has a render method that generates the json for you.
-
-In the area between $oMonitor = new appmonitor(); and render(); you can add
-as many checks you want.
-The syntax is
-
-```php
-$oMonitor->addCheck(
-  array(
-    "name" => "[short name of the check]",
-    "description" => "[an a bit longer description]",
-    "check" => [Array for the check],
-    "worstresult" => RESULT_WARNING
-  )
-);
-```
-
-| key        | type     | description |
-|---         |---       |---
-|name        |(string)  | "id" if the check <span class="required">(*)</span>|
-|description |(string)  | a short description <span class="required">(*)</span>|
-|check       |(array)   | check to perform <span class="required">(*)</span>|
-|worstresult |(integer) | optional: limit maximum error level if the check fails<br>if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING.|
-
-
-The check contains 2 keys:
-
-	"function" => "[Name of a defined check]",
-	"params" => [key->value array; count and keys depend on the function]
-
-
-## available checks ##
 
 See [PHP-client-checks](client-php-checks.md) to get a list of all available checks.
 
@@ -317,6 +261,24 @@ DEPRECATED: This method supports 2 parameters
 | 2  | bHighlight  | \{bool\} use highligthed html instead of json; default: false; if true the response is tex/html and no valid JSON anymore |
 
 
+# Other client things #
+
+
+## Abort a check ##
+
+If you process the checks and need to exit the client with a critcal error
+you can use the method abort().
+
+This triggers a 503 service unavailable error with a given message.
+
+This method should be used if a basic element is missed to perform a useful
+check, i.e. a config file is not found.
+
+```php
+$oMonitor->abort([{string} message]);
+```
+
+
 ## Snippet: show status locally (without appmonitor server) ##
 
 To show the status page on the application server have a look to the snippet 
@@ -339,17 +301,23 @@ ob_end_clean();
 $oMonitor->renderHtmloutput($sJson);
 ```
 
-## Abort a check ##
+# What checks are useful to implement?? #
 
-If you process the checks and need to exit the client with a critcal error
-you can use the method abort().
 
-This triggers a 503 service unavailable error with a given message.
-
-This method should be used if a basic element is missed to perform a useful
-check, i.e. a config file is not found.
-
-```php
-$oMonitor->abort([{string} message]);
-```
+To write your own checks ... these are some ideas you can pick from:
+- file check: 
+  - is a (config) file readable AND writable
+  - is a upload directory writeable?
+  - if the maintenance page is triggered by a file: does the maintenance file NOT exist
+  - verify security: is a sensitive (config) file or a temp a temp directory writeable but not accessible by http? (requires 2 checks: file and http)
+- database checks (PDO)
+  - check database connections (remark: read your config for credentials) ... to master and slaves
+- http checks
+  - check if a remote page (or web api) answers ... and optionally contains given text/ regex
+  - check if page sends the correct redirect location
+  - check if a request contains the wanted non-OK-status code, i.e. redirect with 307 or a config is NOT accessible and sends a 403 response
+- tcp checks
+  - do very basic network checks if you don't make a authenticated connect, i.e. to LDAP, SSH, ...
+- certificate
+  - use the snippet for the certificate check: this check is active if https is used only.
 
