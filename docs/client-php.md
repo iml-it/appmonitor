@@ -303,18 +303,20 @@ You get an error, if
 - ssl connect fails
 
 
-In most cases you can use this snippet to check the ssl certificate of the own instance
+In most cases you can use this snippet to check the ssl certificate of the own instance.
 
 ```php
-$oMonitor->addCheck(
-	array(
-		"name" => "Certificate check",
-		"description" => "Check if SSL cert is valid and does not expire soon",
-		"check" => array(
-			"function" => "Cert",
-		),
-	)
-);
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
+    $oMonitor->addCheck(
+        array(
+            "name" => "Certificate check",
+            "description" => "Check if SSL cert is valid and does not expire soon",
+            "check" => array(
+                "function" => "Cert",
+            ),
+        )
+    );
+}
 ```
 
 
