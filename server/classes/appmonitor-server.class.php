@@ -537,7 +537,7 @@ class appmonitorserver {
                         ));
                         $oCounters->add(array(
                             'status'=>$aCheck['result'], 
-                            'value'=>str_replace('ms', '', $aCheck['time'])
+                            'value'=>str_replace('ms', '', isset($aCheck['time']) ? $aCheck['time'] : '')
                         ));
                         if(isset($aCheck['count']) || (isset($aCheck['type']) && $aCheck['type']==='counter')){
                             $sCounterId='check-'.$sIdSuffix;
