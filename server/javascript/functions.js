@@ -134,7 +134,7 @@ function setAdressbar() {
     if(url!==location.href){
         window.history.pushState({
             url: location.hash,
-            content: $('#content').html(),
+            // content: $('#content').html(),
             filter: aViewFilters
         }, 'Title', url);
     }
