@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.92
+ * @version 0.93
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.92";
+    var $_sVersion = "0.93-dev";
 
     /**
      * html code for icons in the web gui
@@ -1312,6 +1312,7 @@ class appmonitorserver_gui extends appmonitorserver {
             ))
             ;
         }
+        $sAppId=isset($sAppId) ? $sAppId : 'no-app-id';
         $sDivMoredetails='div-http-'.$sAppId;
         $sShowHide='<br><button class="btn btn-default" id="btn-plus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideDown(); $(this).hide(); $(\'#btn-minus-'.$sAppId.'\').show(); return false;"'
                     . '> '.$this->_aIco['plus'].' '.$this->_tr('btn-details').' </button>'
