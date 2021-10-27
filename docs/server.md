@@ -15,7 +15,7 @@ https://github.com/iml-it/appmonitor
 
 # Requirements #
 
-- PHP7 (up to PHP 7.3; runs on php5 but is not supported)
+- PHP7
 - php-curl
 
 The server uses 
