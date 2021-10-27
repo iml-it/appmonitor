@@ -36,8 +36,10 @@ class checkFile extends appmonitorcheck{
         
         $sDirectory = $aParams["directory"];
         if(!is_dir($sDirectory)){
-            $this->_setReturn(RESULT_ERROR, 'directory [' . $sDirectory . '] does not exist. Maybe it is wrong or is not mounted.');
-            return true;
+            return [
+                RESULT_ERROR, 
+                'directory [' . $sDirectory . '] does not exist. Maybe it is wrong or is not mounted.'
+            ];
         }
         
         $iWarn = isset($aParams["warning"]) ? $this->_getSize($aParams["warning"]) : false;

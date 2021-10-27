@@ -48,8 +48,9 @@ if(!defined('RESULT_OK')){
  * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * 2019-06-05  0.88  axel.hahn@iml.unibe.ch  add plugins<br>
+ * 2021-10-28  0.93  axel.hahn@iml.unibe.ch  add plugins<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.91
+ * @version 0.93
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -182,11 +183,19 @@ class appmonitorcheck {
         foreach (explode(",", $sKeyList) as $sKey) {
             if (!array_key_exists($sKey, $aConfig)) {
                 header('HTTP/1.0 503 Service Unavailable');
-                die('ERROR in ' . __CLASS__ . "<br>array requires the keys [$sKeyList] - but key '$sKey' was not found in config array <pre>" . print_r($aConfig, true));
+                die('<h1>503 Service Unavailable</h1>'
+                        . '<h2>Details</h2>'
+                        .__METHOD__ . " - array of check parameters requires the keys [$sKeyList] - but key <code>$sKey</code> was not found in config array."
+                        . "<pre>" . print_r($aConfig, true) .'</pre>'
+                );
             }
             if (is_null($aConfig[$sKey])) {
                 header('HTTP/1.0 503 Service Unavailable');
-                die('ERROR in ' . __CLASS__ . "<br> key '$sKey' is empty in config array <pre>" . print_r($aConfig, true));
+                die('<h1>503 Service Unavailable</h1>'
+                        . '<h2>Details</h2>'
+                        .__METHOD__ . " - key <code>$sKey</code> is empty in config array"
+                        . "<pre>" . print_r($aConfig, true) .'</pre>'
+                );
             }
         }
         return true;
@@ -220,37 +229,50 @@ class appmonitorcheck {
         $this->_aConfig = $aConfig;
         $this->_createDefaultMetadata();
 
-        $sCheck = "check" . preg_replace('/[^a-zA-Z0-9]/', '', $this->_aConfig["check"]["function"]);
+        $sCheck = preg_replace('/[^a-zA-Z0-9]/', '', $this->_aConfig["check"]["function"]);
         $aParams = array_key_exists("params", $this->_aConfig["check"]) ? $this->_aConfig["check"]["params"] : array();
-        if (method_exists($this, $sCheck)) {
-            // load as internal function
-            call_user_func(array($this, $sCheck), $aParams);
-        } else {
-            // load as plugin
-            $sPluginFile=$this->_sPluginDir.'/'.$sCheck.'.php';
-            if (file_exists($sPluginFile)) {
-                
-                require_once($sPluginFile);
-                $oPlogin = new $sCheck;
-                $aResponse=$oPlogin->run($aParams); 
-                if(!is_array($aResponse)){
-                    header('HTTP/1.0 503 Service Unavailable');
-                    die(__CLASS__ . " plugin : $sCheck does not responses an array<pre>" . print_r($aResponse, true));
-                }
-                if(count($aResponse)<2){
-                    header('HTTP/1.0 503 Service Unavailable');
-                    die(__CLASS__ . " plugin : $sCheck does not responses the minimum of 2 array values<pre>" . print_r($aResponse, true));
-                }
-                if(!isset($aResponse[2])){
-                    $aResponse[2]=array();
-                }
-                $this->_setReturn($aResponse[0], $aResponse[1], $aResponse[2]);
-                
-            } else {
-                header('HTTP/1.0 503 Service Unavailable');
-                die(__CLASS__ . " check not found: $sCheck <pre>" . print_r($aConfig, true));
-            }
+        
+        // try to load as plugin from a plugin file
+        $sPluginFile=$this->_sPluginDir.'/checks/'.$sCheck.'.php';
+        $sCheckClass = 'check'.$sCheck;
+        if (file_exists($sPluginFile)) {   
+            require_once($sPluginFile);
         }
+
+        if (!class_exists($sCheckClass)){
+            header('HTTP/1.0 503 Service Unavailable');
+            die('<h1>503 Service Unavailable</h1>'
+                    . '<h2>Details</h2>'
+                    .__METHOD__ . " - check class not found: <code>$sCheckClass</code>"
+                    . "<pre>" . print_r($aConfig, true) .'</pre>'
+                    ."<h2>Known checks</h2>\n".print_r($this->listChecks(), 1)
+            );
+        }
+            
+        $oPlogin = new $sCheckClass;
+        $aResponse=$oPlogin->run($aParams); 
+        if(!is_array($aResponse)){
+            header('HTTP/1.0 503 Service Unavailable');
+            die('<h1>503 Service Unavailable</h1>'
+                    . '<h2>Details</h2>'
+                    .__METHOD__ . " - plugin : $sCheck does not responses an array"
+                    . "<pre>INPUT " . print_r($aConfig, true) .'</pre>'
+                    . "<pre>RESPONSE " . print_r($aResponse, true) .'</pre>'
+            );
+        }
+        if(count($aResponse)<2){
+            header('HTTP/1.0 503 Service Unavailable');
+            die('<h1>503 Service Unavailable</h1>'
+                    . '<h2>Details</h2>'
+                    .__METHOD__ . " - plugin : $sCheck does not responses the minimum of 2 array values"
+                    . "<pre>INPUT " . print_r($aConfig, true) .'</pre>'
+                    . "<pre>RESPONSE " . print_r($aResponse, true) .'</pre>'
+            );
+        }
+        if(!isset($aResponse[2])){
+            $aResponse[2]=array();
+        }
+        $this->_setReturn($aResponse[0], $aResponse[1], $aResponse[2]);
 
         $this->_aData['time'] = number_format((microtime(true) - $this->_iStart) * 1000, 3) . 'ms';
         // ... and send response 
@@ -273,7 +295,7 @@ class appmonitorcheck {
             }
         }
         // return checks from plugins subdir
-        foreach(glob($this->_sPluginDir.'/check*.php') as $sPluginFile){
+        foreach(glob($this->_sPluginDir.'/checks/*.php') as $sPluginFile){
             $aReturn[str_replace('.php', '', basename($sPluginFile))] = 1;
         }
         ksort($aReturn);
@@ -358,8 +380,10 @@ class appmonitorcheck {
             $power++;
         }
         header('HTTP/1.0 503 Service Unavailable');
-        die("ERROR in space value parameter - there is no size unit in [$sValue] - allowed size units are " . implode('|', $this->_units));
-        return false;
+        die('<h1>503 Service Unavailable</h1>'
+                . '<h2>Details</h2>'
+                .__METHOD__ . " ERROR in space value parameter - there is no size unit in [$sValue] - allowed size units are " . implode('|', $this->_units)
+        );
     }
 
 
@@ -389,200 +413,16 @@ class appmonitorcheck {
                 return !!(strstr($value, $verifyValue)!==false);
                 break;
             default:
-                die("FATAL ERROR: a compare function [$sCompare] is not implemented (yet).");
+                header('HTTP/1.0 503 Service Unavailable');
+                die('<h1>503 Service Unavailable</h1>'
+                        . '<h2>Details</h2>'
+                        .__METHOD__ . " - FATAL ERROR: a compare function [$sCompare] is not implemented (yet)."
+                );
                 break;
         }
         return false;
     }
 
 
-    /**
-     * check mysql connection to a database using mysqli realconnect
-     * @param array $aParams
-     * array(
-     *     server              string   database hostname / ip address
-     *     user                string   db user
-     *     password            string   password for db user
-     *     db                  string   schema / database name
-     *     port                integer  optional: port
-     *     timeout             integer  optional timeout in sec; default: 5
-     * )
-     */
-    protected function checkMysqlConnect($aParams) {
-        $this->_checkArrayKeys($aParams, "server,user,password,db");
-        $mysqli=mysqli_init();
-        if(!$mysqli){
-            $this->_setReturn(RESULT_ERROR, 'ERROR: mysqli_init failed.');
-            return false;
-        }
-        if (!$mysqli->options(MYSQLI_OPT_CONNECT_TIMEOUT, (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp)) {
-            $this->_setReturn(RESULT_ERROR, 'ERROR: setting mysqli_init failed.');
-            return false;
-        }
-
-        $db = (isset($aParams["port"]) && $aParams["port"]) 
-                ? $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"], $aParams["port"])
-                : $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"])
-                ;
-        if ($db) {
-            $this->_setReturn(RESULT_OK, "OK: Mysql database " . $aParams["db"] . " was connected");
-            $mysqli->close();
-            return true;
-        } else {
-            $this->_setReturn(RESULT_ERROR, "ERROR: Mysql database " . $aParams["db"] . " was not connected. Error ".mysqli_connect_errno() .": ". mysqli_connect_error());
-            return false;
-        }
-    }
-    /**
-     * check connection to a database using pdo
-     * see http://php.net/manual/en/pdo.drivers.php
-     * 
-     * @param array $aParams
-     * array(
-     *     connect             string   connect string
-     *     user                string   db user
-     *     password            string   password for db user
-     *     timeout             integer  optional timeout in sec; default: 5
-     * )
-     */
-    protected function checkPdoConnect($aParams) {
-        $this->_checkArrayKeys($aParams, "connect,user,password");
-
-        try{
-            $db = new PDO(
-                $aParams['connect'], 
-                $aParams['user'], 
-                $aParams['password'], 
-                array(
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    
-                    // timeout
-                    // Not all drivers support this option; mysqli does
-                    PDO::ATTR_TIMEOUT => (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp,                  
-                    // mssql
-                    // PDO::SQLSRV_ATTR_QUERY_TIMEOUT => $this->_iTimeoutTcp,  
-                )
-            );
-            $this->_setReturn(RESULT_OK, "OK: Database was connected with PDO " . $aParams['connect']);
-            $db=null;
-            return true;
-        } catch(PDOException $e) {
-            $this->_setReturn(RESULT_ERROR, "ERROR: Database was not connected " . $aParams['connect'] . " was not connected. Error ".$e->getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * check if system is listening to a given port
-     * @param array $aParams
-     * array(
-     *     port                integer  port
-     *     host                string   optional hostname to connect; default: 127.0.0.1
-     *     timeout             integer  optional timeout in sec; default: 5
-     * )
-     * @return boolean
-     */
-    protected function checkPortTcp($aParams) {
-        $this->_checkArrayKeys($aParams, "port");
-
-        $sHost = array_key_exists('host', $aParams) ? $aParams['host'] : '127.0.0.1';
-        $iPort = (int) $aParams['port'];
-
-        // from http://php.net/manual/de/sockets.examples.php
-
-        $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if ($socket === false) {
-            $this->_setReturn(RESULT_UNKNOWN, "ERROR: $sHost:$iPort was not checked. socket_create() failed: " . socket_strerror(socket_last_error()));
-            return false;
-        }
-        // set socket timeout
-        socket_set_option(
-            $socket,
-            SOL_SOCKET,  // socket level
-            SO_SNDTIMEO, // timeout option
-            array(
-              "sec"=>(isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp, // timeout in seconds
-              "usec"=>0
-              )
-            );
-
-        $result = socket_connect($socket, $sHost, $iPort);
-        if ($result === false) {
-            $this->_setReturn(RESULT_ERROR, "ERROR: $sHost:$iPort failed. " . socket_strerror(socket_last_error($socket)));
-            socket_close($socket);
-            return false;
-        } else {
-            $this->_setReturn(RESULT_OK, "OK: $sHost:$iPort was connected.");
-            socket_close($socket);
-            return true;
-        }
-    }
-
-    /**
-     * most simple check: set given values
-     * Use this function to add a counter
-     * 
-     * @param array $aParams
-     * array keys:
-     *     value               string   description text
-     *     result              integer  RESULT_nn
-     * 
-     *     brainstorming for a future release
-     * 
-     *     "counter"  optioal: array of counter values
-     *         - label         string   a label
-     *         - value         float    a number
-     *         - type          string   one of simple | bar | line
-     * 
-     */
-    protected function checkSimple($aParams) {
-        $this->_checkArrayKeys($aParams, "result,value");
-        $this->_setReturn((int) $aParams["result"], $aParams["value"]);
-        foreach(array('type', 'count', 'visual') as $sMyKey){
-            if(isset($aParams[$sMyKey])){
-                $this->_aData[$sMyKey]=$aParams[$sMyKey];
-            }
-        }
-        return true;
-    }
-
-    /**
-     * check sqlite connection
-     * @param array $aParams
-     * array(
-     *     db                  string   full path of sqlite file 
-     *     timeout             integer  optional timeout in sec; default: 5
-     * )
-     * @return boolean
-     */
-    protected function checkSqliteConnect($aParams) {
-        $this->_checkArrayKeys($aParams, "db");
-        if (!file_exists($aParams["db"])) {
-            $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database file " . $aParams["db"] . " does not exist.");
-            return false;
-        }
-        if(!isset($aParams['user'])){
-            $aParams['user']='';
-        }
-        if(!isset($aParams['password'])){
-            $aParams['password']='';
-        }
-        try {
-            // $db = new SQLite3($sqliteDB);
-            // $db = new PDO("sqlite:".$sqliteDB);
-            $o = new PDO("sqlite:" . $aParams["db"],
-                $aParams['user'], 
-                $aParams['password'], 
-                array(
-                    PDO::ATTR_TIMEOUT => (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp,                  
-                )
-            );
-            $this->_setReturn(RESULT_OK, "OK: Sqlite database " . $aParams["db"] . " was connected");
-            return true;
-        } catch (Exception $e) {
-            $this->_setReturn(RESULT_ERROR, "ERROR: Sqlite database " . $aParams["db"] . " was not connected. " . $e->getMessage());
-            return false;
-        }
-    }
 
 }
