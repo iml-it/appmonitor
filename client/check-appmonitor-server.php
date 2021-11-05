@@ -148,7 +148,6 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
  * 
  * AS A DEMO: using a custom plugin:
  * 
-*/
 $oMonitor->addCheck(
     array(
         "name" => "plugin test",
@@ -187,6 +186,7 @@ $oMonitor->addCheck(
         "worstresult" => RESULT_OK
     )
 );
+*/
 
 // ----------------------------------------------------------------------
 
