@@ -1049,14 +1049,16 @@ class appmonitorserver_gui extends appmonitorserver {
 
 
         // --- http status code
-        $sStatusIcon=$aEntries['result']['httpstatus']
-                ? $aEntries['result']['httpstatus']>=400 
+        $sStatusIcon=($aEntries['result']['httpstatus']
+                ? ($aEntries['result']['httpstatus']>=400
                     ? $this->_aIco['error']
-                    : $aEntries['result']['httpstatus']>=300 
+                    : ($aEntries['result']['httpstatus']>=300
                         ? $this->_aIco['warning']
                         : $this->_aIco['ok']
+                        )
+                    )
                 : $this->_aIco['error']
-                ;
+                );
 
         // --- notifications & uptime for this webapp
         $aLogs = $this->oNotifcation->getLogdata(array('appid'=>$sAppId));
