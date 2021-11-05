@@ -20,7 +20,7 @@
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
  * 
  */
-class checkFile extends appmonitorcheck{
+class checkDiskfree extends appmonitorcheck{
     /**
      * check free disk space on a given directory
      * @param array $aParams
