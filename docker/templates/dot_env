@@ -1,0 +1,18 @@
+# TARGET: docker/.env
+# ======================================================================
+#
+# {{generator}}
+# values to be used in docker-composer.yml
+#
+# ======================================================================
+
+# ----- application
+APP_NAME={{APP_NAME}}
+
+# uid of www-data in the docker container
+DOCKER_USER_UID={{DOCKER_USER_UID}}
+
+APP_PORT={{APP_PORT}}
+WEBROOT={{WEBROOT}}
+
+# ======================================================================

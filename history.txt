@@ -1,6 +1,14 @@
 
 HISTORY
 
+v0.93 2021-11-xx
+    - filestructur was changed: 
+        - all files were moved to subdir public_html
+        - added subdir docker for local development environment (work in progress)
+    - server: web UI is PHP8 compatible
+    - client: each client check is now in a single file below client/plugins/checks
+    - client: httpContent was extended by curl error
+
 v0.92 2019-06-19
     - client: ApacheProcesses - use percent values
     - docs: moved checks to a single page each
