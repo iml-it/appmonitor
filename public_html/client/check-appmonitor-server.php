@@ -12,6 +12,7 @@
  * ----------------------------------------------------------------------
  * 2019-04-29  aded check for ssl cert; removed a check
  * 2019-05-17  aded check http to config- and tmp dir
+ * 2021-11-nn  removed all checks ... created as single files
  */
 
 require_once('classes/appmonitor-client.class.php');
