@@ -135,7 +135,7 @@ class appmonitorserver {
      * (re) load config and get all urls to fetch (and all other config items)
      * This method 
      * - fills $this->_aCfg
-     * - newly initializes $this->oNotifcation
+     * - newly initializes $this->oNotification
      */
     public function loadConfig() {
         $aUserdata = array();
@@ -166,7 +166,7 @@ class appmonitorserver {
             $this->curl_opts[CURLOPT_TIMEOUT]=(int)$this->_aCfg['curl']['timeout'];
         }
 
-        $this->oNotifcation = new notificationhandler(array(
+        $this->oNotification = new notificationhandler(array(
             'lang' => $this->_aCfg['lang'],
             'serverurl' => $this->_aCfg['serverurl'],
             'notifications' => $this->_aCfg['notifications']
@@ -254,7 +254,7 @@ class appmonitorserver {
         if ($sUrl) {
             if (($key = array_search($sUrl, $this->_aCfg["urls"])) !== false) {
                 $sAppId = $this->_generateUrlKey($sUrl);
-                $this->oNotifcation->deleteApp($sAppId);
+                $this->oNotification->deleteApp($sAppId);
 
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
                 $oCache->delete();
@@ -441,6 +441,37 @@ class appmonitorserver {
         return '<span title="'.$sWebapp."\n".$aEntries["result"]["url"].'">'.$sWebapp.' '.$sHost.'</span>';
     }
     
+    /**
+     * detect outdated application checks by reading cached data
+     * if age (since last write) is larger 2 x TTL then it uis marked as outdated.
+     * REMARK: 
+     */
+    protected function _detect_outdated_appchecks(){
+        foreach ($this->_urls as $sKey => $sUrl) {
+            $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
+
+            $this->_data[$sKey] = $oCache->read();
+
+            $iAge=isset($this->_data[$sKey]["result"]["ts"]) ? (time() - $this->_data[$sKey]["result"]["ts"]) : 0;
+            if($iAge 
+                    && $iAge>2*$this->_data[$sKey]["result"]["ttl"]
+                    && $this->_data[$sKey]["result"]["error"] != $this->_tr('msgErr-Http-outdated')
+            ){
+                $this->_data[$sKey]["result"]["error"] = $this->_tr('msgErr-Http-outdated');
+                $this->_data[$sKey]["result"]["result"] = RESULT_UNKNOWN;
+                if(!isset($this->_data[$sKey]["result"]["outdated"])){
+                    $this->_data[$sKey]["result"]["outdated"] = true;
+
+                    /*
+                    // write to cache that notification class can read from it
+                    $oCache->write($this->_data[$sKey], 0);
+                    $this->oNotification->setApp($sKey);
+                    $this->oNotification->notify();
+                    */
+                }
+            }
+         }
+    }
 
     /**
      * get all client data; it fetches all given urls
@@ -462,20 +493,6 @@ class appmonitorserver {
                 // age is bel['result']['error']ow ttl ... read from Cache 
                 $this->_data[$sKey] = $oCache->read();
                 $this->_data[$sKey]["result"]["fromcache"] = true;
-                
-                $iAge=isset($this->_data[$sKey]["result"]["ts"]) ? (time() - $this->_data[$sKey]["result"]["ts"]) : 0;
-                if($iAge && $iAge>2*$this->_data[$sKey]["result"]["ttl"]){
-                    $this->_data[$sKey]["result"]["error"] = $this->_tr('msgErr-Http-outdated');
-                    $this->_data[$sKey]["result"]["result"] = RESULT_UNKNOWN;
-                    if(!isset($this->_data[$sKey]["result"]["outdated"])){
-                        $this->_data[$sKey]["result"]["outdated"] = true;
-                        
-                        // write to cache that notification class can read from it
-                        $oCache->write($this->_data[$sKey], 0);
-                        $this->oNotifcation->setApp($sKey);
-                        $this->oNotifcation->notify();
-                    }
-                }
             }
         }
         // fetch all non cached items
@@ -496,7 +513,12 @@ class appmonitorserver {
                 }
                 // detect error
                 $iHttpStatus = $this->_getHttpStatus($aResult['response_header']);
-                $sError = !$aResult['response_header'] ? $this->_tr('msgErr-Http-request-failed') : ((!$iHttpStatus || $iHttpStatus < 200 || $iHttpStatus > 299) ? $this->_tr('msgErr-Http-error') : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
+                $sError = !$aResult['response_header'] 
+                        ? $this->_tr('msgErr-Http-request-failed') 
+                        : (
+                                (!$iHttpStatus || $iHttpStatus < 200 || $iHttpStatus > 299) 
+                                    ? $this->_tr('msgErr-Http-error') 
+                                    : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
                         )
                 ;
 
@@ -565,10 +587,11 @@ class appmonitorserver {
                 $this->_data[$sKey] = $aClientData;
 
 
-                $this->oNotifcation->setApp($sKey);
-                $this->oNotifcation->notify();
+                $this->oNotification->setApp($sKey);
+                $this->oNotification->notify();
             }
         }
+        $this->_detect_outdated_appchecks();
         return true;
     }
 

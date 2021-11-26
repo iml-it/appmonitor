@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.93-dev";
+    var $_sVersion = "0.93";
 
     /**
      * html code for icons in the web gui
@@ -81,6 +81,7 @@ class appmonitorserver_gui extends appmonitorserver {
         'del' => '<i class="fas fa-trash"></i>',
         'plus' => '<i class="fas fa-plus"></i>',
         'close' => '<i class="fas fa-times"></i>',
+        'save' => '<i class="fas fa-paper-plane"></i>',
     );
 
     // ----------------------------------------------------------------------
@@ -311,7 +312,7 @@ class appmonitorserver_gui extends appmonitorserver {
      */
     protected function _generateWebappTiles($sAppId) {
         $aHostdata = $this->_data[$sAppId]['result'];
-        $this->oNotifcation->setApp($sAppId);
+        $this->oNotification->setApp($sAppId);
         $sReturn = '';
         $oA=new renderadminlte();
 
@@ -334,7 +335,7 @@ class appmonitorserver_gui extends appmonitorserver {
         foreach($this->_aCfg['view']['appdetails'] as $key=>$bVisibility){
             switch ($key) {
                 case 'appstatus':
-                    $aLast = $this->oNotifcation->getAppLastResult();
+                    $aLast = $this->oNotification->getAppLastResult();
                     $sSince = $aLast && (int) $aLast['result']['ts'] ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['result']['ts']) : '';
                     $sReturn .= (isset($aHostdata['result']) && $bVisibility 
                         ? $this->_getTile(array(
@@ -394,13 +395,13 @@ class appmonitorserver_gui extends appmonitorserver {
                     ;
                 break;
                 case 'receiver':
-                    $this->oNotifcation->setApp($sAppId, $this->_data[$sAppId]);
-                    $aEmailNotifiers = $this->oNotifcation->getAppNotificationdata('email');
-                    $aSlackChannels = $this->oNotifcation->getAppNotificationdata('slack', 1);
+                    $this->oNotification->setApp($sAppId, $this->_data[$sAppId]);
+                    $aEmailNotifiers = $this->oNotification->getAppNotificationdata('email');
+                    $aSlackChannels = $this->oNotification->getAppNotificationdata('slack', 1);
 
                     // $aPeople=array('email1@example.com', 'email2@example.com');
                     $sMoreNotify = (count($aEmailNotifiers) ? '<span title="' . implode("\n", $aEmailNotifiers) . '">' . count($aEmailNotifiers) . ' x ' . $this->_aIco['notify-email'] . '</span> ' : '')
-                            // .'<pre>'.print_r($this->oNotifcation->getAppNotificationdata(), 1).'</pre>'
+                            // .'<pre>'.print_r($this->oNotification->getAppNotificationdata(), 1).'</pre>'
                             . (count($aSlackChannels) ? '<span title="' . implode("\n", array_keys($aSlackChannels)) . '">' . count($aSlackChannels) . ' x ' . $this->_aIco['notify-slack'] . '</span> ' : '')
                     ;
                     $iNotifyTargets = count($aEmailNotifiers) + count($aSlackChannels);
@@ -416,7 +417,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     ;
                 break;
                 case 'notification':
-                    $sSleeping = $this->oNotifcation->isSleeptime();
+                    $sSleeping = $this->oNotification->isSleeptime();
                     $sReturn.= $bVisibility 
                         ? $this->_getTile(array(
                             'result' => ($sSleeping ? RESULT_WARNING : false),
@@ -523,7 +524,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     ;
                 break;
                 case 'notification':
-                    $sSleeping = $this->oNotifcation->isSleeptime();
+                    $sSleeping = $this->oNotification->isSleeptime();
                     $sReturn.= $bVisibility 
                         ? $this->_getTile(array(
                             'result' => ($sSleeping ? RESULT_WARNING : false),
@@ -669,7 +670,6 @@ class appmonitorserver_gui extends appmonitorserver {
                     array_key_exists("result", $aEntries) && array_key_exists("url", $aEntries["result"]) && $sUrl == $aEntries["result"]["url"]
                     )
             ) {
-
                 if (
                         $aEntries["result"]["error"]
                 ) {
@@ -716,7 +716,7 @@ class appmonitorserver_gui extends appmonitorserver {
      */
     protected function _generateNotificationlog($aLogs=false, $sTableClass='datatable-notifications', $bShowDuration=false) {
         if($aLogs===false){
-            $aLogs = $this->oNotifcation->getLogdata();
+            $aLogs = $this->oNotification->getLogdata();
         }
         if(!count($aLogs)){
             return $this->_tr('Notifications-none');
@@ -1061,7 +1061,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 );
 
         // --- notifications & uptime for this webapp
-        $aLogs = $this->oNotifcation->getLogdata(array('appid'=>$sAppId));
+        $aLogs = $this->oNotification->getLogdata(array('appid'=>$sAppId));
 
         $aUptime=$this->_getUptime($aLogs);
         // echo '<pre>'.print_r($aUptime, 1).'</pre>';
@@ -1145,17 +1145,17 @@ class appmonitorserver_gui extends appmonitorserver {
                 
         // --- debug infos 
         if ($this->_aCfg['debug']) {
-            $this->oNotifcation->setApp($sAppId);
+            $this->oNotification->setApp($sAppId);
             $sDebugContent='';
 
             foreach ($this->_getResultDefs() as $i) {
                 $sMgIdPrefix = 'changetype-' . $i;
                 $sDebugContent .= $this->_tr('changetype-' . $i)
                         . '<pre>'
-                        . '' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.logmessage'), 1)) . '<hr>'
-                        . 'TO: ' . implode('; ', $this->oNotifcation->getAppNotificationdata('email')) . '<br>'
-                        . '<strong>' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.email.subject'), 1)) . '</strong><br>'
-                        . '' . htmlentities(print_r($this->oNotifcation->getReplacedMessage($sMgIdPrefix . '.email.message'), 1)) . '<br>'
+                        . '' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.logmessage'), 1)) . '<hr>'
+                        . 'TO: ' . implode('; ', $this->oNotification->getAppNotificationdata('email')) . '<br>'
+                        . '<strong>' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.subject'), 1)) . '</strong><br>'
+                        . '' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.message'), 1)) . '<br>'
                         . '</pre>';
             }
 
@@ -1175,7 +1175,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 .$oA->getSectionRow($oA->getSectionColumn(
                     $oA->getBox(array(
                             'title'=>$this->_tr('Preview-of-messages'),
-                            'text'=>'<pre>' . htmlentities(print_r($this->oNotifcation->getMessageReplacements(), 1)) . '</pre>'
+                            'text'=>'<pre>' . htmlentities(print_r($this->oNotification->getMessageReplacements(), 1)) . '</pre>'
 
                     ))
                     , 12))
@@ -1270,6 +1270,10 @@ class appmonitorserver_gui extends appmonitorserver {
                 </section>'
                 ;
     }
+    
+    private function _renderSelect($aOptions, $sAcive){
+        
+    }
     /**
      * return html code for setup page
      * @return string
@@ -1314,6 +1318,21 @@ class appmonitorserver_gui extends appmonitorserver {
             ))
             ;
         }
+        
+        $sSetup=$sFormOpenTag . '<input type="hidden" name="action" value="savesettings">';
+
+        $sSetup.='<h4>'.$this->_tr('hint').'</h4><p>'
+                . $this->_tr('settings-hint') 
+                . '</p>';
+        /*  
+        // add elements
+
+        $sSetup.='<button class="btn btn-success" '
+                                // . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
+                                . '>' . $this->_aIco['save'].' '.$this->_tr('btn-save') 
+                            . '</button>';
+        $sSetup.='</form>';
+        */
         $sAppId=isset($sAppId) ? $sAppId : 'no-app-id';
         $sDivMoredetails='div-http-'.$sAppId;
         $sShowHide='<br><button class="btn btn-default" id="btn-plus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideDown(); $(this).hide(); $(\'#btn-minus-'.$sAppId.'\').show(); return false;"'
@@ -1330,7 +1349,8 @@ class appmonitorserver_gui extends appmonitorserver {
                             // box for adding new client url
                             $oA->getBox(array(
                                 'title'=>$this->_tr('Setup-configuration'),
-                                'text'=> '<p>TODO: form elements</p>'
+                                'text'=> ''
+                                    . $sSetup
                                     . $sShowHide
                                     . '<div id="'.$sDivMoredetails.'" style="display: none;">'
                                         . '<pre>'.print_r($this->_aCfg, 1).'</pre>'
