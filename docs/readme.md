@@ -13,7 +13,7 @@ The application monitor is an additional tool to the classic system monitoring o
 
 # Features #
 
-- PHP 7 on server (clients can be implemented in other languages too)
+- PHP 7 or 8 on server (clients can be implemented in other languages too)
 - small: 400 kb + docs; no database required
 
 Server webgui
