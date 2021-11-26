@@ -1,0 +1,214 @@
+{
+    "gui":{
+        "Reload": "Reload",
+        "Reload-hint": "Reload the page",
+        "Reload-every": "Auto-Reload is every %ss",
+
+        "All-webapps": "Web applications",
+        "All-webapps-header": "Web applications",
+        "All-webapps-hint": "In the section below you see a list of web applications. They are in alphabetic order grouped by the status (erros and warnings first).<br>Click on the labeltext to see details.<br>You can filter the view by typing in the freetext filter field or clicking a label.",
+
+
+        "Checks": "Checks",
+        "Checks-header": "Overview with all Checks",
+        
+        "Checks-on-webapp": "Checks for webapp",
+        "Checks-total": "Checks total",
+
+        "Duration": "Duration",
+
+        "Notifications": "Notifications",
+        "Notifications-header": "Log of last changes",
+        "Notifications-none": "No messages available.",
+        "Notify-address": "Addresses to notify",
+
+        "Setup": "Setup",
+        "Setup-add-client": "Add client url",
+        "Setup-add-client-pretext": "Enter an Appmonitor client url to add a new monitor:",
+        "Setup-client-list": "List of existing Clients",
+        "Setup-configuration": "Configuration",
+
+        "About": "About...",
+        "About-title": "Name of this project <strong>%s</strong>.",
+        "About-text": "This is Free software and OpenSource.<br>License: GNU Lesser General Public License v3.0<br>University of Bern :: IML - Institute of Medical Education.<br><br>The <strong>client</strong> component makes checks and creates a status file in JSON syntax.<br>The <strong>server</strong> component fetches the health status information data from (all your) application servers and renders a total view and sends notifications to the related teams.",
+        "About-projecturl": "The project is public for all and located at <a href=\"%s\">%s</a>.",
+        "About-docs": "The <a href=\"%s\">Documentation</a> is available as markdown. You can read it online on the project url or as <em>readme.md</em> in the downloaded archive.",
+
+        "Chart-graph": "Graph",
+        "Chart-graph-description": "Last response times of the monitoring request beginning with connect time up to finish of the transfer.",
+        "Chart-time": "Time",
+        "Chart-responsetime": "Responsetime [ms]",
+        
+        "Debug": "Debug",
+        "Debug-config": "Config",
+        "Debug-urls": "Urls",
+        "Debug-clientdata": "Client data",
+        "Debug-icons": "Icons",
+        "Debug-icons-html": "html code",
+        "Debug-icons-preview": "Preview",
+        "Debug-notificationlog": "Notification history Log",
+
+        "Appstatus": "Status of application",
+        "Host": "Host", 
+        "Hosts": "Hosts", 
+        "Webapp": "Web application",
+        "Webapps": "Web applications",
+        "Timestamp": "Timestamp", 
+        "TTL": "TTL", 
+        "Check": "Check", 
+        "Description": "Description", 
+        "Result": "Result", 
+        "Output": "Output",
+        "Count": "Counter",
+        "Url": "Url", 
+
+        "Error-message": "error message",
+        "Http-details": "Http details of the last app monitor request",
+        "Http-status": "Http status",
+        "Http-header": "Http response header",
+        
+        "Change": "Change", 
+        "Message": "Message", 
+        "Tag-filter": "Filter by tag", 
+
+        "Client-source-data": "Source data from the client",
+        "age-of-page": "age",
+        "age-of-result": "age of result",
+        "since": "since",
+        "unknown": "unknown",
+
+        "Result-checks": "Checks",
+        "Resulttype-total": "Total",
+        
+        "Preview-of-messages": "Preview of messages to send (Debug is enabled)",
+        "Preview-replacements": "Replacements: placeholder and its current texts",
+        "Preview-emails": "Preview of email texts",
+        
+        "Sleepmode": "Sleep mode",
+        "Sleepmode-on": "Zzz ... notifications OFF",
+        "Sleepmode-off": "Notication is ON",
+        
+        "Time": "Time",
+        "Time-for-all-checks": "time for all checks",
+
+        "Uptime": "Uptime",
+
+        "Validator-ok": "Validation successful.",
+        "Validator-error": "Validation errors",
+        "Validator-error-title": "Found validation errors: %s",
+        "Validator-warning": "Validation warnings",
+        "Validator-request-error": "Request error",
+        "Validator-warning-title": "Found validation warnings: %s",
+        
+        "hint": "Hint",
+        "settings-hint": "You can edit the file <code>server/config/appmonitor-server-config.json</code><br>OR<br>on command line go to [approot]/server/ and call <code>php ./cli.php</code> to view or edit values.",
+            "settings-thene": "Theme",
+            "settings-lang": "Language",
+            "settings-debug": "Debugging (for developers)",
+            "settings-serverurl": "Server url",
+            "settings-pagereload": "Reload time of pages in [s]",
+            "settings-servicecache": "Caching",
+            "settings-curl-timeout": "Timeout for fetching application checks",
+            "settings-notifications": "Notifications",
+            "settings-notifications-from": "Sender",
+            "settings-notifications-to": "To",
+            "settings-view": "Visisble elements",
+            "settings-view-overview": "Tiles for overview",
+            "settings-view-overview-webapps": "Web applications",
+            "settings-view-overview-hosts": "Hosts",
+            "settings-view-overview-checks": "Checks",
+            "settings-view-overview-notivication": "Notifications enabled",
+            "settings-view-appdetails": "Details for an application",
+            "settings-view-appdetails-appstatus": "Total status of application",
+            "settings-view-appdetails-httpcode": "Http code",
+            "settings-view-appdetails-age": "Age of check",
+            "settings-view-appdetails-checks": "Count of checks",
+            "settings-view-appdetails-times": "time for all checks",
+            "settings-view-appdetails-receiver": "Addresses to notify",
+            "settings-view-appdetails-notification": "Notifications enabled",
+
+        "btn-addUrl": "add",
+        "btn-close": "close",
+        "btn-details": "show details",
+        "btn-hide-details": "hide details",
+
+        "btn-deleteUrl": "delete",
+        "btn-deleteUrl-confirm": "Are you sure that you want to delete the url\\n\\n%s\\n\\n?",
+        "btn-save": "Save",
+
+        "msgErr-nocheck-welcome": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>To add an url to check go to the Setup.</p>",
+        "msgErr-nocheck": "No check was defined yet.",
+        "msgErr-demosite": "This is a demo website. Changing the config is not possible here.",
+        "msgErr-missing-meta-website": "Missing &quot;meta&quot; - &quot;website&quot;",
+
+
+        "msgErr-Http-request-failed": "Http Request to the appmonitor check failed: host or service is unreachable.",
+        "msgErr-Http-error": "The response contains an error code: the Http status code is not a 2xx.",
+        "msgErr-Http-no-jsondata": "The Appmonitor client sent a response but this is no JSON.",
+        "msgErr-Http-outdated": "The information about the application is out of date.",
+
+        "msgOK-Url-was-added": "URL added: %s",
+        "msgErr-Url-not-added-no-appmonitor": "URL not added: %s<br>it does not seems to be an Appmonitor url - no JSON data was found.<br>Http response header: %s",
+        "msgErr-Url-was-added-already": "Skip. URL was added already: %s.",
+        "msgErr-Url-not-removed-it-does-not-exist": "URL cannot be removed - it doees not exist in the config: %s.",
+        "msgOK-Url-was-removed": "URL was removed: %s",
+    
+    
+        "msgErr-missing-section-checks":"There is no section &quot;checks&quot; in the response. This can be the result of a timeout or an error.",
+        "msgErr-missing-key-checks-name":"checks > %s > name is not set - this check has no identifier.",
+        "msgErr-missing-key-checks-result":"checks > %s > result is not set - this check has no result.",
+        
+        "msgWarn-missing-key-checks-description":"checks > %s > description is not set - this check has no description about its action/ reason.",
+        "msgWarn-missing-key-checks-value":"checks > %s > value is not set - the result of this check has no explaination of its result.",
+        "msgWarn-missing-key-checks-time":"checks > %s > time is not set - the check has no measurement data. This is just a hint: measuring data are optional.",
+    
+
+        "msgErr-missing-section-meta":"There is no section &quot;meta&quot; in the response (request failed?).",
+        "msgErr-missing-key-meta-host":"No hostname was set in meta > host",
+        "msgErr-missing-key-meta-website":"No website / name of application was set meta > website",
+        "msgErr-missing-key-meta-result":"The check does not have a result in meta > result",
+        
+        "msgWarn-missing-key-meta-ttl":"No ttl value was set with meta > ttl. Using the default.",
+        "msgWarn-missing-key-meta-notifications":"No section meta > notifications was set. If an error occurs no notification will be sent to developers or product owners.",
+        "msgWarn-no-notifications":"In the section meta > notification > [target] is no notifier. If an error occurs no notification will be sent to developers or product owners.",
+        "msgWarn-missing-key-meta-time":"No measurement - no value was set with meta > time.",
+    
+        "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
+    },
+    "notifications":{
+        
+        "changetype-0.logmessage":    "Webapp has no change: __URL__.",
+        "changetype-0.email.subject": "Webapp has no change: __URL__.",
+        "changetype-0.email.message": "Webapp has no change: __URL__.",
+        
+        "changetype-1.logmessage":    "Webapp was added to the Appmonitor: __URL__. __ERROR__",
+        "changetype-1.email.subject": "[Appmonitor] :: webapp was added: __URL__.",
+        "changetype-1.email.message": "Welcome! The webapp __URL__ was added in the Appmonitor. From now on you will get notifications if the status changes.\n\nurl: __MONITORURL__\n\n__CHECKS__",
+        
+        "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__. __ERROR__",
+        "changetype-2.email.subject": "[Appmonitor] :: __CHANGE__ __LAST-RESULT__ --> __RESULT__ - __URL__",
+        "changetype-2.email.message": "__TIME__\n__WEBSITE__ @ __HOST__\nStatus has changed from __LAST-RESULT__ to __RESULT__.\n\nsee current status on: __MONITORURL__\n\n__CHECKS__",
+        
+        "changetype-3.logmessage":    "Webapp was deleted from Appmonitor: __URL__.",
+        "changetype-3.email.subject": "[Appmonitor] :: webapp was DELETED: __URL__.",
+        "changetype-3.email.message": "__TIME__\nThe webapp __URL__ was deleted in the Appmonitor. You will not get notifications about status changes anymore. If this is an error, then contact the sysadmin.",
+        
+        "email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__.",
+
+        "msgErr-missing-section-checks":"There is no section &quot;checks&quot; in the response. This can be the result of a timeout or an error.",
+        
+        "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
+    },
+
+    "changetype-0": "no change",
+    "changetype-1": "new",
+    "changetype-2": "change",
+    "changetype-3": "deleted",
+    
+    "Resulttype-0": "OK",
+    "Resulttype-1": "Unknown",
+    "Resulttype-2": "Warning",
+    "Resulttype-3": "Error",
+    
+    "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
+}

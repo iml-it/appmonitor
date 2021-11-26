@@ -3,7 +3,6 @@
 	.optional{color:#888;}
 </style>
 
-
 # [APPMONITOR](readme.md) > [CLIENT](client.md) > PHP client #
 
 Free software and Open Source from University of Bern :: IML - Institute of Medical Education
@@ -12,43 +11,41 @@ https://github.com/iml-it/appmonitor
 
 - - -
 
-
 # Requirements #
 
 (For the delivered PHP client - you can implement a client in other languages)
-- PHP7 (up to PHP 7.3; runs on php5 but is not supported)
 
+- PHP7 (up to PHP 8; runs on php5 but is not supported)
 
 # Checks on client side #
-
 
 ## Get started ##
 
 The project package contains the PHP client and the server. The PHP client is used for the Appmonitor server to verify its own installation. You should start with the server installation.
 see [Server](server.md)
 
-To use the client in any of your installations you need the files from the "client" subdir only.
+To use the client in any of your installations you need the files from the "public_html/client" subdir only.
 
 1) Below a document root of a website create a directory [webroot]/appmonitor/
-2) copy all files of [package]/client/ into [webroot]/appmonitor/
+2) copy all files of [package]/public_html/client/ into [webroot]/appmonitor/
 3) verify the installation with your browser
-   http://localhost/appmonitor/client/check-appmonitor-server.php
-   You should see some JSON output
+   <http://localhost/appmonitor/client/check-appmonitor-server.php>
+   You should see some JSON output.
 
-To start with a first check of another web application I suggest 
+To start with a first check of another web application I suggest
+
 1) start with a single "simple" check and response just an OK. Then add the client url in the appminitor server backend. The most primitive check in the monitoring is better than no monitoring. 
 2) Step by step add more checks to verify that all needed things and services for the application work. 
 3) Add tags and notifications.
 4) Finetuning: check some edge cases and security checks.
 
-
 If you don't know how to continue after the first simple check and  and what else to check ... 
+
 - check if a pre defined check exists in https://github.com/iml-it/appmonitor-clients/tree/master/client
 - locate the config
   - try to load the config - check their values.
   - if there is a class with methods to access config data use the application way
 
-   
 # Initialisation #
 
 Have a look to the example in ./client/index.sample.php
@@ -62,12 +59,11 @@ require_once('appmonitor-client.class.php');
 $oMonitor = new appmonitor();
 ```
 
-This will set these default of client metadata with 
+This will set these default of client metadata with
+
 - hostname
-- dominaname of website and 
+- dominaname of website and
 - ttl of 300 sec (= 5 min)
-
-
 
 ## Security ##
 
@@ -80,12 +76,11 @@ If the http request does not come from one of the pre defined ip ranges the requ
 
 ```php
 $oMonitor->checkIp(array(
-	'127.0.0.1',
-	'::1',
-	'192.168.',
+  '127.0.0.1',  
+  '::1',
+  '192.168.',
 ));
 ```
-
 
 Usage of a token
 
@@ -96,17 +91,14 @@ You can define a token that the server must send in the GET request. Without or 
 ... to allow response with correct token only, i.e.
 http://localhost/appmonitor/client/mycheck.php?token=12345678
 
-
-
-	
 # Add Metadata #
 
 In the meta section will be set the values with the following methods.
 
-The appmonitor client has 
+The appmonitor client has
+
 - add* functions to add values - "as many as you want" by repeating the method
 - set* function to set a single attribute - by repeating the method the value will be overwritten
-
 
 ## host ##
 
@@ -121,7 +113,6 @@ $oMonitor->setHost();
 $oMonitor->setHost("web-01.example.com");
 ```
 
-
 ## website ##
 
 Set a name for this website or application and its environment (dev, test, prod).
@@ -129,7 +120,6 @@ If you have several application in subdirectories, i.e. /blog,  /shop...
 then you should the path or any description to identify them too
 
 If no argument is given the name of HTTP_HOST will be used.
-
 
 ```php
 // set the application manually
@@ -141,6 +131,7 @@ $oMonitor->setHost("Wordpress blog");
 ```
 
 **Suggestion**
+
 - Verify the displayed name in the starting page of the server web gui: if names too similiar then set something more unique.
 
 ## TTL ##
@@ -154,8 +145,7 @@ $oMonitor->setTTL(60);
 **Suggestions**
 - You can start with 60 (=1 min) or 300 (5 min).
 - If you test new checks then set it temporarely to something small, i.e. 5 to get a fresh view with every browser refresh.
-	
-	
+
 ## Notification ##
 
 You have these notification possibilities to get informed if a service is down ... or available again.

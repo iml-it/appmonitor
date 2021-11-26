@@ -7,51 +7,52 @@
 
 OPEN SOURCE from University of Bern :: IML - Institute of Medical Education
 
-https://github.com/iml-it/appmonitor
-
+<https://github.com/iml-it/appmonitor>
 
 - - -
 
-
 # Requirements #
 
-- PHP7 (up to PHP 7.3; runs on php5 but is not supported)
+- PHP7 or 8
 - php-curl
 
-The server uses 
+The server uses
 
-- [ahCache] (https://www.axel-hahn.de/docs/ahcache/index.htm) class to store 
+- [ahCache] (<https://www.axel-hahn.de/docs/ahcache/index.htm>) class to store
    serialized data as file (included)
-- [cdnorlocal] (https://www.axel-hahn.de/docs/cdnorlocal/index.htm)
+- [cdnorlocal] (<https://www.axel-hahn.de/docs/cdnorlocal/index.htm>)
 
 ... and loads from CDNJS (but could be stored locally too):
-- [AdminLTE] (https://adminlte.io/)
-- [chartJs] (https://www.chartjs.org/)
-- [jQuery] (https://jquery.com/)
-- [Datatables plugin] (https://datatables.net/)
-- [Font Awesome] (https://fontawesome.com/)
 
+- [AdminLTE] (<https://adminlte.io/>)
+- [chartJs] (<https://www.chartjs.org/>)
+- [jQuery] (<https://jquery.com/>)
+- [Datatables plugin] (<https://datatables.net/>)
+- [Font Awesome] (<https://fontawesome.com/>)
 
 # Installation #
 
 ## Install the server ##
-Below a document root of a website create a directory [webroot]/appmonitor/
-- copy all files of the archive into [webroot]/appmonitor/
-- verify the installation with your browser 
-  http://localhost/appmonitor/server/
+
+Below a document root of a website create a directory [webroot]/appmonitor/.
+
+Remark: sure it works to install the server into webroot.
+
+- copy all files of the public_html subdir from this archive into [webroot]/appmonitor/
+- verify the installation with your browser
+  <http://localhost/appmonitor/server/>
   You will see a welcome message.
 - Go to the setup.
-- Add the url http://localhost/appmonitor/client/check-appmonitor-server.php to integrate a first check.
+- Add the url <http://localhost/appmonitor/client/check-appmonitor-server.php> to integrate a first check.
 
 ## Other clients ##
+
 The next step is creating client checks thats urls you can add in the setup.
 See [Client](client.md) for general introduction. For PHP applications see [PHP-Client](client-php.md) + [PHP-plugins](client-php-plugins.md).
-
 
 ## Production use ##
 
 If you are happy with the first tests then read the sections below.
-
 
 # Configuration #
 
@@ -63,14 +64,12 @@ _[webroot-appmonitor]/server/config/appmonitor-server-config.json_
 | appmonitor-server-config.json           | Custom settings                            |
 | appmonitor-server-config-defaults.json  | DO NOT OVERWRITE - Defaultsetup            |
 
-
 On the first start of the web gui the defaults will be used. 
 By entering a first client appmonitor url the user config will be written.
 
 If you would like to setup it manually without webgui then copy 
 appmonitor-server-config-defaults.json to appmonitor-server-config.json
 (same name - without "-defaults")
-
 
 ``` json
 {
@@ -125,7 +124,7 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
             "receiver": false,
             "notification": false
         }
-    },	
+    },
     "urls":[
         "http://localhost/appmonitor/client/",
         "http://server1/appmonitor/client/",
@@ -173,8 +172,6 @@ Remarks:
 	- "/[0-9]{4}<span class="mark">-</span>12<span class="mark">-</span>/" --> 4 digits is a year then "minus" + month 12 --> disables notification in December of each year
   - "messages": override default notification messages (see next chapter)
 
-
-  
 # Notification #
 
 ## Message texts ##
@@ -187,6 +184,7 @@ You can override the defaults with defining the keys in the server config
 in the section notifications -> messages.
 
 These are the message keys:
+
 - changetype-[N].logmessage
 - changetype-[N].email.message
 - changetype-[N].email.subject
@@ -212,38 +210,38 @@ These texts can contain placeholders.
 | _\_\_WEBSITE___      | name of the website/ service (from client meta -> website) |
 
 Remarks:
+
 - (1) this depends on the set appmonitor server language. The values are these of the English version.
 - (2) It requires that a saved state with another status for this url. Value is "-" if there is no state change logged yet
 - (3) requires a value for "serverurl" in the config
 
 To preview the texts you can 
+
 - set "debug" to true in you config
 - open server monitoring in the browser - go into a detail page of any web app
 - on the bottom you see all placeholders, current replacements and the preview messages for all change types
 
-
 # Security #
 
-## User access ## 
+## User access ##
 
 Important remark:
 The appmonitor has no user login. Protect it by configuration of your webserver, i.e. use ip restriction and/ or basic authentication.
 
-## Sensitive data ## 
+## Sensitive data ##
 
 These files _may_ contain sensitive data and could be interesting for hackers. Deny the web access for
+
 - [approot]/server/config/
 - [approot]/server/tmp/
 
 In both directories is a .htaccess - if you set _AllowOverride Limit_ these .htaccess will be used. Otherwise create a directory or Location section to deny the web access.
-
 
 # Service #
 
 The server instance can be used by just using the web interface. For your first tests you don't need a running service. But it is highly recommended for a production use.
 
 The service that is a permanently running loop that fetches updated information of the outdated client data and sends notification data around the clock (respecting the sleep times).
-
 
 ## Run as systemd service ##
 
@@ -253,7 +251,7 @@ Below */etc/systemd/*  create a service file */etc/systemd/system/appmonitor.ser
 
 [webroot] is something like /var/www/localhost/public_html/
 
-```
+```ini
 [Unit]
 Description=IML Appmonitor service daemon
 Wants=multi-user.target
@@ -283,7 +281,6 @@ systemctl status appmonitor
 systemctl stop appmonitor
 ```
 
-
 ## Manual start ##
 
 This method does runs on all OS (MS Windows, Mac, Linux).
@@ -296,17 +293,14 @@ Interactive mode (*nix and MS Windows):
 
 `php [webroot]/appmonitor/server/service.php`
 
-
 To let it run permanently in the background and after logging out use the nohup command in front and an ampersend at the end (*nix only):
 
 `nohup php [webroot]/appmonitor/server/service.php &`
-
 
 # CLI #
 
 For automation tools like Puppet, Chef, Ansible & Co it is required to set values to trigger a configuration.
 The cli.php returns exitcode 0 if the action was successful; and <> 0 if an error occured.
-
 
 You can see the supported parameters: with *php server/cli.php* (without parameter)
 
@@ -373,7 +367,7 @@ Array
     [2] => http://server-02/appmonitor/client/
     [3] => http://server-03/appmonitor/client/
 )
-``` 
+```
 
 ### Nested subkeys ###
 
@@ -405,10 +399,9 @@ Example: to show the config, then add or delete something and show the current c
 
 *$ php server/cli.php* **--show** [--[modification action]] **--show**
 
-
 ### Add and remove urls of appmonitor clients ###
 
-You can 
+You can
 
 *php server/cli.php* **--addurl** *[url]*
 
@@ -416,12 +409,9 @@ You can
 
 You get an OK message if it was successful - or an error message (with exitcode <>0).
 
-
 Removing an url works in the same way. The url you want to delete must exist.
 
 *php server/cli.php* **--deleteurl** *[url]*
-
-
 
 ### Add / set a variable/ key ###
 

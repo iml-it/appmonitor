@@ -1,0 +1,211 @@
+{
+    "gui":{
+        "Reload": "Aktualisieren",
+        "Reload-hint": "Seitenansicht aktualisieren",
+        "Reload-every": "Auto-Reload ist alle %ss",
+
+        "All-webapps": "Web-Applikationen",
+        "All-webapps-header": "Web-Applikationen",
+        "All-webapps-hint": "Nachfolgend Sehen Sie eine Liste von Web-Applikationen. Diese sind alphabetisch sortiert und nach Status gruppiert (Fehler und Warnungen zuerst).<br>Klicken Sie auf den Labeltext, um Details zu sehen.<br>Die Ansicht kann mit Eingabe im Freitextfilter und Klick auf ein Label gefiltert werden.",
+
+
+        "Checks": "Checks",
+        "Checks-header": "&Uuml;bersicht mit allen Checks",
+        
+        "Checks-on-webapp": "Checks zur Applikation",
+        "Checks-total": "Checks gesamt",
+
+        "Duration": "Dauer",
+
+        "Notifications": "Meldungen",
+        "Notifications-header": "Protokoll der letzten Meldungen",
+        "Notifications-none": "Es sind keine Meldungen vorhanden.",
+        "Notify-address": "Empf&auml;nger der Meldungen",
+
+        "Setup": "Einstellungen",
+        "Setup-add-client": "Url einer Applikation hinzuf&uuml;gen",
+        "Setup-add-client-pretext": "Geben Sie eine Url eines Appmonitor-Clients ein, um diese hinzuzuf&uuml;gen:",
+        "Setup-client-list": "Liste der vorhandenen Web-Applikationen",
+        "Setup-configuration": "Konfiguration",
+
+        "About": "&Uuml;ber...",
+        "About-title": "Projektname <strong>%s</strong>.",
+        "About-text": "Dies ist Freie Software und OpenSource.<br>Lizenz: GNU Lesser General Public License v3.0<br>Universit&auml;t Bern :: IML - Institut f&uuml;r Medizinische Lehre.<br><br>Eine <strong>Client</strong>-Komponente erledigt auf Anwendungsseite frei definierbare Checks und erzeugt einen Status in JSON Syntax.<br>Die <strong>Server</strong>-Komponente sammelt die Monitoring Daten aller Applikationen ein, erzeugt eine Gesamtansicht und kann Benachrichtigungen an die betroffenen Teams senden.",
+        "About-projecturl": "Das Projekt ist &ouml;ffentlich und abrufbar unter <a href=\"%s\">%s</a>.",
+        "About-docs": "Die <a href=\"%s\">Dokumentation</a> ist als Markdown verf&uuml;gbar. Sie k&ouml;nnen es online lesen und sie ist mit der <em>readme.md</em> im Download Archiv enthalten.",
+
+        "Chart-graph": "Grafik",
+        "Chart-time": "Zeit",
+        "Chart-responsetime": "Antwortzeit [ms]",
+        
+        "Debug": "Debug",
+        "Debug-config": "Konfiguration",
+        "Debug-urls": "Urls",
+        "Debug-clientdata": "Client-Daten",
+        "Debug-icons": "Icons",
+        "Debug-icons-html": "Html-code",
+        "Debug-icons-preview": "Vorschau",
+        "Debug-notificationlog": "Letzte Meldungen",
+
+        "Appstatus": "Status der Webapplikation",
+        "Host": "Host", 
+        "Hosts": "Hosts", 
+        "Webapp": "Web-Applikation",
+        "Webapps": "Web-Applikationen",
+        "Timestamp": "Zeitstempel", 
+        "TTL": "TTL", 
+        "Check": "Check", 
+        "Description": "Beschreibung", 
+        "Result": "Resultat", 
+        "Output": "Ausgabe",
+        "Count": "Counter",
+        "Url": "Url", 
+
+        "Error-message": "Fehlermeldung",
+        "Http-details": "Http Details der letzten Appmonitor Anfrage",
+        "Http-status": "Http-Status",
+        "Http-header": "Http-Antwort-Header",
+        
+        "Change": "&Auml;nderung", 
+        "Message": "Nachricht", 
+        "Tag-filter": "Tag-Filter", 
+
+        "Client-source-data": "Quelldaten des Appmonitor Clients",
+        "age-of-page": "Alter",
+        "age-of-result": "Alter der letzten Antwort",
+        "since": "seit",
+        "unknown": "unbekannt",
+
+        "Result-checks": "Checks",
+        "Resulttype-total": "Gesamt",
+        
+        "Preview-of-messages": "Vorschau der zu versendenden Nachrichten (Debug ist EIN)",
+        "Preview-replacements": "Ersetzungen: Platzhalter und deren derzeitige Ersetzungen",
+        "Preview-emails": "Vorschau der E-Mail-texte",
+        
+        "Sleepmode": "Schlaf-Modus",
+        "Sleepmode-on": "Zzz ... Meldungen sind AUS",
+        "Sleepmode-off": "Meldungen sind AN",
+        
+        "Time": "Zeit",
+        "Time-for-all-checks": "Zeiten aller Checks",
+        
+        "Uptime": "Uptime",
+
+        "Validator-ok": "Validierung erfolgreich.",
+        "Validator-error": "Validierungs-Fehler",
+        "Validator-error-title": "Gefundene Validierungs-Fehler: %s",
+        "Validator-request-error": "Request-Fehler",
+        "Validator-warning": "Validierungs-Warnungen",
+        "Validator-warning-title": "Gefundene Validierungs-Warnungen: %s",
+        
+        "hint": "Hinweis",
+        "settings-hint": "Sie k&ouml;nnen die Datei <code>server/config/appmonitor-server-config.json</code> direkt editieren<br>ODER<br>aud Kommandozeile wechseln Sie zu [approot]/server/ und verwenden <code>php ./cli.php</code> um Werte anzusehen oder anzupassen.",
+            "settings-thene": "Skin",
+            "settings-lang": "Sprache",
+            "settings-debug": "Debugging",
+            "settings-serverurl": "Server-Url",
+            "settings-pagereload": "Seitenaktualisierung in [s]",
+            "settings-servicecache": "Caching",
+            "settings-curl-timeout": "Timeout beim Abholen der Client Checks",
+            "settings-notifications": "Nachrichtenversand",
+            "settings-notifications-from": "Sender",
+            "settings-notifications-to": "An",
+            "settings-view": "Sichtbare elemente",
+            "settings-view-overview": "Kacheln in der &Uuml;bersicht",
+            "settings-view-overview-webapps": "Web Applicationen",
+            "settings-view-overview-hosts": "Hosts",
+            "settings-view-overview-checks": "Checks",
+            "settings-view-overview-notivication": "Nachrichtenversand aktiv?",
+            "settings-view-appdetails": "Details zu einer Application",
+            "settings-view-appdetails-appstatus": "Gesamtstatus einer Application",
+            "settings-view-appdetails-httpcode": "Http code",
+            "settings-view-appdetails-age": "Alter des Checks",
+            "settings-view-appdetails-checks": "Anzahl der Checks",
+            "settings-view-appdetails-times": "Ausf&uuml;hrungszeit aller Checks",
+            "settings-view-appdetails-receiver": "Empf&auml;nger-Adressen",
+            "settings-view-appdetails-notification": "Nachrichtenversand aktiv?",
+
+        "btn-addUrl": "hinzuf&uuml;gen",
+        "btn-close": "schliessen",
+        "btn-details": "Details anzeigen",
+        "btn-hide-details": "Details verbergen",
+
+        "btn-deleteUrl": "l&ouml;schen",
+        "btn-deleteUrl-confirm": "Sind Sie sicher, dass Sie die nachfolgende URL l&ouml;schen m&ouml;chten\\n\\n%s\\n\\n?",
+        "btn-save": "Speichern",
+        
+        "msgErr-nocheck-welcome": "<h3>Willkommen bei der Appmonitor Server Webgui!</h3><p>Im Moment sieht es hier noch nackt und leer aus, weil noch ein Check eingerichtet wurde.<br>Um eine URL hinzuzuf&uuml;gen, gehen Sie zu den Einstellungen.</p>",
+        "msgErr-nocheck": "Es wurde noch kein Check eingerichtet.",
+        "msgErr-demosite": "Dies ist eine Demo-Webseite. Das &auml;ndern der Konfiguration ist hier nicht m&ouml;glich.",
+        "msgErr-missing-meta-website": "Fehlende Daten &quot;meta&quot; - &quot;website&quot;",
+
+
+        "msgErr-Http-request-failed": "Die Http Anfrage zu einem Appmonitor-Check ist fehlgeschlagen: Der Host oder der Webservice sind nicht erreichbar.",
+        "msgErr-Http-error": "Die Antwort meldet einen Fehler: der Http Statuscode ist kein 200er Wert.",
+        "msgErr-Http-no-jsondata": "Fehlerhaftes Format: die Antwort des Appmonitor Client ist kein JSON.",
+        "msgErr-Http-outdated": "Die Informationen zum Zustand der Applikation sind veraltet.",
+
+        "msgOK-Url-was-added": "URL hinzugef&uuml;gt: %s",
+        "msgErr-Url-not-added-no-appmonitor": "URL nicht hinzugef&uuml;gt: %s<br>Dies scheint keine Appmonitor url zu sein - es wurden keine JSON Daten gefunden.<br>Http Antwort-Header: %s",
+        "msgErr-Url-was-added-already": "Skip. Die URL wurde bereits hinzugef&uuml;gt: %s.",
+        "msgErr-Url-not-removed-it-does-not-exist": "Die URL konnte nicht entfernt werden - sie existiert nicht in der Konfiguration: %s.",
+        "msgOK-Url-was-removed": "Die URL wurde entfernt: %s",
+    
+    
+        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Dies kann bei einem Timeout oder einem Fehler auftreten.",
+        "msgErr-missing-key-checks-name":"checks > %s > name ist nicht gesetzt - dieser Check hat keine Bezeichnung.",
+        "msgErr-missing-key-checks-result":"checks > %s > result ist nicht gesetzt - dieser Check hat keinen Status.",
+        
+        "msgWarn-missing-key-checks-description":"checks > %s > description ist nicht gesetzt - dieser Check ht keine Beschreibung bzgl. Zweck oder seiner Aktion.",
+        "msgWarn-missing-key-checks-value":"checks > %s > value ist nicht gesetzt - es gibt keinen Wert der das Ergebnis des Checks beschreibt.",
+        "msgWarn-missing-key-checks-time":"checks > %s > time ist nicht gesetzt - dieser Check enth&auml;lt keine gemessene Zeit. Dies ist nur ein Hinweis. Die Zeitmessung ist optional.",
+    
+
+        "msgErr-missing-section-meta":"Es gibt keine Sektion &quot;meta&quot; in der Antwort (die Anfrage ist wom&ouml;glich gescheitert?).",
+        "msgErr-missing-key-meta-host":"Es ist kein Hostname gesetzt unter meta > host",
+        "msgErr-missing-key-meta-website":"Es ist keine Webseite oder kein Applikations-/ Servicename gesetzt via meta > website",
+        "msgErr-missing-key-meta-result":"Der Check ent&auml;lt kein Ergebnis via meta > result",
+        
+        "msgWarn-missing-key-meta-ttl":"Es wurde kein TTL gesetzt via meta > ttl. Es wird der Default verwendet.",
+        "msgWarn-missing-key-meta-notifications":"Es gibt keine Sektion meta > notifications. Im Fehlerfall gibt es keine Meldung an Entwickler / Product Owner dieser Applikation.",
+        "msgWarn-no-notifications":"In der Sektion meta > notification > [target] ist kein Empf&auml;nger. Im Fehlerfall gibt es keine Meldung an Entwickler / Product Owner dieser Applikation.",
+        "msgWarn-missing-key-meta-time":"Es gibt keine Messdaten - es wurde kein Wert gesetzt via meta > time.",
+    
+        "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
+    },
+    "notifications":{
+        
+        "changetype-0.logmessage":    "Webapp ist unver&auml;ndert: __URL__.",
+        "changetype-0.email.subject": "Webapp ist unver&auml;ndert: __URL__.",
+        "changetype-0.email.message": "Webapp ist unver&auml;ndert: __URL__.",
+        
+        "changetype-1.logmessage":    "Webapp wurde im Appmonitor hinzugefügt: __URL__. __ERROR__",
+        "changetype-1.email.subject": "[Appmonitor] :: Webapp hinzugefuegt: __URL__.",
+        "changetype-1.email.message": "Willkommen! Die Webapp __URL__ wurde im Appmonitor aufgenommen. Fortan erhalten Sie Benachrichtigungen sobald sich der Status veraendert.\n\nurl: __MONITORURL__\n\n__CHECKS__",
+        
+        "changetype-2.logmessage":    "Der Status von __URL__ wechselte von __LAST-RESULT__ auf __RESULT__. __ERROR__",
+        "changetype-2.email.subject": "[Appmonitor] :: __CHANGE__ __LAST-RESULT__ --> __RESULT__ - __URL__",
+        "changetype-2.email.message": "__TIME__\n__WEBSITE__ @ __HOST__\nDer Status wechselte von __LAST-RESULT__ auf __RESULT__.\n\nDer aktuelle Status ist einsehbar unter: __MONITORURL__\n\n__CHECKS__",
+        
+        "changetype-3.logmessage":    "Webapp wurde im Appmonitor entfernt: __URL__.",
+        "changetype-3.email.subject": "[Appmonitor] :: Webapp wurde entfernt: __URL__.",
+        "changetype-3.email.message": "Die Webapp __URL__ wurde im Appmonitor entfernt. Sie werden fortan keine Benachrichtigungen bei Statuswechsel mehr erhalten. Wenn dies ein Fehler war, kontaktieren Sie den Sysadmin.",
+
+        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Die kann bei einem Timeout oder einem Fehler auftreten.",
+        
+        "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
+    },
+
+    "changetype-0": "keine &Auml;nderung",
+    "changetype-1": "Neu",
+    "changetype-2": "&Auml;nderung",
+    "changetype-3": "Gel&ouml;scht",
+    
+    "Resulttype-0": "OK",
+    "Resulttype-1": "Unbekannt",
+    "Resulttype-2": "Warnung",
+    "Resulttype-3": "Fehler",
+    
+    "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
+}
