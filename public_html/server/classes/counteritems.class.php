@@ -122,7 +122,7 @@ class counteritems {
     }
     /**
      * get all stored counters of the current app
-     * @return type
+     * @return type array
      */
     public function getCounters(){
         return $this->_aCounters;
@@ -169,7 +169,7 @@ class counteritems {
         $aCounters=$this->getCounters();
         if(count($aCounters)){
             foreach (array_keys($aCounters) as $sCounterid){
-                $this->deleteCounter($sCounterId);
+                $this->deleteCounter($sCounterid);
             }
         }
         return true;
