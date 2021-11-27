@@ -1331,8 +1331,8 @@ class appmonitorserver_gui extends appmonitorserver {
                                 // . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
                                 . '>' . $this->_aIco['save'].' '.$this->_tr('btn-save') 
                             . '</button>';
-        $sSetup.='</form>';
         */
+        $sSetup.='</form>';
         $sAppId=isset($sAppId) ? $sAppId : 'no-app-id';
         $sDivMoredetails='div-http-'.$sAppId;
         $sShowHide='<br><button class="btn btn-default" id="btn-plus-'.$sAppId.'"  onclick="$(\'#'.$sDivMoredetails.'\').slideDown(); $(this).hide(); $(\'#btn-minus-'.$sAppId.'\').show(); return false;"'
