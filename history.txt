@@ -1,7 +1,10 @@
 
 HISTORY
 
-v0.93 2021-11-xx
+v0.94 2021-11-29
+    - server: delayed sending of notifications
+
+v0.93 2021-11-26
     - filestructur was changed: 
         - all files were moved to subdir public_html
         - added subdir docker for local development environment (work in progress)

@@ -62,6 +62,17 @@ class notificationhandler {
     protected $_aAppResult=false;
     protected $_aAppLastResult=false;
 
+    /**
+     * delay sending a notification n times based on a result value
+     * @var arrray
+     */
+    protected $_aDelayNotification=[
+        RESULT_OK      =>0, // 0 = OK comes immediately
+        RESULT_UNKNOWN =>3, // N = other types wait for n repeats
+        RESULT_WARNING =>3,
+        RESULT_ERROR   =>3
+    ];
+
     // ----------------------------------------------------------------------
     // __construct
     // ----------------------------------------------------------------------
@@ -139,8 +150,10 @@ class notificationhandler {
     }
 
     /**
-     * get current or last stored client notification data
-     * this method also stores current notification data on change
+     * get current or last stored client notification receivers
+     * this method also stores current notification data on change.
+     * This information is cached if client status has no data (i.e. timeout)
+     * and we want to inform 
      * 
      * @return array
      */
@@ -245,12 +258,14 @@ class notificationhandler {
             return false;
         }
         $iChangetype=$this->_detectChangetype();
-        // $iResult=$this->_aAppResult['result']['result'];
+        $iResult=$this->_aAppResult['result']['result'];
+
         // $sLogMessage=$this->_generateMessage('changetype-'.$iChangetype.'.logmessage');
-       
         switch ($iChangetype) {
             case CHANGETYPE_NOCHANGE:
                 // echo "DEBUG: ".__METHOD__." NO change detected\n";
+                $this->_aAppResult['result']['counter']++;
+                $this->_saveAppResult();
                 break;
 
             case CHANGETYPE_NEW:
@@ -261,6 +276,7 @@ class notificationhandler {
                 if(!$this->_aAppResult) {
                     // $this->_aAppResult=$this->_aAppLastResult;
                 }
+                $this->_aAppResult['result']['counter']==0;
                 $this->_saveAppResult();
                 // trigger notification
                 $this->sendAllNotifications($iChangetype);
@@ -268,6 +284,11 @@ class notificationhandler {
 
             default:
                 break;
+        }
+
+        // trigger notification
+        if($this->_aAppResult['result']['counter']===$this->_aDelayNotification[$iResult]){
+            $this->sendAllNotifications($iChangetype);
         }
         
         // TODO: remove test calls
@@ -401,7 +422,7 @@ class notificationhandler {
 
     /**
      * read stored log
-     * @return type
+     * @return array
      */
     public function loadLogdata(){
         $oCache=new AhCache($this->_sCacheIdPrefix."-log", "log");
