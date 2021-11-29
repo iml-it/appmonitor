@@ -238,7 +238,10 @@ while true; do
             _wait
             ;;
         u)
+            set -vx
             docker-compose up -d --remove-orphans
+            test ! -z "${ONSTARTUP}" && docker exec -it appmonitor-server /bin/bash -c "${ONSTARTUP}"
+            set +vx
             ;;
         s)
             docker-compose stop

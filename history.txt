@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.95 2021-11-30
+    - server: delayed sending of notifications ... try II
+
 v0.94 2021-11-29
     - server: delayed sending of notifications
 
