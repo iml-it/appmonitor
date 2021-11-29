@@ -264,8 +264,10 @@ class notificationhandler {
         switch ($iChangetype) {
             case CHANGETYPE_NOCHANGE:
                 // echo "DEBUG: ".__METHOD__." NO change detected\n";
-                $this->_aAppResult['result']['counter']++;
-                $this->_saveAppResult();
+
+                // TODO: increase counter
+                // $this->_aAppResult['result']['counter']++;
+                // $this->_saveAppResult();
                 break;
 
             case CHANGETYPE_NEW:
@@ -276,8 +278,11 @@ class notificationhandler {
                 if(!$this->_aAppResult) {
                     // $this->_aAppResult=$this->_aAppLastResult;
                 }
-                $this->_aAppResult['result']['counter']==0;
+                
+                // TODO: reset counter
+                // $this->_aAppResult['result']['counter']==0;
                 $this->_saveAppResult();
+
                 // trigger notification
                 $this->sendAllNotifications($iChangetype);
                 break;
@@ -286,10 +291,12 @@ class notificationhandler {
                 break;
         }
 
-        // trigger notification
+        // TODO trigger notification
+        /*
         if($this->_aAppResult['result']['counter']===$this->_aDelayNotification[$iResult]){
             $this->sendAllNotifications($iChangetype);
         }
+        */        
         
         // TODO: remove test calls
         /*
