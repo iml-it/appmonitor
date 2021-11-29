@@ -324,8 +324,8 @@ class appmonitorserver {
      * hint from kempo19b
      * http://php.net/manual/en/function.curl-multi-select.php
      * 
-     * @param handle  $mh             multicurl master handle
-     * @param boolean $still_running  
+     * @param CurlMultiHandle  $mh             multicurl master handle
+     * @param boolean          $still_running  
      * @return type
      */
     protected function full_curl_multi_exec($mh, &$still_running) {
