@@ -719,8 +719,8 @@ class appmonitorserver {
         $this->_getClientData();
         $aReturn=array();
         $aBasedata=($sFilterAppId && isset($this->_data[$sFilterAppId]) ? $this->_data[$sFilterAppId] : $this->_data );
-        print_r($aBasedata);
-        echo '<br>$sKey = '.$sKey.'<br>';
+        // print_r($aBasedata);
+        // echo '<br>$sKey = '.$sKey.'<br>';
         foreach($aBasedata as $sAppId=>$aData){
             $aReturn[$sAppId]=$sKey 
                     // ? (isset($aData[$sKey]) ? $aData[$sKey] : false) 

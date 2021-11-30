@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.96 2021-11-30
+    - server: fix message texts on delayed notifications 
+
 v0.95 2021-11-30
     - server: delayed sending of notifications ... try II
 
