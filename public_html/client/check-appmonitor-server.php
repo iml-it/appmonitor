@@ -110,7 +110,7 @@ foreach(array('server/config', 'server/tmp') as $sMyDir){
 // ----------------------------------------------------------------------
 // count of current projects
 // ----------------------------------------------------------------------
-require_once(__DIR__.'/../server/classes/appmonitor-server.class.php');
+require_once($sApproot.'/server/classes/appmonitor-server.class.php');
 $oServer=new appmonitorserver();
 $iCount=count($oServer->apiGetAppIds());
 $oMonitor->addCheck(
@@ -124,6 +124,30 @@ $oMonitor->addCheck(
                 "value" => "Found monitored web apps: $iCount",
                 "count" => $iCount,
                 "visual" => "simple",
+            ),
+        ),
+    )
+);
+// ----------------------------------------------------------------------
+// check running service
+// ----------------------------------------------------------------------
+require_once($sApproot.'/server/classes/tinyservice.class.php');
+ob_start();
+$oService = new tinyservice('appmomonitor_server_loop-' . md5($sApproot.'/server/service.php'), 60);
+$sIsStopped=$oService->canStart();
+ob_clean();
+$oMonitor->addCheck(
+    array(
+        "name" => "running service",
+        "description" => "Check if the service is running",
+        "check" => array(
+            "function" => "Simple",
+            "params" => array(
+                "result" => ($sIsStopped ? RESULT_WARNING : RESULT_OK),
+                "value" => ($sIsStopped 
+                    ? "Info: Service is NOT running. Apps are checked interactively only (if the appmonitor web ui is running)." 
+                    : "OK, service is running"
+                ),
             ),
         ),
     )
