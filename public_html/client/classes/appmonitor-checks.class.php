@@ -149,7 +149,7 @@ class appmonitorcheck {
      * @return boolean
      */
     protected function _setCounter($aParams){
-        if(count($aParams)){
+        if(is_array($aParams) && count($aParams)){
             foreach(array('type', 'count', 'visual') as $sMyKey){
                 if(isset($aParams[$sMyKey])){
                     $this->_aData[$sMyKey]=$aParams[$sMyKey];

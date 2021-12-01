@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.97 2021-12-01
+    - server: skip notification if previous status did not reach delay count
+
 v0.96 2021-11-30
     - server: fix message texts on delayed notifications 
 

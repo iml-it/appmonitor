@@ -306,9 +306,25 @@ class notificationhandler {
             $this->_aAppResult['result']['counter']=$iCounter;
             $this->_saveAppResult();
 
+
             // trigger notification
             if($iCounter===$this->_aDelayNotification[$iResult]){
-                $this->sendAllNotifications();
+                
+                $iLastCounter=isset($this->_aAppResult['laststatus']['result']['counter'])
+                    ? $this->_aAppResult['laststatus']['result']['counter']
+                    : -1
+                ;
+                $iLastResult=isset($this->_aAppResult['laststatus']['result']['result'])
+                    ? $this->_aAppResult['laststatus']['result']['result']
+                    : -1
+                ;
+
+                if ($iLastResult >= 0 && $iLastCounter >=0 && $iLastCounter >= $this->_aDelayNotification[$iLastResult] ){
+                    // echo "DEBUG: YES notify<br>";
+                    $this->sendAllNotifications();
+                } else {
+                    // echo "DEBUG: NO ... skipt notification<br>";
+                }
             }
         }
         
