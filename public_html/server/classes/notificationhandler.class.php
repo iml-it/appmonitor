@@ -282,7 +282,7 @@ class notificationhandler {
 
                 // increase counter
                 $iCounter=(isset($this->_aAppLastResult['result']['counter']) ? $this->_aAppLastResult['result']['counter']+1 : $iMaxDelay+1);
-                $this->_aAppResult['laststatus']=$this->_aAppLastResult['laststatus'];
+                $this->_aAppResult['laststatus']=isset($this->_aAppLastResult['laststatus']) ? $this->_aAppLastResult['laststatus'] : false;
                 break;
 
 
