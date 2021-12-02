@@ -77,7 +77,7 @@ class appmonitorserver {
      * value is in sec
      * @var integer
      */
-    protected $_iTtlOnError = 20;
+    protected $_iTtlOnError = 60;
 
     /**
      * name of the config file to load
