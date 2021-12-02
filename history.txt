@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.98 2021-12-02
+    - service: show fetched urls in stdout
+
 v0.97 2021-12-01
     - server: skip notification if previous status did not reach delay count
 

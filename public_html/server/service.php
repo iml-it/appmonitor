@@ -57,6 +57,8 @@ $oService->send("STARTUP: init appmonitor-server", true);
 require_once('classes/appmonitor-server.class.php');
 $oMonitor = new appmonitorserver();
 
+// @since v0.98: show fetched urls in stdout
+$oMonitor->setLogging(true);
 
 
 // -----------------------------------------------------------------------------
@@ -67,9 +69,9 @@ $oService->send("STARTUP: start loop ... ", true);
 // $oService->setDebug(true);
 while (true) {
     $oService->send("RUNNING: reload appmonitor server config");
-    $aData = $oMonitor->loadConfig(); // to get changed hosts during runtime
+    $oMonitor->loadConfig(); // to get changed hosts during runtime
     $oService->send("RUNNING: getMonitoringData()");
-    $aData = $oMonitor->getMonitoringData();
+    $oMonitor->getMonitoringData();
     $oService->sleep();
 }
 

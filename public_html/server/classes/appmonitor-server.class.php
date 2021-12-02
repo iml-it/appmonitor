@@ -37,7 +37,7 @@ require_once 'notificationhandler.class.php';
  * - GUI uses cached data only
  * - NAGIOS output
  * --------------------------------------------------------------------------------<br>
- * @version 0.86
+ * @version 0.98
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -98,6 +98,13 @@ class appmonitorserver {
             // CURLMOPT_MAXCONNECTS => 10
     );
     protected $_aCounter = false;
+
+    /**
+     * flag: show output on STDOUT 
+     * @see send()
+     * @var bool
+     */
+    protected $_bShowLog = false;
 
     /**
      * constructor
@@ -546,7 +553,6 @@ class appmonitorserver {
                         'status'=>$aClientData["result"]["result"], 
                         'value'=>floor($aResult['curlinfo']['total_time']*1000)
                 ));
-
                 // find counters in a check result
                 if(isset($aClientData['checks']) && count($aClientData['checks'])){
                     // echo '<pre>'.print_r($aClientData['checks'], 1).'</pre>';
@@ -575,6 +581,15 @@ class appmonitorserver {
                         }
                     }
                 }
+                $this->send(""
+                    . $aResult['url']
+                    ." Httpstatus=".$iHttpStatus
+                    ." TTL=$iTtl"
+                    ." responsetime=".floor($aResult['curlinfo']['total_time']*1000)."ms"
+                    ." appstatus=".$this->_tr('Resulttype-' . $aClientData["result"]["result"])
+                    .$sError
+                );
+
                 // write cache
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($aResult['url']));
 
@@ -756,7 +771,25 @@ class appmonitorserver {
         return $this->_apiGetAppData('meta',$sFilterAppId);
     }
 
-    
+    /**
+     * set flag for logging to standard output
+     */
+    public function setLogging($bShow){
+        return $this->_bShowLog=!!$bShow;
+    }
+    /**
+     * write a message to STDOUT (if actiated or logging is on)
+     *
+     * @param string   $sMessage  message text
+     * @param boolean  $bShow     flag to write to stdout (overrides internal value)
+     * @return boolean
+     */
+    public function send($sMessage, $bShow = false) {
+        echo ($bShow || $this->_bShowLog) 
+            ? (date("Y-m-d H:i:s") . " " . $sMessage . "\n")
+            : ''
+        ;
+    }
     /**
      * get all client data and final result as array
      * @param   string  $sHost  filter by given hostname
@@ -764,7 +797,6 @@ class appmonitorserver {
      */
     public function getMonitoringData($sHost = false) {
 
-        $aReturn = array();
         $iMaxReturn = 0;
         $aMessages = array();
         $aResults = array();
