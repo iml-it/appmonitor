@@ -626,6 +626,65 @@ class appmonitorserver_gui extends appmonitorserver {
     }
 
 
+    protected function _generateMonitorGraph($sUrl=false){
+        $sReturn='';
+
+        $aNodes=[];
+        $aEdges=[];
+        $iCounter=1;
+        $aShapes=[
+            0 => [ 'color' => '#aaeeaa', 'width' => 2, 'shape'=>'dot' ],
+            1 => [ 'color' => '#ffcccc', 'width' => 6, 'shape'=>'star' ],
+            2 => [ 'color' => '#eeaa22', 'width' => 4, 'shape'=>'diamond' ],
+            3 => [ 'color' => '#dddddd', 'width' => 2, 'shape'=>'ellipse' ],
+        ];
+
+        foreach ($this->_data as $sAppId => $aEntries) {
+            // echo '<pre>'.print_r($aEntries,1); die();
+            $aNodes[]=[ 'id'=> 1, 'label'=> $aEntries['meta']['website'], 'title'=>$this->_tr('Resulttype-'.$aEntries['meta']["result"]).": ".$aEntries['meta']['website'], 'shape' => 'box', 'color'=>$aShapes[$aEntries['meta']['result']]['color'] ];
+            foreach ($aEntries["checks"] as $aCheck) {
+                // echo '<pre>'.print_r($aCheck,1); die();
+                $iCounter++;
+                $aNodes[]=[ 'id'=> $iCounter, 'label'=> $aCheck['name'], 
+                    'title'=>$this->_tr('Resulttype-'.$aCheck["result"]).": ".$aCheck['description'],
+                    'color'=>$aShapes[$aCheck['result']]['color'], 'shape'=>$aShapes[$aCheck['result']]['shape'] ];
+                $aEdges[]=[ 'from' => 1, 'to' => $iCounter, 'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 'length' => 200, 'width' => $aShapes[$aCheck['result']]['width'] ];
+            }
+        }
+        $sReturn.='
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js" integrity="sha512-XHDcSyqhOoO2ocB7sKOCJEkUjw/pQCJViP1ynpy+EGh/LggzrP6U/V3a++LQTnZT7sCQKeHRyWHfhN2afjXjCg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-network.min.css" integrity="sha512-NJXM8vzWgDcBy9SCUTJXYnNO43sZV3pfLWWZMFTuCtEUIOcznk+AMpH6N3XruxavYfMeMmjrzDMEQ6psRh/6Hw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <style type="text/css">
+        #mynetwork {
+          width: 800px;
+          height: 600px;
+          border: 2px dashed lightgray;
+        }
+        </style>
+
+        <div id="mynetwork"></div>
+
+
+
+        <script type="text/javascript">
+
+        var nodes = new vis.DataSet('.json_encode($aNodes).');
+        var edges = new vis.DataSet('.json_encode($aEdges).');
+  
+        // create a network
+        var container = document.getElementById("mynetwork");
+        var data = {
+          nodes: nodes,
+          edges: edges,
+        };
+        var options = {};
+        var network = new vis.Network(container, data, options);
+      </script>        
+        ';
+        return $sReturn;
+    }
+
     /**
      * helper: generate html code with all checks.
      * if a hast is given it renders the data for this host only
@@ -1036,6 +1095,19 @@ class appmonitorserver_gui extends appmonitorserver {
 
             $sHtml .= $oA->getSectionRow($sCounters);
 
+            // --- graph with checks
+            $sHtml .= 
+                $oA->getSectionRow(
+                    $oA->getSectionColumn(
+                        $oA->getBox(array(
+                            // 'label'=>'I am a label.',
+                            // 'collapsable'=>true,
+                            'title'=>$this->_tr('Checks'),
+                            'text'=>$this->_generateMonitorGraph($aEntries["result"]["url"])
+                        ))
+                    )
+                )
+            ;
             // --- table with checks
             $sHtml .= 
                 $oA->getSectionRow(
