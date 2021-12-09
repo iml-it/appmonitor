@@ -629,32 +629,90 @@ class appmonitorserver_gui extends appmonitorserver {
     protected function _generateMonitorGraph($sUrl=false){
         $sReturn='';
 
+        $iGroup=1000;
+        $aParentsCfg=[
+            'file'=>[ 'id'=>$iGroup++ ],
+            'folder'=>[ 'id'=>$iGroup++ ],
+
+            'deny'=>[ 'id'=>$iGroup++ ],
+
+            'database'=>[ 'id'=>$iGroup++ ],
+            'service'=>[ 'id'=>$iGroup++ ],
+            'disk'=>[ 'id'=>$iGroup++ ],
+            'network'=>[ 'id'=>$iGroup++ ],
+
+        ];
+        $aParents=[];
         $aNodes=[];
         $aEdges=[];
         $iCounter=1;
         $aShapes=[
-            0 => [ 'color' => '#aaeeaa', 'width' => 2, 'shape'=>'dot' ],
-            1 => [ 'color' => '#ffcccc', 'width' => 6, 'shape'=>'star' ],
-            2 => [ 'color' => '#eeaa22', 'width' => 4, 'shape'=>'diamond' ],
-            3 => [ 'color' => '#dddddd', 'width' => 2, 'shape'=>'ellipse' ],
+            0 => [ 'color' => '#aaeeaa', 'width' => 2, 'shape'=>'icon',
+                'icon' => [
+                    'face'=> "Font Awesome 5 Free",
+                    'weight'=> "900", // Font Awesome 5 doesn't work properly unless bold.
+                    'code' => "'\\uf00c'",
+                    'size'=> 50,
+                    'color'=> "#aaeeaa"
+                ],
+             ],
+            1 => [ 'color' => '#ffcccc', 'width' => 6, 'shape'=>'star' ],    // error
+            2 => [ 'color' => '#eeaa22', 'width' => 4, 'shape'=>'icon   ' ], // warn
+            3 => [ 'color' => '#dddddd', 'width' => 2, 'shape'=>'ellipse' ], // unknown
         ];
 
         foreach ($this->_data as $sAppId => $aEntries) {
             // echo '<pre>'.print_r($aEntries,1); die();
-            $aNodes[]=[ 'id'=> 1, 'label'=> $aEntries['meta']['website'], 'title'=>$this->_tr('Resulttype-'.$aEntries['meta']["result"]).": ".$aEntries['meta']['website'], 'shape' => 'box', 'color'=>$aShapes[$aEntries['meta']['result']]['color'] ];
+            $aNodes[]=[ 
+                'id'=> 1, 
+                'label'=> $aEntries['meta']['website'], 
+                'title'=>$this->_tr('Resulttype-'.$aEntries['meta']["result"]).": ".$aEntries['meta']['website'], 
+                'shape' => 'box', 
+                'color'=>$aShapes[$aEntries['meta']['result']]['color'] ,
+                // 'margin' => [ { top: 10, right: 20, bottom: 40, left: 30 } ],
+                'margin' => 30 ,
+            ];
+
             foreach ($aEntries["checks"] as $aCheck) {
                 // echo '<pre>'.print_r($aCheck,1); die();
                 $iCounter++;
-                $aNodes[]=[ 'id'=> $iCounter, 'label'=> $aCheck['name'], 
+                $aNodes[]=[ 
+                    'id'=> $iCounter, 
+                    'label'=> $aCheck['name'], 
                     'title'=>$this->_tr('Resulttype-'.$aCheck["result"]).": ".$aCheck['description'],
-                    'color'=>$aShapes[$aCheck['result']]['color'], 'shape'=>$aShapes[$aCheck['result']]['shape'] ];
-                $aEdges[]=[ 'from' => 1, 'to' => $iCounter, 'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 'length' => 200, 'width' => $aShapes[$aCheck['result']]['width'] ];
+                    'color'=>$aShapes[$aCheck['result']]['color'], 
+                    'shape'=>$aShapes[$aCheck['result']]['shape'],
+                    // 'icon'=>$aShapes[$aCheck['result']]['icon'],
+                    'group'=>'check-result-'.$aCheck["result"]
+                    // 'group'=>'users'
+                ];
+                $iParent=1;
+                if(isset($aCheck['parent']) && $aCheck['parent'] && isset($aParentsCfg[$aCheck['parent']]['id'])) {
+                    $iParent=$aParentsCfg[$aCheck['parent']]['id'];
+                    $aParents[$iParent]=[ 
+                        'id'=> $iParent, 
+                        'label'=> $aCheck['parent'], 
+                        // 'title'=>, 
+                        // 'color'=>$aShapes[$aEntries['meta']['result']]['color'] ,
+                        // 'margin' => [ { top: 10, right: 20, bottom: 40, left: 30 } ],
+                        'group'=>'group-'.$aCheck['parent']
+                    ];
+                    
+                }
+                $aEdges[]=[ 'from' => $iParent, 'to' => $iCounter, 'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 'length' => 200, 'width' => $aShapes[$aCheck['result']]['width'] ];
             }
         }
+        if (count($aParents)){
+            foreach($aParents as $aItem){
+                $aNodes[]=$aItem;
+                $aEdges[]=[ 'from' => 1, 'to' => $aItem['id'], 'color' => [ 'color' => $aShapes[3]['color'] ], 'length' => 200, 'width' => 2 ];
+            }
+        }
+        // echo '<pre>'.print_r($aParents,1); die();
+        // echo '<pre>'.print_r($aEdges,1); die();
+        // echo '<pre>'.print_r($aNodes,1); die();
         $sReturn.='
         
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js" integrity="sha512-XHDcSyqhOoO2ocB7sKOCJEkUjw/pQCJViP1ynpy+EGh/LggzrP6U/V3a++LQTnZT7sCQKeHRyWHfhN2afjXjCg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-network.min.css" integrity="sha512-NJXM8vzWgDcBy9SCUTJXYnNO43sZV3pfLWWZMFTuCtEUIOcznk+AMpH6N3XruxavYfMeMmjrzDMEQ6psRh/6Hw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
         <style type="text/css">
         #mynetwork {
           width: 800px;
@@ -665,10 +723,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
         <div id="mynetwork"></div>
 
-
-
         <script type="text/javascript">
-
         var nodes = new vis.DataSet('.json_encode($aNodes).');
         var edges = new vis.DataSet('.json_encode($aEdges).');
   
@@ -678,10 +733,13 @@ class appmonitorserver_gui extends appmonitorserver {
           nodes: nodes,
           edges: edges,
         };
-        var options = {};
-        var network = new vis.Network(container, data, options);
+        
+        // hint: variable visjsNetOptions is defined in javascript/functions.js
+        var network = new vis.Network(container, data, visjsNetOptions);
       </script>        
         ';
+        // echo "<pre>" . htmlentities($sReturn); die();
+        // echo "<pre>" . htmlentities(json_encode($aNodes)); die();
         return $sReturn;
     }
 
@@ -1875,7 +1933,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $oCdn->setLibs(array(
             "admin-lte/2.4.10",
             "datatables/1.10.19",
-            "font-awesome/5.8.1",
+            "font-awesome/5.15.4",
             "jquery/3.4.1",
             "twitter-bootstrap/3.4.1",
             "Chart.js/2.7.2",
@@ -1978,6 +2036,12 @@ class appmonitorserver_gui extends appmonitorserver {
 
                 // Chart.js
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('Chart.js').'/Chart.min.js') . '" type="text/javascript"></script>'
+
+                .'
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js" integrity="sha512-XHDcSyqhOoO2ocB7sKOCJEkUjw/pQCJViP1ynpy+EGh/LggzrP6U/V3a++LQTnZT7sCQKeHRyWHfhN2afjXjCg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-network.min.css" integrity="sha512-NJXM8vzWgDcBy9SCUTJXYnNO43sZV3pfLWWZMFTuCtEUIOcznk+AMpH6N3XruxavYfMeMmjrzDMEQ6psRh/6Hw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+                '
+        
 
                 . '<script src="javascript/functions.js"></script>'
                 
