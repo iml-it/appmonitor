@@ -22,6 +22,7 @@ $oMonitor->setWebsite('Appmonitor server');
 
 // how often the server should ask for updates
 $oMonitor->setTTL(300);
+$oMonitor->setTTL(10);
 
 // a general include ... the idea is to a file with the same actions on all
 // installations and hosts that can be deployed by a software delivery service 
@@ -43,6 +44,7 @@ $oMonitor->addCheck(
     array(
         "name" => "check tmp subdir",
         "description" => "Check cache storage",
+        "parent" => "folder",
         "check" => array(
             "function" => "File",
             "params" => array(
@@ -57,6 +59,7 @@ $oMonitor->addCheck(
     array(
         "name" => "check config subdir",
         "description" => "Check config target directory",
+        "parent" => "folder",
         "check" => array(
             "function" => "File",
             "params" => array(
@@ -71,6 +74,7 @@ $oMonitor->addCheck(
     array(
         "name" => "check config file",
         "description" => "The config file must be writable",
+        "parent" => "file",
         "check" => array(
             "function" => "File",
             "params" => array(
@@ -95,6 +99,7 @@ foreach(array('server/config', 'server/tmp') as $sMyDir){
         array(
             "name" => "deny http to $sMyDir",
             "description" => "Check if the $sMyDir directory is not accessible (counts as warning on fail)",
+            "parent" => "deny",
             "check" => array(
                 "function" => "HttpContent",
                 "params" => array(
@@ -140,6 +145,7 @@ $oMonitor->addCheck(
     array(
         "name" => "running service",
         "description" => "Check if the service is running",
+        "parent" => "service",
         "check" => array(
             "function" => "Simple",
             "params" => array(
@@ -150,6 +156,7 @@ $oMonitor->addCheck(
                 ),
             ),
         ),
+        "worstresult" => RESULT_OK        
     )
 );
 // ----------------------------------------------------------------------
