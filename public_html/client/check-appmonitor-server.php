@@ -122,6 +122,7 @@ $oMonitor->addCheck(
     array(
         "name" => "appcounter",
         "description" => "Monitored apps",
+        "parent" => "monitor",
         "check" => array(
             "function" => "Simple",
             "params" => array(
