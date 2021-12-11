@@ -13,7 +13,7 @@ OPEN SOURCE from University of Bern :: IML - Institute of Medical Education
 
 # Requirements #
 
-- PHP7 or 8
+- PHP7 or 8 (up to 8.1)
 - php-curl
 
 The server uses
@@ -21,6 +21,7 @@ The server uses
 - [ahCache] (<https://www.axel-hahn.de/docs/ahcache/index.htm>) class to store
    serialized data as file (included)
 - [cdnorlocal] (<https://www.axel-hahn.de/docs/cdnorlocal/index.htm>)
+- [Icons small-n-flat] (<http://paomedia.github.io/small-n-flat/>)
 
 ... and loads from CDNJS (but could be stored locally too):
 
@@ -29,6 +30,7 @@ The server uses
 - [jQuery] (<https://jquery.com/>)
 - [Datatables plugin] (<https://datatables.net/>)
 - [Font Awesome] (<https://fontawesome.com/>)
+- [Vis.js] (<https://visjs.org/>)
 
 # Installation #
 
