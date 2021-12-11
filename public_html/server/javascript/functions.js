@@ -26,122 +26,17 @@ var aViewFilters = {};
 
 
 const visjsNetOptions = {
-    groups: {
-
-        // ---------- check results
-        "check-result-0": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf00c",
-                size: 50,
-                color: "#aaeeaa",
-            },
-            },
-        "check-result-1": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf714",
-                size: 50,
-                color: "#ffcccc",
-            },
-            },
-        "check-result-2": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf071",
-                size: 50,
-                color: "#eeaa22",
-            },
-        },
-        "check-result-3": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf059",
-                size: 50,
-                color: "#eeaa22",
-            },
-        },
-
-        // ---------- groups
-        "group-file": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf15b",
-                size: 50,
-                color: "#88ccee",
-            },
-        },
-        "group-folder": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf07b",
-                size: 50,
-                color: "#88ccee",
-            },
-        },
-        "group-deny": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf05e",
-                size: 50,
-                color: "#88ccee",
-            },
-        },
-        "group-database": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf1c0",
-                size: 50,
-                color: "#88ccee",
-            },
-        },
-        "group-disk": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf0a0",
-                size: 50,
-                color: "#88ccee",
-            },
-        },
-        "group-network": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf542",
-                size: 50,
-                color: "#88ccee",
-            },
-        },
-        "group-service": {
-            shape: "icon",
-            icon: {
-                face: "\'Font Awesome 5 Free\'",
-                weight: "900",
-                code: "\uf085",
-                size: 50,
-                color: "#88ccee",
-            },
+    layout: {
+        hierarchical: {
+          direction: "DU",
+          sortMethod: "directed",
         },
     },
+    physics: {
+        hierarchicalRepulsion: {
+          avoidOverlap: +1,
+        },
+    }
 };
     
 // ----------------------------------------------------------------------

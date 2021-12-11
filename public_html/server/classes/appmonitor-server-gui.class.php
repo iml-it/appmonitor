@@ -629,83 +629,87 @@ class appmonitorserver_gui extends appmonitorserver {
     protected function _generateMonitorGraph($sUrl=false){
         $sReturn='';
 
-        $iGroup=1000;
+        $iGroup=1000; // starting node id for groups
+
+        // files with .png must exist in server/images/icons/
         $aParentsCfg=[
-            'file'=>[ 'id'=>$iGroup++ ],
-            'folder'=>[ 'id'=>$iGroup++ ],
-
-            'deny'=>[ 'id'=>$iGroup++ ],
-
-            'database'=>[ 'id'=>$iGroup++ ],
-            'service'=>[ 'id'=>$iGroup++ ],
-            'disk'=>[ 'id'=>$iGroup++ ],
-            'network'=>[ 'id'=>$iGroup++ ],
-
+            'cloud'    => [ 'id'=>$iGroup++ ],
+            'database' => [ 'id'=>$iGroup++ ],
+            'deny'     => [ 'id'=>$iGroup++ ],
+            'disk'     => [ 'id'=>$iGroup++ ],
+            'file'     => [ 'id'=>$iGroup++ ],
+            'folder'   => [ 'id'=>$iGroup++ ],
+            'monitor'  => [ 'id'=>$iGroup++ ],
+            'network'  => [ 'id'=>$iGroup++ ],
+            'security' => [ 'id'=>$iGroup++ ],
+            'service'  => [ 'id'=>$iGroup++ ],
         ];
         $aParents=[];
         $aNodes=[];
         $aEdges=[];
         $iCounter=1;
         $aShapes=[
-            0 => [ 'color' => '#aaeeaa', 'width' => 2, 'shape'=>'icon',
-                'icon' => [
-                    'face'=> "Font Awesome 5 Free",
-                    'weight'=> "900", // Font Awesome 5 doesn't work properly unless bold.
-                    'code' => "'\\uf00c'",
-                    'size'=> 50,
-                    'color'=> "#aaeeaa"
-                ],
-             ],
-            1 => [ 'color' => '#ffcccc', 'width' => 6, 'shape'=>'star' ],    // error
-            2 => [ 'color' => '#eeaa22', 'width' => 4, 'shape'=>'icon   ' ], // warn
-            3 => [ 'color' => '#dddddd', 'width' => 2, 'shape'=>'ellipse' ], // unknown
+            0 => [ 'color' => '#aaeeaa', 'width' => 3 ],
+            1 => [ 'color' => '#ffcccc', 'width' => 9, 'shape'=>'star' ],    // error
+            2 => [ 'color' => '#eeaa22', 'width' => 6, 'shape'=>'dot' ], // warn
+            3 => [ 'color' => '#aaaaaa', 'width' => 3, 'shape'=>'ellipse' ], // unknown
         ];
 
         foreach ($this->_data as $sAppId => $aEntries) {
             // echo '<pre>'.print_r($aEntries,1); die();
+
+            //
+            // --- add application node
+            //
             $aNodes[]=[ 
                 'id'=> 1, 
                 'label'=> $aEntries['meta']['website'], 
                 'title'=>$this->_tr('Resulttype-'.$aEntries['meta']["result"]).": ".$aEntries['meta']['website'], 
                 'shape' => 'box', 
                 'color'=>$aShapes[$aEntries['meta']['result']]['color'] ,
-                // 'margin' => [ { top: 10, right: 20, bottom: 40, left: 30 } ],
-                'margin' => 30 ,
+                'margin' =>[ 'top' => 20, 'right' => 200, 'bottom' => 20, 'left' => 200 ] ,
+                // 'margin' => 30 ,
             ];
 
             foreach ($aEntries["checks"] as $aCheck) {
                 // echo '<pre>'.print_r($aCheck,1); die();
                 $iCounter++;
+                //
+                // --- add check node
+                //
                 $aNodes[]=[ 
                     'id'=> $iCounter, 
                     'label'=> $aCheck['name'], 
-                    'title'=>$this->_tr('Resulttype-'.$aCheck["result"]).": ".$aCheck['description'],
-                    'color'=>$aShapes[$aCheck['result']]['color'], 
-                    'shape'=>$aShapes[$aCheck['result']]['shape'],
-                    // 'icon'=>$aShapes[$aCheck['result']]['icon'],
-                    'group'=>'check-result-'.$aCheck["result"]
-                    // 'group'=>'users'
+                    'title'=>$this->_tr('Resulttype-'.$aCheck["result"]).": ".$aCheck['value'],
+
+                    'shape'=>'image',
+                    'image'=>"images/icons/check-".$aCheck["result"].".png",
                 ];
                 $iParent=1;
+                //
+                // --- collect all parent definitions
+                //
                 if(isset($aCheck['parent']) && $aCheck['parent'] && isset($aParentsCfg[$aCheck['parent']]['id'])) {
                     $iParent=$aParentsCfg[$aCheck['parent']]['id'];
                     $aParents[$iParent]=[ 
                         'id'=> $iParent, 
                         'label'=> $aCheck['parent'], 
-                        // 'title'=>, 
-                        // 'color'=>$aShapes[$aEntries['meta']['result']]['color'] ,
-                        // 'margin' => [ { top: 10, right: 20, bottom: 40, left: 30 } ],
-                        'group'=>'group-'.$aCheck['parent']
+                        'shape'=>'image',
+                        'image'=>"images/icons/".$aCheck['parent'].".png",
+                        'opacity'=>0.1
                     ];
                     
                 }
                 $aEdges[]=[ 'from' => $iParent, 'to' => $iCounter, 'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 'length' => 200, 'width' => $aShapes[$aCheck['result']]['width'] ];
             }
         }
+        //
+        // --- add nodes for parent groups
+        //
         if (count($aParents)){
             foreach($aParents as $aItem){
                 $aNodes[]=$aItem;
-                $aEdges[]=[ 'from' => 1, 'to' => $aItem['id'], 'color' => [ 'color' => $aShapes[3]['color'] ], 'length' => 200, 'width' => 2 ];
+                $aEdges[]=[ 'from' => 1, 'to' => $aItem['id'], 'dashes'=>true, 'color' => [ 'color' => $aShapes[3]['color'] ], 'length' => 200, 'width' => 1 ];
             }
         }
         // echo '<pre>'.print_r($aParents,1); die();
@@ -715,8 +719,8 @@ class appmonitorserver_gui extends appmonitorserver {
         
         <style type="text/css">
         #mynetwork {
-          width: 800px;
-          height: 600px;
+          width: 100%;
+          height: 400px;
           border: 2px dashed lightgray;
         }
         </style>
