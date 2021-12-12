@@ -38,6 +38,7 @@ $oMonitor->addCheck(
   array(
     "name" => "[short name of the check]",
     "description" => "[an a bit longer description]",
+    "group" => "[optional: name of a group]",
     "check" => [Array for the check],
     "worstresult" => RESULT_WARNING
   )
@@ -48,6 +49,7 @@ $oMonitor->addCheck(
 |---         |---       |---
 |name        |(string)  | "id" if the check <span class="required">(*)</span>|
 |description |(string)  | a short description <span class="required">(*)</span>|
+|group       |(string)  | optional name of a group; pre-defined values are listed in [client.md](client.md) |
 |check       |(array)   | check to perform <span class="required">(*)</span>|
 |worstresult |(integer) | optional: limit maximum error level if the check fails<br>if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING.|
 

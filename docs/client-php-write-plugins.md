@@ -38,7 +38,7 @@ print_r($oMonitor->listChecks());
 
 # Example #
 
-A good starting point is the file plugins/checkHello.php
+A good starting point is the file [client]/plugins/hello.php
 
 * To access the checkHello.php you need to use "Hello" in the value check -> function.
 * A plugin gets the array check -> params as argument. The following snippet will use an array with a single key "message"
