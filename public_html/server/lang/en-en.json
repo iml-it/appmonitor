@@ -11,11 +11,14 @@
 
         "Checks": "Checks",
         "Checks-header": "Overview with all Checks",
-        
+
         "Checks-on-webapp": "Checks for webapp",
         "Checks-total": "Checks total",
+        "Checks-visualisation": "Graphical view",
 
         "Duration": "Duration",
+
+        "Group": "Group",
 
         "Notifications": "Notifications",
         "Notifications-header": "Log of last changes",
@@ -209,6 +212,17 @@
     "Resulttype-1": "Unknown",
     "Resulttype-2": "Warning",
     "Resulttype-3": "Error",
-    
+
+    "group-cloud": "Cloud",
+    "group-database": "Database",
+    "group-deny": "Deny",
+    "group-disk": "Disk",
+    "group-file": "File",
+    "group-folder": "Folder",
+    "group-monitor": "Data in tiles",
+    "group-network": "Network",
+    "group-security": "Security",
+    "group-service": "Service",
+
     "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
 }

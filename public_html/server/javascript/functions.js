@@ -28,15 +28,10 @@ var aViewFilters = {};
 const visjsNetOptions = {
     layout: {
         hierarchical: {
-          direction: "DU",
+          direction: "UD",
           sortMethod: "directed",
         },
     },
-    physics: {
-        hierarchicalRepulsion: {
-          avoidOverlap: +1,
-        },
-    }
 };
     
 // ----------------------------------------------------------------------

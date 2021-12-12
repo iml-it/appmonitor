@@ -625,25 +625,79 @@ class appmonitorserver_gui extends appmonitorserver {
         ;
     }
 
+    /**
+     * Get an array with group items of the checks
+     * @return array
+     */
+    protected function _getVisualGroups(){
+        $iGroup=10000; // starting node id for groups
+        $aReturn=[];
+        $sBaseUrl=dirname($_SERVER['SCRIPT_NAME']).'/images/icons/';
+        foreach([
+            'cloud',
+            'database',
+            'deny',
+            'disk',
+            'file',
+            'folder',
+            'monitor',
+            'network',
+            'security',
+            'service',
+        ] as $sGroupname){
+            $aReturn[$sGroupname]=[ 
+                'id'=>$iGroup++,
+                'label'=>$this->_tr('group-'.$sGroupname),
+                'image'=>$sBaseUrl.$sGroupname.'.png',
+            ];
+        }
+        
+        return $aReturn;
+    }
 
+    /**
+     * get image as data: string to embed 
+     * @param  array  $aOptions  hash with option keys
+     *                           - bgcolor  background of svg rect
+     *                           - width    width of svg rect
+     *                           - height   height of svg rect
+     *                           - style    style of html div
+     *                           - content  html code of div
+     * @return string
+     */
+    protected function _getHtmlInSvg($aOptions){
+        $revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
+        $svg ='<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="90">' 
+            .'<rect x="0" y="0"'
+                . (isset($aOptions['width'])   ? ' width="'.(int)$aOptions['width'].'"'  : '')
+                . (isset($aOptions['height'])  ? ' height="'.(int)$aOptions['height'].'"' : '')
+                . (isset($aOptions['bgcolor']) ? ' fill="'.$aOptions['bgcolor'].'"'      : '')
+                .' stroke-width="20" stroke="#ffffff" >'
+            .'</rect>' 
+            .'<foreignObject x="15" y="10" width="100%" height="100%">' 
+                .'<div xmlns="http://www.w3.org/1999/xhtml"'
+                . (isset($aOptions['style']) ? ' style="'.$aOptions['style'].'"' : '')
+                .'>' 
+                . (isset($aOptions['content']) ? $aOptions['content'] : '')
+                ."</div>" 
+            .'</foreignObject>'
+        .'</svg>'
+        ;
+        // die($svg);
+        // echo '<pre>'.htmlentities($svg).'</pre>'; 
+        // die();
+        return "data:image/svg+xml;charset=utf-8," . strtr(rawurlencode($svg), $revert);
+    }
+
+    /**
+     * Get html code for visual view of all checks
+     * @return string
+     */
     protected function _generateMonitorGraph($sUrl=false){
         $sReturn='';
 
-        $iGroup=1000; // starting node id for groups
-
         // files with .png must exist in server/images/icons/
-        $aParentsCfg=[
-            'cloud'    => [ 'id'=>$iGroup++ ],
-            'database' => [ 'id'=>$iGroup++ ],
-            'deny'     => [ 'id'=>$iGroup++ ],
-            'disk'     => [ 'id'=>$iGroup++ ],
-            'file'     => [ 'id'=>$iGroup++ ],
-            'folder'   => [ 'id'=>$iGroup++ ],
-            'monitor'  => [ 'id'=>$iGroup++ ],
-            'network'  => [ 'id'=>$iGroup++ ],
-            'security' => [ 'id'=>$iGroup++ ],
-            'service'  => [ 'id'=>$iGroup++ ],
-        ];
+        $aParentsCfg=$this->_getVisualGroups();
         $aParents=[];
         $aNodes=[];
         $aEdges=[];
@@ -663,9 +717,25 @@ class appmonitorserver_gui extends appmonitorserver {
             //
             $aNodes[]=[ 
                 'id'=> 1, 
-                'label'=> $aEntries['meta']['website'], 
+                // 'label'=> $aEntries['meta']['website'], 
                 'title'=>$this->_tr('Resulttype-'.$aEntries['meta']["result"]).": ".$aEntries['meta']['website'], 
-                'shape' => 'box', 
+                // 'shape' => 'box', 
+                'shape'=>'image',
+                // 'image'=>"data:image/svg+xml;charset=utf-8," . strtr(rawurlencode($svg), $revert),
+                'image'=>$this->_getHtmlInSvg([
+                    'bgcolor'=>$aShapes[$aEntries['meta']['result']]['color'],
+                    'width'=>1200,
+                    'height'=>90,
+                    'style'=>'font-size:3em; text-align: center; padding: 0.1em; font-weight: bold;',
+                    'content'=>''
+                        .'<span style="color:black; opacity: 0.5;">' 
+                            .$this->_tr('Resulttype-'.$aEntries['meta']["result"]).' - '
+                        .'</span>'
+                        .'<span style="color:black; text-shadow:0 0 1px #ffffff,0 0 2px #ffffff,0 0 20px #888888; ">' 
+                            .$aEntries['meta']['website']
+                        .'</span>'
+                    ]),
+
                 'color'=>$aShapes[$aEntries['meta']['result']]['color'] ,
                 'margin' =>[ 'top' => 20, 'right' => 200, 'bottom' => 20, 'left' => 200 ] ,
                 // 'margin' => 30 ,
@@ -680,7 +750,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 $aNodes[]=[ 
                     'id'=> $iCounter, 
                     'label'=> $aCheck['name'], 
-                    'title'=>$this->_tr('Resulttype-'.$aCheck["result"]).": ".$aCheck['value'],
+                    'title'=>/*$this->_tr('Resulttype-'.$aCheck["result"]).": ".*/$aCheck['value'],
 
                     'shape'=>'image',
                     'image'=>"images/icons/check-".$aCheck["result"].".png",
@@ -689,14 +759,27 @@ class appmonitorserver_gui extends appmonitorserver {
                 //
                 // --- collect all parent definitions
                 //
-                if(isset($aCheck['parent']) && $aCheck['parent'] && isset($aParentsCfg[$aCheck['parent']]['id'])) {
-                    $iParent=$aParentsCfg[$aCheck['parent']]['id'];
+                if(isset($aCheck['group']) && $aCheck['group'] && isset($aParentsCfg[$aCheck['group']]['id'])) {
+                    $iParent=$aParentsCfg[$aCheck['group']]['id'];
                     $aParents[$iParent]=[ 
                         'id'=> $iParent, 
-                        'label'=> $aCheck['parent'], 
+                        'label'=> $aParentsCfg[$aCheck['group']]['label'], 
                         'shape'=>'image',
-                        'image'=>"images/icons/".$aCheck['parent'].".png",
-                        'opacity'=>0.1
+                        'image'=>$aParentsCfg[$aCheck['group']]['image'],
+                        /*
+                        'image'=>$this->_getHtmlInSvg([
+                            'bgcolor'=>'#eeeeee',
+                            'width'=>200,
+                            'height'=>200,
+                            // 'style'=>'text-align: center;',
+                            'content'=>''
+                                . '<img src="'.$aParentsCfg[$aCheck['parent']]['image'].'" />'
+                                . $aParentsCfg[$aCheck['parent']]['image']
+                                // .'<img src="./images/icons/"'.$aCheck['parent'].'.png">'
+
+                            ]),
+                            */
+                        'opacity'=>0.2
                     ];
                     
                 }
@@ -720,7 +803,7 @@ class appmonitorserver_gui extends appmonitorserver {
         <style type="text/css">
         #mynetwork {
           width: 100%;
-          height: 400px;
+          height: 600px;
           border: 2px dashed lightgray;
         }
         </style>
@@ -759,12 +842,13 @@ class appmonitorserver_gui extends appmonitorserver {
         if (!count($this->_data)) {
             return $this->_showWelcomeMessage();
         }
-
+        $aCheckGroups=$this->_getVisualGroups();
         $sTableClass = $sUrl ? "datatable-hosts" : "datatable-checks";
         $sReturn .= $sUrl 
         ? $this->_generateTableHead(array(
             $this->_tr('Result'),
             // $this->_tr('TTL'),
+            $this->_tr('Group'),
             $this->_tr('Check'),
             $this->_tr('Description'),
             $this->_tr('Output'),
@@ -813,8 +897,14 @@ class appmonitorserver_gui extends appmonitorserver {
                         } else {
                             $sReturn .= '<td class="result result'.$aCheck["result"].'"><span style="display: none;">'.$aCheck['result'].'</span>' . $this->_tr('Resulttype-'.$aCheck["result"]).'</td>';
                         }
-                        $sReturn .= // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
-                                '<td>' . $aCheck["name"] . '</td>'
+                        $sReturn .= ''// . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
+                                . '<td>' 
+                                . (isset($aCheck["group"]) 
+                                    ? '<img src="'.$aCheckGroups[$aCheck["group"]]['image'].'" width="16">&nbsp;' . $aCheckGroups[$aCheck["group"]]['label']
+                                    : '-' 
+                                )
+                                . '<td>' . $aCheck["name"] . '</td>'
+                                . '</td>'
                                 . '<td>' . $aCheck["description"] . '</td>'
                                 . '<td>' . $aCheck["value"] . '</td>'
                                 . '<td>' . (isset($aCheck["count"]) ? $aCheck["count"] : '-') . '</td>'
@@ -1164,7 +1254,7 @@ class appmonitorserver_gui extends appmonitorserver {
                         $oA->getBox(array(
                             // 'label'=>'I am a label.',
                             // 'collapsable'=>true,
-                            'title'=>$this->_tr('Checks'),
+                            'title'=>$this->_tr('Checks-visualisation'),
                             'text'=>$this->_generateMonitorGraph($aEntries["result"]["url"])
                         ))
                     )
