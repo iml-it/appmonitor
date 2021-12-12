@@ -117,7 +117,7 @@ class appmonitorcheck {
         $this->_aData = array(
             "name" => $this->_aConfig["name"],
             "description" => $this->_aConfig["description"],
-            "parent" => isset($this->_aConfig["parent"]) ? $this->_aConfig["parent"] : false,
+            "group" => isset($this->_aConfig["group"]) ? $this->_aConfig["group"] : false,
             "result" => RESULT_UNKNOWN,
             "value" => false,
             "type" => false,
