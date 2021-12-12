@@ -21,7 +21,14 @@
  * 
  */
 class checkPortTcp extends appmonitorcheck{
-
+    /**
+     * get default group of this check
+     * @param array   $aParams
+     * @return array
+     */
+    public function getGroup(){
+        return 'network';
+    }
 
     /**
      * check if system is listening to a given port

@@ -22,6 +22,15 @@
  */
 class checkDiskfree extends appmonitorcheck{
     /**
+     * get default group of this check
+     * @param array   $aParams
+     * @return array
+     */
+    public function getGroup(){
+        return 'disk';
+    }
+
+    /**
      * check free disk space on a given directory
      * @param array $aParams
      * array(

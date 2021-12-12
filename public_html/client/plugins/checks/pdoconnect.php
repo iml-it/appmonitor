@@ -22,6 +22,14 @@
  */
 class checkPdoConnect extends appmonitorcheck{
     /**
+     * get default group of this check
+     * @param array   $aParams
+     * @return array
+     */
+    public function getGroup(){
+        return 'database';
+    }
+    /**
      * check connection to a database using pdo
      * see http://php.net/manual/en/pdo.drivers.php
      * 

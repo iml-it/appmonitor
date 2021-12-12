@@ -253,8 +253,8 @@ class appmonitorcheck {
             );
         }
             
-        $oPlogin = new $sCheckClass;
-        $aResponse=$oPlogin->run($aParams); 
+        $oPlugin = new $sCheckClass;
+        $aResponse=$oPlugin->run($aParams); 
         if(!is_array($aResponse)){
             header('HTTP/1.0 503 Service Unavailable');
             die('<h1>503 Service Unavailable</h1>'
@@ -277,6 +277,9 @@ class appmonitorcheck {
             $aResponse[2]=array();
         }
         $this->_setReturn($aResponse[0], $aResponse[1], $aResponse[2]);
+        if (!$this->_aData['group'] && method_exists($oPlugin, "getGroup")){
+            $this->_aData['group']=$oPlugin->getGroup($aParams);
+        }
 
         $this->_aData['time'] = number_format((microtime(true) - $this->_iStart) * 1000, 3) . 'ms';
         // ... and send response 

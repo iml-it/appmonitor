@@ -44,7 +44,7 @@ $oMonitor->addCheck(
     array(
         "name" => "check tmp subdir",
         "description" => "Check cache storage",
-        "group" => "folder",
+        // "group" => "folder",
         "check" => array(
             "function" => "File",
             "params" => array(
@@ -59,7 +59,7 @@ $oMonitor->addCheck(
     array(
         "name" => "check config subdir",
         "description" => "Check config target directory",
-        "group" => "folder",
+        // "group" => "folder",
         "check" => array(
             "function" => "File",
             "params" => array(
@@ -74,7 +74,7 @@ $oMonitor->addCheck(
     array(
         "name" => "check config file",
         "description" => "The config file must be writable",
-        "group" => "file",
+        // "group" => "file",
         "check" => array(
             "function" => "File",
             "params" => array(

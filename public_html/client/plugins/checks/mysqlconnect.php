@@ -22,6 +22,14 @@
  */
 class checkMysqlConnect extends appmonitorcheck{
     /**
+     * get default group of this check
+     * @param array   $aParams
+     * @return array
+     */
+    public function getGroup(){
+        return 'database';
+    }
+    /**
      * check mysql connection to a database using mysqli realconnect
      * @param array $aParams
      * array(

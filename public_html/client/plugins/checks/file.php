@@ -25,6 +25,24 @@
  */
 class checkFile extends appmonitorcheck{
     /**
+     * get default group of this check
+     * @param array   $aParams - see run() method
+     * @return array
+     */
+    public function getGroup($aParams){
+        $sReturn='file';
+        if(isset($aParams['dir'])){
+            $sReturn='folder';
+        }
+        foreach(['exists', 'executable', 'readable', 'writable'] as $sFlag){
+            if (isset($aParams[$sFlag]) && !$aParams[$sFlag]){
+                $sReturn='deny';
+            }
+        }
+        return $sReturn;
+    }
+
+    /**
      * check a file
      * @param array $aParams
      * array(

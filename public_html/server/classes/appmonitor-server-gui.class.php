@@ -899,7 +899,7 @@ class appmonitorserver_gui extends appmonitorserver {
                         }
                         $sReturn .= ''// . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
                                 . '<td>' 
-                                . (isset($aCheck["group"]) 
+                                . (isset($aCheck["group"]) && $aCheck["group"] && isset($aCheckGroups[$aCheck["group"]])
                                     ? '<img src="'.$aCheckGroups[$aCheck["group"]]['image'].'" width="16">&nbsp;' . $aCheckGroups[$aCheck["group"]]['label']
                                     : '-' 
                                 )
