@@ -389,7 +389,7 @@ class appmonitorserver_gui extends appmonitorserver {
                         ? $this->_getTile(array(
                             'icon' => $this->_aIco['time'],
                             'label' => $this->_tr('Time-for-all-checks'),
-                            'count' => $this->_data[$sAppId]['meta']['time'],
+                            'count' => preg_replace('/\.[0-9]*/', '', $this->_data[$sAppId]['meta']['time']),
                         ))
                         : ''
                     ;
