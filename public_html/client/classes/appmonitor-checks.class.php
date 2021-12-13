@@ -49,8 +49,9 @@ if(!defined('RESULT_OK')){
  * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * 2019-06-05  0.88  axel.hahn@iml.unibe.ch  add plugins<br>
  * 2021-10-28  0.93  axel.hahn@iml.unibe.ch  add plugins<br>
+ * 2021-12-14  0.93  axel.hahn@iml.unibe.ch  split plugins into single files; added key group in a check<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.93
+ * @version 0.99
  * @author Axel Hahn
  * @link TODO
  * @license GPL
