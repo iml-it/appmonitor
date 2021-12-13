@@ -1,6 +1,13 @@
 
 HISTORY
 
+v0.99 2021-12-xx
+    - client: split checks into single files
+    - client: added group item in check output
+    - server: show graphical overview
+    - server: update jquery to 3.6.0
+    - server: update datatables to 1.10.21
+
 v0.98 2021-12-02
     - service: show fetched urls in stdout
 

@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.98
+ * @version 0.99
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.98";
+    var $_sVersion = "0.99";
 
     /**
      * html code for icons in the web gui
@@ -2026,12 +2026,13 @@ class appmonitorserver_gui extends appmonitorserver {
         ));
         $oCdn->setLibs(array(
             "admin-lte/2.4.10",
-            "datatables/1.10.19",
+            "datatables/1.10.21",
             "font-awesome/5.15.4",
-            "jquery/3.4.1",
+            "jquery/3.6.0",
             "twitter-bootstrap/3.4.1",
             "Chart.js/2.7.2",
-            "x-editable/1.5.0",
+            "vis/4.21.0",
+            // "x-editable/1.5.0",
         ));
         $oA=new renderadminlte();
 
@@ -2122,8 +2123,8 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('twitter-bootstrap').'/js/bootstrap.min.js') . '" type="text/javascript"></script>'
                 
                 // x-editable
-                . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('x-editable').'/bootstrap3-editable/css/bootstrap-editable.css') . '" rel="stylesheet">'
-                . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('x-editable').'/bootstrap3-editable/js/bootstrap-editable.min.js') . '" type="text/javascript"></script>'
+                // . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('x-editable').'/bootstrap3-editable/css/bootstrap-editable.css') . '" rel="stylesheet">'
+                // . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('x-editable').'/bootstrap3-editable/js/bootstrap-editable.min.js') . '" type="text/javascript"></script>'
                 
                 // Font awesome
                 . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('font-awesome').'/css/all.min.css') . '" rel="stylesheet">'
@@ -2131,10 +2132,9 @@ class appmonitorserver_gui extends appmonitorserver {
                 // Chart.js
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('Chart.js').'/Chart.min.js') . '" type="text/javascript"></script>'
 
-                .'
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js" integrity="sha512-XHDcSyqhOoO2ocB7sKOCJEkUjw/pQCJViP1ynpy+EGh/LggzrP6U/V3a++LQTnZT7sCQKeHRyWHfhN2afjXjCg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis-network.min.css" integrity="sha512-NJXM8vzWgDcBy9SCUTJXYnNO43sZV3pfLWWZMFTuCtEUIOcznk+AMpH6N3XruxavYfMeMmjrzDMEQ6psRh/6Hw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-                '
+                // @since v0.99: vis (visjs.org)
+                . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('vis').'/vis.min.js') . '" type="text/javascript"></script>'
+                . '<link href="'  . $oCdn->getFullUrl($oCdn->getLibRelpath('vis').'/vis-network.min.css') . '" rel="stylesheet">'
         
 
                 . '<script src="javascript/functions.js"></script>'
