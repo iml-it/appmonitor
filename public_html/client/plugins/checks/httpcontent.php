@@ -26,8 +26,12 @@ class checkHttpContent extends appmonitorcheck{
      * @param array   $aParams
      * @return array
      */
-    public function getGroup(){
-        return 'service';
+    public function getGroup($aParams){
+        $sReturn='service';
+        if(isset($aParams['status']) && $aParams['status'] > 300 && $aParams['status'] < 500 ){
+            $sReturn='deny';
+        }
+        return $sReturn;
     }
 
     /**
