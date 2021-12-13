@@ -147,16 +147,16 @@ Each check must have these keys:
 - *"group"*: [{string}: name of a group (optional)] \
   In the graphical view you can cluster checks by adding a group \
   Pre defined vaules and the shown labels are 
-  - cloud: ![Client](../public_html/server/images/icons/cloud.png) "Cloud"
-  - database "Database"
-  - deny "Deny"
-  - disk "Disk"
-  - file "File"
-  - folder "Folder"
-  - monitor "Data in tiles"
-  - network "Network"
-  - security "Security"
-  - service "Service"
+  - cloud: ![](../public_html/server/images/icons/cloud.png) "Cloud"
+  - database ![](../public_html/server/images/icons/.png) "Database"
+  - deny ![](../public_html/server/images/icons/deny.png) "Deny"
+  - disk ![](../public_html/server/images/icons/disk.png) "Disk"
+  - file ![](../public_html/server/images/icons/file.png) "File"
+  - folder ![](../public_html/server/images/icons/folder.png) "Folder"
+  - monitor ![](../public_html/server/images/icons/monitor.png) "Data in tiles"
+  - network ![](../public_html/server/images/icons/network.png) "Network"
+  - security ![](../public_html/server/images/icons/security.png) "Security"
+  - service ![](../public_html/server/images/icons/service.png) "Service"
   
 - *"result"*: [integer: 0..3] <span class="required">(*)</span> \
   result code of the check. The values are the same like the result in the 
