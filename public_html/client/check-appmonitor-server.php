@@ -22,7 +22,6 @@ $oMonitor->setWebsite('Appmonitor server');
 
 // how often the server should ask for updates
 $oMonitor->setTTL(300);
-$oMonitor->setTTL(10);
 
 // a general include ... the idea is to a file with the same actions on all
 // installations and hosts that can be deployed by a software delivery service 
