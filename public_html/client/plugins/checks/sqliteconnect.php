@@ -21,6 +21,14 @@
  * 
  */
 class checkSqliteConnect extends appmonitorcheck{
+    /**
+     * get default group of this check
+     * @param array   $aParams
+     * @return array
+     */
+    public function getGroup(){
+        return 'database';
+    }
 
     /**
      * check sqlite connection

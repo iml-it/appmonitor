@@ -66,6 +66,7 @@ returns JSON answers with the conventions described below.
         {
             "name": "[{string}: short name of the test 1]", 
             "description": "[{string}: a description what the test is verifying]", 
+            "group": "[{string}: name of a group (optional)",
             "result": [{integer}: 0..3]
             "value": "[{string}: result in words or {float} value for type=counter]",
             "time": "[{float} value]ms"
@@ -76,6 +77,7 @@ returns JSON answers with the conventions described below.
         {
             "name": "[{string}: short name of the test N]", 
             "description": "[{string}: a description what the test N is verifying]", 
+            "group": "[{string}: name of a group (optional)]",
             "result": [integer: 0..3]
             "value": "[{string}: result in words]" 
             "time": "[value]ms"
@@ -142,6 +144,20 @@ Each check must have these keys:
 - *"description"*: [string: a description what the test N is verifying] <span class="required">(*)</span> \
   This string is for you - you see the description in the server GUI
   i.e. "Check mysql-db ABC on the server db01"
+- *"group"*: [{string}: name of a group (optional)] \
+  In the graphical view you can cluster checks by adding a group \
+  Pre defined vaules and the shown labels are 
+  - cloud: ![](../public_html/server/images/icons/cloud.png) "Cloud"
+  - database ![](../public_html/server/images/icons/.png) "Database"
+  - deny ![](../public_html/server/images/icons/deny.png) "Deny"
+  - disk ![](../public_html/server/images/icons/disk.png) "Disk"
+  - file ![](../public_html/server/images/icons/file.png) "File"
+  - folder ![](../public_html/server/images/icons/folder.png) "Folder"
+  - monitor ![](../public_html/server/images/icons/monitor.png) "Data in tiles"
+  - network ![](../public_html/server/images/icons/network.png) "Network"
+  - security ![](../public_html/server/images/icons/security.png) "Security"
+  - service ![](../public_html/server/images/icons/service.png) "Service"
+  
 - *"result"*: [integer: 0..3] <span class="required">(*)</span> \
   result code of the check. The values are the same like the result in the 
   meta section.

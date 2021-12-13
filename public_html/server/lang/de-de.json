@@ -14,8 +14,11 @@
         
         "Checks-on-webapp": "Checks zur Applikation",
         "Checks-total": "Checks gesamt",
+        "Checks-visualisation": "Grafische Ansicht",
 
         "Duration": "Dauer",
+
+        "Group": "Gruppe",
 
         "Notifications": "Meldungen",
         "Notifications-header": "Protokoll der letzten Meldungen",
@@ -206,6 +209,17 @@
     "Resulttype-1": "Unbekannt",
     "Resulttype-2": "Warnung",
     "Resulttype-3": "Fehler",
+
+    "group-cloud": "Cloud",
+    "group-database": "Datenbank",
+    "group-deny": "Blockieren",
+    "group-disk": "Disk",
+    "group-file": "Datei",
+    "group-folder": "Verzeichnis",
+    "group-monitor": "Daten in Kacheln",
+    "group-network": "Netzwerk",
+    "group-security": "Sicherheit",
+    "group-service": "Dienste",
     
     "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
 }

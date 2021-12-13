@@ -40,7 +40,7 @@ if (!class_exists('appmonitorcheck')){
  * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.93
+ * @version 0.99
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -54,7 +54,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    protected $_sVersion = 'php-client-v0.93';
+    protected $_sVersion = 'php-client-v0.99';
 
     /**
      * config: default ttl for server before requesting the client check again

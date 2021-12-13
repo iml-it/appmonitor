@@ -2,7 +2,7 @@
 #
 # {{generator}}
 #
-FROM php:8.0-apache
+FROM php:8.1-apache
 
 
 # braucht es hier nicht:

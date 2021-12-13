@@ -46,7 +46,15 @@
  * 
  */
 class checkLoadmeter extends appmonitorcheck{
-    
+    /**
+     * get default group of this check
+     * @param array   $aParams
+     * @return array
+     */
+    public function getGroup(){
+        return 'monitor';
+    }
+
     /**
      * detect load of a machine and return a float value
      * windows part was taken from https://stackoverflow.com/questions/5588616/how-do-you-calculate-server-load-in-php

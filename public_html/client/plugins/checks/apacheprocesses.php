@@ -79,6 +79,15 @@ class checkApacheProcesses extends appmonitorcheck{
 
 
     /**
+     * get default group of this check
+     * @param array   $aParams
+     * @return array
+     */
+    public function getGroup(){
+        return 'services';
+    }
+
+    /**
      * 
      * @param array   $aParams
      * @return array

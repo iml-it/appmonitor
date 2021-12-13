@@ -24,6 +24,16 @@ var iRefreshCounter = 0;
  */
 var aViewFilters = {};
 
+
+const visjsNetOptions = {
+    layout: {
+        hierarchical: {
+          direction: "UD",
+          sortMethod: "directed",
+        },
+    },
+};
+    
 // ----------------------------------------------------------------------
 // HELPER FUNCTIONS
 // ----------------------------------------------------------------------

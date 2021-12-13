@@ -8,8 +8,8 @@
 # 2021-11-nn  <axel.hahn@iml.unibe.ch>
 # ======================================================================
 
-cd $( dirname $0 )
 . $0.cfg
+cd $( dirname $0 )
 
 
 # ----------------------------------------------------------------------
@@ -240,6 +240,7 @@ while true; do
         u)
             set -vx
             docker-compose up -d --remove-orphans
+            sleep 2
             test ! -z "${ONSTARTUP}" && docker exec -it appmonitor-server /bin/bash -c "${ONSTARTUP}"
             set +vx
             ;;

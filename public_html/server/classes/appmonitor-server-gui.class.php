@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.98
+ * @version 0.99
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.98";
+    var $_sVersion = "0.99";
 
     /**
      * html code for icons in the web gui
@@ -389,7 +389,7 @@ class appmonitorserver_gui extends appmonitorserver {
                         ? $this->_getTile(array(
                             'icon' => $this->_aIco['time'],
                             'label' => $this->_tr('Time-for-all-checks'),
-                            'count' => $this->_data[$sAppId]['meta']['time'],
+                            'count' => preg_replace('/\.[0-9]*/', '', $this->_data[$sAppId]['meta']['time']),
                         ))
                         : ''
                     ;
@@ -625,6 +625,210 @@ class appmonitorserver_gui extends appmonitorserver {
         ;
     }
 
+    /**
+     * Get an array with group items of the checks
+     * @return array
+     */
+    protected function _getVisualGroups(){
+        $iGroup=10000; // starting node id for groups
+        $aReturn=[];
+        $sBaseUrl=dirname($_SERVER['SCRIPT_NAME']).'/images/icons/';
+        foreach([
+            'cloud',
+            'database',
+            'deny',
+            'disk',
+            'file',
+            'folder',
+            'monitor',
+            'network',
+            'security',
+            'service',
+        ] as $sGroupname){
+            $aReturn[$sGroupname]=[ 
+                'id'=>$iGroup++,
+                'label'=>$this->_tr('group-'.$sGroupname),
+                'image'=>$sBaseUrl.$sGroupname.'.png',
+            ];
+        }
+        
+        return $aReturn;
+    }
+
+    /**
+     * get image as data: string to embed 
+     * @param  array  $aOptions  hash with option keys
+     *                           - bgcolor  background of svg rect
+     *                           - width    width of svg rect
+     *                           - height   height of svg rect
+     *                           - style    style of html div
+     *                           - content  html code of div
+     * @return string
+     */
+    protected function _getHtmlInSvg($aOptions){
+        $revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
+        $svg ='<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="90">' 
+            .'<rect x="0" y="0"'
+                . (isset($aOptions['width'])   ? ' width="'.(int)$aOptions['width'].'"'  : '')
+                . (isset($aOptions['height'])  ? ' height="'.(int)$aOptions['height'].'"' : '')
+                . (isset($aOptions['bgcolor']) ? ' fill="'.$aOptions['bgcolor'].'"'      : '')
+                .' stroke-width="20" stroke="#ffffff" >'
+            .'</rect>' 
+            .'<foreignObject x="15" y="10" width="100%" height="100%">' 
+                .'<div xmlns="http://www.w3.org/1999/xhtml"'
+                . (isset($aOptions['style']) ? ' style="'.$aOptions['style'].'"' : '')
+                .'>' 
+                . (isset($aOptions['content']) ? $aOptions['content'] : '')
+                ."</div>" 
+            .'</foreignObject>'
+        .'</svg>'
+        ;
+        // die($svg);
+        // echo '<pre>'.htmlentities($svg).'</pre>'; 
+        // die();
+        return "data:image/svg+xml;charset=utf-8," . strtr(rawurlencode($svg), $revert);
+    }
+
+    /**
+     * Get html code for visual view of all checks
+     * @return string
+     */
+    protected function _generateMonitorGraph($sUrl=false){
+        $sReturn='';
+
+        // files with .png must exist in server/images/icons/
+        $aParentsCfg=$this->_getVisualGroups();
+        $aParents=[];
+        $aNodes=[];
+        $aEdges=[];
+        $iCounter=1;
+        $aShapes=[
+            0 => [ 'color' => '#aaeeaa', 'width' => 3 ],
+            1 => [ 'color' => '#ffcccc', 'width' => 9, 'shape'=>'star' ],    // error
+            2 => [ 'color' => '#eeaa22', 'width' => 6, 'shape'=>'dot' ], // warn
+            3 => [ 'color' => '#aaaaaa', 'width' => 3, 'shape'=>'ellipse' ], // unknown
+        ];
+
+        foreach ($this->_data as $sAppId => $aEntries) {
+            // echo '<pre>'.print_r($aEntries,1); die();
+
+            //
+            // --- add application node
+            //
+            $aNodes[]=[ 
+                'id'=> 1, 
+                // 'label'=> $aEntries['meta']['website'], 
+                'title'=>$this->_tr('Resulttype-'.$aEntries['meta']["result"]).": ".$aEntries['meta']['website'], 
+                // 'shape' => 'box', 
+                'shape'=>'image',
+                // 'image'=>"data:image/svg+xml;charset=utf-8," . strtr(rawurlencode($svg), $revert),
+                'image'=>$this->_getHtmlInSvg([
+                    'bgcolor'=>$aShapes[$aEntries['meta']['result']]['color'],
+                    'width'=>1200,
+                    'height'=>90,
+                    'style'=>'font-size:3em; text-align: center; padding: 0.1em; font-weight: bold;',
+                    'content'=>''
+                        .'<span style="color:black; opacity: 0.5;">' 
+                            .$this->_tr('Resulttype-'.$aEntries['meta']["result"]).' - '
+                        .'</span>'
+                        .'<span style="color:black; text-shadow:0 0 1px #ffffff,0 0 2px #ffffff,0 0 20px #888888; ">' 
+                            .$aEntries['meta']['website']
+                        .'</span>'
+                    ]),
+
+                'color'=>$aShapes[$aEntries['meta']['result']]['color'] ,
+                'margin' =>[ 'top' => 20, 'right' => 200, 'bottom' => 20, 'left' => 200 ] ,
+                // 'margin' => 30 ,
+            ];
+
+            foreach ($aEntries["checks"] as $aCheck) {
+                // echo '<pre>'.print_r($aCheck,1); die();
+                $iCounter++;
+                //
+                // --- add check node
+                //
+                $aNodes[]=[ 
+                    'id'=> $iCounter, 
+                    'label'=> $aCheck['name'], 
+                    'title'=>/*$this->_tr('Resulttype-'.$aCheck["result"]).": ".*/$aCheck['value'],
+
+                    'shape'=>'image',
+                    'image'=>"images/icons/check-".$aCheck["result"].".png",
+                ];
+                $iParent=1;
+                //
+                // --- collect all parent definitions
+                //
+                if(isset($aCheck['group']) && $aCheck['group'] && isset($aParentsCfg[$aCheck['group']]['id'])) {
+                    $iParent=$aParentsCfg[$aCheck['group']]['id'];
+                    $aParents[$iParent]=[ 
+                        'id'=> $iParent, 
+                        'label'=> $aParentsCfg[$aCheck['group']]['label'], 
+                        'shape'=>'image',
+                        'image'=>$aParentsCfg[$aCheck['group']]['image'],
+                        /*
+                        'image'=>$this->_getHtmlInSvg([
+                            'bgcolor'=>'#eeeeee',
+                            'width'=>200,
+                            'height'=>200,
+                            // 'style'=>'text-align: center;',
+                            'content'=>''
+                                . '<img src="'.$aParentsCfg[$aCheck['parent']]['image'].'" />'
+                                . $aParentsCfg[$aCheck['parent']]['image']
+                                // .'<img src="./images/icons/"'.$aCheck['parent'].'.png">'
+
+                            ]),
+                            */
+                        'opacity'=>0.2
+                    ];
+                    
+                }
+                $aEdges[]=[ 'from' => $iParent, 'to' => $iCounter, 'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 'length' => 200, 'width' => $aShapes[$aCheck['result']]['width'] ];
+            }
+        }
+        //
+        // --- add nodes for parent groups
+        //
+        if (count($aParents)){
+            foreach($aParents as $aItem){
+                $aNodes[]=$aItem;
+                $aEdges[]=[ 'from' => 1, 'to' => $aItem['id'], 'dashes'=>true, 'color' => [ 'color' => $aShapes[3]['color'] ], 'length' => 200, 'width' => 1 ];
+            }
+        }
+        // echo '<pre>'.print_r($aParents,1); die();
+        // echo '<pre>'.print_r($aEdges,1); die();
+        // echo '<pre>'.print_r($aNodes,1); die();
+        $sReturn.='
+        
+        <style type="text/css">
+        #mynetwork {
+          width: 100%;
+          height: 600px;
+          border: 2px dashed lightgray;
+        }
+        </style>
+
+        <div id="mynetwork"></div>
+
+        <script type="text/javascript">
+        var nodes = new vis.DataSet('.json_encode($aNodes).');
+        var edges = new vis.DataSet('.json_encode($aEdges).');
+  
+        // create a network
+        var container = document.getElementById("mynetwork");
+        var data = {
+          nodes: nodes,
+          edges: edges,
+        };
+        
+        // hint: variable visjsNetOptions is defined in javascript/functions.js
+        var network = new vis.Network(container, data, visjsNetOptions);
+      </script>        
+        ';
+        // echo "<pre>" . htmlentities($sReturn); die();
+        // echo "<pre>" . htmlentities(json_encode($aNodes)); die();
+        return $sReturn;
+    }
 
     /**
      * helper: generate html code with all checks.
@@ -638,12 +842,13 @@ class appmonitorserver_gui extends appmonitorserver {
         if (!count($this->_data)) {
             return $this->_showWelcomeMessage();
         }
-
+        $aCheckGroups=$this->_getVisualGroups();
         $sTableClass = $sUrl ? "datatable-hosts" : "datatable-checks";
         $sReturn .= $sUrl 
         ? $this->_generateTableHead(array(
             $this->_tr('Result'),
             // $this->_tr('TTL'),
+            $this->_tr('Group'),
             $this->_tr('Check'),
             $this->_tr('Description'),
             $this->_tr('Output'),
@@ -692,8 +897,14 @@ class appmonitorserver_gui extends appmonitorserver {
                         } else {
                             $sReturn .= '<td class="result result'.$aCheck["result"].'"><span style="display: none;">'.$aCheck['result'].'</span>' . $this->_tr('Resulttype-'.$aCheck["result"]).'</td>';
                         }
-                        $sReturn .= // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
-                                '<td>' . $aCheck["name"] . '</td>'
+                        $sReturn .= ''// . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
+                                . '<td>' 
+                                . (isset($aCheck["group"]) && $aCheck["group"] && isset($aCheckGroups[$aCheck["group"]])
+                                    ? '<img src="'.$aCheckGroups[$aCheck["group"]]['image'].'" width="16">&nbsp;' . $aCheckGroups[$aCheck["group"]]['label']
+                                    : '-' 
+                                )
+                                . '<td>' . $aCheck["name"] . '</td>'
+                                . '</td>'
                                 . '<td>' . $aCheck["description"] . '</td>'
                                 . '<td>' . $aCheck["value"] . '</td>'
                                 . '<td>' . (isset($aCheck["count"]) ? $aCheck["count"] : '-') . '</td>'
@@ -1036,6 +1247,19 @@ class appmonitorserver_gui extends appmonitorserver {
 
             $sHtml .= $oA->getSectionRow($sCounters);
 
+            // --- graph with checks
+            $sHtml .= 
+                $oA->getSectionRow(
+                    $oA->getSectionColumn(
+                        $oA->getBox(array(
+                            // 'label'=>'I am a label.',
+                            // 'collapsable'=>true,
+                            'title'=>$this->_tr('Checks-visualisation'),
+                            'text'=>$this->_generateMonitorGraph($aEntries["result"]["url"])
+                        ))
+                    )
+                )
+            ;
             // --- table with checks
             $sHtml .= 
                 $oA->getSectionRow(
@@ -1802,12 +2026,13 @@ class appmonitorserver_gui extends appmonitorserver {
         ));
         $oCdn->setLibs(array(
             "admin-lte/2.4.10",
-            "datatables/1.10.19",
-            "font-awesome/5.8.1",
-            "jquery/3.4.1",
+            "datatables/1.10.21",
+            "font-awesome/5.15.4",
+            "jquery/3.6.0",
             "twitter-bootstrap/3.4.1",
             "Chart.js/2.7.2",
-            "x-editable/1.5.0",
+            "vis/4.21.0",
+            // "x-editable/1.5.0",
         ));
         $oA=new renderadminlte();
 
@@ -1898,14 +2123,19 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('twitter-bootstrap').'/js/bootstrap.min.js') . '" type="text/javascript"></script>'
                 
                 // x-editable
-                . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('x-editable').'/bootstrap3-editable/css/bootstrap-editable.css') . '" rel="stylesheet">'
-                . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('x-editable').'/bootstrap3-editable/js/bootstrap-editable.min.js') . '" type="text/javascript"></script>'
+                // . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('x-editable').'/bootstrap3-editable/css/bootstrap-editable.css') . '" rel="stylesheet">'
+                // . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('x-editable').'/bootstrap3-editable/js/bootstrap-editable.min.js') . '" type="text/javascript"></script>'
                 
                 // Font awesome
                 . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('font-awesome').'/css/all.min.css') . '" rel="stylesheet">'
 
                 // Chart.js
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('Chart.js').'/Chart.min.js') . '" type="text/javascript"></script>'
+
+                // @since v0.99: vis (visjs.org)
+                . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('vis').'/vis.min.js') . '" type="text/javascript"></script>'
+                . '<link href="'  . $oCdn->getFullUrl($oCdn->getLibRelpath('vis').'/vis-network.min.css') . '" rel="stylesheet">'
+        
 
                 . '<script src="javascript/functions.js"></script>'
                 

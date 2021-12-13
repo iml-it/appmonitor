@@ -594,7 +594,7 @@ class appmonitorserver {
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($aResult['url']));
 
                 // randomize cachetime of appmonitor client response: ttl + 2..30 sec
-                $iTtl = $iTtl + rand(2, min(5+$iTtl/3, 30));
+                $iTtl = $iTtl + rand(2, min(5+round($iTtl/3), 30));
 
                 $oCache->write($aClientData, $iTtl);
 

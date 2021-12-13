@@ -49,8 +49,9 @@ if(!defined('RESULT_OK')){
  * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * 2019-06-05  0.88  axel.hahn@iml.unibe.ch  add plugins<br>
  * 2021-10-28  0.93  axel.hahn@iml.unibe.ch  add plugins<br>
+ * 2021-12-14  0.93  axel.hahn@iml.unibe.ch  split plugins into single files; added key group in a check<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.93
+ * @version 0.99
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -117,6 +118,7 @@ class appmonitorcheck {
         $this->_aData = array(
             "name" => $this->_aConfig["name"],
             "description" => $this->_aConfig["description"],
+            "group" => isset($this->_aConfig["group"]) ? $this->_aConfig["group"] : false,
             "result" => RESULT_UNKNOWN,
             "value" => false,
             "type" => false,
@@ -252,8 +254,8 @@ class appmonitorcheck {
             );
         }
             
-        $oPlogin = new $sCheckClass;
-        $aResponse=$oPlogin->run($aParams); 
+        $oPlugin = new $sCheckClass;
+        $aResponse=$oPlugin->run($aParams); 
         if(!is_array($aResponse)){
             header('HTTP/1.0 503 Service Unavailable');
             die('<h1>503 Service Unavailable</h1>'
@@ -276,6 +278,9 @@ class appmonitorcheck {
             $aResponse[2]=array();
         }
         $this->_setReturn($aResponse[0], $aResponse[1], $aResponse[2]);
+        if (!$this->_aData['group'] && method_exists($oPlugin, "getGroup")){
+            $this->_aData['group']=$oPlugin->getGroup($aParams);
+        }
 
         $this->_aData['time'] = number_format((microtime(true) - $this->_iStart) * 1000, 3) . 'ms';
         // ... and send response 

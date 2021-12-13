@@ -41,6 +41,15 @@
  */
 class checkCert extends appmonitorcheck{
     /**
+     * get default group of this check
+     * @param array   $aParams
+     * @return array
+     */
+    public function getGroup(){
+        return 'security';
+    }
+
+    /**
      * check SSL certificate 
      * @param array $aParams
      * array(
