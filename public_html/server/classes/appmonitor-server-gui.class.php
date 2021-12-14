@@ -693,7 +693,7 @@ class appmonitorserver_gui extends appmonitorserver {
      * Get html code for visual view of all checks
      * @return string
      */
-    protected function _generateMonitorGraph($sUrl=false){
+    protected function _generateMonitorGraph($sUrl){
         $sReturn='';
 
         // files with .png must exist in server/images/icons/
@@ -711,6 +711,9 @@ class appmonitorserver_gui extends appmonitorserver {
 
         foreach ($this->_data as $sAppId => $aEntries) {
             // echo '<pre>'.print_r($aEntries,1); die();
+            if($sUrl != $aEntries['result']['url']) {
+                continue;
+            }
 
             //
             // --- add application node
