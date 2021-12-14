@@ -702,11 +702,12 @@ class appmonitorserver_gui extends appmonitorserver {
         $aNodes=[];
         $aEdges=[];
         $iCounter=1;
+
         $aShapes=[
-            0 => [ 'color' => '#aaeeaa', 'width' => 3 ],
-            1 => [ 'color' => '#ffcccc', 'width' => 9, 'shape'=>'star' ],    // error
-            2 => [ 'color' => '#eeaa22', 'width' => 6, 'shape'=>'dot' ], // warn
-            3 => [ 'color' => '#aaaaaa', 'width' => 3, 'shape'=>'ellipse' ], // unknown
+            RESULT_OK      => [ 'color' => '#aaeeaa', 'width' => 3 ],
+            RESULT_UNKNOWN => [ 'color' => '#aaaaaa', 'width' => 3, 'shape'=>'ellipse' ],
+            RESULT_WARNING => [ 'color' => '#eeaa22', 'width' => 6, 'shape'=>'dot' ],
+            RESULT_ERROR   => [ 'color' => '#ffcccc', 'width' => 9, 'shape'=>'star' ],
         ];
 
         foreach ($this->_data as $sAppId => $aEntries) {
