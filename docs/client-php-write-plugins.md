@@ -22,8 +22,8 @@ writing custom plugins.
 
 # Conventions #
 
-* custom checks are in the "plugins" subdirectory
-* naming convention: they must start with "check" + [name of your check] + ".php"
+* custom checks are in the "plugins/checks/" subdirectory
+* naming convention: they must be lowercase - [name of your check] + ".php"
 * it must be a class that extends appmonitorcheck
 * the class name must be "check" + [name of your check]
 * it needs a run method that gets an array as argument
