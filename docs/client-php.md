@@ -15,7 +15,7 @@ https://github.com/iml-it/appmonitor
 
 (For the delivered PHP client - you can implement a client in other languages)
 
-- PHP7 (up to PHP 8.1; runs on PHP 5 but is not supported)
+- PHP 7 or 8 (up to PHP 8.1; runs on PHP 5 but is not supported)
 
 # Checks on client side #
 
