@@ -30,7 +30,12 @@ function signal_handler($signo) {
 // -----------------------------------------------------------------------------
 require_once('classes/tinyservice.class.php');
 global $oService;
-$oService = new tinyservice('appmomonitor_server_loop-' . md5(__FILE__), $iSleep);
+
+$sServicefile=__FILE__;
+$sMyId='appmonitor_server_loop-' . md5($sServicefile);
+// echo "DEBUG: file = [" . $sServicefile ."]\n";
+// echo "DEBUG: id = " . $sMyId ."\n";
+$oService = new tinyservice($sMyId, $iSleep);
 
 // disallow root to run it
 $oService->denyRoot();
