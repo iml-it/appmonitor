@@ -23,15 +23,11 @@ An application check finally creates a JSON in a predefined structure.
 ![Client](images/appmonitor-overview-client.png "Client")
 
 
-
 # Requirements #
 
-For the delivered PHP client:
-- PHP7 (up to PHP 7.3; runs on php5 but is not supported) \
-  see [PHP-Client](client-php.md) + [PHP-plugins](client-php-plugins.md)
+For the delivered PHP client see [PHP-Client](client-php.md) + [PHP-plugins](client-php-plugins.md)
 
 You can implement a client in other languages.
-
 
 # Description of metadata / NON-PHP clients #
 
