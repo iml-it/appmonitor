@@ -139,7 +139,7 @@ $oMonitor->addCheck(
 // ----------------------------------------------------------------------
 require_once($sApproot.'/server/classes/tinyservice.class.php');
 ob_start();
-$oService = new tinyservice($sMyId, 1);
+$oService = new tinyservice($sMyId, 30);
 $sIsStopped=$oService->canStart();
 $out=ob_get_contents();
 ob_clean();
