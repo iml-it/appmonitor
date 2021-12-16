@@ -37,8 +37,6 @@ $oMonitor->addTag('monitoring');
 // files and dirs
 // ----------------------------------------------------------------------
 $sApproot = str_replace('\\', '/', dirname(__DIR__));
-$sServicefile=$sApproot.'/server/service.php';
-$sMyId='appmonitor_server_loop-' . md5($sServicefile);
 
 $oMonitor->addCheck(
     array(
@@ -139,7 +137,7 @@ $oMonitor->addCheck(
 // ----------------------------------------------------------------------
 require_once($sApproot.'/server/classes/tinyservice.class.php');
 ob_start();
-$oService = new tinyservice($sMyId, 30);
+$oService = new tinyservice($sApproot.'/server/service.php', 15, $sApproot.'/server/tmp');
 $sIsStopped=$oService->canStart();
 $out=ob_get_contents();
 ob_clean();
@@ -153,8 +151,8 @@ $oMonitor->addCheck(
             "params" => array(
                 "result" => ($sIsStopped ? RESULT_WARNING : RESULT_OK),
                 "value" => ($sIsStopped 
-                    ? "Info: Service is NOT running. Apps are checked interactively only (if the appmonitor web ui is running). $out" 
-                    : "OK, service is running"
+                    ? "Info: Service is NOT running. Apps are checked interactively only (if the appmonitor web ui is running). | Output: $out" 
+                    : "OK, service is running. | Output: $out"
                 ),
             ),
         ),
