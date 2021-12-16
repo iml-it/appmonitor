@@ -1,5 +1,4 @@
 <?php
-
 /*
  * ======================================================================
  *
@@ -13,7 +12,7 @@
 // CONFIG
 // -----------------------------------------------------------------------------
 
-$iSleep = 3; // seconds
+$iSleep = 10; // seconds
 
 // -----------------------------------------------------------------------------
 // FUNCTIONS
@@ -28,14 +27,10 @@ function signal_handler($signo) {
 // -----------------------------------------------------------------------------
 // INIT SERVICE
 // -----------------------------------------------------------------------------
+echo "\n===== APPMONITOR :: service =====\n\n";
 require_once('classes/tinyservice.class.php');
 global $oService;
-
-$sServicefile=__FILE__;
-$sMyId='appmonitor_server_loop-' . md5($sServicefile);
-// echo "DEBUG: file = [" . $sServicefile ."]\n";
-// echo "DEBUG: id = " . $sMyId ."\n";
-$oService = new tinyservice($sMyId, $iSleep);
+$oService = new tinyservice(__FILE__, $iSleep, __DIR__.'/tmp');
 
 // disallow root to run it
 $oService->denyRoot();
@@ -50,9 +45,10 @@ if (function_exists("pcntl_signal")) {
 }
 
 if (!$oService->canStart()) {
-    die("CANNOT START ... another process seems to run.");
+    die("CANNOT START ... another process seems to run.\n");
 }
-$oService->setSleeptime($iSleep);
+// $oService->setSleeptime($iSleep);
+echo "----------\n";
 $oService->send("STARTUP: init appmonitor-server", true);
 
 // -----------------------------------------------------------------------------

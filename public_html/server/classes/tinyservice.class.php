@@ -11,16 +11,21 @@
  */
 class tinyservice {
 
-    //put your code here
-
     protected $sTouchfile = false;
     protected $iSleep = false; // seconds
     protected $iStart = false;
     protected $bDebug = false;
 
-    public function __construct($sAppname, $iNewSleeptime = 10) {
+    /**
+     * initialize tiniservice
+     * @param $sAppname       string   app id to prevent starting a script multiuple times
+     * @param $iNewSleeptime  integer  idle time between loops
+     * @param $sTmpdir        string   custom temp dir
+     * @return boolean
+     */
+    public function __construct($sAppname, $iNewSleeptime = 10, $sTmpdir=false) {
         $this->iStart = microtime(true);
-        $this->setAppname($sAppname);
+        $this->setAppname($sAppname, $sTmpdir);
         if ($iNewSleeptime) {
             $this->setSleeptime($iNewSleeptime);
         }
@@ -80,15 +85,16 @@ class tinyservice {
      * set an application name - to create a run file
      *
      * @param string $sAppname  name of the application
+     * @param string $sTmpdir   optional: location of temp dir; default: system temp (often /tmp)
      * @return boolean
      */
-    public function setAppname($sAppname) {
+    public function setAppname($sAppname, $sTmpdir=false) {
         $this->sTouchfile = false;
-        $sFile = preg_replace('/[^a-z0-9]/i', '', $sAppname);
-        if (!$sFile) {
+        $sFilepart = preg_replace('/[^a-z0-9]/i', '_', $sAppname);
+        if (!$sFilepart) {
             return false;
         }
-        $this->sTouchfile = sys_get_temp_dir() . '/running_tinyservice_' . $sFile . '.run';
+        $this->sTouchfile = ($sTmpdir ? $sTmpdir : sys_get_temp_dir()) . '/running_tinyservice_' . $sFilepart . '.run';
         return true;
     }
 
@@ -124,20 +130,19 @@ class tinyservice {
      * @return boolean
      */
     function canStart() {
+        echo "INFO: Run file is $this->sTouchfile\n";
         if (!file_exists($this->sTouchfile)) {
+            echo "STATUS: Not running.\n";
             return true;
         }
         $iTS = filemtime($this->sTouchfile);
         $iAge = date('U') - $iTS;
+        echo "INFO: Its age is " . $iAge . "s (sleep time is $this->iSleep s)\n";
         if ($iAge > $this->iSleep) {
-            echo "INFO outdated run file - it is " . $iAge . "s old. Ignoring it ... and starting.\n";
+            echo "STATUS: Not running. Run file is outdated.\n";
             return true;
         }
-        echo "ERROR: run file was found - it is " . $iAge . "s old. "
-        . "A process seems to run already. "
-        . "Or you need to wait up to " . ($this->iSleep - $iAge) . " seconds.\n"
-        . "$this->sTouchfile\n\nits content:\n";
-        echo file_get_contents($this->sTouchfile) . "\n\n";
+        echo "STATUS: A service process is running.\n";
         return false;
     }
 
