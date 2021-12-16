@@ -667,7 +667,10 @@ class appmonitorserver_gui extends appmonitorserver {
      */
     protected function _getHtmlInSvg($aOptions){
         $revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
-        $svg ='<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="90">' 
+        $svg ='<svg xmlns="http://www.w3.org/2000/svg"'
+            . (isset($aOptions['width'])   ? ' width="'.(int)$aOptions['width'].'"'  : '')
+            . (isset($aOptions['height'])  ? ' height="'.(int)$aOptions['height'].'"' : '')
+        .' >' 
             .'<rect x="0" y="0"'
                 . (isset($aOptions['width'])   ? ' width="'.(int)$aOptions['width'].'"'  : '')
                 . (isset($aOptions['height'])  ? ' height="'.(int)$aOptions['height'].'"' : '')
@@ -721,16 +724,19 @@ class appmonitorserver_gui extends appmonitorserver {
             //
             $aNodes[]=[ 
                 'id'=> 1, 
-                // 'label'=> $aEntries['meta']['website'], 
                 'title'=>$this->_tr('Resulttype-'.$aEntries['meta']["result"]).": ".$aEntries['meta']['website'], 
-                // 'shape' => 'box', 
-                'shape'=>'image',
+
+                'label'=> $aEntries['meta']['website'] . "dgdsf gdsgsfh whs fh  oiuhliuadg lajdljadgija ", 
+                'shape' => 'box', 
+                'widthConstraint' => [ 'maximum' => 300 ],
+                /*
+                // 'shape'=>'image',
                 // 'image'=>"data:image/svg+xml;charset=utf-8," . strtr(rawurlencode($svg), $revert),
-                'image'=>$this->_getHtmlInSvg([
+                'image__'=>$this->_getHtmlInSvg([
                     'bgcolor'=>$aShapes[$aEntries['meta']['result']]['color'],
-                    'width'=>1200,
-                    'height'=>90,
-                    'style'=>'font-size:3em; text-align: center; padding: 0.1em; font-weight: bold;',
+                    'width'=>500,
+                    'height'=>60,
+                    'style'=>'font-size:1.5em; text-align: center; padding: 0.1em; font-weight: bold;',
                     'content'=>''
                         .'<span style="color:black; opacity: 0.5;">' 
                             .$this->_tr('Resulttype-'.$aEntries['meta']["result"]).' - '
@@ -739,10 +745,11 @@ class appmonitorserver_gui extends appmonitorserver {
                             .$aEntries['meta']['website']
                         .'</span>'
                     ]),
-
+                */
                 'color'=>$aShapes[$aEntries['meta']['result']]['color'] ,
-                'margin' =>[ 'top' => 20, 'right' => 200, 'bottom' => 20, 'left' => 200 ] ,
-                // 'margin' => 30 ,
+
+                // 'margin' =>[ 'top' => 20, 'right' => 50, 'bottom' => 20, 'left' => 50 ] ,
+                'margin' => 10 ,
             ];
 
             foreach ($aEntries["checks"] as $aCheck) {
@@ -796,7 +803,7 @@ class appmonitorserver_gui extends appmonitorserver {
         if (count($aParents)){
             foreach($aParents as $aItem){
                 $aNodes[]=$aItem;
-                $aEdges[]=[ 'from' => 1, 'to' => $aItem['id'], 'dashes'=>true, 'color' => [ 'color' => $aShapes[3]['color'] ], 'length' => 200, 'width' => 1 ];
+                $aEdges[]=[ 'from' => 1, 'to' => $aItem['id'], 'dashes'=>true, 'color' => [ 'color' => $aShapes[RESULT_UNKNOWN]['color'] ], 'length' => 200, 'width' => 1 ];
             }
         }
         // echo '<pre>'.print_r($aParents,1); die();
