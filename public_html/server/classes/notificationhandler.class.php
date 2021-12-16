@@ -113,6 +113,7 @@ class notificationhandler {
     // protected functions - handle languages texts
     // ----------------------------------------------------------------------
 
+    /*
     protected function _initMessenger($aOptions){
         if (!isset($aOptions['notifications'])){
             return false;
@@ -122,7 +123,8 @@ class notificationhandler {
                 ? new messenger($aOptions['notifications'])
                 : false;
     }
-    
+    */
+
     /**
      * load language texts
      * 
@@ -179,7 +181,7 @@ class notificationhandler {
     }
 
     /**
-     * check if a defined sleept time was reached
+     * check if a defined sleep time was reached
      * @return boolean
      */
     public function isSleeptime(){
@@ -191,7 +193,6 @@ class notificationhandler {
                 }                
             }
         }
-        // echo '<pre>'.print_r($this->_aNotificationOptions, 1).'</pre>';
         return false;
     }
     
@@ -275,41 +276,42 @@ class notificationhandler {
         // get the highest value for a delay
         $iMaxDelay=max(array_values($this->_aDelayNotification));
 
-        // $sLogMessage=$this->_generateMessage('changetype-'.$iChangetype.'.logmessage');
+        $bDoNotify=false;
         switch ($iChangetype) {
             case CHANGETYPE_NOCHANGE:
-                // echo "DEBUG: ".__METHOD__." NO change detected\n";
-
                 // increase counter
                 $iCounter=(isset($this->_aAppLastResult['result']['counter']) ? $this->_aAppLastResult['result']['counter']+1 : $iMaxDelay+1);
                 $this->_aAppResult['laststatus']=isset($this->_aAppLastResult['laststatus']) ? $this->_aAppLastResult['laststatus'] : false;
                 break;
 
-
             case CHANGETYPE_CHANGE:
                 // store last different application status - @see getMessageReplacements
                 $this->_aAppResult['laststatus']=$this->_aAppLastResult;
+                // reset counter
+                $iCounter=0;
+                break;
+
             case CHANGETYPE_NEW:
                 // reset counter
                 $iCounter=0;
+                $bDoNotify=true;
                 break;
 
             default:
                 break;
         }
-
-        // as long counter is lower max delay ... so after a few checks
-        // writing a new cache (_saveAppResult()) will be skipped for
-        // performance reasons
+        // handle delayed notification:
+        // actions as long counter is lower max delay only
         if ($iCounter<=$iMaxDelay){
 
+            // store cache (_saveAppResult()) with result data and current counter
             $this->_aAppResult['result']['counter']=$iCounter;
             $this->_saveAppResult();
 
-
-            // trigger notification
-            if($iCounter===$this->_aDelayNotification[$iResult]){
-                
+            // not needed for CHANGETYPE_NEW: detect if count of repeats
+            // with the same current status reached the notification delay value
+            if (!$bDoNotify && $iCounter===$this->_aDelayNotification[$iResult]){
+                    
                 $iLastCounter=isset($this->_aAppResult['laststatus']['result']['counter'])
                     ? $this->_aAppResult['laststatus']['result']['counter']
                     : -1
@@ -319,26 +321,16 @@ class notificationhandler {
                     : -1
                 ;
 
-                if ($iLastResult >= 0 && $iLastCounter >=0 && $iLastCounter >= $this->_aDelayNotification[$iLastResult] ){
-                    // echo "DEBUG: YES notify<br>";
-                    $this->sendAllNotifications();
-                } else {
-                    // echo "DEBUG: NO ... skipt notification<br>";
+                if ($iLastResult >= 0 && $iLastCounter >=0 && $iLastCounter >= $this->_aDelayNotification[$iLastResult] ){              
+                    $bDoNotify=true;
                 }
+
             }
         }
-        
-        // TODO: remove test calls
-        /*
-        $this->_generateMessage('email.subject');
-        $this->_generateMessage('changetype-'.CHANGETYPE_CHANGE.'.email.message');
-        $this->_generateMessage('changetype-'.CHANGETYPE_CHANGE.'.logmessage');
-         * 
-         */
-        
-        // echo "DEBUG: ".__METHOD__." done\n";
+        if($bDoNotify){
+            $this->sendAllNotifications();
+        }
         return true;
-        
     }
     
     /**
@@ -349,9 +341,7 @@ class notificationhandler {
     public function deleteApp($sAppId){
         $this->setApp($sAppId);
         $this->_iAppResultChange=CHANGETYPE_DELETE;
-        // $sLogMessage=$this->_generateMessage('changetype-'.CHANGETYPE_DELETE.'.logmessage', CHANGETYPE_DELETE);
-        // $this->addLogitem(CHANGETYPE_DELETE, RESULT_UNKNOWN, $sAppId, $sLogMessage);
-        
+
         // trigger notification
         $this->sendAllNotifications();
         $this->_deleteAppLastResult();
@@ -478,9 +468,6 @@ class notificationhandler {
     protected function saveLogdata(){
         if ($this->_aLog && is_array($this->_aLog) && count($this->_aLog)){            
             $oCache=new AhCache($this->_sCacheIdPrefix."-log", "log");
-            
-            // echo "DEBUG saving notification logdata:\n";
-            // print_r($this->_aLog);
             return $this->_aLog=$oCache->write($this->_aLog);
         }
         return false;
@@ -609,21 +596,28 @@ class notificationhandler {
      */
     protected function sendAllNotifications(){
         if($this->_iAppResultChange===false){
-            die("ERROR: " .__METHOD__ ." no change was detected - or app was not initialized.");
+            die("ERROR: " .__METHOD__ ." failed to detect change type - or app was not initialized.");
             return false;
         }
-
+        if($this->_iAppResultChange==CHANGETYPE_NOCHANGE){
+            return false;
+        }
+        // TODO: check ... why was that needed?
         // get change type between current and last saved other status
-        $this->_detectChangetype(isset($this->_aAppResult['laststatus']) ? $this->_aAppResult['laststatus'] : false);
+        // $this->_detectChangetype(isset($this->_aAppResult['laststatus']) ? $this->_aAppResult['laststatus'] : false);
 
         // take template for log message and current result type
         $sLogMessage=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.logmessage');
         
-        // set result: 
-        // - use current result, if it existst
+        // override result if an app was deleted: 
+        // - use current result, if it exists
         // - use RESULT_UNKNOWN if action was delete or result does not exist
-        $iResult=($this->_iAppResultChange==CHANGETYPE_DELETE) ? RESULT_UNKNOWN 
-                : (isset($this->_aAppResult['result']['result']) ? $this->_aAppResult['result']['result'] : RESULT_UNKNOWN)
+        $iResult=($this->_iAppResultChange==CHANGETYPE_DELETE) 
+                ? RESULT_UNKNOWN 
+                : (isset($this->_aAppResult['result']['result']) 
+                    ? $this->_aAppResult['result']['result'] 
+                    : RESULT_UNKNOWN
+                  )
                 ;
 
         $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
@@ -640,7 +634,6 @@ class notificationhandler {
      * @param string  $sType  optional: type email|slack; defailt: false (=return all keys)
      * @return array
      */
-    
     public function getAppNotificationdata($sType=false){
 
         $aMergeMeta=array();
@@ -685,6 +678,7 @@ class notificationhandler {
     /**
      * get flat array with contacts email addresses for current app from 
      * check result meta -> notifications -> email
+     * @return array
      */
     public function getAppEmailContacts(){
         return array_values($this->getAppNotificationdata('email'));
@@ -695,13 +689,14 @@ class notificationhandler {
      * remark: to get key cvalue array use
      * $this->getAppNotificationdata('slack') 
      * instead
+     * @return array
      */
     public function getAppSlackChannels(){
         return array_values($this->getAppNotificationdata('slack'));
     }
     
     /**
-     * send email notifications to monitor server admins and application contacts
+     * send email notifications to inform server admins and application contacts
      * @return boolean
      */
     protected function _sendEmailNotifications(){
@@ -736,7 +731,7 @@ class notificationhandler {
     // ---------- slack
     
     /**
-     * send email notifications to monitor server admins and application contacts
+     * send slack notifications to inform members of a slack channel
      * @return boolean
      */
     protected function _sendSlackNotifications(){
