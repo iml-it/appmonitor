@@ -130,14 +130,14 @@ class tinyservice {
      * @return boolean
      */
     function canStart() {
-        echo "INFO: Run file is $this->sTouchfile\n";
+        // echo "INFO: Run file is $this->sTouchfile\n";
         if (!file_exists($this->sTouchfile)) {
             echo "STATUS: Not running.\n";
             return true;
         }
         $iTS = filemtime($this->sTouchfile);
         $iAge = date('U') - $iTS;
-        echo "INFO: Its age is " . $iAge . "s (sleep time is $this->iSleep s)\n";
+        // echo "INFO: Its age is " . $iAge . "s (sleep time is $this->iSleep s)\n";
         if ($iAge > $this->iSleep) {
             echo "STATUS: Not running. Run file is outdated.\n";
             return true;
