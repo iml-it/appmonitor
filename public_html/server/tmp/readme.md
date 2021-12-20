@@ -10,7 +10,7 @@ Deleting subdirectories has no functional impact but removes historical data.
 ## Security ##
 
 The web access to `./tmp/` directory should be denied.
-This is tested with delivered check.
+This is tested with the delivered check of appmonitor server.
 
 ## Content in the directories ##
 
@@ -21,3 +21,4 @@ This is tested with delivered check.
 |ahcache/notificationhandler-app   |last notification status of each app (for respecting sleep times)
 |ahcache/notificationhandler-log   |notification log
 |ahcache/rrd                       |history data of each counter
+|running_tinyservice_*.run         |touch file of a running server.php
