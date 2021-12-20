@@ -40,7 +40,7 @@ $sApproot = str_replace('\\', '/', dirname(__DIR__));
 
 $oMonitor->addCheck(
     array(
-        "name" => "check tmp subdir",
+        "name" => "write to ./tmp/",
         "description" => "Check cache storage",
         // "group" => "folder",
         "check" => array(
@@ -55,7 +55,7 @@ $oMonitor->addCheck(
 );
 $oMonitor->addCheck(
     array(
-        "name" => "check config subdir",
+        "name" => "write to ./config/",
         "description" => "Check config target directory",
         // "group" => "folder",
         "check" => array(
@@ -95,7 +95,7 @@ $sBaseUrl = 'http'.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] ? 's' : '')
 foreach(array('server/config', 'server/tmp') as $sMyDir){
     $oMonitor->addCheck(
         array(
-            "name" => "deny http to $sMyDir",
+            "name" => "http to $sMyDir",
             "description" => "Check if the $sMyDir directory is not accessible (counts as warning on fail)",
             "group" => "deny",
             "check" => array(

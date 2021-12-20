@@ -37,6 +37,16 @@ const visjsNetOptions = {
           sortMethod: "directed",
         },
     },
+    edges: {
+        smooth: {
+          type: "cubicBezier",
+          forceDirection:
+          visDirection == "UD" || visDirection == "DU"
+              ? "vertical"
+              : "horizontal",
+          roundness: 0.4,
+        },
+      },    
 };
 
 

@@ -726,7 +726,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 'id'=> 1, 
                 'title'=>$this->_tr('Resulttype-'.$aEntries['meta']["result"]).": ".$aEntries['meta']['website'], 
 
-                'label'=> $aEntries['meta']['website'] . "dgdsf gdsgsfh whs fh  oiuhliuadg lajdljadgija ", 
+                'label'=> $aEntries['meta']['website'], 
                 'shape' => 'box', 
                 'widthConstraint' => [ 'maximum' => 300 ],
                 /*
@@ -749,7 +749,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 'color'=>$aShapes[$aEntries['meta']['result']]['color'] ,
 
                 // 'margin' =>[ 'top' => 20, 'right' => 50, 'bottom' => 20, 'left' => 50 ] ,
-                'margin' => 10 ,
+                'margin' => 20 ,
             ];
 
             foreach ($aEntries["checks"] as $aCheck) {
