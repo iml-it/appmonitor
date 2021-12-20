@@ -1,0 +1,15 @@
+# TARGET: docker/containers/web-server/Dockerfile
+#
+# {{generator}}
+#
+
+
+# install packages
+RUN apt-get update && apt-get install -y {{APP_APT_PACKAGES}}
+
+# enable apache modules
+RUN a2enmod {{APP_APACHE_MODULES}}
+
+# install php packages
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions {{APP_PHP_MODULES}}

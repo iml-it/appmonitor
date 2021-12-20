@@ -1,0 +1,71 @@
+# TARGET: docker/docker-compose.yml
+#
+# {{generator}}
+#
+# ======================================================================
+#
+# (1) see .env for set variables
+# (2) run "docker-compose up" to startup
+# 
+# ======================================================================
+version: '3.9'
+
+networks:
+  {{APP_NAME}}network:
+
+services:
+
+  # ----- apache httpd + php
+  web-server:
+    build:
+      context: .
+      dockerfile: ./containers/web-server/Dockerfile
+    image: "php:{{APP_PHP_VERSION}}-apache"
+    container_name: '{{APP_NAME}}-server'
+    ports:
+      - '${APP_PORT}:80'
+
+    working_dir: ${WEBROOT}
+    
+    volumes:
+      - ../:/var/www/${APP_NAME}
+      - ./containers/web-server/apache/sites-enabled:/etc/apache2/sites-enabled
+      - ./containers/web-server/php/extra-php-config.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      # start_period: 40s
+
+    networks:
+      - {{APP_NAME}}network
+
+    user: ${DOCKER_USER_UID}
+
+    # --- 8< --- {{CUTTER_NO_DATABASE}} --- 8< ---
+
+    depends_on:
+      - db-server
+
+  # ----- mariadb
+  db-server:
+    image: {{MYSQL_IMAGE}}
+    container_name: '${APP_NAME}-db'
+    # restart: always
+    ports:
+      - '${DB_PORT}:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASS}'
+      MYSQL_USER: '${MYSQL_USER}'
+      MYSQL_PASSWORD: '${MYSQL_PASS}'
+      MYSQL_DATABASE: '${MYSQL_DB}'
+    volumes:
+      # - ./containers/db-server/db_data:/var/lib/mysql
+      - ./containers/db-server/mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
+      interval: 5s
+      retries: 5
+    networks:
+      - {{APP_NAME}}network
