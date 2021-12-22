@@ -910,7 +910,7 @@ class appmonitorserver_gui extends appmonitorserver {
                                     '<td class="result result'.$aCheck["result"].'"><span style="display: none;">'.$aCheck['result'].'</span>' . $this->_tr('Resulttype-'.$aCheck["result"]).'</td>'
                                     . '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (<span class="timer-age-in-sec">' . (date("U") - $aEntries["result"]["ts"]) . '</span>&nbsp;s)</td>'
                                     . '<td>' . $aEntries["result"]["host"] . '</td>'
-                                    . '<td>' . $aEntries["result"]["website"] . '</td>'
+                                    . '<td><a href="#" onclick="setTab(\''.$this->_getDivIdForApp($sAppId ).'\');">' . $aEntries["result"]["website"] . '</a></td>'
                                     . '<td>' . $aEntries["result"]["ttl"] . '</td>'
                                     ;
                         } else {
@@ -1529,7 +1529,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $oA=new renderadminlte();
         $sTable=$this->_generateMonitorTable(
             false, // no url to filter ... =all checks
-            true   // hide OK status messages 
+            false   // hide OK status messages 
         );
         $sHtml=$sTable 
             ? $sTable 
