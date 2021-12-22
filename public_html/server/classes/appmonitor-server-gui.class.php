@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.102
+ * @version 0.103
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.102";
+    var $_sVersion = "0.103";
 
     /**
      * html code for icons in the web gui
@@ -60,6 +60,7 @@ class appmonitorserver_gui extends appmonitorserver {
         'url' => '<i class="fas fa-globe"></i>',
         'check' => '<i class="fas fa-check"></i>',
         'checks' => '<i class="fas fa-list"></i>',
+        'problems' => '<i class="fas fa-exclamation-triangle"></i>',
         'notifications' => '<i class="far fa-bell"></i>',
         'setup' => '<i class="fas fa-wrench"></i>',
         'about' => '<i class="fas fa-info-circle"></i>',
@@ -254,6 +255,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     'bgcolor'=>isset($aOptions['bgcolor']) ? $aOptions['bgcolor'] : false,
                     'color'=>$this->_getAdminLteColorByResult($aOptions['result'], $aOptions['color']),
                     'icon' => $this->_getIconClass($aOptions['icon'], $aOptions['result']),
+                    'onclick' =>isset($aOptions['onclick']) ? $aOptions['onclick'] : false,
                     'number' => $aOptions['count'],
                     'text' => $aOptions['label'],
                     'progressvalue' => isset($aOptions['progressvalue']) ? $aOptions['progressvalue'] : false,
@@ -478,6 +480,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 case 'webapps':
                     $sReturn .= $bVisibility
                         ? $this->_getTile(array(
+                            'onclick'=> 'setTab(\'#divwebs\');',
                             'result' => $iResultApps,
                             'count' => ($iResultApps === RESULT_OK ? '' : ' '.$sMoreHosts). $aCounter['apps'],
                             'icon' => $this->_aIco['webapp'],
@@ -519,6 +522,7 @@ class appmonitorserver_gui extends appmonitorserver {
                             'result' => $iResultChecks,
                             'count' => $aCounter['checks'].($iResultChecks === RESULT_OK ? '' : ' '.$sMoreChecks),
                             'label' => $this->_aIco['check'] . ' ' . $this->_tr('Checks-total'),
+                            'onclick'=> 'setTab(\'#divproblems\');',
                         ))
                         : ''
                     ;
@@ -848,14 +852,14 @@ class appmonitorserver_gui extends appmonitorserver {
      * @param  string  $sUrl  optional filter by url; default: all
      * @return string
      */
-    protected function _generateMonitorTable($sUrl = false) {
+    protected function _generateMonitorTable($sUrl = false, $bHideOk=false) {
         $sReturn = '';
         if (!count($this->_data)) {
             return $this->_showWelcomeMessage();
         }
         $aCheckGroups=$this->_getVisualGroups();
         $sTableClass = $sUrl ? "datatable-hosts" : "datatable-checks";
-        $sReturn .= $sUrl 
+        $sTableHead = $sUrl 
         ? $this->_generateTableHead(array(
             $this->_tr('Result'),
             // $this->_tr('TTL'),
@@ -871,12 +875,14 @@ class appmonitorserver_gui extends appmonitorserver {
             $this->_tr('Host'),
             $this->_tr('Webapp'),
             $this->_tr('TTL'),
+            $this->_tr('Group'),
             $this->_tr('Check'),
             $this->_tr('Description'),
             $this->_tr('Output'),
+            $this->_tr('Count'),
             $this->_tr('Time'),
         ));
-        $sReturn .= '<tbody>';
+        // $sReturn .= '<tbody>';
 
         foreach ($this->_data as $sAppId => $aEntries) {
 
@@ -894,7 +900,9 @@ class appmonitorserver_gui extends appmonitorserver {
 
                     foreach ($aEntries["checks"] as $aCheck) {
                         $aTags=isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
-                        
+                        if ($bHideOk && $aCheck["result"] == RESULT_OK ){
+                            continue;
+                        }
                         $sReturn .= '<tr class="result' . $aCheck["result"] . ' tags '.$this->_getCssclassForTag($aTags).'">'
                                 ;
                         if (!$sUrl) {
@@ -915,7 +923,7 @@ class appmonitorserver_gui extends appmonitorserver {
                                     : '-' 
                                 )
                                 . '<td>' . $aCheck["name"] . '</td>'
-                                . '</td>'
+                                
                                 . '<td>' . $aCheck["description"] . '</td>'
                                 . '<td>' . $aCheck["value"] . '</td>'
                                 . '<td>' . (isset($aCheck["count"]) ? $aCheck["count"] : '-') . '</td>'
@@ -925,8 +933,12 @@ class appmonitorserver_gui extends appmonitorserver {
                 }
             }
         }
-        $sReturn .= '</tbody>';
-        return '<table class="' . $sTableClass . '">' . $sReturn . '</table>';
+        return $sReturn
+            ? '<table class="' . $sTableClass . '">' .$sTableHead 
+                .'<tbody>'. $sReturn . '</tbody>'
+                .'</table>'
+            : ''
+            ;
     }
 
     /**
@@ -1509,6 +1521,36 @@ class appmonitorserver_gui extends appmonitorserver {
                 </section>'
                 ;
     }
+    /**
+     * return html code for notification page
+     * @return string
+     */
+    public function generateViewProblems() {
+        $oA=new renderadminlte();
+        $sTable=$this->_generateMonitorTable(
+            false, // no url to filter ... =all checks
+            true   // hide OK status messages 
+        );
+        $sHtml=$sTable 
+            ? $sTable 
+            : '<strong>'.$this->_aIco['check'].' '. $this->_tr('Problems-checks-ok').'</strong>';
+
+
+        return $oA->getSectionHead($this->_aIco["problems"] . ' ' . $this->_tr('Problems'))
+                . '<section class="content">'
+                .$oA->getSectionRow($this->_generateWebTiles())
+                . '<br>'
+
+                . $oA->getSectionRow($oA->getSectionColumn(
+                        $oA->getBox(array(
+                            'title'=>$this->_tr('Problems-checks-header'),
+                            'text'=>$this->_tr('Problems-checks-hints').'<br><br>'.$sHtml
+                        )),
+                        12
+                    )).'
+                </section>'
+                ;
+    }
     
     private function _renderSelect($aOptions, $sAcive){
         
@@ -2055,6 +2097,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $iReload = ((isset($this->_aCfg['pagereload']) && (int) $this->_aCfg['pagereload'] ) ? (int) $this->_aCfg['pagereload'] : 0);
         
         $sNavi .= $this->_renderMenuItem('#divwebs',          'allwebapps', 'allwebapps',    $this->_tr('All-webapps'))
+                . $this->_renderMenuItem('#divproblems',      'problems',   'problems',      $this->_tr('Problems'))
                 . $this->_renderMenuItem('#divnotifications', 'checks',     'notifications', $this->_tr('Notifications'))
                 . $this->_renderMenuItem('#divsetup',         'setup',      'setup',         $this->_tr('Setup'))
                 . $this->_renderMenuItem('#divabout',         'about',      'about',         $this->_tr('About'))

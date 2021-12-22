@@ -58,6 +58,9 @@ switch ($sItem){
     case 'viewnotifications':
         $sHtml.=$oMonitor->generateViewNotifications();
         break;
+    case 'viewproblems':
+            $sHtml.=$oMonitor->generateViewProblems();
+            break;
     case 'viewsetup':
         $sHtml.=$oMonitor->generateViewSetup();
         break;

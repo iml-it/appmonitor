@@ -20,6 +20,11 @@
 
         "Group": "Group",
 
+        "Problems": "Current problems",
+        "Problems-checks-header": "List of all checks",
+        "Problems-checks-hints": "The list contains all checks of all applications that don't have the status OK.",
+        "Problems-checks-ok": "No trouble checks were found.",
+
         "Notifications": "Notifications",
         "Notifications-header": "Log of last changes",
         "Notifications-none": "No messages available.",
