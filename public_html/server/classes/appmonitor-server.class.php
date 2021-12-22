@@ -498,7 +498,9 @@ class appmonitorserver {
                 $aUrls[$sKey] = $sUrl;
             } else {
                 // age is bel['result']['error']ow ttl ... read from Cache 
-                $this->_data[$sKey] = $oCache->read();
+                $aCached = $oCache->read();
+                $this->_data[$sKey]=$aCached ? $aCached : [];
+                
                 $this->_data[$sKey]["result"]["fromcache"] = true;
             }
         }
