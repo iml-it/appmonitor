@@ -77,9 +77,9 @@ class notificationhandler {
      */
     protected $_aDelayNotification=[
         RESULT_OK      =>0, // 0 = OK comes immediately
-        RESULT_UNKNOWN =>3, // N = other types wait for n repeats
-        RESULT_WARNING =>3,
-        RESULT_ERROR   =>3
+        RESULT_UNKNOWN =>2, // N = other types skip n repeats of same status
+        RESULT_WARNING =>2,
+        RESULT_ERROR   =>2
     ];
 
     // ----------------------------------------------------------------------
@@ -311,7 +311,7 @@ class notificationhandler {
             // not needed for CHANGETYPE_NEW: detect if count of repeats
             // with the same current status reached the notification delay value
             if (!$bDoNotify && $iCounter===$this->_aDelayNotification[$iResult]){
-                    
+                
                 $iLastCounter=isset($this->_aAppResult['laststatus']['result']['counter'])
                     ? $this->_aAppResult['laststatus']['result']['counter']
                     : -1
@@ -324,10 +324,22 @@ class notificationhandler {
                 if ($iLastResult >= 0 && $iLastCounter >=0 && $iLastCounter >= $this->_aDelayNotification[$iLastResult] ){              
                     $bDoNotify=true;
                 }
-
             }
+            /*
+            IDEA: track skiped notifications
+
+            if (!$bDoNotify && $iCounter<$this->_aDelayNotification[$iResult]){
+                // echo "DEBUG: ".__METHOD__." skip notification for delayed sending ...\n";
+                $aTexts=$this->getMessageReplacements();
+                $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
+            }
+            */
         }
         if($bDoNotify){
+            // on delayed sending: overwrite change type to send correct information
+            if ($this->_iAppResultChange==CHANGETYPE_NOCHANGE) {
+                $this->_iAppResultChange=CHANGETYPE_CHANGE;
+            }
             $this->sendAllNotifications();
         }
         return true;
@@ -599,9 +611,11 @@ class notificationhandler {
             die("ERROR: " .__METHOD__ ." failed to detect change type - or app was not initialized.");
             return false;
         }
+        /*
         if($this->_iAppResultChange==CHANGETYPE_NOCHANGE){
             return false;
         }
+        */
         // TODO: check ... why was that needed?
         // get change type between current and last saved other status
         // $this->_detectChangetype(isset($this->_aAppResult['laststatus']) ? $this->_aAppResult['laststatus'] : false);
@@ -620,6 +634,7 @@ class notificationhandler {
                   )
                 ;
 
+        // echo "DEBUG:".__METHOD__." add log an sending messages - $sLogMessage\n";
         $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
         
         $this->_sendEmailNotifications();

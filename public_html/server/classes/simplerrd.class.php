@@ -23,7 +23,7 @@ class simpleRrd {
      * logdata for detected changes and sent notifications
      * @var array 
      */
-    protected $_aLog = false;
+    protected $_aLog = [];
     
     /**
      * id of the cache item
@@ -72,6 +72,9 @@ class simpleRrd {
      */
     protected function _getLogs(){
         $this->_aLog=$this->_oCache->read();
+        if (!is_array($this->_aLog)){
+            $this->_aLog=[];
+        }
         return true;
     }
 
@@ -120,8 +123,8 @@ class simpleRrd {
         $aReturn=array();
         $this->_getLogs();
         $aTmp=$this->_aLog;
-        if (!is_array($aTmp) || !count($aTmp)){
-            return array();
+        if (!count($aTmp)){
+            return [];
         }
         $iMax=$iMax ? $iMax : count($aTmp);
         $iMax=min($iMax, count($aTmp));
@@ -142,9 +145,6 @@ class simpleRrd {
         $this->_sCacheId=$sId;
         $this->_oCache=new AhCache($this->_sCacheIdPrefix, $this->_sCacheId);
         $this->_getLogs();
-        if(!$this->_aLog){
-            $this->_aLog=array();
-        }
         return true;
     }
 
