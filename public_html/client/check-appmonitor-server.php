@@ -19,18 +19,12 @@ $sApproot = str_replace('\\', '/', dirname(__DIR__));
 
 require_once($sApproot.'/client/classes/appmonitor-client.class.php');
 
-$aMetadata=[
-        "host" => false,
-        "website" => false,
-        "ttl" => false,
-];
-
 // require_once('classes/client_all_in_one.php');
 $oMonitor = new appmonitor();
 $oMonitor->setWebsite('Appmonitor server');
 
 // how often the server should ask for updates
-$oMonitor->setTTL(5);
+$oMonitor->setTTL(300);
 
 // a general include ... the idea is to a file with the same actions on all
 // installations and hosts that can be deployed by a software delivery service 
