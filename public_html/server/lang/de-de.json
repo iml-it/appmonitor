@@ -20,6 +20,11 @@
 
         "Group": "Gruppe",
 
+        "Problems": "Aktuelle Probleme",
+        "Problems-checks-header": "Liste aller Checks",
+        "Problems-checks-hints": "Die Liste zeigt alle Checks aller Applikationen, die nicht den Status OK aufweisen.",
+        "Problems-checks-ok": "Es gibt keine Probleme bei Checks.",
+
         "Notifications": "Meldungen",
         "Notifications-header": "Protokoll der letzten Meldungen",
         "Notifications-none": "Es sind keine Meldungen vorhanden.",

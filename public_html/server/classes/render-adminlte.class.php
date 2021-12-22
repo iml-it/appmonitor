@@ -364,6 +364,7 @@ class renderadminlte {
      * @param type $aOptions  hash with keys for all options
      *                          - bgcolor - icon color one of aqua|green|yellow|red
      *                          - color - icon color one of aqua|black|gray|green|orange|maroon|navy|purple|red|teal|yellow
+     *                          - onclick
      *                          - icon
      *                          - text
      *                          - number
@@ -384,7 +385,8 @@ class renderadminlte {
         $sAsuf=$sApre ? '</a>' : '';
         
         $aOptions['icon']=$this->_oHtml->getIcon($aOptions['icon']);
-        foreach(array('icon', 'text', 'number', 'progresstext') as $sKey){
+        // foreach(array('icon', 'text', 'number', 'progresstext') as $sKey){
+        foreach(array('icon') as $sKey){
             $aOptions[$sKey]=strstr($aOptions[$sKey], '<a')===false ? $sApre.$aOptions[$sKey].$sAsuf : $aOptions[$sKey];
         }
         

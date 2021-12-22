@@ -374,6 +374,7 @@ function showDiv() {
         '#divabout': 'viewabout',
         '#divdebug': 'viewdebug',
         '#divnotifications': 'viewnotifications',
+        '#divproblems': 'viewproblems',
         '#divsetup': 'viewsetup'
     };
 
