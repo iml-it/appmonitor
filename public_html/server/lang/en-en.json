@@ -24,6 +24,10 @@
         "Problems-checks-header": "List of all checks",
         "Problems-checks-hints": "The list contains all checks of all applications that don't have the status OK.",
         "Problems-checks-ok": "No trouble checks were found.",
+        "Problems-webapps-header": "Application status",
+        "Problems-webapps-hints": "The following applications didn't deliver monitoring data or their status is not OK. Description by icon:",
+        "Problems-webapps-hints-host": "The application didn't deliver valid monitoring data. Maybe the monitoring url is not available or its answer was not a valid JSON.",
+        "Problems-webapps-hints-package": "An application sent valid monitoring data and returned a non-OK result.",
 
         "Notifications": "Notifications",
         "Notifications-header": "Log of last changes",

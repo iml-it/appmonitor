@@ -15,7 +15,10 @@
  * 2021-11-nn  removed all checks ... created as single files
  */
 
-require_once('classes/appmonitor-client.class.php');
+$sApproot = str_replace('\\', '/', dirname(__DIR__));
+
+require_once($sApproot.'/client/classes/appmonitor-client.class.php');
+
 // require_once('classes/client_all_in_one.php');
 $oMonitor = new appmonitor();
 $oMonitor->setWebsite('Appmonitor server');
@@ -36,7 +39,7 @@ $oMonitor->addTag('monitoring');
 // ----------------------------------------------------------------------
 // files and dirs
 // ----------------------------------------------------------------------
-$sApproot = str_replace('\\', '/', dirname(__DIR__));
+
 
 $oMonitor->addCheck(
     array(

@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.103
+ * @version 0.104
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.103";
+    var $_sVersion = "0.104";
 
     /**
      * html code for icons in the web gui
@@ -1531,7 +1531,17 @@ class appmonitorserver_gui extends appmonitorserver {
             false, // no url to filter ... =all checks
             true   // hide OK status messages 
         );
-        $sHtml=$sTable 
+        $aWebapps=$this->_generateWeblist(true);
+
+        $sNoDataHtml=isset($aWebapps[false])
+            ? implode('', array_values($aWebapps[false]))
+            : '';
+        $sAppsHtml=isset($aWebapps[true])
+            ? implode('', array_values($aWebapps[true]))
+            : '';
+            // : '<strong>'.$this->_aIco['check'].' '. $this->_tr('Problems-webapps-ok').'</strong>';
+
+        $sChecksHtml=$sTable 
             ? $sTable 
             : '<strong>'.$this->_aIco['check'].' '. $this->_tr('Problems-checks-ok').'</strong>';
 
@@ -1541,13 +1551,38 @@ class appmonitorserver_gui extends appmonitorserver {
                 .$oA->getSectionRow($this->_generateWebTiles())
                 . '<br>'
 
+                . ("${sNoDataHtml}${sAppsHtml}" 
+                    ? $oA->getSectionRow($oA->getSectionColumn(
+                        $oA->getBox(array(
+                            'title'=>$this->_tr('Problems-webapps-header'),
+                            'text'=>
+                                $this->_tr('Problems-webapps-hints').'<br><br>'
+                                .(isset($aWebapps[false])
+                                    ? $this->_aIco['host'].' '.$this->_tr('Problems-webapps-hints-host').'<br>'
+                                    : ''
+                                )
+                                .(isset($aWebapps[true])
+                                    ? $this->_aIco['webapp'].' '.$this->_tr('Problems-webapps-hints-package').'<br>'
+                                    : ''
+                                )
+                                .'<br>'
+                                .'<div id="divwebsfilter"></div><br>'
+                                .'<div id="divwebs">'
+                                    . $sNoDataHtml.$sAppsHtml
+                                .'</div>'
+                        )),
+                        12
+                    ))
+                    : ''
+                    )
                 . $oA->getSectionRow($oA->getSectionColumn(
                         $oA->getBox(array(
                             'title'=>$this->_tr('Problems-checks-header'),
-                            'text'=>$this->_tr('Problems-checks-hints').'<br><br>'.$sHtml
+                            'text'=>$this->_tr('Problems-checks-hints').'<br><br>'.$sChecksHtml
                         )),
                         12
-                    )).'
+                    ))
+                .'
                 </section>'
                 ;
     }
@@ -1680,41 +1715,19 @@ class appmonitorserver_gui extends appmonitorserver {
                 ;
     }
 
-    /**
-     * return html code for a view list of websites with colored boxes based on site status
-     * @return string
-     */
-    public function generateViewWeblist() {
-        $sReturn = '';
-        $oA=new renderadminlte();
-        /**
-         * @var string
-         */
-        $sTopHeadline=$oA->getSectionHead($this->_aIco["allwebapps"] . ' ' . $this->_tr('All-webapps-header'));
-        $aAllWebapps = array();
-        
-        if (!count($this->_data)) {
-            return $sTopHeadline
-                . '<section class="content">'.
-                    $oA->getSectionRow(
-                        $oA->getSectionColumn(
-                            $oA->getBox(
-                                array(
-                                    'text'=> $this->_showWelcomeMessage()
-                                )
-                            )
-                        )
-                    )
-                .'</section>';
-        }
 
-        $sTileList=$this->_generateWebTiles();
+
+    function _generateWeblist($bSkipOk=false){
+        $oA=new renderadminlte();
+        $aAllWebapps=[];
         foreach ($this->_data as $sAppId => $aEntries) {
             $bHasData = true;
             if (!isset($aEntries["result"]["host"])) {
                 $bHasData = false;
             }
-
+            if ($bSkipOk && $aEntries["result"]["result"] == RESULT_OK){
+                continue;
+            }
             // echo 'DEBUG <pre>'.print_r($aEntries, 1).'</pre>';
             $aValidaion=$this->_checkClientResponse($sAppId);
             $sValidatorinfo='';
@@ -1771,9 +1784,46 @@ class appmonitorserver_gui extends appmonitorserver {
                     )
                     . '</div>'
                     ;
-            $aAllWebapps[$sTilekey] = $sOut;
+            $aAllWebapps[$bHasData][$sTilekey] = $sOut;
         }
-        ksort($aAllWebapps);
+        foreach([false, true] as $sKey){
+            if (isset($aAllWebapps[$sKey])) {
+                ksort($aAllWebapps[$sKey]);
+            }
+        }
+        return $aAllWebapps;
+    }
+
+    /**
+     * return html code for a view list of websites with colored boxes based on site status
+     * @return string
+     */
+    public function generateViewWeblist() {
+        $sReturn = '';
+        $oA=new renderadminlte();
+        /**
+         * @var string
+         */
+        $sTopHeadline=$oA->getSectionHead($this->_aIco["allwebapps"] . ' ' . $this->_tr('All-webapps-header'));
+        $aAllWebapps = array();
+        
+        if (!count($this->_data)) {
+            return $sTopHeadline
+                . '<section class="content">'.
+                    $oA->getSectionRow(
+                        $oA->getSectionColumn(
+                            $oA->getBox(
+                                array(
+                                    'text'=> $this->_showWelcomeMessage()
+                                )
+                            )
+                        )
+                    )
+                .'</section>';
+        }
+
+        $sTileList=$this->_generateWebTiles();
+        $aAllWebapps=$this->_generateWeblist();
         // echo '<pre>'.htmlentities(print_r($aHosts, 1)).'</pre>'; die();
 
         $sReturn='<p>'
@@ -1782,7 +1832,14 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<div id="divwebsfilter"></div><br>'
             .'<div id="divwebs">'
             ;
-        foreach ($aAllWebapps as $aWebapp) {
+        $aMergedWebapps=[];
+        foreach([false, true] as $sKey){
+            if (isset($aAllWebapps[$sKey])){
+                $aMergedWebapps=array_merge($aMergedWebapps, $aAllWebapps[$sKey]);
+            }
+        }
+        if(isset($aAllWebapps))
+        foreach ($aMergedWebapps as $aWebapp) {
             $sReturn .= $aWebapp;
         }
         $sReturn .= '</div>';
@@ -2158,6 +2215,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<head>' . "\n"
                 . '<title>' . $sTitle . '</title>'
                 . '<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>'
+                . '<meta http-equiv="refresh" content="3600">'
                 
                 // jQuery
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('jquery')."/jquery.min.js") . '"></script>' . "\n"
