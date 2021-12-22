@@ -24,6 +24,10 @@
         "Problems-checks-header": "Liste aller Checks",
         "Problems-checks-hints": "Die Liste zeigt alle Checks aller Applikationen, die nicht den Status OK aufweisen.",
         "Problems-checks-ok": "Es gibt keine Probleme bei Checks.",
+        "Problems-webapps-header": "Applikations-Status",
+        "Problems-webapps-hints": "Von nachfolgenden Applikationen liegen entweder keine Monitoring Daten vor oder sie melden einen Status &lt;&gt; OK. Beschreibung der Icons:",
+        "Problems-webapps-hints-host": "Von der Applikationen wurden keine Monitoring-Daten bezogen. Entweder ist die Monitoring-URL nicht erreichbar oder die Antwort war kein g&uuml;ltiges JSON.",
+        "Problems-webapps-hints-package": "Die Applikation hat Monitoring-Daten gesendet und einen kein OK als Gesamstatus.",
 
         "Notifications": "Meldungen",
         "Notifications-header": "Protokoll der letzten Meldungen",
