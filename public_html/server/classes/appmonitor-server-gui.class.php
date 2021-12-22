@@ -1529,7 +1529,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $oA=new renderadminlte();
         $sTable=$this->_generateMonitorTable(
             false, // no url to filter ... =all checks
-            false   // hide OK status messages 
+            true   // hide OK status messages 
         );
         $sHtml=$sTable 
             ? $sTable 
