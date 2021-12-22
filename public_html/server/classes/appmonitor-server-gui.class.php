@@ -2215,6 +2215,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<head>' . "\n"
                 . '<title>' . $sTitle . '</title>'
                 . '<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>'
+                . '<meta http-equiv="refresh" content="3600">'
                 
                 // jQuery
                 . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('jquery')."/jquery.min.js") . '"></script>' . "\n"
