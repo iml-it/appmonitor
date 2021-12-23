@@ -27,17 +27,17 @@ var visJsNetworkMap = function(){
     this.sViewmode="UD";
     this.aViewmodes={
         "LR":{
-            label: "left to right",
-            levelSeparation: 200,
-            nodeDistance: 100
+            label: "&lt;",
+            levelSeparation: 250,
+            nodeDistance: 130
         },
         "UD":{
-            label: "up to down",
+            label: "^",
             levelSeparation: 150,
-            nodeDistance: 175
+            nodeDistance: 200
         }
     };
-    // this.visjsNetOptions = false;
+    this.visjsNetOptions = false;
     
     // ----------------------------------------------------------------------
     //
@@ -51,7 +51,13 @@ var visJsNetworkMap = function(){
     // ----------------------------------------------------------------------
 
     this._getVarKey = function(sName){
+        // the same settings for all apps:
         return location.pathname+'__visJsNetworkMap__'+sName;
+
+        // individual settings per app:
+        // has issues when location was not rewritten yet, i.e. coming from 
+        // webapp overview to app detail page
+        // return location.href+'__visJsNetworkMap__'+sName.replace(/[^a-z_]/, '_');
     }
 
     this._saveVar = function(sName, value){
@@ -118,7 +124,7 @@ var visJsNetworkMap = function(){
         this._saveVar("this.bViewFullsize", this.bViewFullsize);
         
         this.container.className=( this.bViewFullsize===true || this.bViewFullsize==="true")  ? 'large':'';
-        console.log(this.bViewFullsize);
+        // onsole.log(this.sViewmode + " - " + this.bViewFullsize);
         network = new vis.Network(
             this.container,
             { nodes: this.nodes, edges: this.edges }, 
@@ -131,6 +137,9 @@ var visJsNetworkMap = function(){
     // switch view and size
     // ----------------------------------------------------------------------
 
+    /**
+     * render html code for dropdown for views and put it to this.sDomIdSelect
+     */
     this.renderSelectView = function() {
         var sHtml="<select onchange=\""+this.name+".switchViewMode(this.value);\">";
         for (s in this.aViewmodes){
@@ -175,8 +184,9 @@ var visJsNetworkMap = function(){
     }
     */
 
-    this._updateVisOptions();
     this.bViewFullsize=this._getVar("this.bViewFullsize") ? this._getVar("this.bViewFullsize") : false;
     this.sViewmode=this._getVar("this.sViewmode") ? this._getVar("this.sViewmode") : "UD";
+    this._updateVisOptions();
+
     return true;    
 }
