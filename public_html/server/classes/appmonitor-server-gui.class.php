@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.104
+ * @version 0.105
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.104";
+    var $_sVersion = "0.105";
 
     /**
      * html code for icons in the web gui
@@ -728,7 +728,15 @@ class appmonitorserver_gui extends appmonitorserver {
             //
             $aNodes[]=[ 
                 'id'=> 1, 
-                'title'=>$this->_tr('Resulttype-'.$aEntries['meta']["result"]).": ".$aEntries['meta']['website'], 
+                'title'=> ''
+                    .'<div class="result'.$aEntries['meta']["result"].'">'
+                    .'<img src="images/icons/check-'.$aEntries['meta']["result"].'.png">'
+                        .$this->_tr('Resulttype-'.$aEntries['meta']["result"])
+                        .' - '
+                        .'<strong>'.$aEntries['meta']['website'].'</strong><br>'
+
+                    .'</div>'
+                    , 
 
                 'label'=> $aEntries['meta']['website'], 
                 'shape' => 'box', 
@@ -765,7 +773,17 @@ class appmonitorserver_gui extends appmonitorserver {
                 $aNodes[]=[ 
                     'id'=> $iCounter, 
                     'label'=> $aCheck['name'], 
-                    'title'=>/*$this->_tr('Resulttype-'.$aCheck["result"]).": ".*/$aCheck['value'],
+                    'title'=>'<div class="result'.$aCheck["result"].'">'
+                        .'<img src="images/icons/check-'.$aCheck["result"].'.png">'
+                        .$this->_tr('Resulttype-'.$aCheck["result"])
+                        .' - '
+                        // .'<img src="'.$aParentsCfg[$aCheck['group']]['image'].'" width="22"> '
+                        .'<strong>'.$aCheck["name"].'</strong><br>'
+                        .$aCheck["description"].'<br>'
+                        ."<br>"
+                        .$aCheck['value']
+                        .'</div>'
+                        ,
 
                     'shape'=>'image',
                     'image'=>"images/icons/check-".$aCheck["result"].".png",
@@ -815,29 +833,29 @@ class appmonitorserver_gui extends appmonitorserver {
         // echo '<pre>'.print_r($aNodes,1); die();
         $sReturn.='
         
-        <style type="text/css">
-        #mynetwork {
-          width: 100%;
-          height: 600px;
-          border: 2px dashed lightgray;
-        }
-        </style>
 
+        </style>
+        <div id="network-toolbar">
+            <span id="selView">[]</span>
+            <button class="btn btn-default" onclick="oMap.switchViewMode(); return false;">switch View</button>
+            <!--
+            -->
+            <button class="btn btn-default" onclick="oMap.switchViewSize(); return false;">switch Size</button>
+
+        </div>
         <div id="mynetwork"></div>
 
         <script type="text/javascript">
-        var nodes = new vis.DataSet('.json_encode($aNodes).');
-        var edges = new vis.DataSet('.json_encode($aEdges).');
-  
-        // create a network
-        var container = document.getElementById("mynetwork");
-        var data = {
-          nodes: nodes,
-          edges: edges,
-        };
         
-        // hint: variable visjsNetOptions is defined in javascript/functions.js
-        var network = new vis.Network(container, data, visjsNetOptions);
+        // GRRR instance must have the name oMap at the moment
+        var oMap=new visJsNetworkMap();
+        if(!oMap){
+            console.log("ERROR: var oMap=new visJsNetworkMap(); failed.")
+        } else {
+            oMap.setData('.json_encode($aNodes).', '.json_encode($aEdges).');
+            oMap.redrawMap();
+        }
+
       </script>        
         ';
         // echo "<pre>" . htmlentities($sReturn); die();
@@ -2249,8 +2267,9 @@ class appmonitorserver_gui extends appmonitorserver {
                 . '<link href="'  . $oCdn->getFullUrl($oCdn->getLibRelpath('vis').'/vis-network.min.css') . '" rel="stylesheet">'
         
 
+                . '<script src="javascript/visjs-network.class.js"></script>'
                 . '<script src="javascript/functions.js"></script>'
-                
+
                 . '<link href="themes/' . $sTheme . '/screen.css" rel="stylesheet"/>'
                 
                 . '</head>' . "\n"
