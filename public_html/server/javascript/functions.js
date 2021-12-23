@@ -24,52 +24,6 @@ var iRefreshCounter = 0;
  */
 var aViewFilters = {};
 
-// ----------------------------------------------------------------------
-// VISJS SETTINGS
-// ----------------------------------------------------------------------
-
-var visDirection="UD"; // UD | LR
-
-const visjsNetOptions = {
-    layout: {
-        hierarchical: {
-          direction: visDirection,
-          sortMethod: "directed",
-        },
-    },
-    edges: {
-        smooth: {
-          type: "cubicBezier",
-          forceDirection:
-          visDirection == "UD" || visDirection == "DU"
-              ? "vertical"
-              : "horizontal",
-          roundness: 0.4,
-        },
-      },    
-};
-
-
-// https://visjs.github.io/vis-network/examples/network/layout/hierarchicalLayoutUserdefined.html
-var visjsNetOptions_ = {
-    edges: {
-      smooth: {
-        type: "cubicBezier",
-        forceDirection:
-        visDirection == "UD" || visDirection == "DU"
-            ? "vertical"
-            : "horizontal",
-        roundness: 0.4,
-      },
-    },
-    layout: {
-      hierarchical: {
-        direction: visDirection,
-        sortMethod: "directed",
-      },
-    },
-    physics: false,
-  };
 
 // ----------------------------------------------------------------------
 // HELPER FUNCTIONS
