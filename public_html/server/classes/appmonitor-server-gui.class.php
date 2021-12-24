@@ -2073,6 +2073,9 @@ class appmonitorserver_gui extends appmonitorserver {
                                 scaleLabel: {
                                     display: ".($aOptions['yLabel'] ? 'true':'false') .",
                                     labelString: '".$aOptions['yLabel']."'
+                                },
+                                ticks: {
+                                    beginAtZero: true
                                 }
                             }]
                         }"
