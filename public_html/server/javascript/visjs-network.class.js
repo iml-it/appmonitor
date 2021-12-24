@@ -57,16 +57,31 @@ var visJsNetworkMap = function(){
         // individual settings per app:
         // has issues when location was not rewritten yet, i.e. coming from 
         // webapp overview to app detail page
-        // return location.href+'__visJsNetworkMap__'+sName.replace(/[^a-z_]/, '_');
+        // return location.href+'__visJsNetworkMap__'+sName;
     }
 
+    /**
+     * save a given variable in localstorage
+     * @param {string} sName  name of the var (will be used in the key)
+     * @param {*}      value  value to store
+     * @returns bool
+     */
     this._saveVar = function(sName, value){
         return localStorage.setItem(this._getVarKey(sName), value );
     }
+    /**
+     * read a variable from localstorage
+     * @param {*} sName  name of the var to read
+     * @returns 
+     */
     this._getVar = function(sName){
+        // console.log("_getVar() with key " + this._getVarKey(sName));
         return localStorage.getItem(this._getVarKey(sName));
     }
 
+    /**
+     * helper: update visJs network option (because it has variables in it)
+     */
     this._updateVisOptions = function (){
         this.visjsNetOptions = {
             layout: {
@@ -120,11 +135,8 @@ var visJsNetworkMap = function(){
      */
     this.redrawMap = function() {
         this._updateVisOptions();
-        this._saveVar("this.sViewmode", this.sViewmode);
-        this._saveVar("this.bViewFullsize", this.bViewFullsize);
-        
         this.container.className=( this.bViewFullsize===true || this.bViewFullsize==="true")  ? 'large':'';
-        // onsole.log(this.sViewmode + " - " + this.bViewFullsize);
+        // console.log("viewMode=" + this.sViewmode + "; fullsize=" + this.bViewFullsize);
         network = new vis.Network(
             this.container,
             { nodes: this.nodes, edges: this.edges }, 
@@ -162,7 +174,7 @@ var visJsNetworkMap = function(){
         } else {
             this.sViewmode=(this.sViewmode==="LR" ? "UD" : "LR");
         }
-        
+        this._saveVar("this.sViewmode", this.sViewmode);
         this.redrawMap();
     };
 
@@ -170,7 +182,8 @@ var visJsNetworkMap = function(){
      * change size of the map by adding/ removing css class "large"
      */
     this.switchViewSize = function () {
-        this.bViewFullsize=!!!this.bViewFullsize;
+        this.bViewFullsize=!this.bViewFullsize;
+        this._saveVar("this.bViewFullsize", this.bViewFullsize);
         this.redrawMap();
     }
 
