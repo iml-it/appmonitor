@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.106
+ * @version 0.107
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.106";
+    var $_sVersion = "0.107";
 
     /**
      * html code for icons in the web gui
@@ -712,7 +712,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
         $aShapes=[
             RESULT_OK      => [ 'color' => '#aaeeaa', 'width' => 3 ],
-            RESULT_UNKNOWN => [ 'color' => '#aaaaaa', 'width' => 3, 'shape'=>'ellipse' ],
+            RESULT_UNKNOWN => [ 'color' => '#bbbbbb', 'width' => 3, 'shape'=>'ellipse' ],
             RESULT_WARNING => [ 'color' => '#eeaa22', 'width' => 6, 'shape'=>'dot' ],
             RESULT_ERROR   => [ 'color' => '#ffcccc', 'width' => 9, 'shape'=>'star' ],
         ];
@@ -737,7 +737,6 @@ class appmonitorserver_gui extends appmonitorserver {
 
                     .'</div>'
                     , 
-
                 'label'=> $aEntries['meta']['website'], 
                 'shape' => 'box', 
                 'widthConstraint' => [ 'maximum' => 300 ],
@@ -773,16 +772,20 @@ class appmonitorserver_gui extends appmonitorserver {
                 $aNodes[]=[ 
                     'id'=> $iCounter, 
                     'label'=> $aCheck['name'], 
-                    'title'=>'<div class="result'.$aCheck["result"].'">'
-                        .'<img src="images/icons/check-'.$aCheck["result"].'.png">'
-                        .$this->_tr('Resulttype-'.$aCheck["result"])
-                        .' - '
-                        // .'<img src="'.$aParentsCfg[$aCheck['group']]['image'].'" width="22"> '
-                        .'<strong>'.$aCheck["name"].'</strong><br>'
-                        .$aCheck["description"].'<br>'
-                        ."<br>"
-                        .$aCheck['value']
-                        .'</div>'
+                    'title'=>'<table class="result'.$aCheck["result"].'"><tr>'
+                        .'<td align="center">'
+                            .'<img src="images/icons/check-'.$aCheck["result"].'.png"><br>'
+                            .$this->_tr('Resulttype-'.$aCheck["result"])
+                        .'</td><td>'
+                            .'&nbsp;&nbsp;&nbsp;&nbsp;'
+                        .'</td><td>'
+                            .(isset($aCheck['group']) && isset($aParentsCfg[$aCheck['group']]['image']) ? '<img src="'.$aParentsCfg[$aCheck['group']]['image'].'" width="22"> ' : '')
+                            .'<strong>'.$aCheck["name"].'</strong><br>'
+                            .'<em>'.$aCheck["description"].'</em><br>'
+                            ."<br>"
+                            .$aCheck['value']
+                        .'</td>'
+                        .'</tr></table>'
                         ,
 
                     'shape'=>'image',
@@ -816,7 +819,7 @@ class appmonitorserver_gui extends appmonitorserver {
                     ];
                     
                 }
-                $aEdges[]=[ 'from' => $iParent, 'to' => $iCounter, 'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 'length' => 200, 'width' => $aShapes[$aCheck['result']]['width'] ];
+                $aEdges[]=[ 'from' => $iParent, 'to' => $iCounter, 'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 'width' => $aShapes[$aCheck['result']]['width'] ];
             }
         }
         //
@@ -825,7 +828,7 @@ class appmonitorserver_gui extends appmonitorserver {
         if (count($aParents)){
             foreach($aParents as $aItem){
                 $aNodes[]=$aItem;
-                $aEdges[]=[ 'from' => 1, 'to' => $aItem['id'], 'dashes'=>true, 'color' => [ 'color' => $aShapes[RESULT_UNKNOWN]['color'] ], 'length' => 200, 'width' => 1 ];
+                $aEdges[]=[ 'from' => 1, 'to' => $aItem['id'], 'dashes'=>true, 'color' => [ 'color' => $aShapes[RESULT_UNKNOWN]['color'] ], 'width' => 2 ];
             }
         }
         // echo '<pre>'.print_r($aParents,1); die();
