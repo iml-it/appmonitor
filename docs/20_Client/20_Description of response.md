@@ -3,38 +3,15 @@
 	.optional{color:#888;}
 </style>
 
-
-# [APPMONITOR](readme.md) > CLIENT #
-
-Free software and Open Source from University of Bern :: IML - Institute of Medical Education
-
-https://github.com/iml-it/appmonitor
-
-- - -
-
-
-# How does it work? #
-
-
-The main idea is to make the checks with permissions of the application and with its credentials. Check if directories or files are writable, a connection to services like databases, email, external http APIs/ ressources, ... whatever.
-
-An application check finally creates a JSON in a predefined structure.
-
-![Client](images/appmonitor-overview-client.png "Client")
-
-
-# Requirements #
-
-For the delivered PHP client see [PHP-Client](client-php.md) + [PHP-plugins](client-php-plugins.md)
-
-You can implement a client in other languages.
-
-# Description of metadata / NON-PHP clients #
+[TOC]
+# Description of metadata #
 
 If you dont use php on your webserver you can create your own client that 
 returns JSON answers with the conventions described below.
 
-```
+# Example #
+
+```json
 {
     "meta": {
         "host": "[{string} name of the computer]", 
@@ -74,6 +51,7 @@ returns JSON answers with the conventions described below.
             "name": "[{string}: short name of the test N]", 
             "description": "[{string}: a description what the test N is verifying]", 
             "group": "[{string}: name of a group (optional)]",
+            "parent": "[{string}: name of a check (optional)]",
             "result": [integer: 0..3]
             "value": "[{string}: result in words]" 
             "time": "[value]ms"
@@ -89,7 +67,7 @@ The response has 2 keys:
 - meta: metadata for the check
 - checks: container for all checks
 
-## meta ##
+# Section "meta" #
 
 The meta key has these subkeys
 
@@ -123,7 +101,7 @@ The meta key has these subkeys
 
 <span class="required">(*)</span> The keys "host", "website" and "result" are required.
 
-## Checks ##
+# Section "checks" #
 
 The section "checks" is a container for the result of all checks.
 As an example: To verify the health of a webapp you need to check if the
@@ -143,17 +121,12 @@ Each check must have these keys:
 - *"group"*: [{string}: name of a group (optional)] \
   In the graphical view you can cluster checks by adding a group \
   Pre defined vaules and the shown labels are 
-  - cloud: ![](../public_html/server/images/icons/cloud.png) "Cloud"
-  - database ![](../public_html/server/images/icons/.png) "Database"
-  - deny ![](../public_html/server/images/icons/deny.png) "Deny"
-  - disk ![](../public_html/server/images/icons/disk.png) "Disk"
-  - file ![](../public_html/server/images/icons/file.png) "File"
-  - folder ![](../public_html/server/images/icons/folder.png) "Folder"
-  - monitor ![](../public_html/server/images/icons/monitor.png) "Data in tiles"
-  - network ![](../public_html/server/images/icons/network.png) "Network"
-  - security ![](../public_html/server/images/icons/security.png) "Security"
-  - service ![](../public_html/server/images/icons/service.png) "Service"
-  
+- *"parent"*: [{string}: name of a check (optional)] \
+  You can visalize a dependency tree by giving the "name" of the check
+  the current check depends on.
+  i.e. you must read the config first, where are database connection infos
+  before you can check the database status. In the database check 
+  set parent to "read config"
 - *"result"*: [integer: 0..3] <span class="required">(*)</span> \
   result code of the check. The values are the same like the result in the 
   meta section.
