@@ -1,14 +1,15 @@
 {
     "title": "IML Appmonitor",
+    "author": "Axel Hahn",
+    "tagline": "Application monitoring with low requirements.",
+
     "html": {
         "auto_toc": true,
         "auto_landing": false,
         "date_modified": true,
         "jump_buttons": true,
         "links": {
-            "GitHub Repo": "https://github.com/dauxio/daux.io",
-            "Help/Support/Bugs": "https://github.com/dauxio/daux.io/issues",
-            "Made by Todaymade": "http://todaymade.com"
+            "GitHub Repo": "https://github.com/iml-it/appmonitor"
         },
         "theme": "daux-blue",
         "search": false
