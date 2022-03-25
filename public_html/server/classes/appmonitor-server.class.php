@@ -735,15 +735,21 @@ class appmonitorserver {
     protected function _apiGetAppData($sKey=false, $sFilterAppId=false) {
         $this->_getClientData();
         $aReturn=array();
-        $aBasedata=($sFilterAppId && isset($this->_data[$sFilterAppId]) ? $this->_data[$sFilterAppId] : $this->_data );
-        // print_r($aBasedata);
+        // echo 'ALL client data<pre>'.print_r($this->_data, 1).'</pre>';
         // echo '<br>$sKey = '.$sKey.'<br>';
-        foreach($aBasedata as $sAppId=>$aData){
-            $aReturn[$sAppId]=$sKey 
+        foreach($this->_data as $sAppId=>$aData){
+            if($sAppId===$sFilterAppId){
+                $aReturn=$sKey 
+                    ? $aData[$sKey] 
+                    : $aData;
+            } else {
+                $aReturn[$sAppId]=$sKey 
                     // ? (isset($aData[$sKey]) ? $aData[$sKey] : false) 
                     ? $aData[$sKey] 
                     : $aData;
+            }
         }
+        // echo 'aReturn<pre>'.print_r($aReturn, 1).'</pre>';
         return $aReturn;
     }
 
