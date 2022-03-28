@@ -7,11 +7,6 @@
  * this is a sample file for the appmonitor client
  * copy the sample file to index.php and modify it as needed (see ../readme.md).
  * 
- * 
- * to see a few samples that open a config file and make checks on
- * database, file system, ssl certificate
- * visit https://github.com/iml-it/appmonitor-clients/
- * 
  */
 
 require_once('classes/appmonitor-client.class.php');
@@ -29,8 +24,8 @@ $oMonitor->setTTL(300);
 @include 'general_include.php';
 
 // add any tag to add it in the filter list in the server web gui
-$oMonitor->addTag('cms');
-$oMonitor->addTag('production');
+// $oMonitor->addTag('cms');
+// $oMonitor->addTag('production');
 
 // ----------------------------------------------------------------------
 
@@ -39,6 +34,18 @@ $oMonitor->addTag('production');
 
 // add a few custom checks
 // $oMonitor->addCheck(...)
+$oMonitor->addCheck(
+    array(
+        "name" => "hello plugin",
+        "description" => "Test a plugin ... plugins/checks/hello.php",
+        "check" => array(
+            "function" => "Hello",
+            "params" => array(
+                "message" => "Here I am",
+            ),
+        ),
+    )
+);
 
 // ----------------------------------------------------------------------
 

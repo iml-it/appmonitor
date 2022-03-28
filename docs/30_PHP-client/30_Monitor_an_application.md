@@ -1,4 +1,4 @@
-# Initialisation #
+# Monitor an application #
 
 1) start with a single "simple" check and response just an OK. Then add the client url in the appmonitor server backend. The most primitive check in the monitoring is better than no monitoring. 
 2) Step by step add more checks to verify that all needed requirements and services that your application can run smoothly. To write your own checks ... these are some ideas you can pick from:
@@ -27,6 +27,58 @@ If you don't know how to continue after the first simple check and  and what els
 - locate the config
   - try to load the config - check their values.
   - if there is a class with methods to access config data use the application way
+
+## First example ##
+
+Let's have a look to the sample file in public_html/client/index.sample.php ...
+
+```php
+require_once('classes/appmonitor-client.class.php');
+$oMonitor = new appmonitor();
+
+// set a name with application name and environment or hostname
+$oMonitor->setWebsite('[My CMS on host XY]');
+
+// how often the server should ask for updates
+$oMonitor->setTTL(300);
+
+// a general include ... the idea is to a file with the same actions on all
+// installations and hosts that can be deployed by a software delivery service 
+// (Puppet, Ansible, ...)
+@include 'general_include.php';
+
+// add any tag to add it in the filter list in the server web gui
+// $oMonitor->addTag('cms');
+// $oMonitor->addTag('production');
+
+// ----------------------------------------------------------------------
+
+// include default checks for an application
+// @require 'plugins/apps/[name-of-app].php';
+
+// add a few custom checks
+// $oMonitor->addCheck(...)
+$oMonitor->addCheck(
+    array(
+        "name" => "hello plugin",
+        "description" => "Test a plugin ... plugins/checks/hello.php",
+        "check" => array(
+            "function" => "Hello",
+            "params" => array(
+                "message" => "Here I am",
+            ),
+        ),
+    )
+);
+
+// ----------------------------------------------------------------------
+
+$oMonitor->setResult();
+$oMonitor->render();
+
+```
+
+And now we go through it.
 
 # Include appmonitor client class #
 
@@ -170,15 +222,12 @@ $oMonitor->addTag("monitoring");
 - use several tags - it's allowed
 - discuss conventions between the teams
 
-
 # Add Checks #
 
-
-See [PHP-client-checks](client-php-checks.md) to get a list of all available checks.
+See [Check items](30_Monitor_an_application.md) to get a list of all available checks.
 
 Additionally you can write custom checks as plugins. 
 See [PHP-plugins](client-php-write-plugins.md) for details.
-
 
 
 # Prepare the response #
