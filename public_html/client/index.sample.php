@@ -34,9 +34,12 @@ $oMonitor->addTag('production');
 
 // ----------------------------------------------------------------------
 
-// add a few checks
+// include default checks for an application
+// @require 'plugins/apps/[name-of-app].php';
+
+// add a few custom checks
 // $oMonitor->addCheck(...)
-        
+
 // ----------------------------------------------------------------------
 
 $oMonitor->setResult();
