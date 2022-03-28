@@ -1,14 +1,4 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[UP: PHP client: default checks](../client-php-checks.md)
-
---- 
-
 # ApacheProcesses #
-
 
 ## Description ##
 
@@ -17,13 +7,11 @@ active processes.
 
 The returned counts of active workers is for all domains running on the same host.
 
-
 ## Requirements ##
 
 - works for apache httpd only; not for other webservers (i.e. NginX, ...)
 - server status must be available (default: http://localhost/server-status) - to do so, enable mod_status and verify that ExtendedStatus = On)
 - IMPORTANT: limit the access to the server status page to the required systems (i.e. IP restriction).
-
 
 ## Syntax ##
 

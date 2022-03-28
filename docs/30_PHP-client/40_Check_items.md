@@ -54,19 +54,19 @@ The key `check` contains 2 subkeys:
 	"params" => [key->value array; count and keys depend on the function]
 
 
-## Included functions ##
+### Included checks ###
 
-- [ApacheProcesses](client-php/apacheprocesses.md)
-- [Cert](client-php/cert.md)
-- [Diskfree](client-php/diskfree.md)
-- [File](client-php/file.md)
-- [HttpContent](client-php/httpcontent.md)
-- [Loadmeter](client-php/loadmeter.md)
-- [MysqlConnect](client-php/mysqlconnect.md)
-- [PDOConnect](client-php/pdoconnect.md)
-- [PortTcp](client-php/porttcp.md)
-- [Simple](client-php/simple.md)
-- [SqliteConnect](client-php/sqliteconnect.md)
+- [ApacheProcesses](50_Plugins/20_Checks/apacheprocesses.md)
+- [Cert](50_Plugins/20_Checks/cert.md)
+- [Diskfree](50_Plugins/20_Checks/diskfree.md)
+- [File](50_Plugins/20_Checks/file.md)
+- [HttpContent](50_Plugins/20_Checks/httpcontent.md)
+- [Loadmeter](50_Plugins/20_Checks/loadmeter.md)
+- [MysqlConnect](50_Plugins/20_Checks/mysqlconnect.md)
+- [PDOConnect](50_Plugins/20_Checks/pdoconnect.md)
+- [PortTcp](50_Plugins/20_Checks/porttcp.md)
+- [Simple](50_Plugins/20_Checks/simple.md)
+- [SqliteConnect](50_Plugins/20_Checks/sqliteconnect.md)
 
 To see all available checks:
 
@@ -74,7 +74,46 @@ To see all available checks:
 print_r($oMonitor->listChecks());
 ```
 
-## Groups ##
+### Groups ###
+
+This functionality has impact in the rendered view in the web ui only.
+
+Without any group all check results are connected directly to the application node.
+
+```text
++--------+          +---------+    
+| My App +--------->| Check 1 |
++--------+ \        +---------+
+           |\       +---------+
+           | `----->| Check 2 |
+           \        +---------+
+            \       +---------+
+             `----->| Check 3 |
+                    +---------+  
+```
+
+By adding a group "in front" of a check a node for the group will be inserted. All checks of the same type will are connected with a group of checks.
+
+Example:
+
+The checks 1 + 2 get the group "file". Check 3 gets a group "database". The graphical view will change like this:
+
+```text
++--------+          +--------+          +---------+    
+| My App +--------->| File   +--------->| Check 1 |
++--------+ \        +--------+ \        +---------+
+            |                   \       +---------+
+            |                    `----->| Check 2 |
+            |                           +---------+
+             \      +-----------+       +---------+
+              `---->| Database  +------>| Check 3 |
+                    +-----------+       +---------+
+```
+
+A default group is set in all by default shipped checks.
+
+You can override it by setting another group.
+
 
 | Group      | Description |
 |---         |--- 
