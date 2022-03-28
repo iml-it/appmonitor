@@ -3,10 +3,15 @@
  * 
  * APPMONITOR :: AJAX HELPER
  * 
- * API:
+ * API (POC .. do not use it yet):
  * ?item=apps
- * ?item=apps&appid=...
- * ?item=apps&appid=...&what=...
+ *   ... shows ids
+ * 
+ * ?item=apps&appid=[APPID]
+ *   ... shows metadata of app 
+ * 
+ * ?item=apps&appid=[APPID]&what=(all|meta|checks)
+ *   ... show checks or all data of an app
  * 
  * ======================================================================
  */
@@ -17,8 +22,10 @@ $bDebug=true;
 
 $sMode='html';
 $sItem=isset($_GET['item']) && $_GET['item'] ? $_GET['item'] : false;
+
 $sAppId=isset($_GET['appid']) && $_GET['appid'] ? $_GET['appid'] : false;
 $sSubitem=isset($_GET['what']) && $_GET['what'] ? $_GET['what'] : false;
+
 // TODO: id for notification $sId=isset($_GET['id']) && $_GET['id'] ? $_GET['id'] : false;
 
 $sHtml='';
@@ -30,7 +37,13 @@ $sHtml='';
  * @param  array  $aData  array of data to send
  */
 function writeJson($aData){
+    $_aHeader=[
+        '404'=>'HTTP/1.0 404 Not Found'
+    ];
     header('Content-Type: application/json');
+    if(isset($aData['http'])){
+        header($_aHeader[$aData['http']]);
+    }
     echo json_encode($aData); 
     exit (0);
 }
@@ -45,20 +58,25 @@ switch ($sItem){
     
     // ---------- TODO
     case 'apps':
-        // $sHtml.='<pre>'.print_r($oMonitor->apiGetAppIds(), 1).'</pre>';
-        writeJson($sAppId
-            ? $oMonitor->apiGetAppAllData($sAppId)
-            : $oMonitor->apiGetAppIds()
-        );
+        $aData=[];
+        if (!$sAppId){
+            $aData=$oMonitor->apiGetAppIds();
+        } else {
+            switch($sSubitem){
+                case 'checks': 
+                    $aData=$oMonitor->apiGetAppChecks($sAppId);
+                    break;
+                case 'all': 
+                    $aData=$oMonitor->apiGetAppAllData($sAppId);
+                    break;
+                case 'meta': 
+                default: 
+                $aData=$oMonitor->apiGetAppMeta($sAppId);
+                    ;;
+            }
+        }
+        writeJson($aData);
         break;
-    case 'appdata':
-        $sHtml.='<pre>'.print_r($oMonitor->apiGetAppAllData($sAppId), 1).'</pre>';
-        break;
-    case 'appmeta':
-        // $sHtml.='<pre>'.print_r($oMonitor->apiGetAppMeta($sAppId), 1).'</pre>';
-        writeJson($oMonitor->apiGetAppMeta($sAppId));
-        break;
-
     /*
     case 'data':
         $sHtml.='<pre>'.print_r($oMonitor->getMonitoringData(), 1).'</pre>';

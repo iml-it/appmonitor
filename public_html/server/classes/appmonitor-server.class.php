@@ -733,23 +733,25 @@ class appmonitorserver {
      * @return array
      */
     protected function _apiGetAppData($sKey=false, $sFilterAppId=false) {
-        $this->_getClientData();
+        $this->_getClientData(true); // get data; true = use cache
         $aReturn=array();
         // echo 'ALL client data<pre>'.print_r($this->_data, 1).'</pre>';
         // echo '<br>$sKey = '.$sKey.'<br>';
-        foreach($this->_data as $sAppId=>$aData){
-            if($sAppId===$sFilterAppId){
-                $aReturn=$sKey 
-                    ? $aData[$sKey] 
-                    : $aData;
-            } else {
-                $aReturn[$sAppId]=$sKey 
-                    // ? (isset($aData[$sKey]) ? $aData[$sKey] : false) 
-                    ? $aData[$sKey] 
-                    : $aData;
+        if ($sFilterAppId && !isset($this->_data[$sFilterAppId])){
+            $aReturn=['error'=>'App id was not found', 'http' => '404'];
+        } else {
+            foreach($this->_data as $sAppId=>$aData){
+                if($sAppId===$sFilterAppId){
+                    $aReturn=$sKey 
+                        ? $aData[$sKey] 
+                        : $aData;
+                } else {
+                    $aReturn[$sAppId]=$sKey 
+                        ? $aData[$sKey] 
+                        : $aData;
+                }
             }
         }
-        // echo 'aReturn<pre>'.print_r($aReturn, 1).'</pre>';
         return $aReturn;
     }
 
@@ -763,7 +765,7 @@ class appmonitorserver {
     }
     
     /**
-     * get an array of all client data; optional filteex by given app id 
+     * get an array of all client data; optional filtere by given app id 
      * @param string  $sFilterAppId   filter by app id; default false (all)
      * @return array
      */
@@ -771,14 +773,29 @@ class appmonitorserver {
         return $this->_apiGetAppData(false, $sFilterAppId);
     }
     /**
-     * get an array of all client metadata; optional filteex by given app id 
+     * get an array of all client checks; optional filtered by given app id 
+     * @param string  $sFilterAppId   filter by app id; default false (all)
+     * @return type
+     */
+    public function apiGetAppChecks($sFilterAppId=false) {
+        return $this->_apiGetAppData('checks',$sFilterAppId);
+    }
+    /**
+     * get an array of all client metadata; optional filtered by given app id 
      * @param string  $sFilterAppId   filter by app id; default false (all)
      * @return type
      */
     public function apiGetAppMeta($sFilterAppId=false) {
         return $this->_apiGetAppData('meta',$sFilterAppId);
     }
-
+    /**
+     * get an array of all client metadata; optional filtered by given app id 
+     * @param string  $sFilterAppId   filter by app id; default false (all)
+     * @return type
+     */
+    public function apiGetTroubleItems($sFilterAppId=false) {
+        return $this->_apiGetAppData('meta',$sFilterAppId);
+    }
     /**
      * set flag for logging to standard output
      */
