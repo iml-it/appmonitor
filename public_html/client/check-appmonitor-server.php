@@ -25,7 +25,7 @@ $oMonitor = new appmonitor();
 $oMonitor->setWebsite('Appmonitor server');
 
 // how often the server should ask for updates
-$oMonitor->setTTL(10);
+$oMonitor->setTTL(300);
 $oMonitor->addTag('monitoring');
 
 
