@@ -1,5 +1,7 @@
 # Monitor an application #
 
+To monitor an application we need a file that can send metadata (infos about application, ttl) and the result of one or several checks.
+
 1) start with a single "simple" check and response just an OK. Then add the client url in the appmonitor server backend. The most primitive check in the monitoring is better than no monitoring. 
 2) Step by step add more checks to verify that all needed requirements and services that your application can run smoothly. To write your own checks ... these are some ideas you can pick from:
    - file check: 
@@ -80,9 +82,18 @@ $oMonitor->render();
 
 And now we go through it.
 
-# Include appmonitor client class #
+# Create a php file #
 
-Have a look to the example in ./client/index.sample.php. Duplicate it to write your checks.
+Go to the directory `[webroot]/appmonitor/`.
+
+Have a look to the example in index.sample.php. Duplicate it to write your own checks.
+
+- If you have a single application below webroot you can create a file **index.php**. 
+- If you have multiple applications below webroot (eg. on a shared hosting) then create a unique file per application like **check_blog.php**
+
+The filename itself is not important for functionality. It is used for the server instance to add your application check there.
+
+# Include appmonitor client class #
 
 The first step is to initialize the client.
 
@@ -224,10 +235,10 @@ $oMonitor->addTag("monitoring");
 
 # Add Checks #
 
-See [Check items](30_Monitor_an_application.md) to get a list of all available checks.
+See [Check items](40_Check_items.md) to get a list of all available checks.
 
 Additionally you can write custom checks as plugins. 
-See [PHP-plugins](client-php-write-plugins.md) for details.
+See [Write checks](70_Write_checks.md) for details.
 
 
 # Prepare the response #
@@ -280,7 +291,7 @@ DEPRECATED: This method supports 2 parameters
 | 2  | bHighlight  | \{bool\} use highligthed html instead of json; default: false; if true the response is tex/html and no valid JSON anymore |
 
 
-# Other client things #
+# Other client functions #
 
 
 ## Abort a check ##
@@ -319,24 +330,3 @@ ob_end_clean();
 // render
 $oMonitor->renderHtmloutput($sJson);
 ```
-
-# What checks are useful to implement?? #
-
-
-To write your own checks ... these are some ideas you can pick from:
-- file check: 
-  - is a (config) file readable AND writable
-  - is a upload directory writeable?
-  - if the maintenance page is triggered by a file: does the maintenance file NOT exist
-  - verify security: is a sensitive (config) file or a temp a temp directory writeable but not accessible by http? (requires 2 checks: file and http)
-- database checks (PDO)
-  - check database connections (remark: read your config for credentials) ... to master and slaves
-- http checks
-  - check if a remote page (or web api) answers ... and optionally contains given text/ regex
-  - check if page sends the correct redirect location
-  - check if a request contains the wanted non-OK-status code, i.e. redirect with 307 or a config is NOT accessible and sends a 403 response
-- tcp checks
-  - do very basic network checks if you don't make a authenticated connect, i.e. to LDAP, SSH, ...
-- certificate
-  - use the snippet for the certificate check: this check is active if https is used only.
-

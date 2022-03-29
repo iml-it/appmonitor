@@ -1,24 +1,12 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[UP: PHP client: default checks](../client-php-checks.md)
-
---- 
-
 # Loadmeter #
-
 
 ## Description ##
 
 Get system load and render it as a tile.
 
-
 ## Requirements ##
 
 - The system load is available on \*NIX systems only.
-
 
 ## Syntax ##
 
@@ -39,7 +27,6 @@ $oMonitor->addCheck(
 );
 ```
 
-
 ## Parameters ##
 
 
@@ -57,7 +44,6 @@ We recommend to use ```"worstresult" => RESULT_OK```.
 The effect is: if the load check returns anything else then OK in the backend
 the client check switches to the corresponding color, but it has no effect to the total 
 result for the availability of the application.
-
 
 ## Examples ##
 

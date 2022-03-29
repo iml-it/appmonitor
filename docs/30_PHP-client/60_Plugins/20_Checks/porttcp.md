@@ -1,19 +1,8 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[UP: PHP client: default checks](../client-php-checks.md)
-
---- 
-
 # PortTcp #
-
 
 ## Description ##
 
 Check if the local server or another host is listening to a given port number.
-
 
 ## Syntax ##
 
@@ -34,7 +23,6 @@ $oMonitor->addCheck(
 );
 ```
 
-
 ## Parameters ##
 
 | key      | type     | description |
@@ -42,7 +30,6 @@ $oMonitor->addCheck(
 |port      |(integer) |port to check <span class="required">(*)</span>
 |host      |(string)  |optional: hostname to connect to; if unavailable 127.0.0.1 will be tested
 |timeout   |(integer) |optional timeout in sec; default: 5
-
 
 ## Examples ##
 
@@ -73,7 +60,6 @@ $aPorts=array(
 	"5666"=>array("Nagios NRPE"),
 	"5667"=>array("Nagios NSCA"),
 );
-
 
 foreach($aPorts as $iPort=>$aDescr){
 	if (count($aDescr)==1) {

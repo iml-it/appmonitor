@@ -2,7 +2,13 @@
 
 ## Introduction ##
 
-The available different checks are the files in public_html/client/plugins/checks/.
+A check makes a single test like verify if a file exists, a database can be connected and so on. A check will be added with `$oMonitor->addCheck(...)`. You can add as many checks as you want.
+
+You should start with a simple check.
+
+And I suggest to add many checks to verify in many details if your application has all requirements to run. You can chain the checks - then it becomes tool to to detect fast if something is not running and why.
+
+The available checks are the files in public_html/client/plugins/checks/.
 
 ## General include of a check ##
 
@@ -56,17 +62,17 @@ The key `check` contains 2 subkeys:
 
 ### Included checks ###
 
-- [ApacheProcesses](50_Plugins/20_Checks/apacheprocesses.md)
-- [Cert](50_Plugins/20_Checks/cert.md)
-- [Diskfree](50_Plugins/20_Checks/diskfree.md)
-- [File](50_Plugins/20_Checks/file.md)
-- [HttpContent](50_Plugins/20_Checks/httpcontent.md)
-- [Loadmeter](50_Plugins/20_Checks/loadmeter.md)
-- [MysqlConnect](50_Plugins/20_Checks/mysqlconnect.md)
-- [PDOConnect](50_Plugins/20_Checks/pdoconnect.md)
-- [PortTcp](50_Plugins/20_Checks/porttcp.md)
-- [Simple](50_Plugins/20_Checks/simple.md)
-- [SqliteConnect](50_Plugins/20_Checks/sqliteconnect.md)
+- [ApacheProcesses](60_Plugins/20_Checks/apacheprocesses.md)
+- [Cert](60_Plugins/20_Checks/cert.md)
+- [Diskfree](60_Plugins/20_Checks/diskfree.md)
+- [File](60_Plugins/20_Checks/file.md)
+- [HttpContent](60_Plugins/20_Checks/httpcontent.md)
+- [Loadmeter](60_Plugins/20_Checks/loadmeter.md)
+- [MysqlConnect](60_Plugins/20_Checks/mysqlconnect.md)
+- [PDOConnect](60_Plugins/20_Checks/pdoconnect.md)
+- [PortTcp](60_Plugins/20_Checks/porttcp.md)
+- [Simple](60_Plugins/20_Checks/simple.md)
+- [SqliteConnect](60_Plugins/20_Checks/sqliteconnect.md)
 
 To see all available checks:
 
@@ -114,19 +120,18 @@ A default group is set in all by default shipped checks.
 
 You can override it by setting another group.
 
-
 | Group      | Description |
-|---         |--- 
-| cloud      | |
-| database   | |
-| deny       | |
-| disk       | |
-| file       | |
-| folder     | |
-| monitor    | |
-| network    | |
-| security   | |
-| service    | |
+|---         |---
+| cloud      | cloud icon |
+| database   | database icon |
+| deny       | deny sign |
+| disk       | hard disk icon |
+| file       | file icon |
+| folder     | folder icon |
+| monitor    | monitor graph icon |
+| network    | globe icon |
+| security   | keys icon |
+| service    | cogs icon |
 
 ## Chaining with parent ##
 

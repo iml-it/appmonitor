@@ -1,24 +1,12 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[UP: PHP client: default checks](../client-php-checks.md)
-
---- 
-
 # File #
 
-
 ## Description ##
-
 
 Check if a file for file, link or directory. Use the parameter "filename" to set the full filename.
 
 Other given parameters are flags to check. Its values can be set to true (flag must must be true) or false (flag must fail to return a true result). Missing flags won't be checked. 
 
 Giving just a filename without any other flag returns true.
-
 
 ## Syntax ##
 
@@ -39,9 +27,7 @@ $oMonitor->addCheck(
 );
 ```
 
-
 ## Parameters ##
-
 
 | key      | type     | description |
 |---       |---       |---
@@ -53,8 +39,6 @@ $oMonitor->addCheck(
 |executable|(boolean) |flag executable
 |readable  |(boolean) |flag is readable
 |writable  |(boolean) |flag is writable
-
-
 
 ## Examples ##
 

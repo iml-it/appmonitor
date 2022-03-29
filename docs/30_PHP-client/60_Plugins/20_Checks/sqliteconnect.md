@@ -1,14 +1,4 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[UP: PHP client: default checks](../client-php-checks.md)
-
---- 
-
 # SqliteConnect #
-
 
 ## Description ##
 
@@ -18,7 +8,6 @@ The function fails if the filename does not exist or the PDO cannot open it
 ```php
 $o = new PDO("sqlite:".$aParams["db"],(...));
 ```
-
 
 ## Syntax ##
 
@@ -40,9 +29,7 @@ $oMonitor->addCheck(
 );
 ```
 
-
 ## Parameters ##
-
 
 | key      | type     | description |
 |---       |---       |---
@@ -50,8 +37,6 @@ $oMonitor->addCheck(
 |user      |(string)  |optional: username; default: empty
 |password  |(string)  |optional: password; default: empty
 |timeout   |(integer) |optional timeout in sec; default: 5
-
-
 
 ## Examples ##
 

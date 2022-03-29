@@ -1,24 +1,7 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-
-# [APPMONITOR](readme.md) > [CLIENT](client.md) > [PHP-Client](client-php.md) > Write PHP plugins #
-
-Free software and Open Source from University of Bern :: IML - Institute of Medical Education
-
-https://github.com/iml-it/appmonitor
-
-- - -
-
-
 # Introduction #
 
 The php client contains a few checks. You can extend the functionality by 
 writing custom plugins. 
-
-
 
 # Conventions #
 
@@ -26,7 +9,7 @@ writing custom plugins.
 * naming convention: they must be lowercase - [name of your check] + ".php"
 * it must be a class that extends appmonitorcheck
 * the class name must be "check" + [name of your check]
-* it needs a run method that gets an array as argument
+* it needs a `run` method that gets an array as argument
 
 The built in functions and custom checks are listed with listChecks method:
 
@@ -98,8 +81,6 @@ $this->_setReturn($oPlogin->run($aParams));
 
 The checkHello has a documented section. It returns the minimal variant
 with return code and a message - but no counter.
-
-
 
 ```php
 // see method appmonitorcheck->_setReturn()

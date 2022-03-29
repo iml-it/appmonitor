@@ -1,22 +1,12 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[UP: PHP client: default checks](../client-php-checks.md)
-
---- 
-
 # HttpContent #
-
 
 ## Description ##
 
 This check verifies if a given url can be requested. Optionally you can test if it follows wanted rules:
+
 * specific http status code
 * http response header / response body contains/ not containtains given text text
 * http response header / response body matches a given regex
-
 
 ## Syntax ##
 
@@ -35,7 +25,6 @@ $oMonitor->addCheck(
 	)
 );
 ```
-
 
 ## Parameters ##
 
@@ -57,10 +46,7 @@ Remarks:
 
 The checks for text strings are case sensitive. If you need a case insensitive test use a regex with "i" modifyer like in example 3.
 
-
-
 ## Examples ##
-
 
 **Example 1**: \
 Check if a http reponse is successful.
@@ -80,7 +66,6 @@ $oMonitor->addCheck(
 );
 ```
 
-
 **Example 2**: \
 Check if a http reponse is successful and contains a wanted text.
 
@@ -99,7 +84,6 @@ $oMonitor->addCheck(
 	)
 );
 ```
-
 
 **Example 3**: \
 Check the status code: Is the http status a 307 and points to a wanted target?
