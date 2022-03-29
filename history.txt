@@ -1,6 +1,40 @@
 
 HISTORY
 
+v0.108 2022-03-29
+    - client: split code for checks in plugins and apps (bundled checks)
+    - client + server: support parent attrubute to render a chained depenedency
+    - server: WIP: API getter functions
+    - docs: rewrite docs for usage with Daux
+
+v0.107 2021-12-24
+    - server: graphes in tiles start with value zero
+
+V0.106 2021-12-23
+    - server: small fixes in visjs helper class
+
+V0.105 2021-12-23
+    - server: add switchers for visjs network
+
+V0.104 - 2021-12-22
+    - add trouble applications in problems page
+    - page refresh after 1 h
+
+V0.103 2021-12-22
+    - server: add overview page with failed checks
+
+v0.102 2021-12-22
+    - fix warning on php8.1 if cache does not exist yet
+    - fix notification of deleyed messages
+    - fix warning on php 8.1 on empty log data
+    - format example.json
+
+v0.101 2021-12-16
+    - server: fix for usage with php-fpm service (do not use "/tmp")
+
+v0.100 2021-12-16
+    - server: delayed notification
+
 v0.99 2021-12-14
     - client: split checks into single files
     - client: added group item in check output
