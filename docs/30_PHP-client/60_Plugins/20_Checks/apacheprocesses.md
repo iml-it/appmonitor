@@ -1,29 +1,17 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[UP: PHP client: default checks](../client-php-checks.md)
-
---- 
-
 # ApacheProcesses #
-
 
 ## Description ##
 
 Get the available, waiting, active and inactive apache worker processes and render a tile with the
-active processes. 
+active processes.
 
 The returned counts of active workers is for all domains running on the same host.
-
 
 ## Requirements ##
 
 - works for apache httpd only; not for other webservers (i.e. NginX, ...)
 - server status must be available (default: http://localhost/server-status) - to do so, enable mod_status and verify that ExtendedStatus = On)
 - IMPORTANT: limit the access to the server status page to the required systems (i.e. IP restriction).
-
 
 ## Syntax ##
 
@@ -45,9 +33,7 @@ $oMonitor->addCheck(
 );
 ```
 
-
 ## Parameters ##
-
 
 | key        | type     | description
 |---         |---       |---
@@ -55,14 +41,12 @@ $oMonitor->addCheck(
 |warning     |(integer) | optional: limit to switch to warning (in percent); default: 50
 |error       |(integer) | optional: limit to switch to error (in percent); default: 75
 
-
 If a result is not available the result is UNKNOWN
 
 We recommend to use ```"worstresult" => RESULT_OK```. 
 The effect is: if the load check returns anything else then OK in the backend
 the client check switches to the corresponding color, but it has no effect to the total 
 result for the availability of the application.
-
 
 ## Examples ##
 

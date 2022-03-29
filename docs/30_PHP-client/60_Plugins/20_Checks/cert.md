@@ -1,19 +1,8 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[UP: PHP client: default checks](../client-php-checks.md)
-
---- 
-
 # Cert #
-
 
 ## Description ##
 
 Check if a SSL certificate is still valid ... and does not expire soon.
-
 
 ## Syntax ##
 
@@ -34,7 +23,6 @@ $oMonitor->addCheck(
 );
 ```
 
-
 ## Parameters ##
 
 | key      | type     | description |
@@ -50,7 +38,6 @@ I recommend to set verify to *true*. If you should get a warning like
 
 ... then set it back to *false* to make a test for expiration only.
 
-
 It returns OK if 
 - ssl connect is successful
 - valid-to date expires in more than 30 days (or given limit)
@@ -61,7 +48,6 @@ You get an error, if
 - it is not a ssl target
 - certificate is expired
 - ssl connect fails
-
 
 ## Examples ##
 

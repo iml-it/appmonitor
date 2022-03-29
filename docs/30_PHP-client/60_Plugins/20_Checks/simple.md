@@ -1,19 +1,8 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[UP: PHP client: default checks](../client-php-checks.md)
-
---- 
-
 # Simple #
-
 
 ## Description ##
 
 The most simple variant is direct call with the resultcode and output text. 
-
 
 ## Syntax ##
 
@@ -35,20 +24,17 @@ $oMonitor->addCheck(
 );
 ```
 
-
 ## Parameters ##
-
 
 | key        | type     | description |
 |---         |---       |---
 |result      |(integer) | result code <span class="required">(*)</span><br>After loading the client class you can use constants to keep the code more readable<br>RESULT_OK = OK (0)<br>RESULT_UKNOWN = unknown (1)<br>RESULT_WARNING = Warning (2) <br>RESULT_ERROR = Error (3) |
 |value       |(string)  | ouput text to describe the result <span class="required">(*)</span> |
 |count       |(float)   | ptional; if a count exists in a check then a tile will be rendered |
-|visual      |(string)  | optional; used if a "count" was given. see counter description [Client](../client.md)|
+|visual      |(string)  | optional; used if a "count" was given. see counter description [Description of response](../../../20_Client/20_Description_of_response.md)|
 
 You can use the simple check to verify just anything that has no pre defined function
 yet. Set a value for the text that should be visible and the result code (you should use the constants from table above to keep it more readable).
-
 
 ## Examples ##
 

@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.107
+ * @version 0.108
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.107";
+    var $_sVersion = "0.108";
 
     /**
      * html code for icons in the web gui
@@ -659,6 +659,7 @@ class appmonitorserver_gui extends appmonitorserver {
         return $aReturn;
     }
 
+
     /**
      * get image as data: string to embed 
      * @param  array  $aOptions  hash with option keys
@@ -696,6 +697,17 @@ class appmonitorserver_gui extends appmonitorserver {
         return "data:image/svg+xml;charset=utf-8," . strtr(rawurlencode($svg), $revert);
     }
 
+    /**
+     * helper for _generateMonitorGraph: find node id of parent check
+     */
+    protected function _findNodeId($sNeedle, $sKey, $aNodes){
+        foreach ($aNodes as $aNode){
+            if (isset($aNode[$sKey]) && $aNode[$sKey]===$sNeedle){
+                return $aNode['id'];
+            }
+        }
+        return false;
+    }
     /**
      * Get html code for visual view of all checks
      * @return string
@@ -769,8 +781,12 @@ class appmonitorserver_gui extends appmonitorserver {
                 //
                 // --- add check node
                 //
+                $iCheckId=$iCounter;
+                $iParent=1;
+                $iGroup=false;
                 $aNodes[]=[ 
-                    'id'=> $iCounter, 
+                    '_check' => $aCheck['name'], // original check name - used for _findNodeId()
+                    'id'=> $iCheckId, 
                     'label'=> $aCheck['name'], 
                     'title'=>'<table class="result'.$aCheck["result"].'"><tr>'
                         .'<td align="center">'
@@ -791,44 +807,41 @@ class appmonitorserver_gui extends appmonitorserver {
                     'shape'=>'image',
                     'image'=>"images/icons/check-".$aCheck["result"].".png",
                 ];
-                $iParent=1;
-                //
-                // --- collect all parent definitions
-                //
-                if(isset($aCheck['group']) && $aCheck['group'] && isset($aParentsCfg[$aCheck['group']]['id'])) {
-                    $iParent=$aParentsCfg[$aCheck['group']]['id'];
-                    $aParents[$iParent]=[ 
-                        'id'=> $iParent, 
-                        'label'=> $aParentsCfg[$aCheck['group']]['label'], 
-                        'shape'=>'image',
-                        'image'=>$aParentsCfg[$aCheck['group']]['image'],
-                        /*
-                        'image'=>$this->_getHtmlInSvg([
-                            'bgcolor'=>'#eeeeee',
-                            'width'=>200,
-                            'height'=>200,
-                            // 'style'=>'text-align: center;',
-                            'content'=>''
-                                . '<img src="'.$aParentsCfg[$aCheck['parent']]['image'].'" />'
-                                . $aParentsCfg[$aCheck['parent']]['image']
-                                // .'<img src="./images/icons/"'.$aCheck['parent'].'.png">'
+                // --- find parent check node
 
-                            ]),
-                            */
-                        'opacity'=>0.2
-                    ];
-                    
+                if($aCheck["parent"]){
+                    $iParent=$this->_findNodeId($aCheck["parent"],'_check',$aNodes);
                 }
-                $aEdges[]=[ 'from' => $iParent, 'to' => $iCounter, 'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 'width' => $aShapes[$aCheck['result']]['width'] ];
-            }
-        }
-        //
-        // --- add nodes for parent groups
-        //
-        if (count($aParents)){
-            foreach($aParents as $aItem){
-                $aNodes[]=$aItem;
-                $aEdges[]=[ 'from' => 1, 'to' => $aItem['id'], 'dashes'=>true, 'color' => [ 'color' => $aShapes[RESULT_UNKNOWN]['color'] ], 'width' => 2 ];
+                // --- if a group was given: detect a group connected on parent 
+                if(isset($aCheck['group']) && $aCheck['group']) {
+                    $sGroup2Detect=$aCheck['group'].'_'.$iParent;
+                    $iGroup=$this->_findNodeId($sGroup2Detect,'_group',$aNodes);
+                    if(!$iGroup){
+                        // create group node
+                        $iCounter++;
+                        $iGroup=$iCounter;
+                        $aNodes[]=[ 
+                            '_group' => $aCheck['group'].'_'.$iParent, // group name - used for _findNodeId()
+                            'id'=> $iGroup, 
+                            'label'=> $aParentsCfg[$aCheck['group']]['label'], 
+                            'shape'=>'image',
+                            'image'=>$aParentsCfg[$aCheck['group']]['image'],
+                            'opacity'=>0.2
+                        ];
+                        // connect it with app or perent check
+                        $aEdges[]=[ 'from' => $iParent, 
+                            'to' => $iGroup, 
+                            'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 
+                            'width' => $aShapes[$aCheck['result']]['width'] 
+                    ];
+                    }
+                }
+
+                $aEdges[]=[ 'from' => ($iGroup ? $iGroup : $iParent), 
+                    'to' => $iCheckId, 
+                    'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 
+                    'width' => $aShapes[$aCheck['result']]['width'] 
+                ];
             }
         }
         // echo '<pre>'.print_r($aParents,1); die();

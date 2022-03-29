@@ -1,0 +1,17 @@
+{
+    "title": "IML Appmonitor",
+    "author": "Axel Hahn",
+    "tagline": "Application monitoring with low requirements.",
+
+    "html": {
+        "auto_toc": true,
+        "auto_landing": false,
+        "date_modified": false,
+        "jump_buttons": true,
+        "links": {
+            "GitHub Repo": "https://github.com/iml-it/appmonitor"
+        },
+        "theme": "daux-blue",
+        "search": false
+    }
+}
