@@ -1,9 +1,3 @@
-<style>
-	.required{color:#f22;}
-	.optional{color:#888;}
-</style>
-
-[TOC]
 # Requirements #
 
 The delivered PHP client (you can implement a client in other languages) needs

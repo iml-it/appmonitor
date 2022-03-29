@@ -61,7 +61,9 @@ After bringing up the container it starts the monitoring service and shows its l
 
 In the webbrowser open http://localhost:8001/
 
-If you see the welcome message then go back to the terminal. Stop output with Ctrl + C. You see a menu. Press "i" + return to set permissions for your current user and the apache httpd inside the container. If you are back in the menu press "u" + return to start the container again.
+If you see the welcome message then go back to the terminal. Stop output with `Ctrl` + `C`. You see a menu. Press `i` + `Return` to set permissions for your current user and the apache httpd inside the container.
+
+Optional: If you are back in the menu press `u` + `Return` to start the service script in the container again.
 
 ## Production use ##
 
@@ -69,7 +71,7 @@ If you are happy with the first clicks around then continue the next chaprters.
 
 # Used 3rd party tools #
 
-I use several libraries to save time and to use stable components.
+I use several libraries to save time and to use stable components. I just wanna say thank you to all of them.
 
 - [ahCache] (<https://www.axel-hahn.de/docs/ahcache/index.htm>) class to store
    serialized data as file (included)
