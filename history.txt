@@ -4,6 +4,7 @@ HISTORY
 v0.109 2022-03-31
     - docker: enable error reporting
     - server: fix php warning in web ui
+    - server: fix rendering of unknown groups
 
 v0.108 2022-03-29
     - client: split code for checks in plugins and apps (bundled checks)
