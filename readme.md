@@ -9,8 +9,7 @@ https://github.com/iml-it/appmonitor
 
 You can read the docs online: https://iml-it.github.io/appmonitor/ 
 
-Or have a look to the [docs](docs/readme.md) subdirectory.
-
+Have a look to the [docs](docs/) subdirectory.
 
 # Description #
 
@@ -18,7 +17,6 @@ The application monitor is an additional tool to the classic system monitoring
 of a servers and its services. It makes checks from the point of view of the 
 application. With its credentials and permissions started on the application 
 hosts.
-
 
 **Screenshot**:
 

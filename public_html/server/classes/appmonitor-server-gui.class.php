@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.108";
+    var $_sVersion = "0.109";
 
     /**
      * html code for icons in the web gui
@@ -809,7 +809,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 ];
                 // --- find parent check node
 
-                if($aCheck["parent"]){
+                if(isset($aCheck["parent"]) && $aCheck["parent"]){
                     $iParent=$this->_findNodeId($aCheck["parent"],'_check',$aNodes);
                 }
                 // --- if a group was given: detect a group connected on parent 

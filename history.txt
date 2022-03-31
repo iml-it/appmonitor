@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.109 2022-03-31
+    - docker: enable error reporting
+    - server: fix php warning in web ui
+
 v0.108 2022-03-29
     - client: split code for checks in plugins and apps (bundled checks)
     - client + server: support parent attrubute to render a chained depenedency
