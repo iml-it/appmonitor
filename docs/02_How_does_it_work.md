@@ -12,7 +12,7 @@ The appmonitor is a monitoring tool that consists of 2 parts
 - **server** instance
   - collects all JSON data and presents an overview over all checks and websites
   - sends notifications to server admins (read from server config) plus developers and product owners (coming from clients metadata)
-  - more: [Server](10_Server/10_Introduction.md)
+  - more: [Server](10_Server/10_Installation.md)
 
 The server should run as a deamon (but this is not a must for testing).
 It collects all monitoring data from all your web apps by sending an http(s) request.
