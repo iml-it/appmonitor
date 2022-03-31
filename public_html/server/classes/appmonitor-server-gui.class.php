@@ -823,9 +823,9 @@ class appmonitorserver_gui extends appmonitorserver {
                         $aNodes[]=[ 
                             '_group' => $aCheck['group'].'_'.$iParent, // group name - used for _findNodeId()
                             'id'=> $iGroup, 
-                            'label'=> $aParentsCfg[$aCheck['group']]['label'], 
-                            'shape'=>'image',
-                            'image'=>$aParentsCfg[$aCheck['group']]['image'],
+                            'label'=> isset($aParentsCfg[$aCheck['group']]['label']) ? $aParentsCfg[$aCheck['group']]['label'] : '['.$aCheck['group'].']', 
+                            'shape'=> isset($aParentsCfg[$aCheck['group']]['image']) ? 'image' : 'box',
+                            'image'=> isset($aParentsCfg[$aCheck['group']]['image']) ? $aParentsCfg[$aCheck['group']]['image'] : 'NOIMAGE ' . $aCheck['group'],
                             'opacity'=>0.2
                         ];
                         // connect it with app or perent check
