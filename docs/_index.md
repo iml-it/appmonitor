@@ -13,7 +13,7 @@ The application monitor is an additional tool to the classic system monitoring o
 
 # Installation / Get started #
 
-Go to page [Server](10_Server/10_Introduction.md) to install the server that contains the server and client components.
+Go to page [Server](10_Server/10_Installation.md) to install the server that contains the server and client components.
 
 # Features #
 
