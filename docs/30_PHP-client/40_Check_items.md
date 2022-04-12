@@ -140,3 +140,5 @@ With a chaining value you can reference another check by giving its name value.
 As an example: One of the first checks can be the check to read a config. In it are your database credentials. In the check the database access you set a reference to the config check as parent.
 
 In the monitor web ui you get a rendered tree.
+
+![Client](../images/server_web_app_graph.png "Using groups and parents result in chains in the graphical view")

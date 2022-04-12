@@ -110,6 +110,8 @@ if the port of a needed service is available.
 All these things are several single checks you have to put in the checks
 key for the response.
 
+## Subkeys in a check ##
+
 Each check must have these keys:
 
 - *"name"*: [string: short name of the test N] <span class="required">(*)</span> \
@@ -158,6 +160,28 @@ Behind the type can follow an integer for the width where the page width is 12 c
 The last
 
 <span class="required">(*)</span> The keys "name", "description", "value" and "result" are required.
+
+## Chaining ##
+
+Valid values for "group" are:
+
+| Group      | Description |
+|---         |---
+| cloud      | cloud icon |
+| database   | database icon |
+| deny       | deny sign |
+| disk       | hard disk icon |
+| file       | file icon |
+| folder     | folder icon |
+| monitor    | monitor graph icon |
+| network    | globe icon |
+| security   | keys icon |
+| service    | cogs icon |
+
+Using the keys "groups" and "parents" result in chains in the graphical view:
+
+![Client](../images/server_web_app_graph.png "Using groups and parents result in chains in the graphical view")
+
 
 ## Counter examples ##
 
