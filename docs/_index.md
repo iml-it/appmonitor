@@ -28,6 +28,8 @@ Server webgui
 - Filter the view by selecting tags
 - CLI tool to automate settings in the server config (with Puppet, Ansible, ...)
 
-**Screenshot**:
+**Screenshots**:
 
-![Client](images/screenshot-view-client.png "Client view in monitor web gui")
+![Overview with all web apps](images/server_overview_web_apps.png "Overview page showing a total summary and all web apps")
+
+![Client](images/server_web_app_details.png "Client view in monitor web gui")

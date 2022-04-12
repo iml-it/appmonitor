@@ -133,7 +133,7 @@ You can override it by setting another group.
 | security   | keys icon |
 | service    | cogs icon |
 
-## Chaining with parent ##
+### Chaining with parent ###
 
 With a chaining value you can reference another check by giving its name value.
 

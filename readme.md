@@ -18,6 +18,8 @@ of a servers and its services. It makes checks from the point of view of the
 application. With its credentials and permissions started on the application 
 hosts.
 
-**Screenshot**:
+**Screenshots**:
 
-![Client](docs/images/screenshot-view-client.png "Client view in monitor web gui")
+![Overview with all web apps](docs/images/server_overview_web_apps.png "Overview page showing a total summary and all web apps")
+
+![Client](docs/images/server_web_app_details.png "Client view in monitor web gui")

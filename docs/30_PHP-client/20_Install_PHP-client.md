@@ -2,7 +2,7 @@
 
 The project package contains the PHP client and the server.
 
-If you run an pplication, CMS, Blog, ... if it is using PHP then you need the files of subdir "client" from [package]/public_html/ only.
+If you run an application, CMS, Blog, ... and if it is using PHP then you need the client part only.
 
 # Manual installation #
 
@@ -15,7 +15,7 @@ Get the files
 
 ## Copy needed files ##
 
-If you run an pplication, CMS, Blog, ... if it is using PHP then you need the files of subdir "client" from [package]/public_html/.
+Copy the files of subdir "client" from [package]/public_html/.
 
 1) Below the document root of a website create a new directory, i.e. [webroot]/appmonitor/
 2) copy all files of subdir "client" from [package]/public_html/client/ into [webroot]/appmonitor/
@@ -25,18 +25,25 @@ If you run an pplication, CMS, Blog, ... if it is using PHP then you need the fi
 There is a script in `public_html/client/git_update_appmonitor.sh` that automates the manual steps above.
 It acts linke an installer and updater.
 
-Requirements:
+Requirements for the installer:
 
 - Bash
 - rsync
 - git
 
-Steps:
+## Get the installer ##
 
-- Create a directory "appmonitor" below your webroot.
-- Copy git_update_appmonitor.sh there or fetch it as raw file `wget https://raw.githubusercontent.com/iml-it/appmonitor/master/public_html/client/git_update_appmonitor.sh`
-- set execute permissions `chmod 755 git_update_apmonitor.sh`
-- install files `./git_update_appmonitor.sh`
+1) Below the document root of a website create a new directory, i.e. [webroot]/appmonitor/
+2) Copy git_update_appmonitor.sh there or fetch it as raw file 
+
+   - `wget -O git_update_appmonitor.sh https://raw.githubusercontent.com/iml-it/appmonitor/master/public_html/client/git_update_appmonitor.sh`
+   - `curl -o git_update_appmonitor.sh https://raw.githubusercontent.com/iml-it/appmonitor/master/public_html/client/git_update_appmonitor.sh`
+
+3) Set execute permissions `chmod 755 git_update_apmonitor.sh`
+
+The Video shows the installation "somewhere":
+
+![Get the installer](../images/tty_install_php_client.gif)
 
 `./git_update_appmonitor.sh -h` shows a help.
 
@@ -71,3 +78,12 @@ Steps:
         Show this help.
 
 ```
+
+
+## First run: install ##
+
+Install files by executing it: `./git_update_appmonitor.sh`. 
+
+The Video shows the first run of the installer:
+
+![Installation](../images/tty_install_php_client_run.gif)
