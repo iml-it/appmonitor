@@ -7,18 +7,20 @@
 #
 # ----------------------------------------------------------------------
 # 2022-04-11  <axel.hahn@iml.unibe.ch>  first lines
+# 2022-04-12  <axel.hahn@iml.unibe.ch>  add help; exclude unneeded files
 # ======================================================================
 
 # ----------------------------------------------------------------------
 # CONFIG
 # ----------------------------------------------------------------------
 
-git_repo_url="https://github.com/iml-it/appmonitor.git"
-git_target=/tmp/git_data__appmonitor
+readonly git_repo_url="https://github.com/iml-it/appmonitor.git"
+readonly line="____________________________________________________________"
+readonly version="0.2"
 
+git_target=/tmp/git_data__appmonitor
 client_from="${git_target}/public_html/client"
 client_to="."
-line="____________________________________________________________"
 
 cd $( dirname "$0" ) || exit 1
 
@@ -44,7 +46,7 @@ function _gitUpdate(){
     else
         echo "Cloning..."
         git clone "$_url" "$_dirgit"
-        _rc=1
+        _rc=$?
     fi
     return $_rc
 }
@@ -54,31 +56,59 @@ function _gitUpdate(){
 # MAIN
 # ----------------------------------------------------------------------
 
-echo 
-echo 
-echo "          +--------------------------------+"
-echo "          |  UPDATER :: Appmonitor client  |"
-echo "          +--------------------------------+"
-echo 
-echo 
+cat <<ENDOFHEADER
+
+          +-----------------------------------+
+          |                                   |
+          |  INSTALLER  |                     |
+          |      +      |  Appmonitor client  |
+          |   UPDATER   |                     |
+          |                                   |
+          +--------------------------- v$version --+
+
+ENDOFHEADER
 
 case "$1" in
-    -h|-?|--help)
-        echo "USAGE:"
-        echo "$0 [target path]"
-        echo "defautl target is [.] (current directory)"
-        exit 1
+    -h|--help)
+        cat <<ENDOFHELP
+
+    This is a helper script to get the files of the IML Appmonitor
+    client part only.
+
+    This script clones and updates the repository in the /tmp 
+    directory and syncs the client files of it to a given directory.
+
+    In the first run it works like an installer.
+    On additional runs it updates the files.
+
+    USAGE:
+
+    $0 [target path]
+
+        default target is [.] (current directory)
+
+    $0 -h|--help
+
+        Show this help.
+
+ENDOFHELP
+        exit 0
         ;;
     *)
-        if ! test -d "$1"
-        then 
-            echo "ERROR: target dir $1 does not exist."
-            exit 1
+        if test -n "$1" 
+            then
+            if  ! test -d "$1"
+            then 
+                echo "ERROR: target dir [$1] does not exist."
+                exit 1
+            fi
+            echo "set target to $1"
+            client_to="$1"
         fi
-        echo "set target to $1"
-        client_to="$1"
 esac
 
+which rsync >/dev/null || exit 1
+which git >/dev/null || exit 1
 
 echo $line
 echo ">>> #1 of 3 >>> update local git data"
@@ -92,19 +122,27 @@ then
 fi
 echo
 
+
 echo $line
 echo ">>> #2 of 3 >>> Sync files of Appmonitor client"
 echo
 echo "FROM $client_from/*" 
 echo "TO   $client_to"
-rsync -rav $client_from/* "$client_to"
+rsync -rav \
+    --exclude "build" \
+    --exclude "*.sample.*" \
+    --exclude "example.json" \
+    --exclude "check-appmonitor-server.php" \
+    $client_from/* "$client_to"
 echo
+
 
 echo $line
 echo ">>> #3 of 3 >>> Diff"
 echo
 diff -r "$client_from" "$client_to"
 echo
+
 
 echo $line
 echo done.
