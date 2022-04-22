@@ -3,7 +3,11 @@
 
 Free software and Open Source from University of Bern :: IML - Institute of Medical Education
 
-https://github.com/iml-it/appmonitor
+Source: <https://github.com/iml-it/appmonitor>
+
+Docs: <https://os-docs.iml.unibe.ch/appmonitor/>
+
+License: GNU GPL 3.0
 
 - - -
 
