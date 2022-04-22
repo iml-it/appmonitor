@@ -12,6 +12,6 @@
             "GitHub Repo": "https://github.com/iml-it/appmonitor"
         },
         "theme": "daux-blue",
-        "search": false
+        "search": true
     }
 }
