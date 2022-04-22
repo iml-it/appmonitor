@@ -1,11 +1,12 @@
 /*
 
     patch css elements of daux.io blue theme
+    version 2022-04-22
 
 */
 
 
-/* ---------- vars ---------- */
+/* ---------- vars ---------- */ 
 
 :root{
 
@@ -34,7 +35,17 @@
 
 /* ---------- tags ---------- */
 
-body, *{color: var(--color); }
+a.Brand::before {
+	background: rgb(255,0,51);
+	color: #fff;
+    font-family: arial;
+	font-weight: bold;
+	padding: 0.5em 0.3em;
+	content: 'IML';
+    margin-right: 0.4em;
+}
+
+body, *{color: var(--color);}
 body{background: var(--bg-body);}
 
 
