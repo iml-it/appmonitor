@@ -3,13 +3,13 @@
 
 Free software and Open Source from University of Bern :: IML - Institute of Medical Education
 
-https://github.com/iml-it/appmonitor
+<https://github.com/iml-it/appmonitor>
 
 - - -
 
-You can read the docs online: https://iml-it.github.io/appmonitor/ 
+You can read the docs online: <https://os-docs.iml.unibe.ch/appmonitor/>
 
-Have a look to the [docs](docs/) subdirectory.
+Or have a look to the [docs](docs/) subdirectory.
 
 # Description #
 
