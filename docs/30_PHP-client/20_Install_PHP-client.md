@@ -20,10 +20,17 @@ Requirements for the installer:
 ## Get the installer ##
 
 1) Below the document root of a website create a new directory, i.e. [webroot]/appmonitor/
-2) Copy git_update_appmonitor.sh there or fetch it as raw file 
+2) Copy git_update_appmonitor.sh there or fetch it as raw file
 
-   - `wget -O git_update_appmonitor.sh https://raw.githubusercontent.com/iml-it/appmonitor/master/public_html/client/git_update_appmonitor.sh`
-   - `curl -o git_update_appmonitor.sh https://raw.githubusercontent.com/iml-it/appmonitor/master/public_html/client/git_update_appmonitor.sh`
+    ```shell
+    wget -O git_update_appmonitor.sh https://raw.githubusercontent.com/iml-it/appmonitor/master/public_html/client/git_update_appmonitor.sh
+    ```
+
+    OR
+
+    ```shell
+    curl -o git_update_appmonitor.sh https://raw.githubusercontent.com/iml-it/appmonitor/master/public_html/client/git_update_appmonitor.sh`
+    ```
 
 3) Set execute permissions `chmod 755 git_update_apmonitor.sh`
 
@@ -65,10 +72,9 @@ The Video shows the installation "somewhere":
 
 ```
 
-
 ## First run: install ##
 
-Install files by executing it: `./git_update_appmonitor.sh`. 
+Install files by executing it: `./git_update_appmonitor.sh`.
 
 The Video shows the first run of the installer:
 
