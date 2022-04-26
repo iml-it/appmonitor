@@ -8,6 +8,11 @@
         "auto_landing": false,
         "date_modified": false,
         "jump_buttons": true,
+        "edit_on_github": "iml-it/appmonitor/tree/master/docs",
+        "edit_on_": {
+            "name": "Gitlab",
+            "basepath": "__"
+        },
         "links": {
             "GitHub Repo": "https://github.com/iml-it/appmonitor"
         },
