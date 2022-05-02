@@ -29,7 +29,7 @@
  *             "function" => "Cert",
  *             "params" => array(
  *                 "url" => "https://www.example.com",
- *                 "warning" => "21",
+ *                 "warning" => "30",
  *             ),
  *         ),
  *     )
@@ -37,6 +37,7 @@
  * ____________________________________________________________________________
  * 
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
+ * 2022-05-02  <axel.hahn@iml.unibe.ch>  set warning to 21 days (old value was 30); add "critical" param
  * 
  */
 class checkCert extends appmonitorcheck{
@@ -55,7 +56,8 @@ class checkCert extends appmonitorcheck{
      * array(
      *     "url"       optional: url to connect check; default: own protocol + server
      *     "verify"    optional: flag for verification of certificate or check for expiration only; default=true (=verification is on)
-     *     "warning"   optional: count of days to warn; default=30
+     *     "warning"   optional: count of days to warn; default=21 (=3 weeks)
+     *     "critical"  optional: count of days to raise critical; default=5
      * )
      * @return boolean
      */
@@ -64,8 +66,9 @@ class checkCert extends appmonitorcheck{
                 ? $aParams["url"] 
                 : 'http'. ($_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] .':' . $_SERVER['SERVER_PORT']
                 ;
-        $bVerify = isset($aParams["verify"])  ? !!$aParams["verify"] : true;
-        $iWarn   = isset($aParams["warning"]) ? (int)($aParams["warning"]) : 30;
+        $bVerify =   isset($aParams["verify"])   ? !!$aParams["verify"]        : true;
+        $iWarn   =   isset($aParams["warning"])  ? (int)($aParams["warning"])  : 21;
+        $iCrtitcal = isset($aParams["critical"]) ? (int)($aParams["critical"]) : 5;
 
         $sMessage="Checked url: $sUrl ... ";
         $certinfo=$this->_certGetInfos($sUrl, $bVerify);
@@ -91,7 +94,7 @@ class checkCert extends appmonitorcheck{
                 . ' to '.date("Y-m-d H:i", $certinfo['validTo_time_t']).' '
                 . ( $iDaysleft ? "($iDaysleft days left)" : "expired since ".(-$iDaysleft)." days.")
                 ;
-        if ($iDaysleft<0) {
+        if ($iDaysleft<=$iCrtitcal) {
             return [
                 RESULT_ERROR, 
                 'Expired! ' . $sMessage
