@@ -17,6 +17,7 @@ $oMonitor->addCheck(
 				"url"      => [url-to-check],
 				"verify"   => [flag-for-verification],
 				"warning"  => [days-before-cert-expires],
+				"critical" => [days-before-cert-expires],
 			),
 		),
 	)
@@ -29,7 +30,8 @@ $oMonitor->addCheck(
 |---       |---       |---
 |url       |(string)  |url to connect check i.e. https://example.com:3000; default: own protocol + server of your webapp
 |verify    |(boolean) |optional: flag verify certificate; default = true
-|warning   |(integer) |optional: count of days to warn; default=30
+|warning   |(integer) |optional: count of days to warn; default=21
+|critical  |(integer) |optional: count of days to raise critical; default=5
 
 I recommend to set verify to *true*. If you should get a warning like 
 
@@ -38,16 +40,23 @@ I recommend to set verify to *true*. If you should get a warning like
 
 ... then set it back to *false* to make a test for expiration only.
 
-It returns OK if 
+It returns OK if
+
 - ssl connect is successful
-- valid-to date expires in more than 30 days (or given limit)
+- certificate is valid more than 30 days (or given "warning" limit)
 
-You get a warning if it expires soon.
+You get a warning if it expires soon:
 
-You get an error, if 
+- "Expires soon." - certificate expires in less than 21 days (or given "warning" limit)
+- "Expires very soon!" - certificate expires very soon in less than 5 days (or given "critcal" limit)
+
+Even with reaching critical date the application status is "warning" because the application is still functional.
+
+You get an error, if
+
 - it is not a ssl target
-- certificate is expired
 - ssl connect fails
+- certificate is expired
 
 ## Examples ##
 
@@ -65,4 +74,10 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
         )
     );
 }
+```
+
+To not to repeat the same code you can use an include to a file located in public_html/client/plugins/apps/:
+
+```php
+include 'shared_check_ssl.php';
 ```
