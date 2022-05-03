@@ -32,15 +32,16 @@ if (!class_exists('appmonitorcheck')){
  * --------------------------------------------------------------------------------<br>
  * <br>
  * --- HISTORY:<br>
- * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
- * 2014-11-21  0.6   axel.hahn@iml.unibe.ch  removed meta::ts <br>
- * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  show version<br>
- * 2018-08-24  0.51  axel.hahn@iml.unibe.ch  method to show local status page<br>
- * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
- * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
- * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
+ * 2014-10-24  0.5    axel.hahn@iml.unibe.ch<br>
+ * 2014-11-21  0.6    axel.hahn@iml.unibe.ch  removed meta::ts <br>
+ * 2018-08-23  0.50   axel.hahn@iml.unibe.ch  show version<br>
+ * 2018-08-24  0.51   axel.hahn@iml.unibe.ch  method to show local status page<br>
+ * 2018-08-27  0.52   axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
+ * 2018-11-05  0.58   axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
+ * 2019-05-31  0.87   axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
+ * 2020-05-03  0.110  axel.hahn@iml.unibe.ch  update renderHtmloutput<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.99
+ * @version 0.110
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -54,7 +55,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    protected $_sVersion = 'php-client-v0.109';
+    protected $_sVersion = 'php-client-v0.110';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -481,34 +482,44 @@ class appmonitor {
                 . '</div>'
                 . 'Host: '    . (isset($aData['meta']['host'])    ? '<span class="string">' . $aData['meta']['host']   .'</span>'    : '?').'<br>'
                 . 'Website: ' . (isset($aData['meta']['website']) ? '<span class="string">' . $aData['meta']['website'].'</span>'  : '?').'<br>'
-                // . 'Status: '  . (isset($aData['meta']['result'])  ? '<span class="result'.$aData['meta']['result'].'">'. $aMsg[$aData['meta']['result']].'</span>'  : '?').'<br>'
                 . 'Execution time: '    . (isset($aData['meta']['time'])    ? '<span class="float">'  . $aData['meta']['time']  .'</span>'  : '?').'<br>'
+                . 'Client: '    . (isset($aData['meta']['version'])    ? '<span class="float">'  . $aData['meta']['version']  .'</span>'  : '?').'<br>'
 
                 .'<h2>Checks</h2>'
                 ;
         if (isset($aData['checks'][0]) && count($aData['checks'])){
             foreach($aData['checks'] as $aCheck){
-               $sOut.= '<span class="result'.$aCheck['result'].'"> <strong>'.$aCheck['name'].'</strong></span> <br>'
-                   . $aCheck['description'].'<br>'
-                   // . '<span class="result'.$aCheck['result'].'">'.$aCheck['value'].'</span><br>'
-                   . $aCheck['value'].'<br>'
-                   . 'Execution time: ' . $aCheck['time'].'<br>'
-                   . 'Status: '  . $aMsg[$aCheck['result']].'<br>'
-                   . '<br>'
+               $sOut.= ''
+               . '<span class="result'.$aCheck['result'].'"> <strong>'.$aCheck['name'].'</strong></span> <br>'
+               . '<div class="check">'
+                    . '<div class="description">'
+                        . $aCheck['description'].'<br>'
+                        . $aCheck['value'].'<br>'
+                    . '</div>'
+                    . 'Execution time: ' . (isset($aCheck['time']) ? $aCheck['time'] : ' - ').'<br>'
+                    . 'Group: '  . (isset($aCheck['group']) ? $aCheck['group'] : '-').'<br>'
+                    . 'parent: ' . (isset($aCheck['parent']) ? $aCheck['parent']: '-').'<br>'
+                    . 'Status: ' . $aMsg[$aCheck['result']].'<br>'
+                   . '</div>'
                    ;
             }
         }
-        $sOut.= '<hr>List of farbcodes: ';
+        $sOut.= '<h2>List of farbcodes</h2>';
         foreach ($aMsg as $i=>$sText){
             $sOut.= '<span class="result'.$i.'">'. $sText.'</span> ';
         }
+        $sOut.='<h2>Raw result data</h2><pre>'.json_encode($aData, JSON_PRETTY_PRINT).'</pre>';
         $sOut = '<!DOCTYPE html><html><head>'
                 . '<style>'
                 . 'body{background:#fff; color:#444; font-family: verdana,arial; margin: 3em;}'
-                . '.result0{background:#aca; border-left: 1em solid #080; padding: 0 0.5em; }'
-                . '.result1{background:#ccc; border-left: 1em solid #aaa; padding: 0 0.5em; }'
-                . '.result2{background:#fc9; border-left: 1em solid #860; padding: 0 0.5em; }'
-                . '.result3{background:#f88; border-left: 1em solid #f00; padding: 0 0.5em; }'
+                . 'h1{color:#346;}'
+                . 'h2{color:#569; margin-top: 1.5em;}'
+                . '.check{border: 1px solid; padding: 0.4em; margin-bottom: 2em;}'
+                . '.description{font-style: italic; padding: 0.4em 1em;}'
+                . '.result0{background:#aca; border-left: 1em solid #080; padding: 0.5em; }'
+                . '.result1{background:#ccc; border-left: 1em solid #aaa; padding: 0.5em; }'
+                . '.result2{background:#fc9; border-left: 1em solid #860; padding: 0.5em; }'
+                . '.result3{background:#f88; border-left: 1em solid #f00; padding: 0.5em; }'
                 . '</style>'
                 . '<title>' . __CLASS__ . '</title>'
                 . '</head><body>'
