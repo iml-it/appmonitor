@@ -436,6 +436,9 @@ function postLoad(bIsFirstload) {
     $('.datatable-notifications-webapp').dataTable({'order': [[1, 'desc']]});
     $('.datatable-notifications').dataTable({'order': [[1, 'desc']], "aLengthMenu":[[25,100,-1],[25,100,"---"]]});
 
+    // copy problem badges from tile to menu
+    $('#menubagde_problems').html( $('#badgetile_problems').html() );
+
 }
 
 /**
