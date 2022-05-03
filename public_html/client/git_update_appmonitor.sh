@@ -8,6 +8,7 @@
 # ----------------------------------------------------------------------
 # 2022-04-11  <axel.hahn@iml.unibe.ch>  first lines
 # 2022-04-12  <axel.hahn@iml.unibe.ch>  add help; exclude unneeded files
+# 2022-05-03  <axel.hahn@iml.unibe.ch>  create general_include.php
 # ======================================================================
 
 # ----------------------------------------------------------------------
@@ -16,7 +17,7 @@
 
 readonly git_repo_url="https://github.com/iml-it/appmonitor.git"
 readonly line="____________________________________________________________"
-readonly version="0.2"
+readonly version="0.3"
 
 git_target=/tmp/git_data__appmonitor
 client_from="${git_target}/public_html/client"
@@ -28,7 +29,30 @@ cd $( dirname "$0" ) || exit 1
 # FUNCTIONS
 # ----------------------------------------------------------------------
 
+# Create a missing file from sample file
+#
+# global $client_from  source dir with git repo data
+# global $client_to    target dir
+#
+# param  string  source file (containing .sample); relative to $client_from
+function _fileupdate(){
+    local _myfile=$1
+    local _newfile=${_myfile//.sample/}
+    echo -n "Update $client_from/$_myfile --> $client_to/$_newfile ... "
+    
+    if [ ! -f "$client_to/$_newfile" ]; then
+        echo -n "copy ... "
+        cp "$client_from/$_myfile" "$client_to/$_newfile" || exit 2
+        echo "OK"
+    else
+        echo "already exists - SKIP "
+    fi
+
+}
+
 # get data from a repo with git clone or git pull
+# param string  url of public .git repo
+# param string  local directory where to clone it
 function _gitUpdate(){
     local _url=$1
     local _dirgit=$2
@@ -136,6 +160,7 @@ rsync -rav \
     $client_from/* "$client_to"
 echo
 
+_fileupdate general_include.sample.php
 
 echo $line
 echo ">>> #3 of 3 >>> Diff"
