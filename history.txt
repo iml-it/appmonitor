@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.110 2022-05-xx
+    - server: fix recursion of laststatus
+    - server: WIP: show badges for problems in the menu (what if tile not visible?)
+
 v0.109 2022-03-31
     - docker: enable error reporting
     - server: fix php warning in web ui
