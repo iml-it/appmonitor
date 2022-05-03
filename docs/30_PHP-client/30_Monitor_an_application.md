@@ -308,7 +308,6 @@ check, i.e. a config file is not found.
 $oMonitor->abort([{string} message]);
 ```
 
-
 ## Snippet: show status locally (without appmonitor server) ##
 
 To show the status page on the application server have a look to the snippet 
@@ -319,11 +318,9 @@ Appmonitor server.
 It does not send any notification. And this simple snippet does not care about the TTL ("yet": you need to build it).
 
 ```php
-$_SERVER['REMOTE_ADDR']='127.0.0.1';
-
+<?php
 // execute checks
-ob_start();
-require __DIR__ . '/../../../appmonitor/index.php';
+require __DIR__ . '/check-appmonitor-server.php';
 $sJson=ob_get_contents();
 ob_end_clean();
 
