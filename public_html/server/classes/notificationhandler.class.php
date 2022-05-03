@@ -300,6 +300,13 @@ class notificationhandler {
             default:
                 break;
         }
+
+        // setting $this->_aAppResult['laststatus'] above can create recursion
+        if(isset($this->_aAppResult['laststatus']['laststatus'])){
+            unset($this->_aAppResult['laststatus']['laststatus']);
+            $this->_saveAppResult();
+        }
+                
         // handle delayed notification:
         // actions as long counter is lower max delay only
         if ($iCounter<=$iMaxDelay){
@@ -401,6 +408,12 @@ class notificationhandler {
                 array_shift($this->_aLog);
             }
         }
+        // FIX recusrsive data in $this->notify()
+        for($i=0; $i<count($this->_aLog); $i++){
+            if(isset($this->_aLog[$i]['result']['laststatus'])){
+                unset($this->_aLog[$i]['result']['laststatus']);
+            }
+        }
         return true;
     }
     
@@ -436,7 +449,6 @@ class notificationhandler {
         if($bRsort){
             rsort($aData);
         }
-        
         // filter
         if (count($aFilter)>0){
             foreach($aData as $aLogentry){
@@ -470,6 +482,8 @@ class notificationhandler {
         if(!$this->_aLog){
             $this->_aLog=array();
         }
+        $this->cutLogitems();
+
         return $this->_aLog;
     }
     
