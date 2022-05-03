@@ -38,6 +38,7 @@
  * 
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
  * 2022-05-02  <axel.hahn@iml.unibe.ch>  set warning to 21 days (old value was 30); add "critical" param
+ * 2022-05-03  <axel.hahn@iml.unibe.ch>  critical limit is a warning only (because app is still functional)
  * 
  */
 class checkCert extends appmonitorcheck{
@@ -94,7 +95,7 @@ class checkCert extends appmonitorcheck{
                 . ' to '.date("Y-m-d H:i", $certinfo['validTo_time_t']).' '
                 . ( $iDaysleft ? "($iDaysleft days left)" : "expired since ".(-$iDaysleft)." days.")
                 ;
-        if ($iDaysleft<=$iCrtitcal) {
+        if ($iDaysleft<=0) {
             return [
                 RESULT_ERROR, 
                 'Expired! ' . $sMessage
@@ -103,7 +104,10 @@ class checkCert extends appmonitorcheck{
         if ($iDaysleft<=$iWarn) {
             return [
                 RESULT_WARNING, 
-                'Expires soon. ' . $sMessage
+                ($iDaysleft<=$iCrtitcal
+                 ? 'Expires very soon! '
+                 : 'Expires soon. ' 
+                ). $sMessage
             ];
         }
         // echo '<pre>';
