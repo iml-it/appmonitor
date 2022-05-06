@@ -64,6 +64,22 @@ $oMonitor->addCheck(
         ),
     )
 );
+
+$oMonitor->addCheck(
+    array(
+        "name" => "PHP modules",
+        "description" => "Check needed PHP modules",
+        // "group" => "folder",
+        "check" => array(
+            "function" => "Phpmodules",
+            "params" => array(
+                "required" => ["curl"],
+                "optional" => [],
+            ),
+        ),
+    )
+);
+
 // ----------------------------------------------------------------------
 // protect dirs against web access
 // specialty: if the test results in an error, the total result switches
