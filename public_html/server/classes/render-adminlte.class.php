@@ -165,16 +165,17 @@ class renderadminlte {
     }
 
     /**
-     * 
+     * get html code for a badge
      * @param type $aOptions  hash with keys for all options
      *                          - type    - one of [none]|danger|info|primary|success|warning
      *                          - bgcolor - background color (without prefix "bg")
-     *                          - class - css class
-     *                          - text
-     * @param type $aOptions
+     *                          - class   - css class
+     *                          - text    - visible text
+     *                          - title   - optional: title attribute
+     *                          - id      - optional: id attribute
      */
     public function getBadge($aOptions){
-        foreach (array('bgcolor', 'title', 'text', 'type') as $sKey){
+        foreach (array('bgcolor', 'title', 'text', 'type', 'id') as $sKey){
             if(!isset($aOptions[$sKey])){
                 $aOptions[$sKey]=false;
             }
@@ -184,6 +185,7 @@ class renderadminlte {
                     . ($aOptions['type']  ? ' label-'.$aOptions['type'] : '')
                     . ($aOptions['bgcolor'] ? ' bg-'.$aOptions['bgcolor']   : '')
                 .'"'
+                . ($aOptions['id']  ? ' id="'.$aOptions['id'].'"' : '')
                 . (isset($aOptions['title'])  ? ' title="'.$aOptions['title'].'"' : '')
                 . '>'
                 . $aOptions['text']

@@ -1,6 +1,14 @@
 
 HISTORY
 
+v0.110 2022-05-09
+    - server: fix recursion of laststatus
+    - server: show badges for problems in the menu
+    - server: show link to app detail pae in notification view
+    - server: link notification tile to notification view
+    - server: consolidate icons in tiles and navigation
+    - php-client: added check for required and optional modules
+
 v0.109 2022-03-31
     - docker: enable error reporting
     - server: fix php warning in web ui
