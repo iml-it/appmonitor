@@ -97,6 +97,8 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
     }
         */
 
+/* hide green badges in menu items */
+.sidebar-menu .bg-green{display: none;}
 
 .box, .info-box{box-shadow: 0 0.2em 1em rgba(0,0,0,0.2);}
 

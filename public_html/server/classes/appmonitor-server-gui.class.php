@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.110-dev";
+    var $_sVersion = "0.110";
 
     /**
      * html code for icons in the web gui
@@ -54,7 +54,7 @@ class appmonitorserver_gui extends appmonitorserver {
         // Menu items
         'allwebapps' => '<i class="fas fa-globe"></i>',
         'problems' => '<i class="fas fa-exclamation-triangle"></i>',
-        'notifications' => '<i class="far fa-bell"></i>',
+        'notifications' => '<i class="fas fa-bullhorn"></i>',
         'setup' => '<i class="fas fa-wrench"></i>',
         'about' => '<i class="fas fa-info-circle"></i>',
         'debug' => '<i class="fas fa-bug"></i>',
@@ -483,17 +483,18 @@ class appmonitorserver_gui extends appmonitorserver {
                 $iResultApps=$i;
             }
         }
-        $sMoreHosts=$sMoreHosts ? '<span style="float: right;">'.$sMoreHosts.'</span>' : '';
         
         foreach($this->_aCfg['view']['overview'] as $key=>$bVisibility){
             switch ($key) {
                 case 'webapps':
+                    // on OK hide host badges
+                    $sMoreHosts='<span id="badgetile_allapps" style="float: right">'.($iResultApps === RESULT_OK ? '' : $sMoreHosts ).'</span>';
                     $sReturn .= $bVisibility
                         ? $this->_getTile(array(
                             'onclick'=> 'setTab(\'#divwebs\');',
                             'result' => $iResultApps,
-                            'count' => ($iResultApps === RESULT_OK ? '' : ' '.$sMoreHosts). $aCounter['apps'],
-                            'icon' => $this->_aIco['webapp'],
+                            'count' => $sMoreHosts . $aCounter['apps'],
+                            'icon' => $this->_aIco['allwebapps'],
                             'label' => $this->_tr('Webapps'),
                         ))
                         : ''
@@ -528,11 +529,13 @@ class appmonitorserver_gui extends appmonitorserver {
                         }
                     }
                     // content from id "badgetile_problems" will be used for menu badges
-                    $sMoreChecks=$sMoreChecks ? '<span id="badgetile_problems" style="float: right">'.$sMoreChecks.'</span>' : '';
+                    // on OK hide host badges
+                    $sMoreChecks='<span id="badgetile_problems" style="float: right">'.($iResultChecks === RESULT_OK ? '' : $sMoreChecks ).'</span>';
+
                     $sReturn.= $bVisibility 
                         ? $this->_getTile(array(
                             'result' => $iResultChecks,
-                            'count' => $aCounter['checks'].($iResultChecks === RESULT_OK ? '' : ' '.$sMoreChecks),
+                            'count' => $sMoreChecks . $aCounter['checks'],
                             'label' => $this->_aIco['check'] . ' ' . $this->_tr('Checks-total'),
                             'onclick'=> 'setTab(\'#divproblems\');',
                         ))
@@ -546,6 +549,7 @@ class appmonitorserver_gui extends appmonitorserver {
                             'result' => ($sSleeping ? RESULT_WARNING : false),
                             'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
                             'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
+                            'onclick'=> 'setTab(\'#divnotifications\');',
                             'more' => $sSleeping,
                         ))
                         : ''
@@ -1568,6 +1572,8 @@ class appmonitorserver_gui extends appmonitorserver {
         $sHtml=$this->_generateNotificationlog();
         return $oA->getSectionHead($this->_aIco["notifications"] . ' ' . $this->_tr('Notifications-header'))
                 . '<section class="content">'
+                .$oA->getSectionRow($this->_generateWebTiles())
+                . '<br>'
                 . $oA->getSectionRow($oA->getSectionColumn(
                         $oA->getBox(array(
                             'title'=>$this->_tr('Notifications-header'),
@@ -2213,7 +2219,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
         $iReload = ((isset($this->_aCfg['pagereload']) && (int) $this->_aCfg['pagereload'] ) ? (int) $this->_aCfg['pagereload'] : 0);
         
-        $sNavi .= $this->_renderMenuItem('#divwebs',          'allwebapps', 'allwebapps',    $this->_tr('All-webapps'))
+        $sNavi .= $this->_renderMenuItem('#divwebs',          'allwebapps', 'allwebapps',    $this->_tr('All-webapps').' <span id="menubagde_allapps" style="float: right" ></span>')
                 . $this->_renderMenuItem('#divproblems',      'problems',   'problems',      $this->_tr('Problems').' <span id="menubagde_problems" style="float: right" ></span>')
                 . $this->_renderMenuItem('#divnotifications', 'checks',     'notifications', $this->_tr('Notifications'))
                 . $this->_renderMenuItem('#divsetup',         'setup',      'setup',         $this->_tr('Setup'))

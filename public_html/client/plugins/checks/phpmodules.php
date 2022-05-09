@@ -27,7 +27,7 @@ class checkPhpmodules extends appmonitorcheck{
      * @return array
      */
     public function getGroup(){
-        return 'system';
+        return 'service';
     }
 
     /**
@@ -43,25 +43,27 @@ class checkPhpmodules extends appmonitorcheck{
         $sOut='';
         $bHasError=false;
         $bHasWarning=false;
-        $this->_checkArrayKeys($aParams, "required");
+        // $this->_checkArrayKeys($aParams, "required");
 
         // --- get all modules
         $aAllMods=get_loaded_extensions(false);
         
         // --- check required modules
-        $sOut.='Required: ';
-        foreach($aParams['required'] as $sMod){
-            $sOut.=$sMod.'=';
-            if(!array_search($sMod, $aAllMods)===false){
-                $sOut.='OK;';
-            } else {
-                $bHasError=true;
-                $sOut.='MISS;';
+        if(isset($aParams['required']) && count($aParams['required'])){
+            $sOut.='Required: ';
+            foreach($aParams['required'] as $sMod){
+                $sOut.=$sMod.'=';
+                if(!array_search($sMod, $aAllMods)===false){
+                    $sOut.='OK;';
+                } else {
+                    $bHasError=true;
+                    $sOut.='MISS;';
+                }
             }
         }
         // --- check optional modules
         if(isset($aParams['optional']) && count($aParams['optional'])){
-            $sOut.='|Optional: ';
+            $sOut.=($sOut ? '|' : '') . 'Optional: ';
             foreach($aParams['optional'] as $sMod){
                 $sOut.=$sMod.'=';
                 if(!array_search($sMod, $aAllMods)===false){
@@ -71,7 +73,6 @@ class checkPhpmodules extends appmonitorcheck{
                     $sOut.='MISS;';
                 }
             }
-    
         }
 
         // --- return result

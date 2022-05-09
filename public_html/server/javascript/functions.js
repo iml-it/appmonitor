@@ -437,6 +437,9 @@ function postLoad(bIsFirstload) {
     $('.datatable-notifications').dataTable({'order': [[1, 'desc']], "aLengthMenu":[[25,100,-1],[25,100,"---"]]});
 
     // copy problem badges from tile to menu
+    if ($('#badgetile_allapps')){
+        $('#menubagde_allapps').html( $('#badgetile_allapps').html() );
+    }
     if ($('#badgetile_problems')){
         $('#menubagde_problems').html( $('#badgetile_problems').html() );
     }
