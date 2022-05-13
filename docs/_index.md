@@ -18,11 +18,7 @@ The application monitor is a complementing tool next to the classic system monit
 
 Go to page [Server](10_Server/10_Installation.md) to install the server that contains the server and client components.
 
-The server needs
-
-- PHP 7 or 8 on server (clients can be implemented in other languages too)
-- small: less 1 MB + docs
-- low requirements: even no database required
+If you have a server already and want to monitor an PHP application then go to [PHP-Client](30_%F0%9F%93%83_PHP-client/10_Introduction.md).
 
 # Features #
 

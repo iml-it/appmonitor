@@ -2,7 +2,9 @@
 
 The delivered PHP client (you can implement a client in other languages) needs
 
-- PHP 7 or 8 (up to PHP 8.1)
+- PHP 7 or 8 on server (clients can be implemented in other languages too)
+- small: less 1 MB + docs
+- low requirements: even no database required
 
 # Quick start #
 
