@@ -199,7 +199,7 @@
         
         "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__. __ERROR__",
         "changetype-2.email.subject": "[Appmonitor] :: __CHANGE__ __LAST-RESULT__ --> __RESULT__ - __URL__",
-        "changetype-2.email.message": "__TIME__\n__WEBSITE__ @ __HOST__\nStatus has changed from __LAST-RESULT__ to __RESULT__.\n\nsee current status on: __MONITORURL__\n\n__CHECKS__",
+        "changetype-2.email.message": "__TIME__\n__WEBSITE__ @ __HOST__\nStatus has changed after __DELTA-TIME__ from __LAST-RESULT__ to __RESULT__.\n\nsee current status on: __MONITORURL__\n\n__CHECKS__",
         
         "changetype-3.logmessage":    "Webapp was deleted from Appmonitor: __URL__.",
         "changetype-3.email.subject": "[Appmonitor] :: webapp was DELETED: __URL__.",
