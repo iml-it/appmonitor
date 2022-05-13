@@ -82,6 +82,12 @@ class notificationhandler {
         RESULT_ERROR   =>2
     ];
 
+    /**
+     * plugin directory for notification types
+     * @var string
+     */
+    protected $_sPluginDir=__DIR__.'/../plugins/notification';
+
     // ----------------------------------------------------------------------
     // __construct
     // ----------------------------------------------------------------------
@@ -333,7 +339,7 @@ class notificationhandler {
                 }
             }
             /*
-            IDEA: track skiped notifications
+            IDEA: track skipped notifications
 
             if (!$bDoNotify && $iCounter<$this->_aDelayNotification[$iResult]){
                 // echo "DEBUG: ".__METHOD__." skip notification for delayed sending ...\n";
@@ -625,14 +631,6 @@ class notificationhandler {
             die("ERROR: " .__METHOD__ ." failed to detect change type - or app was not initialized.");
             return false;
         }
-        /*
-        if($this->_iAppResultChange==CHANGETYPE_NOCHANGE){
-            return false;
-        }
-        */
-        // TODO: check ... why was that needed?
-        // get change type between current and last saved other status
-        // $this->_detectChangetype(isset($this->_aAppResult['laststatus']) ? $this->_aAppResult['laststatus'] : false);
 
         // take template for log message and current result type
         $sLogMessage=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.logmessage');
@@ -651,9 +649,46 @@ class notificationhandler {
         // echo "DEBUG:".__METHOD__." add log an sending messages - $sLogMessage\n";
         $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
         
-        $this->_sendEmailNotifications();
-        $this->_sendSlackNotifications();
+        foreach($this->getPlugins() as $sPlugin){
+
+            // get plugin specific receivers
+            $aTo=array_values($this->getAppNotificationdata($sPlugin));
+
+            if(count($aTo)){
+                $aOptions=[
+                    '__plugin__'=>$sPlugin, 
+                    'from'=>(isset($this->_aNotificationOptions['from'][$sPlugin]) && $this->_aNotificationOptions['from'][$sPlugin]) 
+                        ? $this->_aNotificationOptions['from'][$sPlugin] 
+                        : false,
+                    'to'=>$aTo,
+                    'subject'=>$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.subject'),
+                    'message'=>$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.message'),
+                ];
+                // $sSendMethod="send_$sPlugin";
+                // $sSendMethod($aOptions);
+
+                $sClassname=$sPlugin."Notification"; // eg. "emailNotification"
+                $oPlugin=new $sClassname;
+                $oPlugin::send($aOptions);
+            }
+        }
+
         return true;
+    }
+
+    /**
+     * get an array with notification plugins
+     * It is a list of basenames in the plugin directory server/plugins/notification/*.php
+     * Additionally its functions will be included to be used in sendAllNotifications
+     * @return array
+     */
+    function getPlugins(){
+        $aReturn=[];
+        foreach(glob($this->_sPluginDir .'/*.php') as $sPlugin){
+            $aReturn[]=str_replace('.php', '', basename($sPlugin));
+            include_once($sPlugin);
+        }
+        return $aReturn;
     }
 
     /**
@@ -702,101 +737,6 @@ class notificationhandler {
         return $sType 
                 ? (isset($aMergeMeta[$sType]) ? $aMergeMeta[$sType] : array())
                 : $aMergeMeta;
-    }
-    // ---------- email
-    /**
-     * get flat array with contacts email addresses for current app from 
-     * check result meta -> notifications -> email
-     * @return array
-     */
-    public function getAppEmailContacts(){
-        return array_values($this->getAppNotificationdata('email'));
-    }
-    /**
-     * get flat array with slack webhook addresses for current app from 
-     * check result meta -> notifications -> slack
-     * remark: to get key cvalue array use
-     * $this->getAppNotificationdata('slack') 
-     * instead
-     * @return array
-     */
-    public function getAppSlackChannels(){
-        return array_values($this->getAppNotificationdata('slack'));
-    }
-    
-    /**
-     * send email notifications to inform server admins and application contacts
-     * @return boolean
-     */
-    protected function _sendEmailNotifications(){
-        $sFrom=(isset($this->_aNotificationOptions['from']['email']) && $this->_aNotificationOptions['from']['email']) ? $this->_aNotificationOptions['from']['email'] : false;
-        if(!$sFrom){
-            return false; // no from address
-        }
-
-        $aTo=$this->getAppEmailContacts();
-        if(!count($aTo)){
-            return false; // no to adress in server config nor app metadata
-        }
-
-        $sTo=implode(";", $aTo);
-        $sEmailSubject=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.subject');
-        $sEmailBody=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.message');
-
-        mail($sTo,  
-            utf8_decode(html_entity_decode($sEmailSubject)), 
-            utf8_decode(html_entity_decode($sEmailBody)),
-            "From: " . $sFrom . "\r\n" 
-            . "Reply-To: " . $sFrom . "\r\n"
-
-            . "X-Priority: 1 (Highest)\r\n"
-            . "X-MSMail-Priority: High\r\n"
-            . "Importance: High\r\n"
-
-        );
-        return true;
-    }
-    
-    // ---------- slack
-    
-    /**
-     * send slack notifications to inform members of a slack channel
-     * @return boolean
-     */
-    protected function _sendSlackNotifications(){
-        $sFrom=(isset($this->_aNotificationOptions['from']['slack']) && $this->_aNotificationOptions['from']['slack']) ? $this->_aNotificationOptions['from']['slack'] : false;
-        if(!$sFrom){
-            return false; // no from address
-        }
-        $aTargetChannels=$this->getAppNotificationdata('slack');
-
-        if(!count($aTargetChannels)){
-            return false; // no slack channel in server config nor app metadata
-        }
-
-        // --- start sending
-        $data=array(
-            'text'       => $this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.message'),
-            'username'   => '[APPMONITOR]',
-            'icon_emoji' => false
-        );
-
-        $options = array(
-          'http' => array(
-            'header'  => 'Content-type: application/x-www-form-urlencoded\r\n',
-            'method'  => 'POST',
-            'content' => json_encode($data)
-          )
-        );
-        $context  = stream_context_create($options);
-
-        // --- loop over slack targets
-        foreach($aTargetChannels as $sLabel=>$sChannelUrl){
-            // check if channel exists in predefined channels
-            $result = file_get_contents($sChannelUrl, false, $context);
-        }
-
-        return true;
     }
     
 }

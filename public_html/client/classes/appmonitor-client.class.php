@@ -41,7 +41,7 @@ if (!class_exists('appmonitorcheck')){
  * 2019-05-31  0.87   axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * 2020-05-03  0.110  axel.hahn@iml.unibe.ch  update renderHtmloutput<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.110
+ * @version 0.111
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -55,7 +55,7 @@ class appmonitor {
      * value is in seconds
      * @var int
      */
-    protected $_sVersion = 'php-client-v0.110';
+    protected $_sVersion = 'php-client-v0.111';
 
     /**
      * config: default ttl for server before requesting the client check again

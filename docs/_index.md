@@ -1,28 +1,30 @@
-[TOC]
 # APPMONITOR #
 
 Free software and Open Source from University of Bern :: IML - Institute of Medical Education
 
-Source: <https://github.com/iml-it/appmonitor>
+📄 Source: <https://github.com/iml-it/appmonitor>
 
-Docs: <https://os-docs.iml.unibe.ch/appmonitor/>
+📜 License: GNU GPL 3.0
 
-License: GNU GPL 3.0
+📖 Docs: <https://os-docs.iml.unibe.ch/appmonitor/>
 
 - - -
 
 # Description #
 
-The application monitor is an additional tool to the classic system monitoring of a servers and its services. It makes checks from the point of view of the application. With its credentials and permissions started on the application hosts.
+The application monitor is a complementing tool next to the classic system monitoring of servers and its services. It makes checks from the point of view of the application: with its credentials and permissions started on the application hosts.
 
 # Installation / Get started #
 
 Go to page [Server](10_Server/10_Installation.md) to install the server that contains the server and client components.
 
-# Features #
+The server needs
 
 - PHP 7 or 8 on server (clients can be implemented in other languages too)
-- small: less 1 MB + docs; no database required
+- small: less 1 MB + docs
+- low requirements: even no database required
+
+# Features #
 
 Server webgui
 
@@ -32,7 +34,14 @@ Server webgui
 - Filter the view by selecting tags
 - CLI tool to automate settings in the server config (with Puppet, Ansible, ...)
 
-**Screenshots**:
+Client data
+
+- have meta data with global application status and a separate section for all single checks
+- define the user groups to notify if the application status changes
+- define tags that will be visible in the server ui to filter by a group of application types or departments or other logic
+- chaining: with naming a parent you can create a dependency tree of checks
+
+## Screenshots ##
 
 ![Overview with all web apps](images/server_overview_web_apps.png "Overview page showing a total summary and all web apps")
 
