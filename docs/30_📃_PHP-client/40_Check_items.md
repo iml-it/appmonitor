@@ -56,28 +56,9 @@ $oMonitor->addCheck(
 
 The key `check` contains 2 subkeys:
 
+```php
 	"function" => "[Name of a defined check]",
 	"params" => [key->value array; count and keys depend on the function]
-
-
-### Included checks ###
-
-- [ApacheProcesses](60_Plugins/20_Checks/apacheprocesses.md)
-- [Cert](60_Plugins/20_Checks/cert.md)
-- [Diskfree](60_Plugins/20_Checks/diskfree.md)
-- [File](60_Plugins/20_Checks/file.md)
-- [HttpContent](60_Plugins/20_Checks/httpcontent.md)
-- [Loadmeter](60_Plugins/20_Checks/loadmeter.md)
-- [MysqlConnect](60_Plugins/20_Checks/mysqlconnect.md)
-- [PDOConnect](60_Plugins/20_Checks/pdoconnect.md)
-- [PortTcp](60_Plugins/20_Checks/porttcp.md)
-- [Simple](60_Plugins/20_Checks/simple.md)
-- [SqliteConnect](60_Plugins/20_Checks/sqliteconnect.md)
-
-To see all available checks:
-
-```php
-print_r($oMonitor->listChecks());
 ```
 
 ### Groups ###
