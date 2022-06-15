@@ -16,6 +16,11 @@
         "email":[],
         "slack":[]
     },
+    "api":{
+        "header":{
+            "Access-Control-Allow-Origin": false
+        }
+    },
     "view": {
         "overview":{
             "webapps": true,
