@@ -17,8 +17,12 @@
         "slack":[]
     },
     "api":{
+        "sourceips":[
+            "172.22.0.1"
+        ],
         "header":{
-            "Access-Control-Allow-Origin": false
+            "Access-Control-Allow-Origin": false,
+            "Access-Control-Allow-Methods": "GET"
         }
     },
     "view": {
