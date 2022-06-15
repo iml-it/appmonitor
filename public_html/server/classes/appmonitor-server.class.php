@@ -161,7 +161,7 @@ class appmonitorserver {
         if (file_exists($sCfgFile)) {
             $aUserdata = json_decode(file_get_contents($sCfgFile), true);
         }
-        $this->_aCfg = array_merge($aDefaults, $aUserdata);
+        $this->_aCfg = array_replace_recursive($aDefaults, $aUserdata);
 
         if (isset($this->_aCfg['urls']) && is_array($this->_aCfg['urls'])) {
             // add urls
