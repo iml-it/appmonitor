@@ -9,6 +9,10 @@
 require_once('../server/classes/appmonitor-server-api.class.php');
 require_once('../server/classes/tinyrouter.class.php');
 
+// ----------------------------------------------------------------------
+// CONFIG
+// ----------------------------------------------------------------------
+
 $aRoutes=[
 
     [ "/v1",                                       "_list_"         ],
@@ -18,22 +22,22 @@ $aRoutes=[
     [ "/v1/config/@var",                           "get_config_var"   ],
     [ "/v1/apps/@appid:[0-9a-f]*/@what:[a-z]*",    "acess_appdata"       ],
 
-    [ "/v1/apps",                                  "_list_"         ],
+    [ "/v1/apps",                                  "_list_"                                               ],
 
     // single application data
-    [ "/v1/apps/id",                               "apiGetAppIds"     ],
-    [ "/v1/apps/id/@appid:[0-9a-f]*",              "_list_"     ],
+    [ "/v1/apps/id",                               ["method"=>"apiGetFilteredApp", "outmode" => "appid"]  ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*",              "_list_"                                               ],
 
-    [ "/v1/apps/id/@appid:[0-9a-f]*/all",          "apiGetAppAllData" ],
-    [ "/v1/apps/id/@appid:[0-9a-f]*/checks",       "apiGetAppChecks"  ],
-    [ "/v1/apps/id/@appid:[0-9a-f]*/meta",         "apiGetAppMeta"    ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/all",          ["method"=>"apiGetFilteredApp", "outmode" => "all"]    ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/checks",       ["method"=>"apiGetFilteredApp", "outmode" => "checks"] ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/meta",         ["method"=>"apiGetFilteredApp", "outmode" => "meta"]   ],
 
     // 
-    [ "/v1/apps/tags",                              "apiGetTags"    ],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*",        "apiGetAppMeta"    ],
+    [ "/v1/apps/tags",                              ["method"=>"apiGetTags"]    ],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*",        ["method"=>"apiGetFilteredApp", "outmode" => "all"]   ],
 
     // tags
-    [ "/v1/tags",                                   "apiGetTags"       ],
+    [ "/v1/tags",                                   ["method"=>"apiGetTags"]                              ],
     
 
 ];
@@ -78,15 +82,14 @@ if(!$aFoundRoute){
 // echo '<pre>'.print_r($aFoundRoute, 1).'</pre>';
 
 $sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
-$sAction=$oRouter->getCallback();
+$callback=$oRouter->getCallback();
 
-if($sAction=='_list_'){
+if($callback=='_list_'){
     writeJson($oRouter->getSubitems());
     die("LIST");
 }
 
-$sAction=$oRouter->getCallback();
-
+$sAction=$callback['method'];
 
 // ----------------------------------------------------------------------
 // init appmonitor
@@ -138,25 +141,37 @@ if (isset($aCfg['header']) && is_array($aCfg['header'])){
 // get return data
 
 $aData=[];
+
+// print_r($aFilter);
+
+
 switch ($sItem){
 
     // ---------- SINGLE APP DATA
     case 'apps':
 
+        // generate paraters
         $sAppId=$oRouter->getVar('appid');
-        // $sWhat=$oRouter->getVar('what');
-        if (!$sAppId){
-            $aData=$oMonitor->$sAction();
-        } else {
-            $aData=$oMonitor->$sAction($sAppId);
-        }
+        $aTags=$oRouter->getVar('tags') ? explode(',', $oRouter->getVar('tags')) : false;
+        
+        $aFilter=[
+            'appid'=>$sAppId,
+            'tags'=>$aTags,
+        ];
+
+        $sOutmode=isset($callback['outmode']) ? $callback['outmode'] : false;
+
+        $aData=$oMonitor->$sAction($aFilter, $sOutmode);
         break;
+        ;;
     
     // ---------- TAGS
     case 'tags':
 
         $aData=$oMonitor->$sAction();
         break;
+        ;;
+
     default:
         header('HTTP/1.0 400 Bad request');
         die('<h1>400 Bad request</h1>ERROR: unknown item ['.$sItem.'] ... or it is not implemented yet.');

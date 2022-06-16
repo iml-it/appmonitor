@@ -73,63 +73,106 @@ class appmonitorserver_api extends appmonitorserver {
     }
 
     // ----------------------------------------------------------------------
-    // /v1/apps
+    // /v1/apps/*
     // ----------------------------------------------------------------------
 
     /**
-     * get a flat array with all application ids and website + url
-     * as subkeys
-     * @return array
+     * get an array of all applications that match a filter
+     * @param  array  $aFilter   filter definitions using AND condition over all filters
+     *                           appid   - string of appid
+     *                           tags    - array of tags that must match (AND condition)
+     *                           website - substring of website
+     * @param  string  $outmode  kind of result data
+     * @return type
      */
-    public function apiApps() {
-        return ["id","tags"];
-    }
-    
-
-    // ----------------------------------------------------------------------
-    // /v1/apps/id
-    // ----------------------------------------------------------------------
-
-    /**
-     * get a flat array with all application ids and website + url
-     * as subkeys
-     * @return array
-     */
-    public function apiGetAppIds() {
-        $this->_getClientData(true);
+    public function apiGetFilteredApp($aFilter=[],$outmode='all') {
         $aReturn=[];
-        foreach($this->_data as $sKey=>$aData){
-            $aReturn[$sKey]=[
-                'website'=>$aData['result']['website'],
-                'url'=>$aData['result']['url'],
-            ];
+
+        // sort filter items or delete empty key
+        if (isset($aFilter['tags']) && is_array($aFilter['tags']) && count($aFilter['tags'])){
+            sort($aFilter['tags']);
+        } else {
+            unset($aFilter['tags']);
         }
+
+        // remove empty items
+        foreach(['appid', 'website'] as $sFilterKey){
+            if (isset($aFilter[$sFilterKey]) && !$aFilter[$sFilterKey]){
+                unset($aFilter[$sFilterKey]);
+            }
+        }
+
+        // --- reduce apps by app internal data
+        foreach($this->_data as $sKey=>$aData){
+            $iAdd=0;
+            $iRemove=0;
+
+            // on empty filter: add
+            if (!count($aFilter)) {
+                $iAdd++;
+            }
+
+            if (isset($aFilter['appid'])) {
+                if ($sKey==$aFilter['appid']){
+                    $iAdd++;
+                } else {
+                    $iRemove++;
+                }
+            }
+
+            // tags
+            if (isset($aFilter['tags'])){
+                if(isset($aData['meta']['tags']) ) {
+                    foreach ($aFilter['tags'] as $sMustMatch){
+                        if(in_array($sMustMatch, $aData['meta']['tags'])){
+                            $iAdd++;
+                        } else {
+                            $iRemove++;
+                        }
+
+                    }
+                } else {
+                    $iRemove++;
+                }
+            }
+
+            if(isset($aFilter['website'])){
+                if(strstr($aData['meta']['website'], $aFilter['website'])){
+                    $iAdd++;
+                } else {
+                    $iRemove++;
+                }
+            }
+
+            if ($iAdd>0 && !$iRemove){
+
+                // add something to the result set based on outnode
+                switch($outmode){
+
+                    // short view of matching apps
+                    case 'appid':
+                        $aReturn[$sKey]=[
+                            'website'=>$aData['result']['website'],
+                            'url'=>$aData['result']['url'],
+                        ];
+                        break;
+                        ;;
+                    // return an existing key only
+                    case 'checks':
+                    case 'meta':
+                        $aReturn[$sKey]=$aData[$outmode];
+                        break;
+                        ;;
+                    
+                    // all
+                    default:
+                        $aReturn[$sKey]=$aData;
+                    ;;
+                }
+            }
+        }
+
         return $aReturn;
-    }
-    
-    /**
-     * get an array of all client data; optional filtere by given app id 
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return array
-     */
-    public function apiGetAppAllData($sFilterAppId=false) {
-        return $this->_apiGetAppData(false, $sFilterAppId);
-    }
-    /**
-     * get an array of all client checks; optional filtered by given app id 
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return type
-     */
-    public function apiGetAppChecks($sFilterAppId=false) {
-        return $this->_apiGetAppData('checks',$sFilterAppId);
-    }
-    /**
-     * get an array of all client metadata; optional filtered by given app id 
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return type
-     */
-    public function apiGetAppMeta($sFilterAppId=false) {
-        return $this->_apiGetAppData('meta',$sFilterAppId);
     }
 
     // ----------------------------------------------------------------------
@@ -144,6 +187,9 @@ class appmonitorserver_api extends appmonitorserver {
     public function apiGetTags() {
         return $this->_getClientTags();
     }
+    // ----------------------------------------------------------------------
+    // TODO CHECK
+    // ----------------------------------------------------------------------
     /**
      * get an array of all client metadata; optional filtered by given app id 
      * @param string  $sFilterAppId   filter by app id; default false (all)

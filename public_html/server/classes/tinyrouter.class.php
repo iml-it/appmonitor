@@ -138,7 +138,7 @@ class tinyrouter{
     }
     /**
      * return the variables as keys in route parts with starting @ character
-     * @return array
+     * @return string
      */
     public function getVar($sVarname){
         return isset($this->aMatch['vars'][$sVarname]) ? $this->aMatch['vars'][$sVarname] : false; 
