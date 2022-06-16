@@ -152,7 +152,7 @@ class tinyrouter{
         $aReturn=[];
         $iCurrent=count($this->getUrlParts());
         foreach($this->aRoutes as $aRoutecfg){
-            $sRoute=$this->aMatch['route'][0];
+            $sRoute=$aRoutecfg[0];
             if(count($this->getUrlParts($sRoute))-1 == $iCurrent && strstr($sRoute, $this->aMatch['route']) ){
                 $aReturn[]=basename($sRoute);
             }
