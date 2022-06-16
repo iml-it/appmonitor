@@ -143,4 +143,20 @@ class tinyrouter{
     public function getVar($sVarname){
         return isset($this->aMatch['vars'][$sVarname]) ? $this->aMatch['vars'][$sVarname] : false; 
     }
+
+    /**
+     * get an array with next level route entries releative to the current route
+     * @return array
+     */
+    public function getSubitems(){
+        $aReturn=[];
+        $iCurrent=count($this->getUrlParts());
+        foreach($this->aRoutes as $aRoutecfg){
+            $sRoute=$this->aMatch['route'][0];
+            if(count($this->getUrlParts($sRoute))-1 == $iCurrent && strstr($sRoute, $this->aMatch['route']) ){
+                $aReturn[]=basename($sRoute);
+            }
+        }
+        return $aReturn;
+    }
 }
