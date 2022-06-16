@@ -3,33 +3,40 @@
  * 
  * APPMONITOR :: API
  * 
- * API (POC .. do not use it yet):
- * ?item=apps
- *   ... shows ids
- * 
- * ?item=apps&appid=[APPID]
- *   ... shows metadata of app 
- * 
- * ?item=apps&appid=[APPID]&what=(all|meta|checks)
- *   ... show checks or all data of an app
- * 
  * ======================================================================
  */
 
-require_once('../classes/appmonitor-server-gui.class.php');
-require_once('../classes/tinyrouter.class.php');
+require_once('../server/classes/appmonitor-server-api.class.php');
+require_once('../server/classes/tinyrouter.class.php');
 
 $aRoutes=[
+
+    [ "/v1",                                       "_list_"         ],
+
     // dummy entries:
-    [ "/config",                             "get_config"     ],
-    [ "/config/@var",                        "get_config_var" ],
+    [ "/v1/config",                                "get_config"       ],
+    [ "/v1/config/@var",                           "get_config_var"   ],
+    [ "/v1/apps/@appid:[0-9a-f]*/@what:[a-z]*",    "acess_appdata"       ],
 
-    // wnated entries
-    [ "/apps",                               "apiGetAppIds"       ],
-    [ "/apps/@appid:[0-9a-f]*",              "acess_appdata"  ],
-    [ "/apps/@appid:[0-9a-f]*/@what:[a-z]*", "acess_appdata"  ],
+    [ "/v1/apps",                                  "_list_"         ],
+
+    // single application data
+    [ "/v1/apps/id",                               "apiGetAppIds"     ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*",              "_list_"     ],
+
+    [ "/v1/apps/id/@appid:[0-9a-f]*/all",          "apiGetAppAllData" ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/checks",       "apiGetAppChecks"  ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/meta",         "apiGetAppMeta"    ],
+
+    // 
+    [ "/v1/apps/tags",                              "apiGetTags"    ],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*",        "apiGetAppMeta"    ],
+
+    // tags
+    [ "/v1/tags",                                   "apiGetTags"       ],
+    
+
 ];
-
 
 // ----------------------------------------------------------------------
 // FUNCTIONS
@@ -65,21 +72,26 @@ $oRouter=new tinyrouter($aRoutes, $sApiUrl);
 $aFoundRoute=$oRouter->getRoute();
 if(!$aFoundRoute){
     header('HTTP/1.0 400 Bad request');
-    die('<h1>400 Bad request</h1>unknown item ['.$sItem.'] ... or it is not implemented yet.');
+    die('<h1>400 Bad request</h1>Your request was not understood.');
 }
 
 // echo '<pre>'.print_r($aFoundRoute, 1).'</pre>';
 
-$sItem=$oRouter->getUrlParts()[0];
+$sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
 $sAction=$oRouter->getCallback();
 
-echo "$sItem ... $sAction";
+if($sAction=='_list_'){
+    writeJson($oRouter->getSubitems());
+    die("LIST");
+}
+
+$sAction=$oRouter->getCallback();
 
 
 // ----------------------------------------------------------------------
 // init appmonitor
 
-$oMonitor = new appmonitorserver_gui();
+$oMonitor = new appmonitorserver_api();
 $oMonitor->loadClientData();
 
 $_aTmpCfg=$oMonitor->getConfigVars();
@@ -125,42 +137,28 @@ if (isset($aCfg['header']) && is_array($aCfg['header'])){
 // ----------------------------------------------------------------------
 // get return data
 
+$aData=[];
 switch ($sItem){
 
-    // ---------- TODO
+    // ---------- SINGLE APP DATA
     case 'apps':
 
-        // ---------- get data
-        $aData=[];
         $sAppId=$oRouter->getVar('appid');
-        $sWhat=$oRouter->getVar('what');
-        
+        // $sWhat=$oRouter->getVar('what');
         if (!$sAppId){
-            $aData=$oMonitor->apiGetAppIds();
+            $aData=$oMonitor->$sAction();
         } else {
-            switch($sSubitem){
-                case 'checks': 
-                    $aData=$oMonitor->apiGetAppChecks($sAppId);
-                    break;
-                case 'all': 
-                    $aData=$oMonitor->apiGetAppAllData($sAppId);
-                    break;
-                case 'meta': 
-                default: 
-                $aData=$oMonitor->apiGetAppMeta($sAppId);
-                    ;;
-            }
+            $aData=$oMonitor->$sAction($sAppId);
         }
-        writeJson($aData);
         break;
-    /*
-    case 'data':
-        $sHtml.='<pre>'.print_r($oMonitor->getMonitoringData(), 1).'</pre>';
-        break;
-    */
     
+    // ---------- TAGS
+    case 'tags':
+
+        $aData=$oMonitor->$sAction();
+        break;
     default:
         header('HTTP/1.0 400 Bad request');
-        die('<h1>400 Bad request</h1>unknown item ['.$sItem.'] ... or it is not implemented yet.');
+        die('<h1>400 Bad request</h1>ERROR: unknown item ['.$sItem.'] ... or it is not implemented yet.');
 }
-
+writeJson($aData);
