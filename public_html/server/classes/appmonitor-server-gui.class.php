@@ -1941,17 +1941,6 @@ class appmonitorserver_gui extends appmonitorserver {
         return $this->_tr('Resulttype-' . $i);
     }
 
-    /**
-     * load monitoring data ... if not done yet
-     * @return boolean
-     */
-    public function loadClientData(){
-        if (!count($this->_data)) {
-            $this->_getClientData();
-        }
-        return true;
-    }
-
 
     /**
      * helper: get a name for the div of app data
@@ -1964,24 +1953,6 @@ class appmonitorserver_gui extends appmonitorserver {
         return '#divweb-'.$sAppid;
     }
     
-    /**
-     * get a flat array of tags sent from all clients
-     * @return array
-     */
-    protected function _getClientTags(){
-        $aTags=array();
-        foreach ($this->_data as $aEntries) {
-            if (isset($aEntries['meta']['tags'])){
-                foreach($aEntries['meta']['tags'] as $sTag){
-                    $aTags[]=$sTag;
-                }
-            }
-        }
-        sort($aTags);
-        $aTags = array_unique($aTags);
-        return $aTags;
-    }
-
     /**
      * get name for css class of a tag
      * 

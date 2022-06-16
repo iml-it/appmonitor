@@ -112,7 +112,7 @@ foreach(array('server/config', 'server/tmp') as $sMyDir){
 // ----------------------------------------------------------------------
 require_once($sApproot.'/server/classes/appmonitor-server.class.php');
 $oServer=new appmonitorserver();
-$iCount=count($oServer->apiGetAppIds());
+$iCount=count($oServer->getAppIds());
 $oMonitor->addCheck(
     array(
         "name" => "appcounter",
