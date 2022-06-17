@@ -30,9 +30,9 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.111
+ * @version 0.112
  * @author Axel Hahn
- * @link TODO
+ * @link https://github.com/iml-it/appmonitor
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.111";
+    var $_sVersion = "0.112";
 
     /**
      * html code for icons in the web gui

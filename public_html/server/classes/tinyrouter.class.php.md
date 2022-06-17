@@ -1,6 +1,6 @@
 # TinyRouter
 
-Axels first php class with a router.
+Axels first php class of a router.
 
 ## Installation
 
@@ -23,7 +23,7 @@ $aRoutes=[
     [ "/apps/@appid:[0-9a-f]*/@what:[a-z]*", "acess_appdata"  ],
 //    ^                                       ^
 //    |                                       |
-//    route                                   callback
+//    route                                   callback (string|array|... any type you want to get back)
 //      string     = folder
 //      @var       = set a variable
 //      @var:regex = set variable if it matches the given regex

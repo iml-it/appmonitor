@@ -32,14 +32,9 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * TODO:
- * - server job that caches all entries
- * - GUI uses cached data only
- * - NAGIOS output
- * --------------------------------------------------------------------------------<br>
- * @version 0.98
+ * @version 0.112
  * @author Axel Hahn
- * @link TODO
+ * @link https://github.com/iml-it/appmonitor
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor

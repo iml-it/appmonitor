@@ -30,13 +30,56 @@ require_once 'appmonitor-server.class.php';
  * <br>
  * --------------------------------------------------------------------------------<br>
  * @author Axel Hahn
- * @link TODO
+ * @link https://github.com/iml-it/appmonitor
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
  */
 class appmonitorserver_api extends appmonitorserver {
 
+    // ----------------------------------------------------------------------
+    // pre actions
+    // ----------------------------------------------------------------------
+
+    /**
+     * check if the source ip is allowed to access the api based on config api -> sourceips
+     * if config is empty: all ips are allowed.
+     * It responds true if acess is granted; false if denied
+     * 
+     * @return boolean
+     */
+    public function apiCheckIp(){
+        $_aTmpCfg=$this->getConfigVars();
+        $aCfg=$_aTmpCfg['api'];
+
+        $bAllowRequest=true;
+        if(isset($aCfg['sourceips']) && is_array($aCfg['sourceips'])){
+            $bAllowRequest=false;
+            $sMyIp=$_SERVER['REMOTE_ADDR'];
+            foreach($aCfg['sourceips'] as $sRegex) {
+                if (preg_match("/$sRegex/", $sMyIp)){
+                    $bAllowRequest=true;
+                    break;
+                }
+            }
+        }
+        return $bAllowRequest;
+    }
+
+    /**
+     * send additional http response headers
+     * @return boolean
+     */
+    public function apiSendHeaders(){
+        $_aTmpCfg=$this->getConfigVars();
+        $aCfg=$_aTmpCfg['api'];
+        if (isset($aCfg['header']) && is_array($aCfg['header'])){
+            foreach($aCfg['header'] as $sHeader=>$sValue){
+                header($sHeader . ': '.$sValue);
+            }
+        }
+        return true;
+    }
 
     // ----------------------------------------------------------------------
     // /v1/apps
@@ -186,17 +229,6 @@ class appmonitorserver_api extends appmonitorserver {
      */
     public function apiGetTags() {
         return ['tags'=>$this->_getClientTags()];
-    }
-    // ----------------------------------------------------------------------
-    // TODO CHECK
-    // ----------------------------------------------------------------------
-    /**
-     * get an array of all client metadata; optional filtered by given app id 
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return type
-     */
-    public function __UNUSED__apiGetTroubleItems($sFilterAppId=false) {
-        return $this->_apiGetAppData('meta',$sFilterAppId);
     }
 
 }
