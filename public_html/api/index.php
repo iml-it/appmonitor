@@ -3,6 +3,9 @@
  * 
  * APPMONITOR :: API
  * 
+ * ----------------------------------------------------------------------
+ * ah <axel.hahm@iml.unibe.ch>
+ * 2022-06-17  v1.0  ah  initial version
  * ======================================================================
  */
 
@@ -16,11 +19,6 @@ require_once('../server/classes/tinyrouter.class.php');
 $aRoutes=[
 
     [ "/v1",                                       "_list_"         ],
-
-    // dummy entries:
-    [ "/v1/config",                                "get_config"       ],
-    [ "/v1/config/@var",                           "get_config_var"   ],
-    [ "/v1/apps/@appid:[0-9a-f]*/@what:[a-z]*",    "acess_appdata"       ],
 
     [ "/v1/apps",                                  "_list_"                                                ],
 
@@ -57,12 +55,13 @@ $aRoutes=[
  */
 function writeJson($aData){
     $_aHeader=[
-        '400'=>['header'=>'400 Bad request'],
-        '404'=>['header'=>'404 Not Found']
+        '400'=>['header'=>'Bad request'],
+        '401'=>['header'=>'Not autorized'],
+        '404'=>['header'=>'Not Found']
     ];
     header('Content-Type: application/json');
     if(isset($aData['http'])){
-        header('HTTP/1.0 '. $_aHeader[$aData['http']]['header']);
+        header('HTTP/1.0 '. $aData['http'].' '.$_aHeader[$aData['http']]['header']);
     }
     echo json_encode($aData); 
 }
@@ -72,6 +71,13 @@ function writeJson($aData){
 // MAIN
 // ----------------------------------------------------------------------
 
+if ($_SERVER['REQUEST_METHOD']!=='GET'){
+    writeJson([
+        'http'=>400, 
+        'error'=>'ERROR: Only GET is supported.',
+    ]);
+    die();
+}
 
 $sApiUrl=isset($_GET['request']) && $_GET['request'] ? $_GET['request'] : false;
 $oRouter=new tinyrouter($aRoutes, $sApiUrl);
@@ -84,8 +90,6 @@ if(!$aFoundRoute){
     ]);
     die();
 }
-
-// echo '<pre>'.print_r($aFoundRoute, 1).'</pre>';
 
 $sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
 $callback=$oRouter->getCallback();
@@ -101,62 +105,31 @@ $sAction=isset($callback['method']) ? $callback['method'] : false;
 // init appmonitor
 
 $oMonitor = new appmonitorserver_api();
-$oMonitor->loadClientData();
-
-$_aTmpCfg=$oMonitor->getConfigVars();
-$aCfg=$_aTmpCfg['api'];
-/*
-echo '<pre>'; 
-print_r($_SERVER);
-print_r($aCfg);die();
-*/
 
 
-// ---------- check access
+// ---------- pre check for access
 
-/*
-
-$bAllowRequest=true;
-if(isset($aCfg['sourceips']) && is_array($aCfg['sourceips'])){
-    $bAllowRequest=false;
-    $sMyIp=$_SERVER['REMOTE_ADDR'];
-    foreach($aCfg['sourceips'] as $sRegex) {
-        if (preg_match($sRegex, $sMyIp)){
-            $bAllowRequest=true;
-            break;
-        }
-    }
+if(!$oMonitor->apiCheckIp()){
+    writeJson([
+        'http'=>401, 
+        'error'=>'ERROR: Not authorized: your ip is not allowed to access the api.',
+    ]);
+    die();
 }
-if(!$bAllowRequest){
-    header("HTTP/1.1 401 Unauthorized");
-    die('<h1>401 Unauthorized</h1>');
-}
-$bFoundOrigin=array_search($_SERVER['REMOTE_ADDR'], $aCfg['sourceips']);
-// header('Access-Control-Allow-Origin: '.$bFoundOrigin);
-
-if (isset($aCfg['header']) && is_array($aCfg['header'])){
-    foreach($aCfg['header'] as $sHeader=>$sValue){
-        header($sHeader . ': '.$sValue);
-    }
-}
-
-*/
+$oMonitor->apiSendHeaders();
 
 
 // ----------------------------------------------------------------------
 // get return data
 
 $aData=[];
-
-// print_r($aFilter);
-
-
+$oMonitor->loadClientData();
 switch ($sItem){
 
     // ---------- SINGLE APP DATA
     case 'apps':
 
-        // generate paraters
+        // generate parameters
         $sAppId=$oRouter->getVar('appid');
         $aTags=$oRouter->getVar('tags') ? explode(',', $oRouter->getVar('tags')) : false;
         
@@ -168,6 +141,10 @@ switch ($sItem){
         $sOutmode=isset($callback['outmode']) ? $callback['outmode'] : false;
 
         $aData=$oMonitor->$sAction($aFilter, $sOutmode);
+        if(count($aData)==0){
+            $aData=['http'=>'404', 'error'=> 'ERROR: No app was found that matches the filter.'];
+        }
+        
         break;
         ;;
     
