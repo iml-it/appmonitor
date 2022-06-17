@@ -149,12 +149,13 @@ class tinyrouter{
      * @return array
      */
     public function getSubitems(){
-        $aReturn=[];
+        $sKey='allowed_subkeys';
+        $aReturn=[$sKey=>[]];
         $iCurrent=count($this->getUrlParts());
         foreach($this->aRoutes as $aRoutecfg){
             $sRoute=$aRoutecfg[0];
             if(count($this->getUrlParts($sRoute))-1 == $iCurrent && strstr($sRoute, $this->aMatch['route']) ){
-                $aReturn[]=basename($sRoute);
+                $aReturn[$sKey][]=basename($sRoute);
             }
         }
         return $aReturn;

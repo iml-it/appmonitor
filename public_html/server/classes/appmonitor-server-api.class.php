@@ -185,7 +185,7 @@ class appmonitorserver_api extends appmonitorserver {
      * @return array
      */
     public function apiGetTags() {
-        return $this->_getClientTags();
+        return ['tags'=>$this->_getClientTags()];
     }
     // ----------------------------------------------------------------------
     // TODO CHECK
