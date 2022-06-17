@@ -16,6 +16,15 @@
         "email":[],
         "slack":[]
     },
+    "api":{
+        "sourceips":[
+            "127\\.0\\.0\\.1"
+        ],
+        "header":{
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET"
+        }
+    },
     "view": {
         "overview":{
             "webapps": true,

@@ -32,14 +32,9 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * TODO:
- * - server job that caches all entries
- * - GUI uses cached data only
- * - NAGIOS output
- * --------------------------------------------------------------------------------<br>
- * @version 0.98
+ * @version 0.112
  * @author Axel Hahn
- * @link TODO
+ * @link https://github.com/iml-it/appmonitor
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
@@ -134,6 +129,16 @@ class appmonitorserver {
         return $this->oLang = new lang($this->_aCfg['lang']);
     }
     
+    /**
+     * get a flat array with all application ids and website + url
+     * as subkeys
+     * @return array
+     */
+    public function getAppIds() {
+        $this->_getClientData(true);
+        return array_keys($this->_data);
+    }
+
     public function getConfigVars() {
         return $this->_aCfg;
     }
@@ -161,7 +166,7 @@ class appmonitorserver {
         if (file_exists($sCfgFile)) {
             $aUserdata = json_decode(file_get_contents($sCfgFile), true);
         }
-        $this->_aCfg = array_merge($aDefaults, $aUserdata);
+        $this->_aCfg = array_replace_recursive($aDefaults, $aUserdata);
 
         if (isset($this->_aCfg['urls']) && is_array($this->_aCfg['urls'])) {
             // add urls
@@ -179,6 +184,17 @@ class appmonitorserver {
             'notifications' => $this->_aCfg['notifications']
         ));
     }
+    /**
+     * load monitoring data ... if not done yet; used in gui and api
+     * @return boolean
+     */
+    public function loadClientData(){
+        if (!count($this->_data)) {
+            $this->_getClientData();
+        }
+        return true;
+    }
+    
 
     /**
      * save the current config
@@ -295,6 +311,24 @@ class appmonitorserver {
             default:
                 break;
         }
+    }
+
+    /**
+     * get a flat array of tags sent from all clients
+     * @return array
+     */
+    protected function _getClientTags(){
+        $aTags=array();
+        foreach ($this->_data as $aEntries) {
+            if (isset($aEntries['meta']['tags'])){
+                foreach($aEntries['meta']['tags'] as $sTag){
+                    $aTags[]=$sTag;
+                }
+            }
+        }
+        sort($aTags);
+        $aTags = array_unique($aTags);
+        return $aTags;
     }
 
     /**
@@ -725,77 +759,6 @@ class appmonitorserver {
         );
     }
 
-    /**
-     * get array with application data 
-     * 
-     * @param string  $sKey           filter key i.e. "meta"; default false (all)
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return array
-     */
-    protected function _apiGetAppData($sKey=false, $sFilterAppId=false) {
-        $this->_getClientData(true); // get data; true = use cache
-        $aReturn=array();
-        // echo 'ALL client data<pre>'.print_r($this->_data, 1).'</pre>';
-        // echo '<br>$sKey = '.$sKey.'<br>';
-        if ($sFilterAppId && !isset($this->_data[$sFilterAppId])){
-            $aReturn=['error'=>'App id was not found', 'http' => '404'];
-        } else {
-            foreach($this->_data as $sAppId=>$aData){
-                if($sAppId===$sFilterAppId){
-                    $aReturn=$sKey 
-                        ? $aData[$sKey] 
-                        : $aData;
-                } else {
-                    $aReturn[$sAppId]=$sKey 
-                        ? $aData[$sKey] 
-                        : $aData;
-                }
-            }
-        }
-        return $aReturn;
-    }
-
-    /**
-     * get a flat array with all application ids
-     * @return array
-     */
-    public function apiGetAppIds() {
-        $this->_getClientData(true);
-        return array_keys($this->_data);
-    }
-    
-    /**
-     * get an array of all client data; optional filtere by given app id 
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return array
-     */
-    public function apiGetAppAllData($sFilterAppId=false) {
-        return $this->_apiGetAppData(false, $sFilterAppId);
-    }
-    /**
-     * get an array of all client checks; optional filtered by given app id 
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return type
-     */
-    public function apiGetAppChecks($sFilterAppId=false) {
-        return $this->_apiGetAppData('checks',$sFilterAppId);
-    }
-    /**
-     * get an array of all client metadata; optional filtered by given app id 
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return type
-     */
-    public function apiGetAppMeta($sFilterAppId=false) {
-        return $this->_apiGetAppData('meta',$sFilterAppId);
-    }
-    /**
-     * get an array of all client metadata; optional filtered by given app id 
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return type
-     */
-    public function apiGetTroubleItems($sFilterAppId=false) {
-        return $this->_apiGetAppData('meta',$sFilterAppId);
-    }
     /**
      * set flag for logging to standard output
      */

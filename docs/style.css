@@ -1,7 +1,7 @@
 /*
 
     patch css elements of daux.io blue theme
-    version 2022-04-22
+    version 2022-05-13
 
 */
 
@@ -28,8 +28,8 @@
 
     --h1: rgba(40,60,80,0.8);
     --h1-bottom: 1px solid rgba(40,60,80,0.1);
-    --h2: rgba(40,60,80,0.5);
-    --h3: rgba(40,60,80,0.3);
+    --h2: #468;
+    --h3: #579;
 
 }
 
