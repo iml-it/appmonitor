@@ -17,8 +17,30 @@ To use pretty urls like `https://www.example.com/[API-URL]` you need a rewrite:
     ...
     RewriteEngine on
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule (/api/.*)$ index.php?request=$1
+    RewriteRule /api(/.*)$ index.php?request=$1
 </location>
+```
+
+## How does it work? ##
+
+```mermaid
+graph TD;
+  Start((Start))
+  --> chkMethod{Methode = GET?}
+  --> |yes|chkRoute{Find matching route}
+  --> |yes|chkList{Is a listing?}
+  --> |no|chkIp{IP allowed?}
+  --> |yes|sendHeader
+  --> getData
+  --> chkdata{Found data?}
+  --> |yes|sendJson
+  --> End((End))
+
+  chkMethod-->|no|onlyGet[ERROR 400: GET only]-->End
+  chkRoute-->|no|onlyNoRoute[ERROR 400: no Route]-->End
+  chkList-->|yes|showSubitems-->End
+  chkIp-->|no|denyIp[ERROR 401: access denied]-->End
+  chkdata-->|no|noData[ERROR 404: no data]-->End
 ```
 
 ## Usage ##
