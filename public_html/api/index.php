@@ -22,22 +22,25 @@ $aRoutes=[
     [ "/v1/config/@var",                           "get_config_var"   ],
     [ "/v1/apps/@appid:[0-9a-f]*/@what:[a-z]*",    "acess_appdata"       ],
 
-    [ "/v1/apps",                                  "_list_"                                               ],
+    [ "/v1/apps",                                  "_list_"                                                ],
 
     // single application data
-    [ "/v1/apps/id",                               ["method"=>"apiGetFilteredApp", "outmode" => "appid"]  ],
-    [ "/v1/apps/id/@appid:[0-9a-f]*",              "_list_"                                               ],
+    [ "/v1/apps/id",                               ["method"=>"apiGetFilteredApp", "outmode" => "appid"]   ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*",              "_list_"                                                ],
 
-    [ "/v1/apps/id/@appid:[0-9a-f]*/all",          ["method"=>"apiGetFilteredApp", "outmode" => "all"]    ],
-    [ "/v1/apps/id/@appid:[0-9a-f]*/checks",       ["method"=>"apiGetFilteredApp", "outmode" => "checks"] ],
-    [ "/v1/apps/id/@appid:[0-9a-f]*/meta",         ["method"=>"apiGetFilteredApp", "outmode" => "meta"]   ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/all",          ["method"=>"apiGetFilteredApp", "outmode" => "all"]     ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/checks",       ["method"=>"apiGetFilteredApp", "outmode" => "checks"]  ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/meta",         ["method"=>"apiGetFilteredApp", "outmode" => "meta"]    ],
 
-    // 
-    [ "/v1/apps/tags",                              ["method"=>"apiGetTags"]    ],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*",        ["method"=>"apiGetFilteredApp", "outmode" => "all"]   ],
+    // multipe applications having a list of tags
+    [ "/v1/apps/tags",                              ["method"=>"apiGetTags"]                               ],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*",        "_list_"                                               ],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/all",    ["method"=>"apiGetFilteredApp", "outmode" => "all"]    ],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/checks", ["method"=>"apiGetFilteredApp", "outmode" => "checks"] ],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/meta",   ["method"=>"apiGetFilteredApp", "outmode" => "meta"]   ],
 
     // tags
-    [ "/v1/tags",                                   ["method"=>"apiGetTags"]                              ],
+    [ "/v1/tags",                                   ["method"=>"apiGetTags"]                               ],
     
 
 ];
@@ -54,14 +57,14 @@ $aRoutes=[
  */
 function writeJson($aData){
     $_aHeader=[
-        '404'=>'HTTP/1.0 404 Not Found'
+        '400'=>['header'=>'400 Bad request'],
+        '404'=>['header'=>'404 Not Found']
     ];
     header('Content-Type: application/json');
     if(isset($aData['http'])){
-        header($_aHeader[$aData['http']]);
+        header('HTTP/1.0 '. $_aHeader[$aData['http']]['header']);
     }
     echo json_encode($aData); 
-    exit (0);
 }
 
 
@@ -75,8 +78,11 @@ $oRouter=new tinyrouter($aRoutes, $sApiUrl);
 
 $aFoundRoute=$oRouter->getRoute();
 if(!$aFoundRoute){
-    header('HTTP/1.0 400 Bad request');
-    die('<h1>400 Bad request</h1>Your request was not understood.');
+    writeJson([
+        'http'=>400, 
+        'error'=>'ERROR: Your request was not understood. Maybe you try to access a non existing route or a variable / id contains in your url invalid chars.',
+    ]);
+    die();
 }
 
 // echo '<pre>'.print_r($aFoundRoute, 1).'</pre>';
@@ -86,10 +92,10 @@ $callback=$oRouter->getCallback();
 
 if($callback=='_list_'){
     writeJson($oRouter->getSubitems());
-    die("LIST");
+    die();
 }
 
-$sAction=$callback['method'];
+$sAction=isset($callback['method']) ? $callback['method'] : false;
 
 // ----------------------------------------------------------------------
 // init appmonitor
@@ -173,7 +179,9 @@ switch ($sItem){
         ;;
 
     default:
-        header('HTTP/1.0 400 Bad request');
-        die('<h1>400 Bad request</h1>ERROR: unknown item ['.$sItem.'] ... or it is not implemented yet.');
+        $aData=[
+            'http'=>400, 
+            'error'=>'ERROR: unknown item ['.$sItem.'] ... or it is not implemented yet.'
+        ];
 }
 writeJson($aData);
