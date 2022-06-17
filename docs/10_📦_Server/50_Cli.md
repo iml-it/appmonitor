@@ -5,7 +5,7 @@ The cli.php returns exitcode 0 if the action was successful; and <> 0 if an erro
 
 You can see the supported parameters: with *php server/cli.php* (without parameter)
 
-```
+```txt
 ; _________________________________________________________________________________________
 ;
 ;
@@ -60,7 +60,7 @@ To see a single variable (or any subkey of the hash):
 
 *php server/cli.php* **--show** *urls*
 
-```
+```txt
 (...)
 Array
 (
@@ -75,7 +75,8 @@ Array
 To see only then subitem of a key use the "<span class="mark">.</span>" char as divider and chain all subkeys:
 
 *$ php server/cli.php* **--show** *notifications<span class="mark">.</span>sleeptimes*
-```
+
+```txt
 (...)
 Array
 (
@@ -85,12 +86,11 @@ Array
 )
 ``` 
 
-
 *$ php server/cli.php* **--show** *notifications<span class="mark">.</span>sleeptimes<span class="mark">.</span>2*
-```
-/[0][0-4]:/
-``` 
 
+```txt
+/[0][0-4]:/
+```
 
 ### Chaining of commands ###
 
@@ -127,7 +127,8 @@ To add an array value i.e. in the notification section name the keys. If the las
 *php ./cli.php* **--set** notifications.sleeptimes "/(Wed)/" --show notifications.sleeptimes
 
 ... shows the result:
-```
+
+```txt
 (...)
 Array
 (
@@ -144,7 +145,7 @@ Example to change Wednesday to Thursday:
 
 *php ./cli.php* **--set** notifications.sleeptimes.3 "/(Thu)/" --show notifications.sleeptimes
 
-```
+```txt
 (...)
 Array
 (

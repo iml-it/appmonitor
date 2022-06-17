@@ -8,13 +8,16 @@ You get a result as JSON object.
 
 A non pretty url does not need any configuration on a webserver.
 
-`/api/?&request=[API-URL]`
+`https://www.example.com/api/?&request=[API-URL]`
 
-To use pretty urls you need a rewrite.
+To use pretty urls like `https://www.example.com/[API-URL]` you need a rewrite:
 
 ```txt
-    <location /api>
-        ... TODO ...
+    <location /appmonitor/api>
+        ...
+        RewriteEngine on
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteRule (/api/.*)$ index.php?request=$1
     </location>
 ```
 
