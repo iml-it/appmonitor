@@ -42,6 +42,22 @@ To access application results we use the `/v1/apps` path.
 
     * `/v1/apps/id/@appid:[0-9a-f]*/all` returns the largest result set with all metadata and checks. Next to the data from /meta or /checks you get more details like summary, timestamp of result, http response header.
 
+* `/v1/apps/tags` lists tags of all applications
+
+  * `/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*` - with adding a tag - or a taglist seperated with "," - it lists with adding the appid you get a list of possible data to fetch.
+
+    * `/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/meta` returns smallest result set with application name and its status.
+
+    * `/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/checks` returns all performed checks for the application.
+
+    * `/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/all` returns the largest result set with all metadata and checks. Next to the data from /meta or /checks you get more details like summary, timestamp of result, http response header.
+
 ### /v1/tags - tags ###
 
 Shows a list of the tags that are in use in all applications.
+
+## Response ##
+
+A valid api request has the http status code 200.
+
+If you get a status code 400 you get a json with the keys "http" and a key "error".
