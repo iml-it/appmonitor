@@ -1,6 +1,13 @@
 
 HISTORY
 
+v0.113 2022-06-21
+    - server: application check with 40x switches to unknown (before: error)
+    - server: color for "unknown" status is now purple (before: gray)
+
+v0.112 2022-06-17
+    - server: added api with readonly access to appstatus
+
 v0.111 2022-05-13
     - server: notifications are plugins now
 

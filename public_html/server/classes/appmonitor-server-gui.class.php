@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.112
+ * @version 0.113
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.112";
+    var $_sVersion = "0.113";
 
     /**
      * html code for icons in the web gui
@@ -201,7 +201,7 @@ class appmonitorserver_gui extends appmonitorserver {
         $aAdminLteColorMapping=array(
             RESULT_ERROR=>'red',
             RESULT_WARNING=>'orange',
-            RESULT_UNKNOWN=>'gray',
+            RESULT_UNKNOWN=>'purple',
             RESULT_OK=>'green',
         );
         return isset($aAdminLteColorMapping[$iResult]) 
@@ -1834,7 +1834,8 @@ class appmonitorserver_gui extends appmonitorserver {
                         : 
                             $oA->getWidget(array(
                                 'onclick'=>$sOnclick,
-                                'bgcolor'=>$this->_getAdminLteColorByResult(RESULT_ERROR),
+                                'bgcolor'=>$this->_getAdminLteColorByResult($aEntries["result"]["result"]),
+                                // 'bgcolor'=>$this->_getAdminLteColorByResult(RESULT_ERROR),
                                 'icon' => $this->_getIconClass($this->_aIco['host']),
                                 'number' => $this->_renderBadgesForWebsite($sAppId, true),
                                 'text' => $sAppLabel.'<br>',
