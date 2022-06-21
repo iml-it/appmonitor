@@ -32,7 +32,7 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.112
+ * @version 0.113
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -436,7 +436,7 @@ class appmonitorserver {
     protected function _generateResultArray($aClientData) {
         $aReturn = array();
         $aReturn["ts"] = date("U");
-        $aReturn["result"] = 3; // set error as default
+        $aReturn["result"] = 1; // set "unknown" as default
 
         if (!array_key_exists("meta", $aClientData)) {
             return $aReturn;
@@ -567,6 +567,19 @@ class appmonitorserver {
 
                 // add more metadata
                 $aClientData["result"] = $this->_generateResultArray($aClientData);
+
+                // set application status
+                // 2xx -> check json response
+                // no status = connect failed -> error
+                // 4xx -> no data -> unknown
+                // 5xx -> application error -> error
+                if (!$iHttpStatus || $iHttpStatus >=400){
+                    $aClientData["result"]["result"]=(!$iHttpStatus || $iHttpStatus >=500) 
+                        ? RESULT_ERROR
+                        : RESULT_UNKNOWN
+                        ;
+                }
+
                 $aClientData["result"]["ttl"] = $iTtl;
                 $aClientData["result"]["url"] = $aResult['url'];
                 $aClientData["result"]["header"] = $aResult['response_header'];
