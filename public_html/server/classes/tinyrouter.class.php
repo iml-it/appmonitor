@@ -24,7 +24,8 @@
  * 
 **/
 
- class tinyrouter{
+namespace iml;
+class tinyrouter{
 
     public $sUrl = '';
     public $aRoutes = [];
@@ -39,6 +40,10 @@
         $this->setRoutes($aRoutes);
         $this->setUrl($sUrl);
     }
+
+    // ----------------------------------------------------------------------
+    // protected functions
+    // ----------------------------------------------------------------------
 
     /**
      * detect last matching route item
@@ -98,6 +103,9 @@
         return $this->aMatch;
     }
     
+    // ----------------------------------------------------------------------
+    // public functions :: setter
+    // ----------------------------------------------------------------------
 
     /**
      * set routes
@@ -117,6 +125,10 @@
         $this->sUrl=$sUrl;
         $this->_getRoute();
     }
+
+    // ----------------------------------------------------------------------
+    // public functions :: getter
+    // ----------------------------------------------------------------------
 
     /**
      * helper function: get url parts as array
