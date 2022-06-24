@@ -41,29 +41,9 @@ class appmonitorserver_api extends appmonitorserver {
     // pre actions
     // ----------------------------------------------------------------------
 
-    /**
-     * check if the source ip is allowed to access the api based on config api -> sourceips
-     * if config is empty: all ips are allowed.
-     * It responds true if acess is granted; false if denied
-     * 
-     * @return boolean
-     */
-    public function apiCheckIp(){
+    public function getApiConfig(){
         $_aTmpCfg=$this->getConfigVars();
-        $aCfg=$_aTmpCfg['api'];
-
-        $bAllowRequest=true;
-        if(isset($aCfg['sourceips']) && is_array($aCfg['sourceips'])){
-            $bAllowRequest=false;
-            $sMyIp=$_SERVER['REMOTE_ADDR'];
-            foreach($aCfg['sourceips'] as $sRegex) {
-                if (preg_match("/$sRegex/", $sMyIp)){
-                    $bAllowRequest=true;
-                    break;
-                }
-            }
-        }
-        return $bAllowRequest;
+        return isset($_aTmpCfg['api']) ? $_aTmpCfg['api'] : [];
     }
 
     /**

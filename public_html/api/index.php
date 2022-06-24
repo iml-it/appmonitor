@@ -9,7 +9,11 @@
  * ======================================================================
  */
 
+use iml\tinyapi;
+use iml\tinyrouter;
+
 require_once('../server/classes/appmonitor-server-api.class.php');
+require_once('../server/classes/tinyapi.class.php');
 require_once('../server/classes/tinyrouter.class.php');
 
 // ----------------------------------------------------------------------
@@ -44,80 +48,77 @@ $aRoutes=[
 ];
 
 // ----------------------------------------------------------------------
-// FUNCTIONS
-// ----------------------------------------------------------------------
-
-
-/**
- * send API response:
- * set content type in http response header and transform data to json
- * @param  array  $aData  array of data to send
- */
-function writeJson($aData){
-    $_aHeader=[
-        '400'=>['header'=>'Bad request'],
-        '401'=>['header'=>'Not autorized'],
-        '404'=>['header'=>'Not Found']
-    ];
-    header('Content-Type: application/json');
-    if(isset($aData['http'])){
-        header('HTTP/1.0 '. $aData['http'].' '.$_aHeader[$aData['http']]['header']);
-    }
-    echo json_encode($aData); 
-}
-
-
-// ----------------------------------------------------------------------
 // MAIN
 // ----------------------------------------------------------------------
 
-if ($_SERVER['REQUEST_METHOD']!=='GET'){
-    writeJson([
-        'http'=>400, 
-        'error'=>'ERROR: Only GET is supported.',
-    ]);
-    die();
-}
 
+/*
+$oApi = new tinyapi();
+$oApi->allowMethods(['GET']);
+$oApi->allowIps(['^130.92.']);
+*/
+
+$oMonitor = new appmonitorserver_api();
+$aConfig=$oMonitor->getApiConfig();
+
+$oApi = new tinyapi([
+    'methods'=>['GET', 'OPTIONS' ], 
+    'ips'=>$aConfig['sourceips'],
+
+    'users'=>[
+            [ "_" => true ],
+
+            // echo password_hash("your-password-here", PASSWORD_BCRYPT)
+            ["api"=>'$2y$10$5E4ZWyul.VdZjpP1.Ff6Le0z0kxu3ix7jnbYhv0Zg5vhvhjdJTOm6'], // hello
+            ["cli"=>'$2y$10$EIv0PDJaruecZZCFYow1MekIT/NKqj0TS6cqk/.VOy1yPGJTEJNNO'], // world
+        ],
+
+]);
+// $oApi->sendError(401, 'ERROR: A valid user is required.');
+$oApi->checkMethod();
+$oApi->checkIp();
+$oApi->checkUser();
+// $oApi->sendJson($sUser);
+
+// $oApi->sendJson(apache_request_headers());die();
+// writeJson($_SERVER);die();
+
+// init router
 $sApiUrl=isset($_GET['request']) && $_GET['request'] ? $_GET['request'] : false;
 $oRouter=new tinyrouter($aRoutes, $sApiUrl);
 
 $aFoundRoute=$oRouter->getRoute();
 if(!$aFoundRoute){
-    writeJson([
-        'http'=>400, 
-        'error'=>'ERROR: Your request was not understood. Maybe you try to access a non existing route or a variable / id contains in your url invalid chars.',
-    ]);
-    die();
+    $oApi->sendError(400, 'ERROR: Your request was not understood. Maybe you try to access a non existing route or a variable / id contains in your url invalid chars.');
 }
 
 $sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
 $callback=$oRouter->getCallback();
 
 if($callback=='_list_'){
-    writeJson($oRouter->getSubitems());
+    $oApi->sendJson($oRouter->getSubitems());
     die();
 }
 
 $sAction=isset($callback['method']) ? $callback['method'] : false;
 
 // ----------------------------------------------------------------------
-// init appmonitor
-
-$oMonitor = new appmonitorserver_api();
 
 
 // ---------- pre check for access
 
-if(!$oMonitor->apiCheckIp()){
-    writeJson([
-        'http'=>401, 
-        'error'=>'ERROR: Not authorized: your ip is not allowed to access the api.',
-    ]);
-    die();
-}
 $oMonitor->apiSendHeaders();
 
+if(!$oMonitor->checkBasicAuth()){
+    $oApi->sendError(401,'ERROR: A user is required.');
+    die();
+}
+/*
+if (!$oMonitor->hasRole('api')){
+    $oApi->sendError(403, 'ERROR: Your user has no permission.');
+    die();
+}
+*/
 
 // ----------------------------------------------------------------------
 // get return data
@@ -161,4 +162,4 @@ switch ($sItem){
             'error'=>'ERROR: unknown item ['.$sItem.'] ... or it is not implemented yet.'
         ];
 }
-writeJson($aData);
+$oApi->sendJson($aData);
