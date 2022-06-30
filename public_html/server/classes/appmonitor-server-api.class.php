@@ -41,15 +41,33 @@ class appmonitorserver_api extends appmonitorserver {
     // pre actions
     // ----------------------------------------------------------------------
 
+    /**
+     * get the "api" section from configuration
+     * @return array
+     */
     public function getApiConfig(){
         $_aTmpCfg=$this->getConfigVars();
         return isset($_aTmpCfg['api']) ? $_aTmpCfg['api'] : [];
     }
 
     /**
-     * send additional http response headers
-     * @return boolean
+     * get an array with users in the config to apply it on tinyapi init
+     * Syntax: username is the key and password hash as value.
+     * @return array
      */
+    public function getApiUsers(){
+        $aReturn=[];
+        $_aTmpCfg=$this->getConfigVars();
+        foreach($_aTmpCfg['users'] as $sLoopuser=>$aUserdata){
+            $aReturn[$sLoopuser]=isset($aUserdata['password']) ? $aUserdata['password'] : false;
+        }
+        return $aReturn;
+    }
+
+    /**
+     * send additional http response headers that are defined in config
+     * api -> header
+     * @return boolean
     public function apiSendHeaders(){
         $_aTmpCfg=$this->getConfigVars();
         $aCfg=$_aTmpCfg['api'];
@@ -60,40 +78,7 @@ class appmonitorserver_api extends appmonitorserver {
         }
         return true;
     }
-
-    // ----------------------------------------------------------------------
-    // /v1/apps
-    // ----------------------------------------------------------------------
-
-    /**
-     * get array with application data 
-     * 
-     * @param string  $sKey           filter key i.e. "meta"; default false (all)
-     * @param string  $sFilterAppId   filter by app id; default false (all)
-     * @return array
      */
-    protected function _apiGetAppData($sKey=false, $sFilterAppId=false) {
-        $this->_getClientData(true); // get data; true = use cache
-        $aReturn=array();
-        // echo 'ALL client data<pre>'.print_r($this->_data, 1).'</pre>';
-        // echo '<br>$sKey = '.$sKey.'<br>';
-        if ($sFilterAppId && !isset($this->_data[$sFilterAppId])){
-            $aReturn=['error'=>'App id was not found', 'http' => '404'];
-        } else {
-            foreach($this->_data as $sAppId=>$aData){
-                if($sAppId===$sFilterAppId){
-                    $aReturn=$sKey 
-                        ? $aData[$sKey] 
-                        : $aData;
-                } else {
-                    $aReturn[$sAppId]=$sKey 
-                        ? $aData[$sKey] 
-                        : $aData;
-                }
-            }
-        }
-        return $aReturn;
-    }
 
     // ----------------------------------------------------------------------
     // /v1/apps/*
@@ -110,6 +95,7 @@ class appmonitorserver_api extends appmonitorserver {
      */
     public function apiGetFilteredApp($aFilter=[],$outmode='all') {
         $aReturn=[];
+        $aTmp=[];
 
         // sort filter items or delete empty key
         if (isset($aFilter['tags']) && is_array($aFilter['tags']) && count($aFilter['tags'])){
@@ -169,31 +155,44 @@ class appmonitorserver_api extends appmonitorserver {
 
             if ($iAdd>0 && !$iRemove){
 
-                // add something to the result set based on outnode
+                // generate a key to sort apps
+                // reverse status code to bring errors on top
+                $iAppResult=RESULT_ERROR - (isset($aData['result']['result']) ? $aData['result']['result'] : 1);
+
+                // ... and add appname
+                $sAppName=$iAppResult.'__'.strtoupper( isset($aData['result']['website']) ? $aData['result']['website'] : 'zzz' ) . '__'.$sKey;
+
                 switch($outmode){
 
                     // short view of matching apps
                     case 'appid':
-                        $aReturn[$sKey]=[
-                            'website'=>$aData['result']['website'],
-                            'url'=>$aData['result']['url'],
+                        $aTmp[$sAppName][$sKey]=[
+                            'website'=>isset($aData['result']['website']) ? $aData['result']['website'] : false,
+                            'url'=>isset($aData['result']['url']) ? $aData['result']['url'] : false,
                         ];
                         break;
                         ;;
                     // return an existing key only
                     case 'checks':
                     case 'meta':
-                        $aReturn[$sKey]=$aData[$outmode];
+                        $aTmp[$sAppName][$sKey]=isset($aData[$outmode]) ? $aData[$outmode] : false;
                         break;
                         ;;
                     
                     // all
                     default:
-                        $aReturn[$sKey]=$aData;
+                        $aTmp[$sAppName][$sKey]=$aData;
                     ;;
                 }
+
             }
         }
+        ksort($aTmp);
+        foreach($aTmp as $aApp){
+            $sKey=array_keys($aApp)[0];
+            $aReturn[$sKey]=$aApp[$sKey];
+        }
+
 
         return $aReturn;
     }

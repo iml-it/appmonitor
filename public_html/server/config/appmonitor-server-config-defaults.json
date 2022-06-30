@@ -20,9 +20,13 @@
         "sourceips":[
             "127\\.0\\.0\\.1"
         ],
-        "header":{
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET"
+        "pretty": false
+    },
+    "users": {
+        "*": {
+            "password": false,
+            "comment": "anonymous access",
+            "roles": [ "api" ]
         }
     },
     "view": {

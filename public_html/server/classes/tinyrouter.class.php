@@ -28,8 +28,9 @@ namespace iml;
 class tinyrouter{
 
     public $sUrl = '';
+    public $sMethod = '';
+
     public $aRoutes = [];
-    public $aMatch = false;
 
     /**
      * constructor
@@ -92,6 +93,8 @@ class tinyrouter{
                 }
                 if($bFoundRoute){
                     $aReturn=[
+                        "request-method"=>(isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : false),
+                        "request-url"=>$this->sUrl,
                         "route"=>$aRoutecfg[0],
                         "callback"=>$aRoutecfg[1],
                         "vars"=>$aVars

@@ -40,12 +40,17 @@ class tinyapi{
      * @var  array  list of allowed users with username and optional password hash; empty list = allow all
      */
     protected $_aAllowedUsers = [ 
-        [ '_basicauth' => true ],
+        [ '*' => false ],          // anonymous requests
+        // [ '_' => false ],       // take authenticated user from $_SERVER environemnt
+
+        // OR
+        // a client directly sends basic auth data
+
         // [ 'api1'        => '[passwordhash1]' ],
         // [ 'apiN'        => '[passwordhashN]' ],
     ];
     
-    protected $_aAllowBasicAuth = false;
+    protected $_aAllowBasicAuth = true;
 
     // protected $_aHeaders = [ ];
 
@@ -59,6 +64,10 @@ class tinyapi{
      */
     protected $_sMethod = false;
 
+    /**
+     * @var  string  current method
+     */
+    protected $_bPretty = false;
     
     /**
      * constructor
@@ -76,8 +85,12 @@ class tinyapi{
         if (isset($aRequirements['users'])){
             $this->allowUsers($aRequirements['users']);
         }
+        if (isset($aRequirements['pretty'])){
+            $this->setPretty($aRequirements['pretty']);
+        }
         header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Headers: *");
+        header('Access-Control-Allow-Credentials: true');
         // Access-Control-Allow-Headers
         return true;
     }
@@ -115,18 +128,14 @@ class tinyapi{
     }
     /**
      * set allowed users
-     * @param  array  aIpRegex  array of regex
-     *                 [ '_basicauth' => true|false       ] - allows all users that are authenticated with basic auth
-     *                 [ 'apiuser'    => '[passwordhash]' ] - an api user that can send an basic auth header
+     * @param  array  aUsers  array of allowed users; key= username; value = password hash (BASIC AUTH)
+     *                 '*'          =>  false,          - allow anonymous requests
+     *                 'apiuser'    => '[passwordhash]' - an api user that can send an basic auth header
      * @return bool
      */
     public function allowUsers($aUsers){
         if(is_array($aUsers)){
-            $this->_aAllowedUsers=[];
-            foreach($aUsers as $aUser){
-
-                $this->_aAllowedUsers[]=['user'=>array_keys($aUser)[0], 'pw'=>array_values($aUser)[0]];
-            }
+            $this->_aAllowedUsers=$aUsers;
         }
 
         return true;
@@ -187,22 +196,42 @@ class tinyapi{
     }
 
 
+    /**
+     * Get an authenticated user and return a detected username as string.
+     * Checks are done in that sequence
+     * - sent basic auth (user:password); remark it can override the user of a already authenticated user
+     * - already made basic auth from $_SERVER
+     * - test if anonymous access is allowed
+     * Remark: this is a pre check. Your app can make further check like check
+     * a role if the found user has access to a function.
+     * 
+     * @example:
+     * $oYourApp->setUser($oTinyApi->checkUser());
+     * if (!$oYourApp->hasRole('api')){
+     *     $oTinyApi->sendError(403, 'ERROR: Your user has no permission to access the api.');
+     *     die();
+     * };
+     * 
+     * @return string
+     */
     public function checkUser(){
 
+        // detect a sent basic authentication in request header
         $aHeaders=apache_request_headers();
         if(is_array($aHeaders) && isset($aHeaders['Authorization'])){
             $sAuthline=preg_replace('/^Basic /','', $aHeaders['Authorization']);
-            // $this->sendJson($sAuthline);
             
             $aAuth=explode(':', base64_decode($sAuthline));
             if(is_array($aAuth) && count($aAuth)==2){
                 list($sGivenUser, $sGivenPw)=$aAuth;
 
-                foreach($this->_aAllowedUsers as $aLoopUser){
-                    $sLoopuser=$aLoopUser['user'];
-                    $sPwHash=$aLoopUser['pw'];
-                    if($sLoopuser==$sGivenUser && password_verify($sGivenPw, $sPwHash)){
-                        return $sLoopuser;
+                foreach($this->_aAllowedUsers as $sLoopuser => $sPwHash){
+                    if($sLoopuser==$sGivenUser) {
+                        if (password_verify($sGivenPw, $sPwHash)){
+                            return $sLoopuser;
+                        } else {
+                            $this->sendError(403, 'ERROR: Authentication failed.');
+                        }
                     }
                 }
             }
@@ -215,9 +244,13 @@ class tinyapi{
             }
         }
 
-        // if no user is set, then allow as anonymous
-        if(!$this->_aAllowedUsers || ( is_array($this->_aAllowedUsers) && !count($this->_aAllowedUsers) )){
-            return 'anonymous';
+        // if no user is set, then check as anonymous
+        // allow i no user was set ... or user '*' was found
+        if(!$this->_aAllowedUsers 
+            || ( is_array($this->_aAllowedUsers) && !count($this->_aAllowedUsers) )
+            || isset($this->_aAllowedUsers['*'])
+        ){
+            return '*';
         }
 
         $this->sendError(403, 'ERROR: A valid user is required.');
@@ -234,22 +267,49 @@ class tinyapi{
     // set/ append response data
     // ----------------------------------------------------------------------
 
+    /**
+     * set response data; "should" be an array
+     * @param  array  $aData  response data
+     * @return boolean
+     */
     public function setData($aData){
-        $this->_aData=$aData;
-        return true;
+        return $this->_aData=$aData;
     }
+
+    /**
+     * append response data; "should" be an array
+     * If no key as 2nd param is given the given array will be added as new array element.
+     * With a given key the key will be used to set data (existing key will be replaced)
+     * 
+     * @param  array   $aData  response data
+     * @param  string  $sKey   optional: use key 
+     * @return boolean
+     */
     public function appendData($aData, $sKey=false){
-        if ($sKey){
-            $this->aData[$sKey]=$aData;
-        } else {
-            $this->aData[]=$aData;
-        }
-        return true;
+        return ($sKey)
+            ? $this->aData[$sKey]=$aData
+            : $this->aData[]=$aData
+        ;
+    }
+
+    /**
+     * set response data; "should" be an array
+     * @param  array  $aData  response data
+     * @return boolean
+     */
+    public function setPretty($bPretty){
+        return $this->_bPretty=!!$bPretty;
     }
 
     // ----------------------------------------------------------------------
     // send response
     // ----------------------------------------------------------------------
+
+    public function stopIfOptions(){
+        if ($this->_sMethod == 'OPTIONS' ) {
+            $this->sendJson();
+        }
+    }   
 
     /**
      * send error message using the sendJson method.
@@ -261,12 +321,12 @@ class tinyapi{
             'http'=>$iHttpstatus, 
             'error'=>$sErrormessage,
         ]);
-        die();
     }
 
     /**
      * send API response:
      * set content type in http response header and transform data to json
+     * and stop.
      * @param  array  $aData  array of data to send
      */
     public function sendJson($aData=false){
@@ -284,11 +344,14 @@ class tinyapi{
             $iStatusCode=$this->_aData['http'];
             if(isset($_aHeader[$iStatusCode]['header'])){
                 $this->_aData['_header']='HTTP/1.1 '. $iStatusCode.' '.$_aHeader[$iStatusCode]['header'];
-                // do not send non 200 header if auth was sent 
-                // header($this->_aData['_header']);
+                // do not send non 200 header if method is OPTIONS
+                if ($this->_sMethod !== 'OPTIONS' ) {
+                    header($this->_aData['_header']);
+                }
             }
         }
-        echo json_encode($this->_aData, JSON_PRETTY_PRINT);
+        $iJsonOptions=$this->_bPretty ? JSON_PRETTY_PRINT : 0;
+        echo json_encode($this->_aData, $iJsonOptions);
         die();
     }
 }

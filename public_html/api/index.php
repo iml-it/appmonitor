@@ -47,6 +47,8 @@ $aRoutes=[
 
 ];
 
+$sAuthuser=false;
+
 // ----------------------------------------------------------------------
 // MAIN
 // ----------------------------------------------------------------------
@@ -61,28 +63,46 @@ $oApi->allowIps(['^130.92.']);
 $oMonitor = new appmonitorserver_api();
 $aConfig=$oMonitor->getApiConfig();
 
+// echo 'DEBUG <pre>';print_r($oMonitor->getApiUsers()); die("index.php");
 $oApi = new tinyapi([
     'methods'=>['GET', 'OPTIONS' ], 
-    'ips'=>$aConfig['sourceips'],
+    'ips'=>isset($aConfig['sourceips']) ? $aConfig['sourceips'] : [],
 
+    'users'=>$oMonitor->getApiUsers(),
+    /*
     'users'=>[
-            [ "_" => true ],
+        "*" => true, // allow anonymous
 
-            // echo password_hash("your-password-here", PASSWORD_BCRYPT)
-            ["api"=>'$2y$10$5E4ZWyul.VdZjpP1.Ff6Le0z0kxu3ix7jnbYhv0Zg5vhvhjdJTOm6'], // hello
-            ["cli"=>'$2y$10$EIv0PDJaruecZZCFYow1MekIT/NKqj0TS6cqk/.VOy1yPGJTEJNNO'], // world
-        ],
+        "api"=>'$2y$10$5E4ZWyul.VdZjpP1.Ff6Le0z0kxu3ix7jnbYhv0Zg5vhvhjdJTOm6', // hello
+        "cli"=>'$2y$10$EIv0PDJaruecZZCFYow1MekIT/NKqj0TS6cqk/.VOy1yPGJTEJNNO', // world
+        //      ^
+        //      |
+        //      `--- echo password_hash("your-password-here", PASSWORD_BCRYPT)
 
+    ],
+    */
+    'pretty'=> isset($aConfig['pretty']) ? $aConfig['pretty'] : false ,
 ]);
-// $oApi->sendError(401, 'ERROR: A valid user is required.');
+
+
+// ----------------------------------------------------------------------
+// CHECKS
+
 $oApi->checkMethod();
 $oApi->checkIp();
-$oApi->checkUser();
-// $oApi->sendJson($sUser);
 
-// $oApi->sendJson(apache_request_headers());die();
-// writeJson($_SERVER);die();
+$oMonitor->setUser($oApi->checkUser());
+// $oApi->sendJson($sAuthuser);
 
+// $oMonitor->apiSendHeaders();
+
+if (!$oMonitor->hasRole('api')){
+    $oApi->sendError(403, 'ERROR: Your user ['.$oMonitor->getUsername().'] has no permission to access the api.');
+    die();
+}
+
+
+// ----------------------------------------------------------------------
 // init router
 $sApiUrl=isset($_GET['request']) && $_GET['request'] ? $_GET['request'] : false;
 $oRouter=new tinyrouter($aRoutes, $sApiUrl);
@@ -92,8 +112,12 @@ if(!$aFoundRoute){
     $oApi->sendError(400, 'ERROR: Your request was not understood. Maybe you try to access a non existing route or a variable / id contains in your url invalid chars.');
 }
 
+$oApi->stopIfOptions();
+
 $sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
 $callback=$oRouter->getCallback();
+
+// echo '<pre>'; print_r($aFoundRoute);
 
 if($callback=='_list_'){
     $oApi->sendJson($oRouter->getSubitems());
@@ -101,24 +125,6 @@ if($callback=='_list_'){
 }
 
 $sAction=isset($callback['method']) ? $callback['method'] : false;
-
-// ----------------------------------------------------------------------
-
-
-// ---------- pre check for access
-
-$oMonitor->apiSendHeaders();
-
-if(!$oMonitor->checkBasicAuth()){
-    $oApi->sendError(401,'ERROR: A user is required.');
-    die();
-}
-/*
-if (!$oMonitor->hasRole('api')){
-    $oApi->sendError(403, 'ERROR: Your user has no permission.');
-    die();
-}
-*/
 
 // ----------------------------------------------------------------------
 // get return data
@@ -142,9 +148,13 @@ switch ($sItem){
         $sOutmode=isset($callback['outmode']) ? $callback['outmode'] : false;
 
         $aData=$oMonitor->$sAction($aFilter, $sOutmode);
+        /*
+         * is it really a good idea to send a 404??
+         * 
         if(count($aData)==0){
             $aData=['http'=>'404', 'error'=> 'ERROR: No app was found that matches the filter.'];
         }
+        */
         
         break;
         ;;

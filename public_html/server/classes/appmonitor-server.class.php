@@ -32,7 +32,7 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.113
+ * @version 0.114
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -90,7 +90,7 @@ class appmonitorserver {
         CURLOPT_SSL_VERIFYHOST => 0,
         CURLOPT_SSL_VERIFYPEER => 0,
         CURLOPT_USERAGENT => 'Appmonitor (using curl; see https://github.com/iml-it/appmonitor to install your own monitoring instance;)',
-            // CURLMOPT_MAXCONNECTS => 10
+        // CURLMOPT_MAXCONNECTS => 10
     );
     protected $_aCounter = false;
 
@@ -100,6 +100,12 @@ class appmonitorserver {
      * @var bool
      */
     protected $_bShowLog = false;
+
+    /**
+     * detected user name to handle with roles
+     * see config -> users -> USERNAME
+     */
+    protected $_user=false;
 
     /**
      * constructor
@@ -289,6 +295,87 @@ class appmonitorserver {
             } else {
                 $this->_addLog(sprintf($this->_tr('msgErr-Url-not-removed-it-does-not-exist'), $sUrl), "error");
             }
+        }
+        return false;
+    }
+
+    /**
+     * check a user in local config
+     * It can skip password check to authenticate anywhere
+    public function checkUser($sUser, $sPassword=false){
+        $this->_user=false;
+        if(!isset($this->_aCfg["users"][$sUser])){
+            return [ 'error' => 'User does not exist.' ];
+        }
+        $aUser=$this->_aCfg["users"][$sUser];
+
+        if ($sPassword){
+            if (isset($aUser['password'])){
+
+                // TODO: this is clear text 
+                // --> implement https://www.php.net/manual/en/function.password-verify.php
+                // 
+                // JS:
+                // headers.set('Authorization', 'Basic ' + btoa(username + ":" + password));
+                if ($aUser['password'] !== $sPassword){
+                    return [ 'error' => 'authentication failed' ];
+                }
+            }
+        }
+        $this->_user=$sUser;
+        return true;
+    }
+     */
+
+    /**
+     * detect a user from $_SERVER env 
+     */
+    public function getAlreadyAuthenticatedUser(){
+        // check if a user ist set with basic auth
+        foreach([ 'PHP_AUTH_USER' ] as $sUserkey) {
+            if (isset($_SERVER[$sUserkey])) {
+                return $_SERVER[$sUserkey];
+            }
+        }
+        return true;
+    }
+
+    /**
+     * get current username that was detected or set
+     * @return string
+     */
+    public function getUsername(){
+        return $this->_user;
+    }
+
+    /**
+     * get current username and its meta fields
+     * @return 
+     */
+    public function getUser(){
+        return $this->_user && isset($this->_aCfg["users"][$this->_user])
+            ? $this->_aCfg["users"][$this->_user]
+            : false
+        ;
+    }
+
+    /**
+     * set a username to work with
+     * @param  string  $sNewUser  username; it should be a user in config users key (or you loose all access)
+     * @return bool
+     */
+    public function setUser($sNewUser){
+        $this->_user=$sNewUser;
+        return true;
+    }
+
+    public function hasRole($sRequiredRole){
+        $tmpUser=$this->getUser();
+        if(is_array($tmpUser) && isset($tmpUser['roles'])){
+            return (
+                in_array('*', $tmpUser['roles'])
+                || in_array($sRequiredRole, $tmpUser['roles'])
+            );
         }
         return false;
     }
