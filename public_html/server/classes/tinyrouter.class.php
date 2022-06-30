@@ -112,6 +112,8 @@ class tinyrouter{
 
     /**
      * set routes
+     * @param  array  $aRoutes  list of [ route, more params ... ]
+     * @return boolean
      */
     public function setRoutes($aRoutes=[]){
         if(is_array($aRoutes) && count($aRoutes)){
@@ -123,10 +125,12 @@ class tinyrouter{
 
     /**
      * set incoming url
+     * @param  string  sUrl  url to fetch; https://api.exaple.com/
      */
     public function setUrl($sUrl){
         $this->sUrl=$sUrl;
         $this->_getRoute();
+        return true;
     }
 
     // ----------------------------------------------------------------------
