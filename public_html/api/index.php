@@ -5,7 +5,8 @@
  * 
  * ----------------------------------------------------------------------
  * ah <axel.hahm@iml.unibe.ch>
- * 2022-06-17  v1.0  ah  initial version
+ * 2022-06-17  v0.1  ah  initial version
+ * 2022-07-01  v1.0  ah  first public version
  * ======================================================================
  */
 
@@ -53,34 +54,14 @@ $sAuthuser=false;
 // MAIN
 // ----------------------------------------------------------------------
 
-
-/*
-$oApi = new tinyapi();
-$oApi->allowMethods(['GET']);
-$oApi->allowIps(['^130.92.']);
-*/
-
 $oMonitor = new appmonitorserver_api();
 $aConfig=$oMonitor->getApiConfig();
 
-// echo 'DEBUG <pre>';print_r($oMonitor->getApiUsers()); die("index.php");
 $oApi = new tinyapi([
     'methods'=>['GET', 'OPTIONS' ], 
     'ips'=>isset($aConfig['sourceips']) ? $aConfig['sourceips'] : [],
 
     'users'=>$oMonitor->getApiUsers(),
-    /*
-    'users'=>[
-        "*" => true, // allow anonymous
-
-        "api"=>'$2y$10$5E4ZWyul.VdZjpP1.Ff6Le0z0kxu3ix7jnbYhv0Zg5vhvhjdJTOm6', // hello
-        "cli"=>'$2y$10$EIv0PDJaruecZZCFYow1MekIT/NKqj0TS6cqk/.VOy1yPGJTEJNNO', // world
-        //      ^
-        //      |
-        //      `--- echo password_hash("your-password-here", PASSWORD_BCRYPT)
-
-    ],
-    */
     'pretty'=> isset($aConfig['pretty']) ? $aConfig['pretty'] : false ,
 ]);
 
@@ -94,10 +75,8 @@ $oApi->checkIp();
 $oMonitor->setUser($oApi->checkUser());
 // $oApi->sendJson($sAuthuser);
 
-// $oMonitor->apiSendHeaders();
-
 if (!$oMonitor->hasRole('api')){
-    $oApi->sendError(403, 'ERROR: Your user ['.$oMonitor->getUsername().'] has no permission to access the api.');
+    $oApi->sendError(403, 'ERROR: Your user ['.$oMonitor->getUserid().'] has no permission to access the api.');
     die();
 }
 
@@ -117,7 +96,7 @@ $oApi->stopIfOptions();
 $sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
 $callback=$oRouter->getCallback();
 
-// echo '<pre>'; print_r($aFoundRoute);
+//echo '<pre>'; print_r($aFoundRoute);
 
 if($callback=='_list_'){
     $oApi->sendJson($oRouter->getSubitems());

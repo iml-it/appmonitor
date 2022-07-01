@@ -29,6 +29,7 @@ require_once 'appmonitor-server.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
+ * @version v1
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -63,22 +64,6 @@ class appmonitorserver_api extends appmonitorserver {
         }
         return $aReturn;
     }
-
-    /**
-     * send additional http response headers that are defined in config
-     * api -> header
-     * @return boolean
-    public function apiSendHeaders(){
-        $_aTmpCfg=$this->getConfigVars();
-        $aCfg=$_aTmpCfg['api'];
-        if (isset($aCfg['header']) && is_array($aCfg['header'])){
-            foreach($aCfg['header'] as $sHeader=>$sValue){
-                header($sHeader . ': '.$sValue);
-            }
-        }
-        return true;
-    }
-     */
 
     // ----------------------------------------------------------------------
     // /v1/apps/*
@@ -192,7 +177,6 @@ class appmonitorserver_api extends appmonitorserver {
             $sKey=array_keys($aApp)[0];
             $aReturn[$sKey]=$aApp[$sKey];
         }
-
 
         return $aReturn;
     }
