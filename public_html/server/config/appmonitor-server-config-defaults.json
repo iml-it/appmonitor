@@ -22,12 +22,19 @@
         ],
         "pretty": false
     },
+    "userfields": [
+        "PHP_AUTH_USER"
+    ],
     "users": {
         "*": {
             "password": false,
             "username": "anonymous",
             "comment": "anonymous access",
             "roles": [ "api", "ui", "ui-config", "ui-debug" ]
+        },
+        "__default_authenticated_user__": {
+            "comment": "default roles for an by the webserver authenticated user",
+            "roles": [ "api", "ui" ]
         }
     },
     "view": {

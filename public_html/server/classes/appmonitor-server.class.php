@@ -342,7 +342,7 @@ class appmonitorserver {
      */
     public function getAlreadyAuthenticatedUser(){
         // check if a user ist set with basic auth
-        foreach([ 'PHP_AUTH_USER' ] as $sUserkey) {
+        foreach($this->_aCfg['userfields'] as $sUserkey) {
             if (isset($_SERVER[$sUserkey])) {
                 return $_SERVER[$sUserkey];
             }
@@ -363,16 +363,18 @@ class appmonitorserver {
      */
     public function getUsername(){
         $aUser=$this->getUser();
-        return isset($aUser['username']) ? print_r($aUser['username'], 1) : $this->_user;
+        return isset($aUser['username']) ? print_r($aUser['username'], 1) : '['.$this->_user.']';
     }
 
     /**
-     * get current username and its meta fields
+     * get meta fields for current or given user
+     * @param  string  $sUsername  optional: override user id 
      * @return 
      */
-    public function getUser(){
-        return $this->_user && isset($this->_aCfg["users"][$this->_user])
-            ? $this->_aCfg["users"][$this->_user]
+    public function getUser($sUsername=false){
+        $sUsername=$sUsername ? $sUsername : $this->_user;
+        return $sUsername && isset($this->_aCfg["users"][$sUsername])
+            ? $this->_aCfg["users"][$sUsername]
             : false
         ;
     }
@@ -383,16 +385,38 @@ class appmonitorserver {
      * @return bool
      */
     public function setUser($sNewUser){
-        $this->_user=$sNewUser;
+        $this->_user=preg_replace('/[^a-z0-9\*]/', '', $sNewUser);
         return true;
     }
 
+    /**
+     * get roles of a user. If the user itself has no roles
+     * but was authenticated by the webserver then it gets
+     * default roles from user "__default_authenticated_user__"
+     */
+    public function getRoles(){
+        $aUser=$this->getUser();
+        if(is_array($aUser)){
+            if (isset($aUser['roles'])){
+                return $aUser['roles'];
+            }
+            $aDefault=$this->getUser('__default_authenticated_user__');
+            return isset($aDefault['roles']) ? $aDefault['roles'] : false;
+        }
+        return false;
+    }
+
+    /**
+     * return if a user has a given role
+     * @param  string  $sRequiredRole  name of the role to verify
+     * @return true
+     */
     public function hasRole($sRequiredRole){
-        $tmpUser=$this->getUser();
-        if(is_array($tmpUser) && isset($tmpUser['roles'])){
+        $aRoles=$this->getRoles();
+        if(is_array($aRoles) && count($aRoles)){
             return (
-                in_array('*', $tmpUser['roles'])
-                || in_array($sRequiredRole, $tmpUser['roles'])
+                in_array('*', $aRoles)                // a user has * for all roles
+                || in_array($sRequiredRole, $aRoles)  // the role name itself was found
             );
         }
         return false;

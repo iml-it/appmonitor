@@ -43,7 +43,7 @@
         "About-docs": "Die <a href=\"%s\">Dokumentation</a> ist als Markdown verf&uuml;gbar. Sie k&ouml;nnen es online lesen und sie ist mit der <em>readme.md</em> im Download Archiv enthalten.",
 
         "Hello-user": "Hallo <strong>%s</strong>!",
-        "Hello-roles": "Rollen: ",
+        "Hello-roles": "Rollen",
 
         "Reload": "Aktualisieren",
         "Reload-hint": "Seitenansicht aktualisieren",
