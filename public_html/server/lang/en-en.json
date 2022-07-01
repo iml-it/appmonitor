@@ -43,7 +43,7 @@
         "About-docs": "The <a href=\"%s\">Documentation</a> is available as markdown. You can read it online on the project url or as <em>readme.md</em> in the downloaded archive.",
 
         "Hello-user": "Hello <strong>%s</strong>!",
-        "Hello-roles": "Roles: ",
+        "Hello-roles": "Roles",
 
         "Reload": "Reload",
         "Reload-hint": "Reload the page",
