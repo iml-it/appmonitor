@@ -106,5 +106,6 @@ Remarks:
 To preview the texts you can 
 
 * set "debug" to true in you config
+* add role "ui-debug" for your user in ./server/config/appmonitor-server-config.json
 * open server monitoring in the browser - go into a detail page of any web app
 * on the bottom you see all placeholders, current replacements and the preview messages for all change types

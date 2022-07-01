@@ -18,11 +18,16 @@
     },
     "api":{
         "sourceips":[
-            "127\\.0\\.0\\.1"
+            "^127\\.0\\.0\\.1$"
         ],
-        "header":{
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET"
+        "pretty": false
+    },
+    "users": {
+        "*": {
+            "password": false,
+            "username": "anonymous",
+            "comment": "anonymous access",
+            "roles": [ "api", "ui", "ui-config", "ui-debug" ]
         }
     },
     "view": {

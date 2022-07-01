@@ -1,9 +1,5 @@
 {
     "gui":{
-        "Reload": "Aktualisieren",
-        "Reload-hint": "Seitenansicht aktualisieren",
-        "Reload-every": "Auto-Reload ist alle %ss",
-
         "All-webapps": "Web-Applikationen",
         "All-webapps-header": "Web-Applikationen",
         "All-webapps-hint": "Nachfolgend Sehen Sie eine Liste von Web-Applikationen. Diese sind alphabetisch sortiert und nach Status gruppiert (Fehler und Warnungen zuerst).<br>Klicken Sie auf den Labeltext, um Details zu sehen.<br>Die Ansicht kann mit Eingabe im Freitextfilter und Klick auf ein Label gefiltert werden.",
@@ -45,6 +41,13 @@
         "About-text": "Dies ist Freie Software und OpenSource.<br>Lizenz: GNU Lesser General Public License v3.0<br>Universit&auml;t Bern :: IML - Institut f&uuml;r Medizinische Lehre.<br><br>Eine <strong>Client</strong>-Komponente erledigt auf Anwendungsseite frei definierbare Checks und erzeugt einen Status in JSON Syntax.<br>Die <strong>Server</strong>-Komponente sammelt die Monitoring Daten aller Applikationen ein, erzeugt eine Gesamtansicht und kann Benachrichtigungen an die betroffenen Teams senden.",
         "About-projecturl": "Das Projekt ist &ouml;ffentlich und abrufbar unter <a href=\"%s\">%s</a>.",
         "About-docs": "Die <a href=\"%s\">Dokumentation</a> ist als Markdown verf&uuml;gbar. Sie k&ouml;nnen es online lesen und sie ist mit der <em>readme.md</em> im Download Archiv enthalten.",
+
+        "Hello-user": "Hallo <strong>%s</strong>!",
+        "Hello-roles": "Rollen: ",
+
+        "Reload": "Aktualisieren",
+        "Reload-hint": "Seitenansicht aktualisieren",
+        "Reload-every": "Auto-Reload ist alle %ss",
 
         "Chart-graph": "Grafik",
         "Chart-time": "Zeit",
@@ -147,6 +150,9 @@
         "btn-deleteUrl-confirm": "Sind Sie sicher, dass Sie die nachfolgende URL l&ouml;schen m&ouml;chten\\n\\n%s\\n\\n?",
         "btn-save": "Speichern",
         
+        "msgErr-access-denied": "Zugriff verweigert.",
+        "msgErr-access-denied-role-not-found": "Dein Benutzer [%s] hat nicht die ben&ouml;tigte Rolle (%s).",
+
         "msgErr-nocheck-welcome": "<h3>Willkommen bei der Appmonitor Server Webgui!</h3><p>Im Moment sieht es hier noch nackt und leer aus, weil noch ein Check eingerichtet wurde.<br>Um eine URL hinzuzuf&uuml;gen, gehen Sie zu den Einstellungen.</p>",
         "msgErr-nocheck": "Es wurde noch kein Check eingerichtet.",
         "msgErr-demosite": "Dies ist eine Demo-Webseite. Das &auml;ndern der Konfiguration ist hier nicht m&ouml;glich.",

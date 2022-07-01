@@ -29,6 +29,7 @@ require_once 'appmonitor-server.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
+ * @version v1
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -42,75 +43,24 @@ class appmonitorserver_api extends appmonitorserver {
     // ----------------------------------------------------------------------
 
     /**
-     * check if the source ip is allowed to access the api based on config api -> sourceips
-     * if config is empty: all ips are allowed.
-     * It responds true if acess is granted; false if denied
-     * 
-     * @return boolean
-     */
-    public function apiCheckIp(){
-        $_aTmpCfg=$this->getConfigVars();
-        $aCfg=$_aTmpCfg['api'];
-
-        $bAllowRequest=true;
-        if(isset($aCfg['sourceips']) && is_array($aCfg['sourceips'])){
-            $bAllowRequest=false;
-            $sMyIp=$_SERVER['REMOTE_ADDR'];
-            foreach($aCfg['sourceips'] as $sRegex) {
-                if (preg_match("/$sRegex/", $sMyIp)){
-                    $bAllowRequest=true;
-                    break;
-                }
-            }
-        }
-        return $bAllowRequest;
-    }
-
-    /**
-     * send additional http response headers
-     * @return boolean
-     */
-    public function apiSendHeaders(){
-        $_aTmpCfg=$this->getConfigVars();
-        $aCfg=$_aTmpCfg['api'];
-        if (isset($aCfg['header']) && is_array($aCfg['header'])){
-            foreach($aCfg['header'] as $sHeader=>$sValue){
-                header($sHeader . ': '.$sValue);
-            }
-        }
-        return true;
-    }
-
-    // ----------------------------------------------------------------------
-    // /v1/apps
-    // ----------------------------------------------------------------------
-
-    /**
-     * get array with application data 
-     * 
-     * @param string  $sKey           filter key i.e. "meta"; default false (all)
-     * @param string  $sFilterAppId   filter by app id; default false (all)
+     * get the "api" section from configuration
      * @return array
      */
-    protected function _apiGetAppData($sKey=false, $sFilterAppId=false) {
-        $this->_getClientData(true); // get data; true = use cache
-        $aReturn=array();
-        // echo 'ALL client data<pre>'.print_r($this->_data, 1).'</pre>';
-        // echo '<br>$sKey = '.$sKey.'<br>';
-        if ($sFilterAppId && !isset($this->_data[$sFilterAppId])){
-            $aReturn=['error'=>'App id was not found', 'http' => '404'];
-        } else {
-            foreach($this->_data as $sAppId=>$aData){
-                if($sAppId===$sFilterAppId){
-                    $aReturn=$sKey 
-                        ? $aData[$sKey] 
-                        : $aData;
-                } else {
-                    $aReturn[$sAppId]=$sKey 
-                        ? $aData[$sKey] 
-                        : $aData;
-                }
-            }
+    public function getApiConfig(){
+        $_aTmpCfg=$this->getConfigVars();
+        return isset($_aTmpCfg['api']) ? $_aTmpCfg['api'] : [];
+    }
+
+    /**
+     * get an array with users in the config to apply it on tinyapi init
+     * Syntax: username is the key and password hash as value.
+     * @return array
+     */
+    public function getApiUsers(){
+        $aReturn=[];
+        $_aTmpCfg=$this->getConfigVars();
+        foreach($_aTmpCfg['users'] as $sLoopuser=>$aUserdata){
+            $aReturn[$sLoopuser]=isset($aUserdata['password']) ? $aUserdata['password'] : false;
         }
         return $aReturn;
     }
@@ -130,6 +80,7 @@ class appmonitorserver_api extends appmonitorserver {
      */
     public function apiGetFilteredApp($aFilter=[],$outmode='all') {
         $aReturn=[];
+        $aTmp=[];
 
         // sort filter items or delete empty key
         if (isset($aFilter['tags']) && is_array($aFilter['tags']) && count($aFilter['tags'])){
@@ -189,30 +140,42 @@ class appmonitorserver_api extends appmonitorserver {
 
             if ($iAdd>0 && !$iRemove){
 
-                // add something to the result set based on outnode
+                // generate a key to sort apps
+                // reverse status code to bring errors on top
+                $iAppResult=RESULT_ERROR - (isset($aData['result']['result']) ? $aData['result']['result'] : 1);
+
+                // ... and add appname
+                $sAppName=$iAppResult.'__'.strtoupper( isset($aData['result']['website']) ? $aData['result']['website'] : 'zzz' ) . '__'.$sKey;
+
                 switch($outmode){
 
                     // short view of matching apps
                     case 'appid':
-                        $aReturn[$sKey]=[
-                            'website'=>$aData['result']['website'],
-                            'url'=>$aData['result']['url'],
+                        $aTmp[$sAppName][$sKey]=[
+                            'website'=>isset($aData['result']['website']) ? $aData['result']['website'] : false,
+                            'url'=>isset($aData['result']['url']) ? $aData['result']['url'] : false,
                         ];
                         break;
                         ;;
                     // return an existing key only
                     case 'checks':
                     case 'meta':
-                        $aReturn[$sKey]=$aData[$outmode];
+                        $aTmp[$sAppName][$sKey]=isset($aData[$outmode]) ? $aData[$outmode] : false;
                         break;
                         ;;
                     
                     // all
                     default:
-                        $aReturn[$sKey]=$aData;
+                        $aTmp[$sAppName][$sKey]=$aData;
                     ;;
                 }
+
             }
+        }
+        ksort($aTmp);
+        foreach($aTmp as $aApp){
+            $sKey=array_keys($aApp)[0];
+            $aReturn[$sKey]=$aApp[$sKey];
         }
 
         return $aReturn;

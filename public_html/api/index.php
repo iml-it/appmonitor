@@ -5,11 +5,16 @@
  * 
  * ----------------------------------------------------------------------
  * ah <axel.hahm@iml.unibe.ch>
- * 2022-06-17  v1.0  ah  initial version
+ * 2022-06-17  v0.1  ah  initial version
+ * 2022-07-01  v1.0  ah  first public version
  * ======================================================================
  */
 
+use iml\tinyapi;
+use iml\tinyrouter;
+
 require_once('../server/classes/appmonitor-server-api.class.php');
+require_once('../server/classes/tinyapi.class.php');
 require_once('../server/classes/tinyrouter.class.php');
 
 // ----------------------------------------------------------------------
@@ -43,81 +48,62 @@ $aRoutes=[
 
 ];
 
-// ----------------------------------------------------------------------
-// FUNCTIONS
-// ----------------------------------------------------------------------
-
-
-/**
- * send API response:
- * set content type in http response header and transform data to json
- * @param  array  $aData  array of data to send
- */
-function writeJson($aData){
-    $_aHeader=[
-        '400'=>['header'=>'Bad request'],
-        '401'=>['header'=>'Not autorized'],
-        '404'=>['header'=>'Not Found']
-    ];
-    header('Content-Type: application/json');
-    if(isset($aData['http'])){
-        header('HTTP/1.0 '. $aData['http'].' '.$_aHeader[$aData['http']]['header']);
-    }
-    echo json_encode($aData); 
-}
-
+$sAuthuser=false;
 
 // ----------------------------------------------------------------------
 // MAIN
 // ----------------------------------------------------------------------
 
-if ($_SERVER['REQUEST_METHOD']!=='GET'){
-    writeJson([
-        'http'=>400, 
-        'error'=>'ERROR: Only GET is supported.',
-    ]);
+$oMonitor = new appmonitorserver_api();
+$aConfig=$oMonitor->getApiConfig();
+
+$oApi = new tinyapi([
+    'methods'=>['GET', 'OPTIONS' ], 
+    'ips'=>isset($aConfig['sourceips']) ? $aConfig['sourceips'] : [],
+
+    'users'=>$oMonitor->getApiUsers(),
+    'pretty'=> isset($aConfig['pretty']) ? $aConfig['pretty'] : false ,
+]);
+
+
+// ----------------------------------------------------------------------
+// CHECKS
+
+$oApi->checkMethod();
+$oApi->checkIp();
+
+$oMonitor->setUser($oApi->checkUser());
+// $oApi->sendJson($sAuthuser);
+
+if (!$oMonitor->hasRole('api')){
+    $oApi->sendError(403, 'ERROR: Your user ['.$oMonitor->getUserid().'] has no permission to access the api.');
     die();
 }
 
+
+// ----------------------------------------------------------------------
+// init router
 $sApiUrl=isset($_GET['request']) && $_GET['request'] ? $_GET['request'] : false;
 $oRouter=new tinyrouter($aRoutes, $sApiUrl);
 
 $aFoundRoute=$oRouter->getRoute();
 if(!$aFoundRoute){
-    writeJson([
-        'http'=>400, 
-        'error'=>'ERROR: Your request was not understood. Maybe you try to access a non existing route or a variable / id contains in your url invalid chars.',
-    ]);
-    die();
+    $oApi->sendError(400, 'ERROR: Your request was not understood. Maybe you try to access a non existing route or a variable / id contains in your url invalid chars.');
 }
+
+$oApi->stopIfOptions();
 
 $sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
 $callback=$oRouter->getCallback();
 
+//echo '<pre>'; print_r($aFoundRoute);
+
 if($callback=='_list_'){
-    writeJson($oRouter->getSubitems());
+    $oApi->sendJson($oRouter->getSubitems());
     die();
 }
 
 $sAction=isset($callback['method']) ? $callback['method'] : false;
-
-// ----------------------------------------------------------------------
-// init appmonitor
-
-$oMonitor = new appmonitorserver_api();
-
-
-// ---------- pre check for access
-
-if(!$oMonitor->apiCheckIp()){
-    writeJson([
-        'http'=>401, 
-        'error'=>'ERROR: Not authorized: your ip is not allowed to access the api.',
-    ]);
-    die();
-}
-$oMonitor->apiSendHeaders();
-
 
 // ----------------------------------------------------------------------
 // get return data
@@ -141,9 +127,13 @@ switch ($sItem){
         $sOutmode=isset($callback['outmode']) ? $callback['outmode'] : false;
 
         $aData=$oMonitor->$sAction($aFilter, $sOutmode);
+        /*
+         * is it really a good idea to send a 404??
+         * 
         if(count($aData)==0){
             $aData=['http'=>'404', 'error'=> 'ERROR: No app was found that matches the filter.'];
         }
+        */
         
         break;
         ;;
@@ -161,4 +151,4 @@ switch ($sItem){
             'error'=>'ERROR: unknown item ['.$sItem.'] ... or it is not implemented yet.'
         ];
 }
-writeJson($aData);
+$oApi->sendJson($aData);

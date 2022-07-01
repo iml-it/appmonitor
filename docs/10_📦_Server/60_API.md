@@ -26,21 +26,23 @@ To use pretty urls like `https://www.example.com/[API-URL]` you need a rewrite:
 ```mermaid
 graph TD;
   Start((Start))
-  --> chkMethod{Methode = GET?}
+  --> chkMethod{Method enabled?}
+  --> |yes|chkIp{IP allowed?}
+  --> |yes|chkUser{user detected?}
+  --> |yes|chkRole{user has the role api?}
   --> |yes|chkRoute{Find matching route}
   --> |yes|chkList{Is a listing?}
-  --> |no|chkIp{IP allowed?}
   --> |yes|sendHeader
   --> getData
-  --> chkdata{Found data?}
   --> |yes|sendJson
   --> End((End))
 
   chkMethod-->|no|onlyGet[ERROR 400: GET only]-->End
+  chkIp-->|no|denyIp[ERROR 401: access denied]-->End
+  chkUser-->|no|denyUser[ERROR 401: access denied]-->End
+  chkRole-->|no|denyUser[ERROR 401: access denied]-->End
   chkRoute-->|no|onlyNoRoute[ERROR 400: no Route]-->End
   chkList-->|yes|showSubitems-->End
-  chkIp-->|no|denyIp[ERROR 401: access denied]-->End
-  chkdata-->|no|noData[ERROR 404: no data]-->End
 ```
 
 ## Usage ##
@@ -104,4 +106,4 @@ Statuscode | Description
 200        | OK.
 400        | Bad request. No Route was found. Maybe a route is wrong or a variable did not match the required regex.
 401        | Not authorized. Your ip is not allowed to access the api.
-404        | No data. An Id is wrong or a search has no data.
+403        | Access denied. A valid user was not detected or user has no permissions.

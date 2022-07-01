@@ -1,9 +1,5 @@
 {
     "gui":{
-        "Reload": "Reload",
-        "Reload-hint": "Reload the page",
-        "Reload-every": "Auto-Reload is every %ss",
-
         "All-webapps": "Web applications",
         "All-webapps-header": "Web applications",
         "All-webapps-hint": "In the section below you see a list of web applications. They are in alphabetic order grouped by the status (erros and warnings first).<br>Click on the labeltext to see details.<br>You can filter the view by typing in the freetext filter field or clicking a label.",
@@ -45,6 +41,13 @@
         "About-text": "This is Free software and OpenSource.<br>License: GNU Lesser General Public License v3.0<br>University of Bern :: IML - Institute of Medical Education.<br><br>The <strong>client</strong> component makes checks and creates a status file in JSON syntax.<br>The <strong>server</strong> component fetches the health status information data from (all your) application servers and renders a total view and sends notifications to the related teams.",
         "About-projecturl": "The project is public for all and located at <a href=\"%s\">%s</a>.",
         "About-docs": "The <a href=\"%s\">Documentation</a> is available as markdown. You can read it online on the project url or as <em>readme.md</em> in the downloaded archive.",
+
+        "Hello-user": "Hello <strong>%s</strong>!",
+        "Hello-roles": "Roles: ",
+
+        "Reload": "Reload",
+        "Reload-hint": "Reload the page",
+        "Reload-every": "Auto-Reload is every %ss",
 
         "Chart-graph": "Graph",
         "Chart-graph-description": "Last response times of the monitoring request beginning with connect time up to finish of the transfer.",
@@ -147,6 +150,9 @@
         "btn-deleteUrl": "delete",
         "btn-deleteUrl-confirm": "Are you sure that you want to delete the url\\n\\n%s\\n\\n?",
         "btn-save": "Save",
+
+        "msgErr-access-denied": "Access denied.",
+        "msgErr-access-denied-role-not-found": "Your user [%s] does not have the needed role (%s).",
 
         "msgErr-nocheck-welcome": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>To add an url to check go to the Setup.</p>",
         "msgErr-nocheck": "No check was defined yet.",

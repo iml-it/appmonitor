@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.113
+ * @version 0.114
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -40,9 +40,9 @@ require_once 'render-adminlte.class.php';
 class appmonitorserver_gui extends appmonitorserver {
 
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sDocUrl = "https://github.com/iml-it/appmonitor/blob/master/readme.md";
+    var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.113";
+    var $_sVersion = "0.114";
 
     /**
      * html code for icons in the web gui
@@ -1456,7 +1456,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
                 
         // --- debug infos 
-        if ($this->_aCfg['debug']) {
+        if ($this->_aCfg['debug'] && $this->hasRole('ui-debug')) {
             $this->oNotification->setApp($sAppId);
             $sDebugContent='';
 
@@ -1516,6 +1516,9 @@ class appmonitorserver_gui extends appmonitorserver {
      * @return string
      */
     public function generateViewDebug() {
+        if(!$this->hasRole('ui-debug')){
+            return $this->_access_denied(sprintf($this->_tr('msgErr-access-denied-role-not-found'), $this->getUserid(), 'ui-debug'));
+        }
         $oA=new renderadminlte();
         
         $sAlIcons='';
@@ -1653,6 +1656,25 @@ class appmonitorserver_gui extends appmonitorserver {
     private function _renderSelect($aOptions, $sAcive){
         
     }
+
+    /**
+     * get html code for a access denied message
+     * @param  string  $sMessage  message text to display
+     * @return string
+     */
+    public function _access_denied($sMessage){
+        $oA=new renderadminlte();
+        // $this->setUser('hahn');
+        if(!$this->hasRole('ui-config')){
+            return $oA->getAlert(array(
+                'type'=>'danger',
+                'dismissible'=>false,
+                'title'=>$this->_aIco['error'].' '.$this->_tr('msgErr-access-denied'),
+                'text'=>$sMessage,
+                ));
+        }
+    }
+    
     /**
      * return html code for setup page
      * @return string
@@ -1660,6 +1682,10 @@ class appmonitorserver_gui extends appmonitorserver {
     public function generateViewSetup() {
         $oA=new renderadminlte();
         $sFormOpenTag = '<form action="?#divsetup" class="form-horizontal" method="POST">';
+
+        if(!$this->hasRole('ui-config')){
+            return $this->_access_denied(sprintf($this->_tr('msgErr-access-denied-role-not-found'), $this->getUserid(), 'ui-config'));
+        }
         
         // list of all clients
         $sHostlist='';
@@ -2190,13 +2216,21 @@ class appmonitorserver_gui extends appmonitorserver {
         $sTitle = $this->_sTitle.' v'.$this->_sVersion;
 
         $iReload = ((isset($this->_aCfg['pagereload']) && (int) $this->_aCfg['pagereload'] ) ? (int) $this->_aCfg['pagereload'] : 0);
-        
-        $sNavi .= $this->_renderMenuItem('#divwebs',          'allwebapps', 'allwebapps',    $this->_tr('All-webapps').' <span id="menubagde_allapps" style="float: right" ></span>')
+
+        $aUser=$this->getUser();
+
+        $sNavi .= '<li><a href="#" title="'
+                        .$this->_tr('Hello-roles').': '.(isset($aUser['roles']) ? implode(', ', $aUser['roles']) : '-')
+                    .'">'.sprintf($this->_tr('Hello-user'), $this->getUsername()).'</a><br></li>'
+                . $this->_renderMenuItem('#divwebs',          'allwebapps', 'allwebapps',    $this->_tr('All-webapps').' <span id="menubagde_allapps" style="float: right" ></span>')
                 . $this->_renderMenuItem('#divproblems',      'problems',   'problems',      $this->_tr('Problems').' <span id="menubagde_problems" style="float: right" ></span>')
                 . $this->_renderMenuItem('#divnotifications', 'checks',     'notifications', $this->_tr('Notifications'))
-                . $this->_renderMenuItem('#divsetup',         'setup',      'setup',         $this->_tr('Setup'))
+                . ($this->hasRole('ui-debug') 
+                    ? $this->_renderMenuItem('#divsetup',         'setup',      'setup',         $this->_tr('Setup'))
+                    : ''
+                    )
                 . $this->_renderMenuItem('#divabout',         'about',      'about',         $this->_tr('About'))
-                . ($this->_aCfg['debug']
+                . ($this->_aCfg['debug'] && $this->hasRole('ui-debug')
                     ? $this->_renderMenuItem('#divdebug',     'debug',      'debug',         $this->_tr('Debug'))
                     : ''
                 )

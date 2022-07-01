@@ -24,11 +24,13 @@
  * 
 **/
 
- class tinyrouter{
+namespace iml;
+class tinyrouter{
 
     public $sUrl = '';
+    public $sMethod = '';
+
     public $aRoutes = [];
-    public $aMatch = false;
 
     /**
      * constructor
@@ -39,6 +41,10 @@
         $this->setRoutes($aRoutes);
         $this->setUrl($sUrl);
     }
+
+    // ----------------------------------------------------------------------
+    // protected functions
+    // ----------------------------------------------------------------------
 
     /**
      * detect last matching route item
@@ -87,6 +93,8 @@
                 }
                 if($bFoundRoute){
                     $aReturn=[
+                        "request-method"=>(isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : false),
+                        "request-url"=>$this->sUrl,
                         "route"=>$aRoutecfg[0],
                         "callback"=>$aRoutecfg[1],
                         "vars"=>$aVars
@@ -98,9 +106,14 @@
         return $this->aMatch;
     }
     
+    // ----------------------------------------------------------------------
+    // public functions :: setter
+    // ----------------------------------------------------------------------
 
     /**
      * set routes
+     * @param  array  $aRoutes  list of [ route, more params ... ]
+     * @return boolean
      */
     public function setRoutes($aRoutes=[]){
         if(is_array($aRoutes) && count($aRoutes)){
@@ -112,11 +125,17 @@
 
     /**
      * set incoming url
+     * @param  string  sUrl  url to fetch; https://api.exaple.com/
      */
     public function setUrl($sUrl){
         $this->sUrl=$sUrl;
         $this->_getRoute();
+        return true;
     }
+
+    // ----------------------------------------------------------------------
+    // public functions :: getter
+    // ----------------------------------------------------------------------
 
     /**
      * helper function: get url parts as array
