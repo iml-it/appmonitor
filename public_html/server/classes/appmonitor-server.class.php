@@ -400,10 +400,14 @@ class appmonitorserver {
             if (isset($aUser['roles'])){
                 return $aUser['roles'];
             }
-            $aDefault=$this->getUser('__default_authenticated_user__');
-            return isset($aDefault['roles']) ? $aDefault['roles'] : false;
         }
-        return false;
+        // no roles for anonymous if user config was removed
+        if($this->_user=='*'){
+            return false;
+        }
+        // non detected authenticated users inherit data from __default_authenticated_user__
+        $aDefault=$this->getUser('__default_authenticated_user__');
+        return isset($aDefault['roles']) ? $aDefault['roles'] : false;
     }
 
     /**
