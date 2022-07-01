@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.114 2022-07-01
+    - server: add api
+    - server: add support for roles (api and web ui)
+    - server: update docs url 
+
 v0.113 2022-06-21
     - server: application check with 40x switches to unknown (before: error)
     - server: color for "unknown" status is now purple (before: gray)

@@ -105,7 +105,7 @@ class appmonitorserver {
      * detected user name to handle with roles
      * see config -> users -> USERNAME
      */
-    protected $_user=false;
+    protected $_user='*';
 
     /**
      * constructor
@@ -114,6 +114,9 @@ class appmonitorserver {
         $this->loadConfig();
         $this->_loadLangTexts();
         $this->_handleParams();
+
+        $_sUser=$this->getAlreadyAuthenticatedUser();
+        $this->setUser($_sUser ? $_sUser : '*');
     }
 
     // ----------------------------------------------------------------------
@@ -173,6 +176,9 @@ class appmonitorserver {
             $aUserdata = json_decode(file_get_contents($sCfgFile), true);
         }
         $this->_aCfg = array_replace_recursive($aDefaults, $aUserdata);
+
+        // undo unwanted recursive merge behaviour:
+        $this->_aCfg['users']=$aUserdata['users'];
 
         if (isset($this->_aCfg['urls']) && is_array($this->_aCfg['urls'])) {
             // add urls
@@ -327,6 +333,10 @@ class appmonitorserver {
     }
      */
 
+    // ----------------------------------------------------------------------
+    // USER FUNCTIONS
+    // ----------------------------------------------------------------------
+
     /**
      * detect a user from $_SERVER env 
      */
@@ -337,15 +347,23 @@ class appmonitorserver {
                 return $_SERVER[$sUserkey];
             }
         }
-        return true;
+        return '';
     }
 
     /**
      * get current username that was detected or set
      * @return string
      */
-    public function getUsername(){
+    public function getUserid(){
         return $this->_user;
+    }
+    /**
+     * get current username that was detected or set
+     * @return string
+     */
+    public function getUsername(){
+        $aUser=$this->getUser();
+        return isset($aUser['username']) ? print_r($aUser['username'], 1) : $this->_user;
     }
 
     /**
@@ -379,6 +397,8 @@ class appmonitorserver {
         }
         return false;
     }
+
+    // ----------------------------------------------------------------------
 
     /**
      * helper function: handle url parameters
