@@ -178,7 +178,7 @@ class appmonitorserver {
         $this->_aCfg = array_replace_recursive($aDefaults, $aUserdata);
 
         // undo unwanted recursive merge behaviour:
-        $this->_aCfg['users']=$aUserdata['users'];
+        $this->_aCfg['users']=isset($aUserdata['users']) ? $aUserdata['users'] : $aDefaults['users'];
 
         if (isset($this->_aCfg['urls']) && is_array($this->_aCfg['urls'])) {
             // add urls
