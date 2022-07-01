@@ -168,22 +168,36 @@ Here can be the subkeys
 
 The users section defines users and its roles to access the api or web ui.
 
-The subkey is the user id of a user.
+The subkey is the user id of a user. There are 2 special user ids:
 
-The object below the user id
+* `*` - contains the roles for anonymous access
+* `__default_authenticated_user__` - default roles for an by the webserver authenticated user
+* `[userid]` - a user id for api or web ui access. Allowed chars are a-z (lowercase) and 0-9. 
+
+If you create your first user then copy the entries for \* and __default_authenticated_user__ from default config.
+
+The object below the user id contains
 
 key       | description
 ----------|---------------------------
 comment   | additional comments
-password  | password hash
-username  | Full user name
+password  | password hash for api user
 roles     | flat list of roles
+username  | Users display name
+
+Remark:
+
+The password hash will be verified by api requests only. It is optional for non protected api directory - then the user and password will be verified by the api itself.
 
 To create a password hash on command line you can use
 
 ```txt
 php -r 'echo password_hash("your-password-here", PASSWORD_BCRYPT);'
 ```
+
+BUT: we recommend to use webservers protection with basic authentication for better performance.
+
+All users without password field or *password: false* will match for users with webservers basic authentication.
 
 Existing roles:
 
@@ -208,11 +222,14 @@ Example:
         },
         "api": {
             "password": "$2y$10$5E4ZWyul.VdZjpP1.Ff6Le0z0kxu3ix7jnbYhv0Zg5vhvhjdJTOm6",
-            "comment": "Axels Dashboard",
+            "comment": "api user for Axels Dashboard",
             "roles": [ "api" ]
         },
+        "__default_authenticated_user__": {
+            "comment": "default roles for an by the webserver authenticated user",
+            "roles": [ "api", "ui" ]
+        }
         "superuser": {
-            "password": false,
             "comment": "Access to all things here",
             "roles": [ "*" ]
         }

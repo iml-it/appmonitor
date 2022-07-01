@@ -47,8 +47,7 @@ class appmonitorserver_api extends appmonitorserver {
      * @return array
      */
     public function getApiConfig(){
-        $_aTmpCfg=$this->getConfigVars();
-        return isset($_aTmpCfg['api']) ? $_aTmpCfg['api'] : [];
+        return isset($this->_aCfg['api']) ? $this->_aCfg['api'] : [];
     }
 
     /**
@@ -58,8 +57,7 @@ class appmonitorserver_api extends appmonitorserver {
      */
     public function getApiUsers(){
         $aReturn=[];
-        $_aTmpCfg=$this->getConfigVars();
-        foreach($_aTmpCfg['users'] as $sLoopuser=>$aUserdata){
+        foreach($this->_aCfg['users'] as $sLoopuser=>$aUserdata){
             $aReturn[$sLoopuser]=isset($aUserdata['password']) ? $aUserdata['password'] : false;
         }
         return $aReturn;

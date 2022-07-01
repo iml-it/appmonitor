@@ -2218,9 +2218,13 @@ class appmonitorserver_gui extends appmonitorserver {
         $iReload = ((isset($this->_aCfg['pagereload']) && (int) $this->_aCfg['pagereload'] ) ? (int) $this->_aCfg['pagereload'] : 0);
 
         $aUser=$this->getUser();
-
+        if(!$this->hasRole('ui')){
+            die("No ui access for user [".$this->getUsername()."].");
+        }
         $sNavi .= '<li><a href="#" title="'
-                        .$this->_tr('Hello-roles').': '.(isset($aUser['roles']) ? implode(', ', $aUser['roles']) : '-')
+                        .'uid: '. $this->getUserid()."\n"
+                        .$this->_tr('Hello-roles').': '.(isset($aUser['roles']) ? implode(', ', $aUser['roles']) : '-')."\n"
+                        .''
                     .'">'.sprintf($this->_tr('Hello-user'), $this->getUsername()).'</a><br></li>'
                 . $this->_renderMenuItem('#divwebs',          'allwebapps', 'allwebapps',    $this->_tr('All-webapps').' <span id="menubagde_allapps" style="float: right" ></span>')
                 . $this->_renderMenuItem('#divproblems',      'problems',   'problems',      $this->_tr('Problems').' <span id="menubagde_problems" style="float: right" ></span>')
