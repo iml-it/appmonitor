@@ -14,10 +14,11 @@
  *                                                               
  * ____________________________________________________________________________
  * 
- * CHECK SWLITE CONNECTION USING PDO
+ * CHECK TCP CONNECTION TO A GIVEN PORT
  * ____________________________________________________________________________
  * 
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
+ * 2022-07-05  <axel.hahn@iml.unibe.ch>  send unknown if socket module is not activated.
  * 
  */
 class checkPortTcp extends appmonitorcheck{
@@ -45,6 +46,10 @@ class checkPortTcp extends appmonitorcheck{
 
         $sHost = array_key_exists('host', $aParams) ? $aParams['host'] : '127.0.0.1';
         $iPort = (int) $aParams['port'];
+
+        if (!function_exists('socket_create')){
+            return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform tcp test. The socket module is not enabled in the php installation."];
+        }
 
         // from http://php.net/manual/de/sockets.examples.php
 
