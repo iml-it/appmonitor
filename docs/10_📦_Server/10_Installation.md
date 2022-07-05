@@ -34,14 +34,18 @@ Create a vhost with a webroot on `/var/www/appmonitor/public_html`
 
 Open the Webinterface on webroot, eg. <http://localhost/>
 
-## Use docker ##
+You will see a welcome message. Go to the settings page and add this url:
+`http://localhost/client/check-appmonitor-server.php`
+This is the self check of the appmonitor server.
+
+## Using a Docker container ##
 
 The repository includes my development environment.
 
-You need 
+You need
 
 - a running rootless docker service
-- docker-compose 
+- docker-compose
 - bash
 - acl (to use command setfacl)
 
@@ -53,17 +57,43 @@ With your desktop user:
 cd somewhere
 git clone https://github.com/iml-it/appmonitor.git
 cd appmonitor
-./docker/init.sh u
+./docker/init.sh
 ```
 
+There you have a menu. 
+
+```txt
+>>>>> MENU
+  g - remove git data of starterkit
+
+  i - init application: set permissions
+  t - generate files from templates
+  T - remove generated files
+
+  u - startup containers    docker-compose up -d
+  s - shutdown containers   docker-compose stop
+  r - remove containers     docker-compose rm -f
+
+  m - more infos
+  c - console (bash)
+
+  select >
+```
+
+From top down press ...
+
+- `i` + `Return` - it sets permissions for your current user and the apache httpd user of the container onto the public_html directory.
+- `t` + `Return` - generate configuration files for the docker container and docker compose.
+- `u` + `Return` - start container
+
+Remark: `i` and `t` are needed only once.
+
 It starts up a Apache 2.4 + PHP 8.1 instance and uses the public_html subdir as webroot.
-After bringing up the container it starts the monitoring service and shows its log
+After bringing up the container it starts the monitoring service and shows its log.
 
-In the webbrowser open http://localhost:8001/
-
-If you see the welcome message then go back to the terminal. Stop output with `Ctrl` + `C`. You see a menu. Press `i` + `Return` to set permissions for your current user and the apache httpd inside the container.
-
-Optional: If you are back in the menu press `u` + `Return` to start the service script in the container again.
+In the webbrowser open <http://localhost:8001/>. You will see a welcome message. Go to the settings page and add this url:
+`http://localhost/client/check-appmonitor-server.php`
+This is the self check of the appmonitor server.
 
 ## Production use ##
 
