@@ -13,6 +13,7 @@ In the folder plugins/checks/ are the files that contain the logic of a single c
 - [MysqlConnect](mysqlconnect.md)
 - [PDOConnect](pdoconnect.md)
 - [Phpmodules](phpmodules.md)
+- [Ping](ping.md)
 - [PortTcp](porttcp.md)
 - [Simple](simple.md)
 - [SqliteConnect](sqliteconnect.md)
