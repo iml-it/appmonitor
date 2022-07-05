@@ -740,7 +740,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
         $aShapes=[
             RESULT_OK      => [ 'color' => '#aaeeaa', 'width' => 3 ],
-            RESULT_UNKNOWN => [ 'color' => '#bbbbbb', 'width' => 3, 'shape'=>'ellipse' ],
+            RESULT_UNKNOWN => [ 'color' => '#bb77bb', 'width' => 3, 'shape'=>'ellipse' ],
             RESULT_WARNING => [ 'color' => '#eeaa22', 'width' => 6, 'shape'=>'dot' ],
             RESULT_ERROR   => [ 'color' => '#ffcccc', 'width' => 9, 'shape'=>'star' ],
         ];
