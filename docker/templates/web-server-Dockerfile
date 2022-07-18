@@ -2,7 +2,7 @@
 #
 # {{generator}}
 #
-
+FROM php:{{APP_PHP_VERSION}}-apache
 
 # install packages
 RUN apt-get update && apt-get install -y {{APP_APT_PACKAGES}}
