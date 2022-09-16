@@ -18,6 +18,7 @@
  * ____________________________________________________________________________
  * 
  * 2022-07-05  <axel.hahn@iml.unibe.ch>
+ * 2022-09-16  <axel.hahn@iml.unibe.ch>  read error before closing socket.
  * 
  */
 class checkPing extends appmonitorcheck{
@@ -75,8 +76,9 @@ class checkPing extends appmonitorcheck{
 
                 ];
             } else {
+                $aResult=[RESULT_ERROR, "ERROR: ping to $sHost failed after connect." . socket_strerror(socket_last_error($socket))];
                 socket_close($socket);
-                return [RESULT_ERROR, "ERROR: ping to $sHost failed after connect. " . socket_strerror(socket_last_error($socket))];
+                return $aResult;
             }
         } else {
             return [RESULT_ERROR, "ERROR: ping to $sHost failed. " . socket_strerror(socket_last_error($socket))];
