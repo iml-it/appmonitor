@@ -19,6 +19,7 @@
  * 
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
  * 2022-07-05  <axel.hahn@iml.unibe.ch>  send unknown if socket module is not activated.
+ * 2022-09-16  <axel.hahn@iml.unibe.ch>  read error before closing socket.
  * 
  */
 class checkPortTcp extends appmonitorcheck{
@@ -70,8 +71,9 @@ class checkPortTcp extends appmonitorcheck{
 
         $result = socket_connect($socket, $sHost, $iPort);
         if ($result === false) {
+            $aResult=[RESULT_ERROR, "ERROR: $sHost:$iPort failed. " . socket_strerror(socket_last_error($socket))];
             socket_close($socket);
-            return [RESULT_ERROR, "ERROR: $sHost:$iPort failed. " . socket_strerror(socket_last_error($socket))];
+            return $aResult;
         } else {
             socket_close($socket);
             return [RESULT_OK, "OK: $sHost:$iPort was connected."];
