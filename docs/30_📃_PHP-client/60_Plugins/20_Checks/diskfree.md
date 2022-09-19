@@ -8,18 +8,18 @@ Check if a given filesystem / directory that it has enough space.
 
 ```php
 $oMonitor->addCheck(
-	array(
-		"name" => "check file storage",
-		"description" => "The file storage have some space left",
-		"check" => array(
-			"function" => "Diskfree",
-			"params" => array(
-				"directory" => "[directory]",
-				"warning"   => [size],
-				"critical"  => [size],
-			),
-		),
-	)
+    array(
+        "name" => "check file storage",
+        "description" => "The file storage have some space left",
+        "check" => array(
+            "function" => "Diskfree",
+            "params" => array(
+                "directory" => "[directory]",
+                "warning"   => [size],
+                "critical"  => [size],
+            ),
+        ),
+    )
 );
 ```
 
@@ -41,6 +41,7 @@ $oMonitor->addCheck(
 Remark to the [size] value:
 
 The values for warning and critical
+
 - must be integer OR
 - integer or float added by a size unit (see below)
 - warning level must be higher than critical value
