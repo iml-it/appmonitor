@@ -7,6 +7,7 @@ In the folder plugins/checks/ are the files that contain the logic of a single c
 - [ApacheProcesses](apacheprocesses.md)
 - [Cert](cert.md)
 - [Diskfree](diskfree.md)
+- [Exec](exec.md)
 - [File](file.md)
 - [HttpContent](httpcontent.md)
 - [Loadmeter](loadmeter.md)
