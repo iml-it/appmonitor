@@ -45,10 +45,12 @@ $oMonitor->addCheck(
 |command🔸    |(string)  |filename or directory to check
 |exitOK       |(array)   |array of integegers for ok exitcodes
 |exitWarn     |(array)   |array of integegers for exitcodes with warning
-|exitCritical |(array)   |array of integegers for exitcodes that result in an error
+|exitCritical |(array)   |array of integegers for exitcodes that result in an error (otherwise the plugin can return OK or CRITITCAL only)
 |output       |(bool)    |flag: show output of the executed command; default: true
 
 ## Examples ##
+
+### Demo with list command ###
 
 Just as a demo: execute a ls on a non existing directory.
 To see the error of ls on STDERR we add `2>&1`.
@@ -68,6 +70,8 @@ $oMonitor->addCheck(
     )
 );
 ```
+
+### Custom return codes ###
 
 To allow another non-zero existode as OK you can use the array exitOK.
 Here is a returncode example with rsync (which is not really a good test command in a monitoring).

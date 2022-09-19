@@ -48,7 +48,8 @@ The checks for text strings are case sensitive. If you need a case insensitive t
 
 ## Examples ##
 
-**Example 1**: \
+### Example 1 ###
+
 Check if a http reponse is successful.
 
 ```php
@@ -66,7 +67,8 @@ $oMonitor->addCheck(
 );
 ```
 
-**Example 2**: \
+### Example 2 ###
+
 Check if a http reponse is successful and contains a wanted text.
 
 ```php
@@ -85,7 +87,8 @@ $oMonitor->addCheck(
 );
 ```
 
-**Example 3**: \
+### Example 3 ###
+
 Check the status code: Is the http status a 307 and points to a wanted target?
 
 ```php

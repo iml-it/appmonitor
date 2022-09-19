@@ -42,8 +42,9 @@ $oMonitor->addCheck(
 
 ## Examples ##
 
-**Example 1**: \
-check if "filename" is a directory and is writable
+### Example 1 ###
+
+Check if "filename" is a directory and is writable
 
 ```php
 $oMonitor->addCheck(
@@ -62,7 +63,8 @@ $oMonitor->addCheck(
 );
 ```
 
-**Example 2**: \
+### Example 2 ###
+
 With *"exists" => false* you can check if a file does not exist (flag is checked that it is not matching).
 
 ```php

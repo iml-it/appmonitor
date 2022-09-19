@@ -33,7 +33,7 @@ $oMonitor->addCheck(
 
 ## Examples ##
 
-### Check local SSH port (22)
+### Check local SSH port (22) ###
 
 ```php
 $oMonitor->addCheck(
@@ -50,7 +50,7 @@ $oMonitor->addCheck(
 );
 ```
 
-### Loop: multiple port check
+### Loop: multiple port check ###
 
 And an additional code snippet for a multiple port check:
 
