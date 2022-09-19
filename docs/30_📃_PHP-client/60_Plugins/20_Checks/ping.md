@@ -8,17 +8,17 @@ Check if the local server or another host is listening to a given port number.
 
 ```php
 $oMonitor->addCheck(
-	array(
-		"name" => "Ping",
-		"description" => "ping to a server",
-		"check" => array(
-			"function" => "Ping",
-			"params" => array(
-				"host" => [hostname],
-				"timeout" => [time],
-			),
-		),
-	)
+    array(
+        "name" => "Ping",
+        "description" => "ping to a server",
+        "check" => array(
+            "function" => "Ping",
+            "params" => array(
+                "host" => [hostname],
+                "timeout" => [time],
+            ),
+        ),
+    )
 );
 ```
 

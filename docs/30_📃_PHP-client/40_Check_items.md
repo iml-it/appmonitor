@@ -44,14 +44,14 @@ $oMonitor->addCheck(
 );
 ```
 
-| key        | type     | description |
-|---         |---       |---
-|name        |(string)  | "id" if the check <span class="required">(*)</span>|
-|description |(string)  | a short description <span class="required">(*)</span>|
-|group       |(string)  | optional override name of a group |
-|parent      |(string)  | optional set a "name" of another check to create a deoendency chain |
-|check       |(array)   | check to perform <span class="required">(*)</span>|
-|worstresult |(integer) | optional: limit maximum error level if the check fails<br>if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING.|
+| key          | type     | description |
+|---           |---       |---
+|name🔸        |(string)  | "id" if the check
+|description🔸 |(string)  | a short description
+|group         |(string)  | optional override name of a group
+|parent        |(string)  | optional set a "name" of another check to create a deoendency chain |
+|check🔸       |(array)   | check to perform
+|worstresult   |(integer) | optional: limit maximum error level if the check fails<br>if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING.
 
 
 The key `check` contains 2 subkeys:

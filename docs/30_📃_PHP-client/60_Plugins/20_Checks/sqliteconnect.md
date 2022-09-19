@@ -13,19 +13,19 @@ $o = new PDO("sqlite:".$aParams["db"],(...));
 
 ```php
 $oMonitor->addCheck(
-	array(
-		"name" => "Slite test",
-		"description" => "Connect sqlite database file",
-		"check" => array(
-			"function" => "SqliteConnect",
-			"params" => array(
-			  "db"       => [database file],
-			  "user"     => [username],
-			  "password" => [password],
-			  "timeout"  => [time],
-			),
-		),
-	)
+    array(
+        "name" => "Slite test",
+        "description" => "Connect sqlite database file",
+        "check" => array(
+            "function" => "SqliteConnect",
+            "params" => array(
+                "db"       => [database file],
+                "user"     => [username],
+                "password" => [password],
+                "timeout"  => [time],
+            ),
+        ),
+    )
 );
 ```
 
@@ -33,7 +33,7 @@ $oMonitor->addCheck(
 
 | key      | type     | description |
 |---       |---       |---
-|db        |(string)  |full path of the sqlite database file <span class="required">(*)</span>
+|db🔸      |(string)  |full path of the sqlite database file
 |user      |(string)  |optional: username; default: empty
 |password  |(string)  |optional: password; default: empty
 |timeout   |(integer) |optional timeout in sec; default: 5

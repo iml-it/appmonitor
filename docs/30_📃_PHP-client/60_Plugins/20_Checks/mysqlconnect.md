@@ -8,20 +8,20 @@ verify a database connection with mysqli real connect function.
 
 ```php
 $oMonitor->addCheck(
-	array(
-		"name" => "Mysql Master",
-		"description" => "Connect mysql db X on server Y",
-		"check" => array(
-			"function" => "MysqlConnect",
-			"params" => array(
-			  "server"   => $aDb['host'],
-			  "user"     => $aDb['user'],
-			  "password" => $aDb['pass'],
-			  "db"       => $aDb['path'],
-			  "port"     => $aDb['port'], // optional
-			),
-		),
-	)
+    array(
+        "name" => "Mysql Master",
+        "description" => "Connect mysql db X on server Y",
+        "check" => array(
+            "function" => "MysqlConnect",
+            "params" => array(
+                "server"   => $aDb['host'],
+                "user"     => $aDb['user'],
+                "password" => $aDb['pass'],
+                "db"       => $aDb['path'],
+                "port"     => $aDb['port'], // optional
+            ),
+        ),
+    )
 );
 ```
 
@@ -31,10 +31,10 @@ Parameters:
 
 | key      | type     | description |
 |---       |---       |---
-|server    |(string)  |hostname/ ip of mysql server <span class="required">(*)</span>
-|user      |(string)  |mysql username <span class="required">(*)</span>
-|password  |(string)  |password <span class="required">(*)</span>
-|db        |(string)  |database name / scheme to connect <span class="required">(*)</span>
+|server🔸  |(string)  |hostname/ ip of mysql server
+|user🔸    |(string)  |mysql username
+|password🔸|(string)  |password
+|db🔸      |(string)  |database name / scheme to connect
 |port      |(integer) |database port; optional
 |timeout   |(integer) |optional timeout in sec; default: 5
 

@@ -37,7 +37,7 @@ $oMonitor->addCheck(
 
 | key        | type     | description
 |---         |---       |---
-|url         |(string)  | optional: override https server-status page; default is http://localhost/server-status; Use it if the protocol to localhost is not http, but https or if it requires an authentication
+|url         |(string)  | optional: override https server-status page; default is <http://localhost/server-status>; Use it if the protocol to localhost is not http, but https or if it requires an authentication
 |warning     |(integer) | optional: limit to switch to warning (in percent); default: 50
 |error       |(integer) | optional: limit to switch to error (in percent); default: 75
 

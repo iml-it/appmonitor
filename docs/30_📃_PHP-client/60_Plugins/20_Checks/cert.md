@@ -8,19 +8,19 @@ Check if a SSL certificate is still valid ... and does not expire soon.
 
 ```php
 $oMonitor->addCheck(
-	array(
-		"name" => "Certificate check",
-		"description" => "Check if SSL cert is valid and does not expire soon",
-		"check" => array(
-			"function" => "Cert",
-			"params" => array(
-				"url"      => [url-to-check],
-				"verify"   => [flag-for-verification],
-				"warning"  => [days-before-cert-expires],
-				"critical" => [days-before-cert-expires],
-			),
-		),
-	)
+    array(
+        "name" => "Certificate check",
+        "description" => "Check if SSL cert is valid and does not expire soon",
+        "check" => array(
+            "function" => "Cert",
+            "params" => array(
+                "url"      => [url-to-check],
+                "verify"   => [flag-for-verification],
+                "warning"  => [days-before-cert-expires],
+                "critical" => [days-before-cert-expires],
+            ),
+        ),
+    )
 );
 ```
 

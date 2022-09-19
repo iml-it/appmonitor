@@ -20,18 +20,18 @@ for finetuning.
 
 ```php
 $oMonitor->addCheck(
-  array(
-    "name" => "exec check",
-    "description" => "exec check",
-    "check" => array(
-      "function" => "Exec",
-      "params" => array(
-        "command"      => [string: Command],
-        "output"       => [bool: show output?]
-        // optional: handle custom exitcodes
-        "exitOK"       => [array],
-        "exitWarn"     => [array],
-        "exitCritical" => [array],
+    array(
+        "name" => "exec check",
+        "description" => "exec check",
+        "check" => array(
+            "function" => "Exec",
+            "params" => array(
+                "command"      => [string: Command],
+                "output"       => [bool: show output?]
+                // optional: handle custom exitcodes
+                "exitOK"       => [array],
+                "exitWarn"     => [array],
+                "exitCritical" => [array],
       ),
     ),
   )
@@ -42,7 +42,7 @@ $oMonitor->addCheck(
 
 | key         | type     | description |
 |---          |---       |---
-|command      |(string)  |filename or directory to check  <span class="required">(*)</span>
+|command🔸    |(string)  |filename or directory to check
 |exitOK       |(array)   |array of integegers for ok exitcodes
 |exitWarn     |(array)   |array of integegers for exitcodes with warning
 |exitCritical |(array)   |array of integegers for exitcodes that result in an error
