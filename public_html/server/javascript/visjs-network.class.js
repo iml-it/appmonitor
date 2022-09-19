@@ -134,7 +134,6 @@ var visJsNetworkMap = function(){
      * and update select
      */
     this.redrawMap = function() {
-        // this.container.className=document.fullscreenElement ? 'fullscreen' : '';
         this._updateVisOptions();
         
         // removed because fullscreen was added
@@ -146,7 +145,7 @@ var visJsNetworkMap = function(){
             { nodes: this.nodes, edges: this.edges }, 
             this.visjsNetOptions
         );        
-        this.renderSelectView();
+        // this.renderSelectView();
     }
     
     // ----------------------------------------------------------------------
@@ -205,7 +204,8 @@ var visJsNetworkMap = function(){
         var oContainer=document.getElementById(idContainer);
 
         // detect if view is 100% already
-        var bToFull=(this.container.className=='');
+        bToFull=!document.fullscreenElement;
+        // var bToFull=(this.container.className=='');
         
         // set to full screen?
         if(bToFull){

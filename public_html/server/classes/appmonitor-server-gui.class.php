@@ -870,7 +870,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
         <div id="networkContainer">
             <div id="network-toolbar">
-                <span id="selView">[]</span>
+                <span id="selView"></span>
                 <button class="btn btn-default" onclick="oMap.switchViewMode(); return false;">switch View</button>
                 <!--
                 <button class="btn btn-default" onclick="oMap.switchViewSize(); return false;">switch Size</button>
