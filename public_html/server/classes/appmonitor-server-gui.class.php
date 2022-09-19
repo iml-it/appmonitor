@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.114";
+    var $_sVersion = "0.115";
 
     /**
      * html code for icons in the web gui
@@ -740,7 +740,7 @@ class appmonitorserver_gui extends appmonitorserver {
 
         $aShapes=[
             RESULT_OK      => [ 'color' => '#aaeeaa', 'width' => 3 ],
-            RESULT_UNKNOWN => [ 'color' => '#bbbbbb', 'width' => 3, 'shape'=>'ellipse' ],
+            RESULT_UNKNOWN => [ 'color' => '#bb77bb', 'width' => 3, 'shape'=>'ellipse' ],
             RESULT_WARNING => [ 'color' => '#eeaa22', 'width' => 6, 'shape'=>'dot' ],
             RESULT_ERROR   => [ 'color' => '#ffcccc', 'width' => 9, 'shape'=>'star' ],
         ];
@@ -867,15 +867,19 @@ class appmonitorserver_gui extends appmonitorserver {
         
 
         </style>
-        <div id="network-toolbar">
-            <span id="selView">[]</span>
-            <button class="btn btn-default" onclick="oMap.switchViewMode(); return false;">switch View</button>
-            <!--
-            -->
-            <button class="btn btn-default" onclick="oMap.switchViewSize(); return false;">switch Size</button>
 
+        <div id="networkContainer">
+            <div id="network-toolbar">
+                <span id="selView">[]</span>
+                <button class="btn btn-default" onclick="oMap.switchViewMode(); return false;">switch View</button>
+                <!--
+                <button class="btn btn-default" onclick="oMap.switchViewSize(); return false;">switch Size</button>
+                -->
+                <button class="btn btn-default" onclick="oMap.toggleFullscreen(\'networkContainer\'); return false;">Fullscreen</button>
+
+            </div>
+            <div id="mynetwork"></div>
         </div>
-        <div id="mynetwork"></div>
 
         <script type="text/javascript">
         

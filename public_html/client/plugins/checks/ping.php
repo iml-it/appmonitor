@@ -14,15 +14,14 @@
  *                                                               
  * ____________________________________________________________________________
  * 
- * CHECK TCP CONNECTION TO A GIVEN PORT
+ * CHECK PING RESPONSE TIME VIA ICMP
  * ____________________________________________________________________________
  * 
- * 2021-10-27  <axel.hahn@iml.unibe.ch>
- * 2022-07-05  <axel.hahn@iml.unibe.ch>  send unknown if socket module is not activated.
+ * 2022-07-05  <axel.hahn@iml.unibe.ch>
  * 2022-09-16  <axel.hahn@iml.unibe.ch>  read error before closing socket.
  * 
  */
-class checkPortTcp extends appmonitorcheck{
+class checkPing extends appmonitorcheck{
     /**
      * get default group of this check
      * @param array   $aParams
@@ -33,50 +32,56 @@ class checkPortTcp extends appmonitorcheck{
     }
 
     /**
-     * check if system is listening to a given port
+     * check ping to a target
      * @param array $aParams
      * array(
-     *     port                integer  port
      *     host                string   optional hostname to connect; default: 127.0.0.1
      *     timeout             integer  optional timeout in sec; default: 5
      * )
      * @return boolean
      */
     public function run($aParams) {
-        $this->_checkArrayKeys($aParams, "port");
-
         $sHost = array_key_exists('host', $aParams) ? $aParams['host'] : '127.0.0.1';
-        $iPort = (int) $aParams['port'];
 
         if (!function_exists('socket_create')){
-            return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform tcp test. The socket module is not enabled in the php installation."];
+            return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform ping test. The socket module is not enabled in the php installation."];
         }
 
-        // from http://php.net/manual/de/sockets.examples.php
-
-        $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        if ($socket === false) {
-            return [RESULT_UNKNOWN, "ERROR: $sHost:$iPort was not checked. socket_create() failed: " . socket_strerror(socket_last_error())];
-        }
-        // set socket timeout
+        /* ICMP ping packet with a pre-calculated checksum */
+        $package = "\x08\x00\x7d\x4b\x00\x00\x00\x00PingHost";
+        $socket  = socket_create(AF_INET, SOCK_RAW, 1);
         socket_set_option(
-            $socket,
-            SOL_SOCKET,  // socket level
-            SO_SNDTIMEO, // timeout option
+            $socket, 
+            SOL_SOCKET, 
+            SO_RCVTIMEO, 
             array(
-              "sec"=>(isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp, // timeout in seconds
-              "usec"=>0
+                "sec"=>(isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp, // timeout in seconds
+                "usec"=>0
               )
-            );
+        );
 
-        $result = socket_connect($socket, $sHost, $iPort);
-        if ($result === false) {
-            $aResult=[RESULT_ERROR, "ERROR: $sHost:$iPort failed. " . socket_strerror(socket_last_error($socket))];
-            socket_close($socket);
-            return $aResult;
+        $start = microtime(true);
+        $connect = socket_send($socket, $package, strLen($package), 0);
+        if($connect){
+            if (socket_read($socket, 255)){
+                $result = microtime(true) - $start;
+                socket_close($socket);
+                return [RESULT_OK, 
+                    "OK: ping to $sHost in " . socket_strerror(socket_last_error($socket)),
+                    array(
+                        'type'=>'counter',
+                        'count'=>$result,
+                        'visual'=>'line',
+                    )
+
+                ];
+            } else {
+                $aResult=[RESULT_ERROR, "ERROR: ping to $sHost failed after connect." . socket_strerror(socket_last_error($socket))];
+                socket_close($socket);
+                return $aResult;
+            }
         } else {
-            socket_close($socket);
-            return [RESULT_OK, "OK: $sHost:$iPort was connected."];
+            return [RESULT_ERROR, "ERROR: ping to $sHost failed. " . socket_strerror(socket_last_error($socket))];
         }
     }
     

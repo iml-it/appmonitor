@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.115 2022-09-19
+   - server: added fullscreen mode for graphical view
+   - client: add ping check
+   - client: add exec check
+
 v0.114 2022-07-01
     - server: add api
     - server: add support for roles (api and web ui)

@@ -134,14 +134,18 @@ var visJsNetworkMap = function(){
      * and update select
      */
     this.redrawMap = function() {
+        // this.container.className=document.fullscreenElement ? 'fullscreen' : '';
         this._updateVisOptions();
-        this.container.className=( this.bViewFullsize===true || this.bViewFullsize==="true")  ? 'large':'';
+        
+        // removed because fullscreen was added
+        // this.container.className=( this.bViewFullsize===true || this.bViewFullsize==="true")  ? 'large':'';
+
         // console.log("viewMode=" + this.sViewmode + "; fullsize=" + this.bViewFullsize);
         network = new vis.Network(
             this.container,
             { nodes: this.nodes, edges: this.edges }, 
             this.visjsNetOptions
-        );
+        );        
         this.renderSelectView();
     }
     
@@ -179,12 +183,59 @@ var visJsNetworkMap = function(){
     };
 
     /**
+     * DEPRECATED - removed because fullscreen was added
      * change size of the map by adding/ removing css class "large"
      */
     this.switchViewSize = function () {
         this.bViewFullsize=!this.bViewFullsize;
         this._saveVar("this.bViewFullsize", this.bViewFullsize);
         this.redrawMap();
+    }
+
+    // ----------------------------------------------------------------------
+    // FULL SCREEN
+    // ----------------------------------------------------------------------
+
+    /**
+     * toggle full screen given domid (=container of network)
+     * @param {*} idContainer 
+     * @returns 
+     */
+    this.toggleFullscreen = function(idContainer) {
+        var oContainer=document.getElementById(idContainer);
+
+        // detect if view is 100% already
+        var bToFull=(this.container.className=='');
+        
+        // set to full screen?
+        if(bToFull){
+            if (oContainer.requestFullscreen) {
+                oContainer.requestFullscreen();
+            } else if (oContainer.webkitRequestFullscreen) { /* Safari */
+                oContainer.webkitRequestFullscreen();
+            } else if (oContainer.msRequestFullscreen) { /* IE11 */
+                oContainer.msRequestFullscreen();
+            }
+        } else {
+            try {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+                    
+            } catch (error) {
+                // 
+            }
+
+        }
+        // this.container.className=document.fullscreenElement ? 'fullscreen' : '';
+        this.container.className=bToFull ? 'fullscreen' : '';
+
+        this.redrawMap();
+        return true;
     }
 
     // ----------------------------------------------------------------------
@@ -197,8 +248,10 @@ var visJsNetworkMap = function(){
     }
     */
 
-    this.bViewFullsize=this._getVar("this.bViewFullsize") ? this._getVar("this.bViewFullsize") : false;
-    this.sViewmode=this._getVar("this.sViewmode") ? this._getVar("this.sViewmode") : "UD";
+    // removed because fullscreen was added
+    // this.bViewFullsize=this._getVar("this.bViewFullsize") ? this._getVar("this.bViewFullsize") : false;
+    this.bViewFullscreen=this._getVar("this.bViewFullscreen") ? this._getVar("this.bViewFullscreen") : false;
+    
     this._updateVisOptions();
 
     return true;    

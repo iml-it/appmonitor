@@ -71,16 +71,16 @@ The response has 2 keys:
 
 The meta key has these subkeys
 
-- *"host"*: [string: name of the computer] <span class="required">(*)</span>\
+- *"host"*: [string: name of the computer] 🔸\
   This is the hostname. The server GUI for the monitoring can group by server. 
   If you host several websites then these have the same "host".
-- *"website"*: [string: domain (and maybe path) of the webapp or any clear description. <span class="required">(*)</span>\
+- *"website"*: [string: domain (and maybe path) of the webapp or any clear description. 🔸\
   Suggestion: [Application] - [vhost]/path, i.e. "My Wordpress blog - example.com/blog/".
 - *"ttl"*: [integer: ttl for the server gui] <span class="optional">(optional)</span> \
   Time to live value in seconds. The server GUI respects this value and does
   not ask the appmonitor client more often. A goof value for beginning is
   60 or 300 (1 min/ 5 min)
-- *"result"*: [integer: 0..3] <span class="required">(*)</span>\
+- *"result"*: [integer: 0..3] 🔸\
   Result code of all checks of the webapp. \
   0 - OK \
   1 - unknown \
@@ -99,7 +99,7 @@ The meta key has these subkeys
   - *"email"*: flat list of emails
   - *"slack"*: key-value list with a readable label for the target channel and the Slack webhook url
 
-<span class="required">(*)</span> The keys "host", "website" and "result" are required.
+🔸 The keys "host", "website" and "result" are required.
 
 # Section "checks" #
 
@@ -114,10 +114,10 @@ key for the response.
 
 Each check must have these keys:
 
-- *"name"*: [string: short name of the test N] <span class="required">(*)</span> \
+- *"name"*: [string: short name of the test N] 🔸 \
   This string is for you - make it unique to identify it in the server GUI.
   i.e. "Mysql-db ABC"
-- *"description"*: [string: a description what the test N is verifying] <span class="required">(*)</span> \
+- *"description"*: [string: a description what the test N is verifying] 🔸 \
   This string is for you - you see the description in the server GUI
   i.e. "Check mysql-db ABC on the server db01"
 - *"group"*: [{string}: name of a group (optional)] \
@@ -129,12 +129,12 @@ Each check must have these keys:
   i.e. you must read the config first, where are database connection infos
   before you can check the database status. In the database check 
   set parent to "read config"
-- *"result"*: [integer: 0..3] <span class="required">(*)</span> \
+- *"result"*: [integer: 0..3] 🔸 \
   result code of the check. The values are the same like the result in the 
   meta section.
   Based on the result code the server GUI renders the item for the check
   (i.e. green if OK, red on error)
-- *"value"*: [string: result in words] <span class="required">(*)</span> \
+- *"value"*: [string: result in words] 🔸 \
   A human readable text of the result of the ckeck
   i.e. 
   - OK, database was connected successfully
@@ -159,7 +159,7 @@ Each check must have these keys:
 Behind the type can follow an integer for the width where the page width is 12 columns. The default is 2.\
 The last
 
-<span class="required">(*)</span> The keys "name", "description", "value" and "result" are required.
+🔸 The keys "name", "description", "value" and "result" are required.
 
 ## Chaining ##
 

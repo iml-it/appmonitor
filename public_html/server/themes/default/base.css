@@ -65,7 +65,7 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 #counter{border-bottom: 1px solid rgba(255,255,255,0.3); text-align: center; margin-right: 0.5em;}
 #counter div{background:#fc2; height: 1px; transition: width 0.8s linear ; bottom: 0;}
 
-
+#networkContainer{background-color: #fff;}
 #mynetwork {
 	width: 100%;
 	height: 400px;
@@ -74,9 +74,8 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
     border-radius: 2em;
     box-shadow: 0 0 5em #fff inset ;
 }
-#mynetwork.large {
-    height: 900px;
-}
+/*#mynetwork.large {height: 900px;}*/
+#mynetwork.fullscreen {height: 100%;}
 
 /* ---------- override AdminLte */
 /* HACK: remove menu icon ... it is in the template classes/layout-html.tpl :-/ */

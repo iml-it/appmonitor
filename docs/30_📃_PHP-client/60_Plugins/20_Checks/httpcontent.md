@@ -12,17 +12,17 @@ This check verifies if a given url can be requested. Optionally you can test if 
 
 ```php
 $oMonitor->addCheck(
-	array(
-		"name" => "HttpContent 1",
-		"description" => "check if the example website sends a response",
-		"check" => array(
-			"function" => "HttpContent",
-			"params" => array(
-				"url" => "http://www.example.com/",
-				"[option]" => "[see parameters table]",
-			),
-		),
-	)
+    array(
+        "name" => "HttpContent 1",
+        "description" => "check if the example website sends a response",
+        "check" => array(
+            "function" => "HttpContent",
+            "params" => array(
+                "url" => "http://www.example.com/",
+                "[option]" => "[see parameters table]",
+            ),
+        ),
+    )
 );
 ```
 
@@ -30,7 +30,7 @@ $oMonitor->addCheck(
 
 | key              | type     | description |
 |---               |---       |---
-|url               |(string)  |url to fetch <span class="required">(*)</span>
+|url               |(string)  |url to fetch 🔸
 |timeout           |(integer) |optional timeout in sec; default: 5
 |headeronly        |(boolean) |optional flag to fetch http response herader only (HEAD request); default: false = returns header and body; 
 |follow            |(boolean) |optional flag to follow a location; default: false = do not follow; If you set it to true it ries to follow (but this is not a safe method)
@@ -48,60 +48,63 @@ The checks for text strings are case sensitive. If you need a case insensitive t
 
 ## Examples ##
 
-**Example 1**: \
+### Example 1 ###
+
 Check if a http reponse is successful.
 
 ```php
 $oMonitor->addCheck(
-	array(
-		"name" => "HttpContent 1",
-		"description" => "check if the example website sends a response",
-		"check" => array(
-			"function" => "HttpContent",
-			"params" => array(
-				"url" => "http://www.example.com/",
-			),
-		),
-	)
+    array(
+        "name" => "HttpContent 1",
+        "description" => "check if the example website sends a response",
+        "check" => array(
+            "function" => "HttpContent",
+            "params" => array(
+                "url" => "http://www.example.com/",
+            ),
+        ),
+    )
 );
 ```
 
-**Example 2**: \
+### Example 2 ###
+
 Check if a http reponse is successful and contains a wanted text.
 
 ```php
 $oMonitor->addCheck(
-	array(
-		"name" => "HttpContent 1",
-		"description" => "check if the example website sends a response and contains hello in the text",
-		"check" => array(
-			"function" => "HttpContent",
-			"params" => array(
-				"url" => "http://www.example.com/",
-				"bodycontains" => "hello",
-			),
-		),
-	)
+    array(
+        "name" => "HttpContent 1",
+        "description" => "check if the example website sends a response and contains hello in the text",
+        "check" => array(
+            "function" => "HttpContent",
+            "params" => array(
+                "url" => "http://www.example.com/",
+                "bodycontains" => "hello",
+            ),
+        ),
+    )
 );
 ```
 
-**Example 3**: \
+### Example 3 ###
+
 Check the status code: Is the http status a 307 and points to a wanted target?
 
 ```php
 $oMonitor->addCheck(
-	array(
-		"name" => "HttpContent 2",
-		"description" => "check if the example website is a redirect with 307",
-		"check" => array(
-			"function" => "HttpContent",
-			"params" => array(
-				"url" => "https://www.example.com/redirect",
-				"headeronly" => true,
-				"status" => 307,
-				"headerregex" => "#Location: https://www.example.com/mytarget#i",
-			),
-		),
-	)
+    array(
+        "name" => "HttpContent 2",
+        "description" => "check if the example website is a redirect with 307",
+        "check" => array(
+        "function" => "HttpContent",
+            "params" => array(
+                "url" => "https://www.example.com/redirect",
+                "headeronly" => true,
+                "status" => 307,
+                "headerregex" => "#Location: https://www.example.com/mytarget#i",
+            ),
+        ),
+    )
 );
 ```
