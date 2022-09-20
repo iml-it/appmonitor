@@ -6,11 +6,9 @@ of servers and its services.
 
 Free software and Open Source from University of Bern :: IML - Institute of Medical Education
 
-📄 Source: <https://github.com/iml-it/appmonitor>
-
-📜 License: GNU GPL 3.0
-
-📖 You can read the docs online: <https://os-docs.iml.unibe.ch/appmonitor/>
+📄 Source: <https://github.com/iml-it/appmonitor> \
+📜 License: GNU GPL 3.0 \
+📗 You can read the docs online: <https://os-docs.iml.unibe.ch/appmonitor/>
 Or have a look to the [docs](docs/) subdirectory.
 
 
