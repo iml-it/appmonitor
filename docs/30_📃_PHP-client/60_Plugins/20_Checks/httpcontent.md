@@ -42,6 +42,8 @@ $oMonitor->addCheck(
 |bodynotcontains   |(string)  |test for a string in the http response body; it returns OK if the text was not found
 |bodyregex         |(string)  |test for a regex in the http response body; it returns OK if the regex matches;
 
+🔸 required
+
 Remarks:
 
 The checks for text strings are case sensitive. If you need a case insensitive test use a regex with "i" modifyer like in example 3.

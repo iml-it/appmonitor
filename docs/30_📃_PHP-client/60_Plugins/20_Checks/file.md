@@ -40,6 +40,8 @@ $oMonitor->addCheck(
 |readable  |(boolean) |flag is readable
 |writable  |(boolean) |flag is writable
 
+🔸 required
+
 ## Examples ##
 
 ### Example 1 ###

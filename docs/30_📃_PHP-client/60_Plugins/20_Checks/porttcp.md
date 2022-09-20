@@ -31,6 +31,8 @@ $oMonitor->addCheck(
 |host      |(string)  |optional: hostname to connect to; if unavailable 127.0.0.1 will be tested
 |timeout   |(integer) |optional timeout in sec; default: 5
 
+🔸 required
+
 ## Examples ##
 
 ### Check local SSH port (22) ###

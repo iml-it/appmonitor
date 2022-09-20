@@ -48,6 +48,8 @@ $oMonitor->addCheck(
 |exitCritical |(array)   |array of integegers for exitcodes that result in an error (otherwise the plugin can return OK or CRITITCAL only)
 |output       |(bool)    |flag: show output of the executed command; default: true
 
+🔸 required
+
 ## Examples ##
 
 ### Demo with list command ###

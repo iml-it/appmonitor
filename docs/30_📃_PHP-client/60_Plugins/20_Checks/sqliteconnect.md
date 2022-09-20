@@ -38,6 +38,8 @@ $oMonitor->addCheck(
 |password  |(string)  |optional: password; default: empty
 |timeout   |(integer) |optional timeout in sec; default: 5
 
+🔸 required
+
 ## Examples ##
 
 ```php

@@ -35,6 +35,8 @@ $oMonitor->addCheck(
 |password🔸|(string)  |password
 |timeout   |(integer) |optional timeout in sec; default: 5
 
+🔸 required
+
 Remark:  
 The idea is not to enter credentials in the parameters. You should parse the config of your application and insert its variables.
 
