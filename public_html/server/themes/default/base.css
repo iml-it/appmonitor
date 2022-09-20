@@ -65,17 +65,16 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 #counter{border-bottom: 1px solid rgba(255,255,255,0.3); text-align: center; margin-right: 0.5em;}
 #counter div{background:#fc2; height: 1px; transition: width 0.8s linear ; bottom: 0;}
 
-#networkContainer{background-color: #fff;}
+#networkContainer{background-color: #fff;height: 500px;}
+#network-toolbar{position: absolute; top: 4em; left: 1em; z-index:101;}
 #mynetwork {
 	width: 100%;
-	height: 400px;
+	height: 100%;
 	border: 0px dashed lightgray;
 	background: linear-gradient(-5deg,#d8e0f0,#fff,#fed);
-    border-radius: 2em;
     box-shadow: 0 0 5em #fff inset ;
+    z-index:100;
 }
-/*#mynetwork.large {height: 900px;}*/
-#mynetwork.fullscreen {height: 100%;}
 
 /* ---------- override AdminLte */
 /* HACK: remove menu icon ... it is in the template classes/layout-html.tpl :-/ */
