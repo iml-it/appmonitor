@@ -1,7 +1,7 @@
 <?php
 /**
  * 
- * Axels first router
+ * IML TINY ROUTER
  * 
  * --------------------------------------------------------------------------------<br>
  * <br>
@@ -15,9 +15,9 @@
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 1.0
+ * @version 1.2
  * @author Axel Hahn
- * @link https://github.com/iml-it/appmonitor
+ * @link https://git-repo.iml.unibe.ch/iml-open-source/tinyrouter-php-class
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package -
@@ -34,12 +34,14 @@ class tinyrouter{
 
     /**
      * constructor
-     * @param  $aRoutes  array   array of routings
+     * @param  $aRoutes  array   array of routes
      * @param  $sUrl     string  incoming url
+     * @return boolean
      */
-    public function __construct($aRoutes=[], $sUrl=false){
+    public function __construct($aRoutes=[],$sUrl=false){
         $this->setRoutes($aRoutes);
         $this->setUrl($sUrl);
+        return true;
     }
 
     // ----------------------------------------------------------------------
@@ -49,6 +51,7 @@ class tinyrouter{
     /**
      * detect last matching route item
      * if no route matches then it returns false
+     * @return array
      */
     protected function _getRoute(){
         $aReturn=[];
@@ -66,7 +69,7 @@ class tinyrouter{
                 $bFoundRoute=false;
                 foreach($aParts as $sPart){
                     // detect @varname or @varname:regex in a routing
-                    if($sPart[0]=="@"){
+                    if(isset($sPart[0]) && $sPart[0]=="@"){
                         $sValue=$aReqParts[$iPart];
                         preg_match('/\@([a-z]*):(.*)/', $sPart, $match);
 
@@ -124,8 +127,9 @@ class tinyrouter{
     }
 
     /**
-     * set incoming url
-     * @param  string  sUrl  url to fetch; https://api.exaple.com/
+     * set incoming url, add the request behind protocol and domain.
+     * @param  string  sUrl  url to fetch; /api/v1/productbyid/3424084
+     * @return boolean
      */
     public function setUrl($sUrl){
         $this->sUrl=$sUrl;
@@ -138,7 +142,8 @@ class tinyrouter{
     // ----------------------------------------------------------------------
 
     /**
-     * helper function: get url parts as array
+     * helper function: get url request parts as array
+     * @param  string  $sUrl  url to handle; /api/v1/productbyid/3424084
      * @returns array
      */
     public function getUrlParts($sUrl=false){
@@ -163,8 +168,9 @@ class tinyrouter{
     }
 
     /**
-     * return the callback of matching route
-     * @return string
+     * return the callback iten of the matching route
+     * If no route was matching it returns false
+     * @return {*}
      */
     public function getCallback(){
         return isset($this->aMatch['callback']) ? $this->aMatch['callback'] : false; 
