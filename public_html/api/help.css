@@ -1,0 +1,14 @@
+:root{
+    --bg: #f8f8f8;
+    --bg-th: #dde;
+    --bg-pre: #eee;
+    --fc: #223;
+    --fc-h1: #77a;
+}
+
+body{background: var(--bg); color:var(--fc);font-family: arial;}
+h1{color: var(--fc-h1);}
+table{border: 1px dotted;}
+th{background: var(--bg-th); border-bottom: 1px solid;}
+td{vertical-align: top;}
+pre{background: var(--bg-pre);}

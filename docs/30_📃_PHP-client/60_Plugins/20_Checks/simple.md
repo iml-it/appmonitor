@@ -33,6 +33,8 @@ $oMonitor->addCheck(
 |count       |(float)   | ptional; if a count exists in a check then a tile will be rendered |
 |visual      |(string)  | optional; used if a "count" was given. see counter description [Description of response](../../../20_Client/20_Description_of_response.md)|
 
+🔸 required
+
 You can use the simple check to verify just anything that has no pre defined function
 yet. Set a value for the text that should be visible and the result code (you should use the constants from table above to keep it more readable).
 

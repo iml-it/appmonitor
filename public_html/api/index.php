@@ -23,6 +23,7 @@ require_once('../server/classes/tinyrouter.class.php');
 
 $aRoutes=[
 
+    [ "/",                                         "_help_"         ],
     [ "/v1",                                       "_list_"         ],
 
     [ "/v1/apps",                                  "_list_"                                                ],
@@ -96,10 +97,20 @@ $oApi->stopIfOptions();
 $sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
 $callback=$oRouter->getCallback();
 
-//echo '<pre>'; print_r($aFoundRoute);
 
 if($callback=='_list_'){
     $oApi->sendJson($oRouter->getSubitems());
+    die();
+}
+if($callback=='_help_'){
+    if(file_exists('help.php')){
+        include "help.php";
+    } else {
+        $oApi->sendJson([
+            'http'=>400, 
+            'error'=>'ERROR: help is not enabled.'
+        ]);
+    }
     die();
 }
 

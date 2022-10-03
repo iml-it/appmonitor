@@ -53,6 +53,7 @@ $oMonitor->addCheck(
 |check🔸       |(array)   | check to perform
 |worstresult   |(integer) | optional: limit maximum error level if the check fails<br>if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING.
 
+🔸 required
 
 The key `check` contains 2 subkeys:
 

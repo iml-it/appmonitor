@@ -38,6 +38,8 @@ $oMonitor->addCheck(
 |warning     |{integer\|string} | size for warning level
 |critical🔸  |(integer\|string) | size for critical level
 
+🔸 required
+
 Remark to the [size] value:
 
 The values for warning and critical

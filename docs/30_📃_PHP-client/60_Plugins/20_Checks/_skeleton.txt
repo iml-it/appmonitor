@@ -43,6 +43,8 @@ $oMonitor->addCheck(
 |count       |(float)   | ptional; if a count exists in a check then a tile will be rendered |
 |visual      |(string)  | optional; used if a "count" was given. see counter description [Client](../client.md)|
 
+🔸 required
+
 ... TEXT
 
 
