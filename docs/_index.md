@@ -8,6 +8,10 @@ Free software and Open Source from University of Bern :: IML - Institute of Medi
 
 - - -
 
+Related projects:
+
+* POC Dashboard<br>Repo: <https://git-repo.iml.unibe.ch/iml-open-source/appmonitor-dashboard/><br>Html+Javascript Dashboard that can run locally without a webserver. It uses fetch() with Basic authentication for cross origin requests.
+
 # Description #
 
 The application monitor is a complementing tool next to the classic system monitoring of servers and its services. It makes checks from the point of view of the application: with its credentials and permissions started on the application hosts.
