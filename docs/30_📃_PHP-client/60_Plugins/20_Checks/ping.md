@@ -1,4 +1,4 @@
-# Ping (WIP) #
+# Ping #
 
 ## Description ##
 
@@ -14,8 +14,7 @@ $oMonitor->addCheck(
         "check" => array(
             "function" => "Ping",
             "params" => array(
-                "host" => [hostname],
-                "timeout" => [time],
+                "host" => [hostname]
             ),
         ),
     )
@@ -26,9 +25,21 @@ $oMonitor->addCheck(
 
 | key      | type     | description |
 |---       |---       |---
-|host      |(string)  |optional: hostname to connect to; if unavailable 127.0.0.1 will be tested
-|timeout   |(integer) |optional timeout in sec; default: 5
+|host      |(string)  |optional: hostname or ip address to connect to; if unavailable 127.0.0.1 will be tested
 
 ## Examples ##
 
-none.
+```php
+$oMonitor->addCheck(
+    array(
+        "name" => "Ping",
+        "description" => "ping to www.example.com",
+        "check" => array(
+            "function" => "Ping",
+            "params" => array(
+                "host" => "www.example.com"
+            ),
+        ),
+    )
+);
+```
