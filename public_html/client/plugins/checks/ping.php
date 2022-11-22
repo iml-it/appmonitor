@@ -36,7 +36,7 @@ class checkPing extends appmonitorcheck{
      * @param array $aParams
      * array(
      *     host                string   optional hostname to connect; default: 127.0.0.1
-     *     timeout             integer  optional timeout in sec; default: 5
+     *     timeout             integer  OBSOLET (because using exec): optional timeout in sec; default: 5
      * )
      * @return boolean
      */
