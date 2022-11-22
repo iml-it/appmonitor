@@ -1,4 +1,9 @@
-# APPMONITOR #
+<html>
+<div class="hero">
+    <h2>IML AppMonitor</h2>
+    Application monitoring with low requirements.
+</div>
+</html>
 
 Free software and Open Source from University of Bern :: IML - Institute of Medical Education
 
