@@ -46,7 +46,7 @@ class checkPing extends appmonitorcheck{
         $sParamCount=strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? "n" : "c";
         $iRepeat=1;
         
-        $sCommand="ping -$sParamCount $iRepeat $sHost";
+        $sCommand="ping -$sParamCount $iRepeat $sHost 2>&1";
         exec($sCommand, $aOut, $iRc);
         $sOut=implode("\n", $aOut);
 
