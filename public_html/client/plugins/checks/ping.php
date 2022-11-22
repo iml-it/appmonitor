@@ -19,7 +19,7 @@
  * 
  * 2022-07-05  <axel.hahn@iml.unibe.ch>
  * 2022-09-16  <axel.hahn@iml.unibe.ch>  read error before closing socket.
- * 
+ * 2022-11-22  <axel.hahn@iml.unibe.ch>  Use exec with detecting MS Win for the ping parameter for count of pings
  */
 class checkPing extends appmonitorcheck{
     /**
@@ -43,13 +43,32 @@ class checkPing extends appmonitorcheck{
     public function run($aParams) {
         $sHost = array_key_exists('host', $aParams) ? $aParams['host'] : '127.0.0.1';
 
+        $sParamCount=strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? "n" : "c";
+        $iRepeat=1;
+        
+        $sCommand="ping -$sParamCount $iRepeat $sHost";
+        exec($sCommand, $aOut, $iRc);
+        $sOut=implode("\n", $aOut);
+
+        if ($iRc>0){
+            return [RESULT_ERROR, "ERROR: ping to $sHost failed.\n".$sOut];
+        }
+        return [RESULT_OK, "OK: ping to $sHost\n".$sOut];
+
+        /*
+            Socket functions require root :-/
+
         if (!function_exists('socket_create')){
             return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform ping test. The socket module is not enabled in the php installation."];
         }
 
-        /* ICMP ping packet with a pre-calculated checksum */
+        // ICMP ping packet with a pre-calculated checksum
         $package = "\x08\x00\x7d\x4b\x00\x00\x00\x00PingHost";
-        $socket  = socket_create(AF_INET, SOCK_RAW, 1);
+        $socket  = socket_create(AF_INET, SOCK_RAW, getprotobyname('icmp'));
+        // TODO
+        if(!$socket){
+                die("ERROR: unable to create socket");
+        }
         socket_set_option(
             $socket, 
             SOL_SOCKET, 
@@ -61,13 +80,14 @@ class checkPing extends appmonitorcheck{
         );
 
         $start = microtime(true);
+        socket_connect($socket, $sHost, 0);
         $connect = socket_send($socket, $package, strLen($package), 0);
         if($connect){
             if (socket_read($socket, 255)){
                 $result = microtime(true) - $start;
                 socket_close($socket);
                 return [RESULT_OK, 
-                    "OK: ping to $sHost in " . socket_strerror(socket_last_error($socket)),
+                    "OK: ping to $sHost",
                     array(
                         'type'=>'counter',
                         'count'=>$result,
@@ -83,6 +103,8 @@ class checkPing extends appmonitorcheck{
         } else {
             return [RESULT_ERROR, "ERROR: ping to $sHost failed. " . socket_strerror(socket_last_error($socket))];
         }
+
+        */
     }
-    
+
 }
