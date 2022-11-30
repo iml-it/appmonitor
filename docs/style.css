@@ -1,10 +1,11 @@
 /*
-    patch css elements of daux.io blue theme
-    version 2022-11-22
+    override css elements of daux.io blue theme
+    version 2022-11-30
 */
 :root {
     /* Axels Overrides */
-    --link-color: #37a;
+    --color-text: #222;
+    --link-color: #822;
     --brand-color: var(--color-secondary);
     --brand-background: var(--body-background);
     --hr-color: none;
@@ -26,11 +27,11 @@
     --axel_h1: #345;
     --axel_h1-bg: none;
     --axel_h1-bottom: 3px solid none;
-    --axel_h2: #27a;
-    --axel_h2-bg: #fafafa;
-    --axel_h2-bottom: 2px solid #8ce;
+    --axel_h2: #156;
+    --axel_h2-bg: #f8fafb;
+    --axel_h2-bottom: 2px solid #467;
     --axel_h2-hero-bottom: 2px solid #912;
-    --axel_h3: #838;
+    --axel_h3: #278;
     --axel_h3-bottom: 1px solid #ddd;
     --axel_hero_bg: #f8f8f8;
     --axel_nav-bg: #fcfcfc;
@@ -43,7 +44,7 @@
 .dark {
     /* Axels Overrides */
     --color-text: #c0c0c0;
-    --link-color: #6bd;
+    --link-color: #b44;
     --brand-color: var(--color-text);
     --brand-background: var(--body-background);
     --hr-color: none;
@@ -65,11 +66,11 @@
     --axel_h1: #777;
     --axel_h1-bg: none;
     --axel_h1-bottom: none;
-    --axel_h2: #27a;
-    --axel_h2-bg: #282828;
+    --axel_h2: #467;
+    --axel_h2-bg: #202020;
     --axel_h2-bottom: 2px solid #256;
     --axel_h2-hero-bottom: 2px solid #712;
-    --axel_h3: #838;
+    --axel_h3: #589;
     --axel_h3-bottom: 1px solid #333;
     --axel_hero_bg: #242424;
     --axel_nav-bg: #242424;
