@@ -20,6 +20,7 @@
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
  * 2022-07-05  <axel.hahn@iml.unibe.ch>  send unknown if socket module is not activated.
  * 2022-09-16  <axel.hahn@iml.unibe.ch>  read error before closing socket.
+ * 2022-12-05  <axel.hahn@unibe.ch>      add @ sign at socket functions to prevent warning
  * 
  */
 class checkPortTcp extends appmonitorcheck{
@@ -54,7 +55,7 @@ class checkPortTcp extends appmonitorcheck{
 
         // from http://php.net/manual/de/sockets.examples.php
 
-        $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $socket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if ($socket === false) {
             return [RESULT_UNKNOWN, "ERROR: $sHost:$iPort was not checked. socket_create() failed: " . socket_strerror(socket_last_error())];
         }
@@ -69,7 +70,7 @@ class checkPortTcp extends appmonitorcheck{
               )
             );
 
-        $result = socket_connect($socket, $sHost, $iPort);
+        $result = @socket_connect($socket, $sHost, $iPort);
         if ($result === false) {
             $aResult=[RESULT_ERROR, "ERROR: $sHost:$iPort failed. " . socket_strerror(socket_last_error($socket))];
             socket_close($socket);
