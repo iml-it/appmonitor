@@ -18,6 +18,7 @@
  * ____________________________________________________________________________
  * 
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
+ * 2022-12-21  <axel.hahn@unibe.ch>      add flag sslverify
  * 
  */
 class checkHttpContent extends appmonitorcheck{
@@ -42,6 +43,7 @@ class checkHttpContent extends appmonitorcheck{
      *     timeout             integer  optional timeout in sec; default: 5
      *     headeronly          boolean  optional flag to fetch http response herader only; default: false = returns header and body
      *     follow              boolean  optional flag to follow a location; default: false = do not follow
+     *     sslverify           boolean  flag: enable/ disable verification of ssl certificate; default: true (verification is on)
      *     status              integer  test for an expected http status code; if none is given then test fails on status 400 and greater
      *     headercontains      string   test for a string in the http response header; it returns OK if the text was found
      *     headernotcontains   string   test for a string in the http response header; it returns OK if the text was not found
@@ -64,7 +66,7 @@ class checkHttpContent extends appmonitorcheck{
         curl_setopt($ch, CURLOPT_NOBODY, isset($aParams["headeronly"]) && $aParams["headeronly"]);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, isset($aParams["follow"]) && $aParams["follow"]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, isset($aParams["sslverify"]) ? !!$aParams["sslverify"] : 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp);
         $res = curl_exec($ch);
 

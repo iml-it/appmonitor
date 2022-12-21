@@ -34,6 +34,7 @@ $oMonitor->addCheck(
 |timeout           |(integer) |optional timeout in sec; default: 5
 |headeronly        |(boolean) |optional flag to fetch http response herader only (HEAD request); default: false = returns header and body; 
 |follow            |(boolean) |optional flag to follow a location; default: false = do not follow; If you set it to true it ries to follow (but this is not a safe method)
+|sslverify         |boolean   |flag: enable/ disable verification of ssl certificate; default: true (verification is on)
 |status            |(integer) |test for an expected http status code; if none is given then test fails on status 400 and greater
 |headercontains    |(string)  |test for a string in the http response header; it returns OK if the text was found
 |headernotcontains |(string)  |test for a string in the http response header; it returns OK if the text was not found
@@ -105,6 +106,25 @@ $oMonitor->addCheck(
                 "headeronly" => true,
                 "status" => 307,
                 "headerregex" => "#Location: https://www.example.com/mytarget#i",
+            ),
+        ),
+    )
+);
+```
+
+In the same way - by setting a status code to 40x - you also can check if sensitive information is not accessible.
+
+```php
+$oMonitor->addCheck(
+    array(
+        "name" => "Secure config",
+        "description" => "check if config is not readable wit a browser",
+        "check" => array(
+        "function" => "HttpContent",
+            "params" => array(
+                "url" => "https://www.example.com/config/sample.json",
+                "headeronly" => true,
+                "status" => 403,
             ),
         ),
     )
