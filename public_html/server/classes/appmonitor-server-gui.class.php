@@ -791,17 +791,18 @@ class appmonitorserver_gui extends appmonitorserver {
                 'margin' => 20 ,
             ];
 
+            //
+            // --- add check node
+            //
             foreach ($aEntries["checks"] as $aCheck) {
                 // echo '<pre>'.print_r($aCheck,1); die();
                 $iCounter++;
-                //
-                // --- add check node
-                //
                 $iCheckId=$iCounter;
                 $iParent=1;
                 $iGroup=false;
                 $aNodes[]=[ 
                     '_check' => $aCheck['name'], // original check name - used for _findNodeId()
+                    '_data' => $aCheck,          // original check name - used for _findNodeId()
                     'id'=> $iCheckId, 
                     'label'=> $aCheck['name'], 
                     'title'=>'<table class="result'.$aCheck["result"].'"><tr>'
@@ -823,11 +824,73 @@ class appmonitorserver_gui extends appmonitorserver {
                     'shape'=>'image',
                     'image'=>"images/icons/check-".$aCheck["result"].".png",
                 ];
-                // --- find parent check node
+                // $aNodes[count($aNodes)-1]['title'].='<pre>'.print_r($aNodes[count($aNodes)-1], 1).'<hr>'.print_r($aCheck, 1).'</pre>';
+            }
+            
+            //
+            // --- find parent check node and draw connectors
+            //
+            foreach($aNodes as $aNode){
+                $iParent=1;
+                $iGroup=false;
+                if(!isset($aNode['_data'])){
+                    continue;
+                }
+
+                $aCheck=$aNode['_data'];
+                $iCheckId=$aNode['id'];
 
                 if(isset($aCheck["parent"]) && $aCheck["parent"]){
                     $iParent=$this->_findNodeId($aCheck["parent"],'_check',$aNodes);
                 }
+                // --- if a group was given: detect a group connected on parent 
+                if(isset($aCheck['group']) && $aCheck['group']) {
+                    $sGroup2Detect=$aCheck['group'].'_'.$iParent;
+                    $iGroup=$this->_findNodeId($sGroup2Detect,'_group',$aNodes);
+                    if(!$iGroup){
+                        // create group node
+                        $iCounter++;
+                        $iGroup=$iCounter;
+                        $aNodes[]=[ 
+                            '_group' => $aCheck['group'].'_'.$iParent, // group name - used for _findNodeId()
+                            'id'=> $iGroup, 
+                            'label'=> $iGroup . ' - '.isset($aParentsCfg[$aCheck['group']]['label']) ? $aParentsCfg[$aCheck['group']]['label'] : '['.$aCheck['group'].']', 
+                            'shape'=> isset($aParentsCfg[$aCheck['group']]['image']) ? 'image' : 'box',
+                            'image'=> isset($aParentsCfg[$aCheck['group']]['image']) ? $aParentsCfg[$aCheck['group']]['image'] : 'NOIMAGE ' . $aCheck['group'],
+                            'opacity'=>0.2
+                        ];
+                        // connect it with app or perent check
+                        $aEdges[]=[ 
+                            'from' => $iParent, 
+                            'to' => $iGroup, 
+                            'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 
+                            'width' => $aShapes[$aCheck['result']]['width'] 
+                        ];
+                    }
+                }
+                $aEdges[]=[ 'from' => ($iGroup ? $iGroup : $iParent), 
+                    'to' => $iCheckId, 
+                    'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 
+                    'width' => $aShapes[$aCheck['result']]['width'] 
+                ];
+                // echo '<pre>Check='.print_r($aCheck,1) . "Edges=" . print_r($aEdges,1) . "parent: $iParent<br>group: $iGroup<br></pre>..."; // die();
+
+            }
+            // echo '<pre>'.print_r($aEdges,1); die();
+            // echo '<pre>'.print_r($aNodes,1); die();
+
+            /*
+            // $iCounter=1;
+            foreach ($aEntries["checks"] as $aCheck) {
+                //$iCounter++;
+                $iCheckId=$iCounter;
+                $iParent=1;
+                $iGroup=false;
+
+                if(isset($aCheck["parent"]) && $aCheck["parent"]){
+                    $iParent=$this->_findNodeId($aCheck["parent"],'_check',$aNodes);
+                }
+
                 // --- if a group was given: detect a group connected on parent 
                 if(isset($aCheck['group']) && $aCheck['group']) {
                     $sGroup2Detect=$aCheck['group'].'_'.$iParent;
@@ -859,7 +922,9 @@ class appmonitorserver_gui extends appmonitorserver {
                     'width' => $aShapes[$aCheck['result']]['width'] 
                 ];
             }
+        */
         }
+
         // echo '<pre>'.print_r($aParents,1); die();
         // echo '<pre>'.print_r($aEdges,1); die();
         // echo '<pre>'.print_r($aNodes,1); die();
