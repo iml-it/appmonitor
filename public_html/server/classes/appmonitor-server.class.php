@@ -32,7 +32,7 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.114
+ * @version 0.116
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -100,6 +100,13 @@ class appmonitorserver {
      * @var bool
      */
     protected $_bShowLog = false;
+
+    /**
+     * notificationhandler object to send email/ slack messages
+     * it is initialized in method loadConfig()
+     * @var object
+     */
+    var $oNotification = false;
 
     /**
      * detected user name to handle with roles
