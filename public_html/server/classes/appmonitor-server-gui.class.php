@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.114
+ * @version 0.116
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.115";
+    var $_sVersion = "0.116";
 
     /**
      * html code for icons in the web gui
@@ -733,16 +733,15 @@ class appmonitorserver_gui extends appmonitorserver {
 
         // files with .png must exist in server/images/icons/
         $aParentsCfg=$this->_getVisualGroups();
-        $aParents=[];
         $aNodes=[];
         $aEdges=[];
         $iCounter=1;
 
         $aShapes=[
-            RESULT_OK      => [ 'color' => '#aaeeaa', 'width' => 3 ],
-            RESULT_UNKNOWN => [ 'color' => '#bb77bb', 'width' => 3, 'shape'=>'ellipse' ],
-            RESULT_WARNING => [ 'color' => '#eeaa22', 'width' => 6, 'shape'=>'dot' ],
-            RESULT_ERROR   => [ 'color' => '#ffcccc', 'width' => 9, 'shape'=>'star' ],
+            RESULT_OK      => [ 'color' => '#55aa55', 'width' => 3 ],
+            RESULT_UNKNOWN => [ 'color' => '#aa55aa', 'width' => 3, 'shape'=>'ellipse' ],
+            RESULT_WARNING => [ 'color' => '#f39c12', 'width' => 6, 'shape'=>'dot' ],
+            RESULT_ERROR   => [ 'color' => '#ff3333', 'width' => 9, 'shape'=>'star' ],
         ];
 
         foreach ($this->_data as $sAppId => $aEntries) {
@@ -768,26 +767,10 @@ class appmonitorserver_gui extends appmonitorserver {
                 'label'=> $aEntries['meta']['website'], 
                 'shape' => 'box', 
                 'widthConstraint' => [ 'maximum' => 300 ],
-                /*
-                // 'shape'=>'image',
-                // 'image'=>"data:image/svg+xml;charset=utf-8," . strtr(rawurlencode($svg), $revert),
-                'image__'=>$this->_getHtmlInSvg([
-                    'bgcolor'=>$aShapes[$aEntries['meta']['result']]['color'],
-                    'width'=>500,
-                    'height'=>60,
-                    'style'=>'font-size:1.5em; text-align: center; padding: 0.1em; font-weight: bold;',
-                    'content'=>''
-                        .'<span style="color:black; opacity: 0.5;">' 
-                            .$this->_tr('Resulttype-'.$aEntries['meta']["result"]).' - '
-                        .'</span>'
-                        .'<span style="color:black; text-shadow:0 0 1px #ffffff,0 0 2px #ffffff,0 0 20px #888888; ">' 
-                            .$aEntries['meta']['website']
-                        .'</span>'
-                    ]),
-                */
+                'font'=>[ 'size'=> 18, 'color'=>'#ffffff' ],
                 'color'=>$aShapes[$aEntries['meta']['result']]['color'] ,
 
-                // 'margin' =>[ 'top' => 20, 'right' => 50, 'bottom' => 20, 'left' => 50 ] ,
+                // 'margin' =>[ 'top' => 120, 'right' => 50, 'bottom' => 20, 'left' => 50 ] ,
                 'margin' => 20 ,
             ];
 
@@ -795,14 +778,13 @@ class appmonitorserver_gui extends appmonitorserver {
             // --- add check node
             //
             foreach ($aEntries["checks"] as $aCheck) {
-                // echo '<pre>'.print_r($aCheck,1); die();
                 $iCounter++;
                 $iCheckId=$iCounter;
                 $iParent=1;
                 $iGroup=false;
                 $aNodes[]=[ 
                     '_check' => $aCheck['name'], // original check name - used for _findNodeId()
-                    '_data' => $aCheck,          // original check name - used for _findNodeId()
+                    '_data' => $aCheck,          // original check data
                     'id'=> $iCheckId, 
                     'label'=> $aCheck['name'], 
                     'title'=>'<table class="result'.$aCheck["result"].'"><tr>'
@@ -824,7 +806,6 @@ class appmonitorserver_gui extends appmonitorserver {
                     'shape'=>'image',
                     'image'=>"images/icons/check-".$aCheck["result"].".png",
                 ];
-                // $aNodes[count($aNodes)-1]['title'].='<pre>'.print_r($aNodes[count($aNodes)-1], 1).'<hr>'.print_r($aCheck, 1).'</pre>';
             }
             
             //
@@ -876,60 +857,10 @@ class appmonitorserver_gui extends appmonitorserver {
                 // echo '<pre>Check='.print_r($aCheck,1) . "Edges=" . print_r($aEdges,1) . "parent: $iParent<br>group: $iGroup<br></pre>..."; // die();
 
             }
-            // echo '<pre>'.print_r($aEdges,1); die();
-            // echo '<pre>'.print_r($aNodes,1); die();
 
-            /*
-            // $iCounter=1;
-            foreach ($aEntries["checks"] as $aCheck) {
-                //$iCounter++;
-                $iCheckId=$iCounter;
-                $iParent=1;
-                $iGroup=false;
-
-                if(isset($aCheck["parent"]) && $aCheck["parent"]){
-                    $iParent=$this->_findNodeId($aCheck["parent"],'_check',$aNodes);
-                }
-
-                // --- if a group was given: detect a group connected on parent 
-                if(isset($aCheck['group']) && $aCheck['group']) {
-                    $sGroup2Detect=$aCheck['group'].'_'.$iParent;
-                    $iGroup=$this->_findNodeId($sGroup2Detect,'_group',$aNodes);
-                    if(!$iGroup){
-                        // create group node
-                        $iCounter++;
-                        $iGroup=$iCounter;
-                        $aNodes[]=[ 
-                            '_group' => $aCheck['group'].'_'.$iParent, // group name - used for _findNodeId()
-                            'id'=> $iGroup, 
-                            'label'=> isset($aParentsCfg[$aCheck['group']]['label']) ? $aParentsCfg[$aCheck['group']]['label'] : '['.$aCheck['group'].']', 
-                            'shape'=> isset($aParentsCfg[$aCheck['group']]['image']) ? 'image' : 'box',
-                            'image'=> isset($aParentsCfg[$aCheck['group']]['image']) ? $aParentsCfg[$aCheck['group']]['image'] : 'NOIMAGE ' . $aCheck['group'],
-                            'opacity'=>0.2
-                        ];
-                        // connect it with app or perent check
-                        $aEdges[]=[ 'from' => $iParent, 
-                            'to' => $iGroup, 
-                            'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 
-                            'width' => $aShapes[$aCheck['result']]['width'] 
-                    ];
-                    }
-                }
-
-                $aEdges[]=[ 'from' => ($iGroup ? $iGroup : $iParent), 
-                    'to' => $iCheckId, 
-                    'color' => [ 'color' => $aShapes[$aCheck['result']]['color'] ], 
-                    'width' => $aShapes[$aCheck['result']]['width'] 
-                ];
-            }
-        */
         }
 
-        // echo '<pre>'.print_r($aParents,1); die();
-        // echo '<pre>'.print_r($aEdges,1); die();
-        // echo '<pre>'.print_r($aNodes,1); die();
         $sReturn.='
-        
 
         </style>
 

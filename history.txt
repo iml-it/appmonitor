@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.116 2023-02-16
+   - server: fix: draw network map with unordered check items
+
 v0.115 2022-09-19
    - server: added fullscreen mode for graphical view
    - client: add ping check
