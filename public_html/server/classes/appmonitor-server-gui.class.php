@@ -234,6 +234,24 @@ class appmonitorserver_gui extends appmonitorserver {
         }
         return preg_replace('/^.*\"(.*)\".*/', '$1', $sIconCode);
     }
+    /**
+     * get a label for the web application
+     * @param type $sAppId
+     * @return string
+     */
+    protected function _getAppLabel($sAppId){
+        if(!isset($this->_data[$sAppId])){
+            return '??';
+        }
+        $aEntries = $this->_data[$sAppId];
+        $sWebapp = $aEntries["result"]["website"];
+        $sVHost = parse_url($aEntries["result"]["url"], PHP_URL_HOST);
+        $sHost = isset($aEntries["result"]["host"]) && $aEntries["result"]["host"] 
+                ? $this->_aIco['host'].' '.$aEntries["result"]["host"]
+                : '@'.$sVHost
+            ;
+        return '<span title="'.$sWebapp."\n".$aEntries["result"]["url"].'">'.$sWebapp.' '.$sHost.'</span>';
+    }
 
     /**
      * get html code for a tile widget
@@ -835,7 +853,7 @@ class appmonitorserver_gui extends appmonitorserver {
                         $aNodes[]=[ 
                             '_group' => $aCheck['group'].'_'.$iParent, // group name - used for _findNodeId()
                             'id'=> $iGroup, 
-                            'label'=> $iGroup . ' - '.isset($aParentsCfg[$aCheck['group']]['label']) ? $aParentsCfg[$aCheck['group']]['label'] : '['.$aCheck['group'].']', 
+                            'label'=> isset($aParentsCfg[$aCheck['group']]['label']) ? $aParentsCfg[$aCheck['group']]['label'] : '['.$aCheck['group'].']', 
                             'shape'=> isset($aParentsCfg[$aCheck['group']]['image']) ? 'image' : 'box',
                             'image'=> isset($aParentsCfg[$aCheck['group']]['image']) ? $aParentsCfg[$aCheck['group']]['image'] : 'NOIMAGE ' . $aCheck['group'],
                             'opacity'=>0.2
