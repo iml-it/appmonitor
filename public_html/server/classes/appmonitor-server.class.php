@@ -32,7 +32,7 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.114
+ * @version 0.116
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -80,6 +80,10 @@ class appmonitorserver {
      */
     protected $_sConfigfile = "appmonitor-server-config.json";
     protected $_aMessages = array();
+    /**
+     * language texts object
+     * @var object
+     */
     protected $oLang = false;
     protected $_bIsDemo = false; // set true to disallow changing config in webgui
     protected $curl_opts = array(
@@ -100,6 +104,13 @@ class appmonitorserver {
      * @var bool
      */
     protected $_bShowLog = false;
+
+    /**
+     * notificationhandler object to send email/ slack messages
+     * it is initialized in method loadConfig()
+     * @var object
+     */
+    var $oNotification = false;
 
     /**
      * detected user name to handle with roles
@@ -597,24 +608,6 @@ class appmonitorserver {
         }
         $aReturn["summary"] = $aResults;
         return $aReturn;
-    }
-    /**
-     * get a label for the web application
-     * @param type $sAppId
-     * @return string
-     */
-    protected function _getAppLabel($sAppId){
-        if(!isset($this->_data[$sAppId])){
-            return '??';
-        }
-        $aEntries = $this->_data[$sAppId];
-        $sWebapp = $aEntries["result"]["website"];
-        $sVHost = parse_url($aEntries["result"]["url"], PHP_URL_HOST);
-        $sHost = isset($aEntries["result"]["host"]) && $aEntries["result"]["host"] 
-                ? $this->_aIco['host'].' '.$aEntries["result"]["host"]
-                : '@'.$sVHost
-            ;
-        return '<span title="'.$sWebapp."\n".$aEntries["result"]["url"].'">'.$sWebapp.' '.$sHost.'</span>';
     }
     
     /**
