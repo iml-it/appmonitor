@@ -350,7 +350,7 @@ class AhCache {
      *                          - ttlBelow         integer  return items with ttl less than [n] sec
      *                          - ttlGreater       integer  return items with ttl more than [n] sec
      *                          no filter returns all cached entries
-     * @return void
+     * @return array
      */
     public function getCachedItems($sDir=false, $aFilter=array()){
         $aReturn=array();
