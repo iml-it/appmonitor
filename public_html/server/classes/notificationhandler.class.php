@@ -83,6 +83,18 @@ class notificationhandler {
     ];
 
     /**
+     * Caching id for last results of a check
+     * @var string
+     */
+    protected $_sCache_lastResult='';
+
+    /**
+     * Caching id for notification log
+     * @var string
+     */
+    protected $_sCache_notificationsLog='';
+
+    /**
      * plugin directory for notification types
      * @var string
      */
@@ -445,8 +457,8 @@ class notificationhandler {
      * get current log data
      * 
      * @param array   $aFilter  filter with possible keys timestamp|changetype|status|appid|message (see addLogitem())
-     * @param integer $iLimit
-     * @param boolean $bRsort   flag to reverse sort logs; default is true (=newset entry first)
+     * @param integer $iLimit   set a maximum of log entries
+     * @param boolean $bRsort   flag to reverse sort logs; default is true (=newest entry first)
      * @return array
      */
     public function getLogdata($aFilter=array(), $iLimit=false, $bRsort=true){
