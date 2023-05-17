@@ -1,6 +1,14 @@
 
 HISTORY
 
+v0.118 2023-05-17
+   - server: update cdnorlocal
+   - server: update jquery to 3.6.4
+   - server: update font-awesome to 6.4.0
+
+v0.117 2023-03-17
+   - server: fix: remove php warnings
+
 v0.116 2023-02-16
    - server: fix: draw network map with unordered check items
 
