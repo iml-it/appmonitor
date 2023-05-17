@@ -44,7 +44,7 @@ desired effect
     <nav class="navbar navbar-static-top" role="navigation">
       <!-- Sidebar toggle button-->
       <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-        <i class="fas fa-bars"></i>
+        <i class="fa-solid fa-bars"></i>
         <span class="sr-only">Toggle navigation</span>
       </a>
       
