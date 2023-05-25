@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.119 2023-05-25
+  - FIX: tile for checks with ok status: show badges if a check is not ok
+  - UPDATE: new webapp overview
+  - UPDATE: table colors are closer to bootstrap colors
+
 v0.118 2023-05-17
    - server: update cdnorlocal
    - server: update jquery to 3.6.4
