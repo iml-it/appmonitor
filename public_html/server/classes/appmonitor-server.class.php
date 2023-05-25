@@ -32,7 +32,7 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.116
+ * @version 0.119
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
