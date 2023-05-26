@@ -201,28 +201,33 @@ function applyViewFilter() {
     $('.tagfilterinfo').html(aViewFilters['tag'] ? '<i class="fa fa-tag"></i> ' + aViewFilters['tag'] + ' <a href="#" class="btn btn-danger" onclick="setTagClass(\'\'); return false;">x</a>' : '');
 
     // filter hosts
-    filterMonitors('divwebs');
-    filterMonitors('divsetup');
+    filterApps('divwebs',  'appname', true);  // app overview
+    filterApps('divsetup', 'divhost', false); // page "setup"
 
     // update url int the browser
     setAdressbar();
 }
 
-
 /**
  * callback ... filter the table
  * use addFilterToTable() before.
+ * @param  {string}  sDiv         id of a div to search in
+ * @param  {string}  sClass       class name to search in
+ * @param  {bool}    bIsOverview  flag: is it the overview page (to hide the right element)
  * @returns {undefined}
  */
-function filterMonitors(sDiv) {
-    var sTarget = '#' + sDiv + ' .divhost';
-    if (!sTarget) {
-        return false;
-    }
+function filterApps(sDiv, sClass, bIsOverview) {
+    var sTarget = '#' + sDiv + ' .'+sClass;
+
     var filter = aViewFilters[sDiv];
+    var oHide=false;
     $(sTarget).removeHighlight();
     if (filter) {
-        $(sTarget + ":not(:regex('" + filter + "'))").hide();
+        oHide=bIsOverview 
+            ? $(sTarget + ":not(:regex('" + filter + "'))").parent().parent()
+            : $(sTarget + ":not(:regex('" + filter + "'))")
+            ;
+        oHide.hide();
         $(sTarget).highlight(filter);
     }
     return true;

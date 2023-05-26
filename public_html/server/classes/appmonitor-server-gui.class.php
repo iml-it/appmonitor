@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.119
+ * @version 0.120
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -42,7 +42,7 @@ class appmonitorserver_gui extends appmonitorserver {
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.119";
+    var $_sVersion = "0.120";
 
     /**
      * html code for icons in the web gui
@@ -1049,8 +1049,9 @@ class appmonitorserver_gui extends appmonitorserver {
     /**
      * get html code for notification log page
      * 
-     * @param array   $aLogs         array with logs; if false then all logs will be fetched
-     * @param string  $sTableClass   custom classname for the datatable; for custom datatable settings (see functions.js)
+     * @param array   $aLogs          array with logs; if false then all logs will be fetched
+     * @param string  $sTableClass    custom classname for the datatable; for custom datatable settings (see functions.js)
+     * @param bool    $bShowDuration  flag: show duration
      * @return string
      */
     protected function _generateNotificationlog($aLogs=false, $sTableClass='datatable-notifications', $bShowDuration=false) {
@@ -1152,7 +1153,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 }
             }
         }
-        return $sHtml ? '<span style="float: right">'.$sHtml.'</span>' : '';
+        return $sHtml;
     }
 
     /**
@@ -1974,9 +1975,7 @@ class appmonitorserver_gui extends appmonitorserver {
                         .$sSince
                     .'</div>'
                     . '<div class="col-md-4 appname">'
-                        .$this->_renderBadgesForWebsite($sAppId, true)
-                        .'
-                            <strong>
+                        .'<strong>
                             <a href="#" onclick="'.$sOnclick.'">
                                 <i class="'.$sIcon.'"></i> '
                                 .$sAppLabel
@@ -1984,7 +1983,8 @@ class appmonitorserver_gui extends appmonitorserver {
                             </strong><br>'
                         .'</div>'
                     . '<div class="col-md-1">'
-                        .$sValidatorinfo.'<br>'
+                        .'<span style="text-align: right; width: 5em; display: inline-block;">'.$this->_renderBadgesForWebsite($sAppId, true).'<br>'
+                        .$sValidatorinfo.'</span>'
                     .'</div>'
                     . '<div class="col-md-2">'.$sTaglist.'</div>'
                     . '<div class="col-md-4" style="background: rgba(255,255,255,0.4);">'.$this->_renderCounter(
