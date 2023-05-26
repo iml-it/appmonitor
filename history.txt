@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.120 2023-05-26
+  - FIX: position of long app names in app overview
+  - FIX: filter function for app in overview page
+
 v0.119 2023-05-25
   - FIX: tile for checks with ok status: show badges if a check is not ok
   - UPDATE: new webapp overview
