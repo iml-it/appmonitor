@@ -1152,7 +1152,7 @@ class appmonitorserver_gui extends appmonitorserver {
                 }
             }
         }
-        return $sHtml ? '<span style="float: right">'.$sHtml.'</span>' : '';
+        return $sHtml;
     }
 
     /**
@@ -1974,9 +1974,7 @@ class appmonitorserver_gui extends appmonitorserver {
                         .$sSince
                     .'</div>'
                     . '<div class="col-md-4 appname">'
-                        .$this->_renderBadgesForWebsite($sAppId, true)
-                        .'
-                            <strong>
+                        .'<strong>
                             <a href="#" onclick="'.$sOnclick.'">
                                 <i class="'.$sIcon.'"></i> '
                                 .$sAppLabel
@@ -1984,7 +1982,8 @@ class appmonitorserver_gui extends appmonitorserver {
                             </strong><br>'
                         .'</div>'
                     . '<div class="col-md-1">'
-                        .$sValidatorinfo.'<br>'
+                        .'<span style="text-align: right; width: 5em; display: inline-block;">'.$this->_renderBadgesForWebsite($sAppId, true).'<br>'
+                        .$sValidatorinfo.'</span>'
                     .'</div>'
                     . '<div class="col-md-2">'.$sTaglist.'</div>'
                     . '<div class="col-md-4" style="background: rgba(255,255,255,0.4);">'.$this->_renderCounter(
