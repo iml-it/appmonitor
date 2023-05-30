@@ -8,7 +8,7 @@ define("CHANGETYPE_NEW", 1);
 define("CHANGETYPE_CHANGE", 2);
 define("CHANGETYPE_DELETE", 3);
 
-if(!defined('RESULT_OK')){
+if (!defined('RESULT_OK')) {
     define("RESULT_OK", 0);
     define("RESULT_UNKNOWN", 1);
     define("RESULT_WARNING", 2);
@@ -34,71 +34,72 @@ if(!defined('RESULT_OK')){
  *
  * @author hahn
  */
-class notificationhandler {
+class notificationhandler
+{
 
-    protected $_sCacheIdPrefix="notificationhandler";
-    protected $_iMaxLogentries=5000;
-    
+    protected $_sCacheIdPrefix = "notificationhandler";
+    protected $_iMaxLogentries = 5000;
+
     /**
      * logdata for detected changes and sent notifications
      * @var array 
      */
     protected $_aLog = false;
-    
+
     /**
      * language texts
      * @var object
      */
     protected $oLang = false;
-    
-    protected $_aNotificationOptions=false;
-    protected $_sServerurl=false;
-    
+
+    protected $_aNotificationOptions = false;
+    protected $_sServerurl = false;
+
     // ------------------------------------------------------------------
     // data of the current app 
     // ------------------------------------------------------------------
-    protected $_sAppId=false;
-    protected $_iAppResultChange=false;
+    protected $_sAppId = false;
+    protected $_iAppResultChange = false;
 
     /**
      * currently fetched result of an web application
      * @var array
      */
-    protected $_aAppResult=false;
+    protected $_aAppResult = false;
     /**
      * last fetched result of an web application
      * @var array
      */
-    protected $_aAppLastResult=false;
+    protected $_aAppLastResult = false;
 
     /**
      * delay sending a notification n times based on a result value
      * @var array
      */
-    protected $_aDelayNotification=[
-        RESULT_OK      =>0, // 0 = OK comes immediately
-        RESULT_UNKNOWN =>2, // N = other types skip n repeats of same status
-        RESULT_WARNING =>2,
-        RESULT_ERROR   =>2
+    protected $_aDelayNotification = [
+        RESULT_OK      => 0, // 0 = OK comes immediately
+        RESULT_UNKNOWN => 2, // N = other types skip n repeats of same status
+        RESULT_WARNING => 2,
+        RESULT_ERROR   => 2
     ];
 
     /**
      * Caching id for last results of a check
      * @var string
      */
-    protected $_sCache_lastResult='';
+    protected $_sCache_lastResult = '';
 
     /**
      * Caching id for notification log
      * @var string
      */
-    protected $_sCache_notificationsLog='';
+    protected $_sCache_notificationsLog = '';
 
     /**
      * plugin directory for notification types
      * @var string
      */
-    protected $_sPluginDir=__DIR__.'/../plugins/notification';
+    protected $_sPluginDir = __DIR__ . '/../plugins/notification';
 
     // ----------------------------------------------------------------------
     // __construct
@@ -112,18 +113,19 @@ class notificationhandler {
      *                          - {string} notifications  appmionitor config settings in notification settings (for sleeptime and messages)
      * @return boolean
      */
-    public function __construct($aOptions=array()) {
-        if(isset($aOptions['lang'])){
+    public function __construct($aOptions = array())
+    {
+        if (isset($aOptions['lang'])) {
             $this->_loadLangTexts($aOptions['lang']);
         }
-        if(isset($aOptions['serverurl'])){
-            $this->_sServerurl=$aOptions['serverurl'];
+        if (isset($aOptions['serverurl'])) {
+            $this->_sServerurl = $aOptions['serverurl'];
         }
-        
+
         $this->_aNotificationOptions = isset($aOptions['notifications']) ? $aOptions['notifications'] : false;
 
-        $this->_sCache_lastResult=$this->_sCacheIdPrefix."-app";
-        $this->_sCache_notificationsLog=$this->_sCacheIdPrefix."-notify";
+        $this->_sCache_lastResult = $this->_sCacheIdPrefix . "-app";
+        $this->_sCache_notificationsLog = $this->_sCacheIdPrefix . "-notify";
 
         return true;
     }
@@ -149,7 +151,8 @@ class notificationhandler {
      * @param string  $sLang  language; i.e. "en-en"
      * @return type
      */
-    protected function _loadLangTexts($sLang) {
+    protected function _loadLangTexts($sLang)
+    {
         return $this->oLang = new lang($sLang);
     }
     /**
@@ -158,23 +161,25 @@ class notificationhandler {
      * @param string $sWord
      * @return string
      */
-    protected function _tr($sWord) {
+    protected function _tr($sWord)
+    {
         return $this->oLang->tr($sWord, array('notifications'));
     }
 
     // ----------------------------------------------------------------------
     // protected functions - handle cache of application checkdata
     // ----------------------------------------------------------------------
-    
+
     /**
      * delete app based caches; method is triggered on deletion of an app
      * 
      * @return boolean
      */
-    protected function _deleteAppLastResult(){
-        $oCache=new AhCache($this->_sCache_lastResult, $this->_sAppId);
+    protected function _deleteAppLastResult()
+    {
+        $oCache = new AhCache($this->_sCache_lastResult, $this->_sAppId);
         $oCache->delete();
-        $oCache=new AhCache($this->_sCache_notificationsLog, $this->_sAppId);
+        $oCache = new AhCache($this->_sCache_notificationsLog, $this->_sAppId);
         $oCache->delete();
         return true;
     }
@@ -187,10 +192,11 @@ class notificationhandler {
      * 
      * @return array
      */
-    protected function _getAppNotifications(){
-        $oCache=new AhCache($this->_sCache_notificationsLog, $this->_sAppId);
-        $aCached=$oCache->read();
-        if (isset($this->_aAppResult['meta']['notifications']) && $aCached!==$this->_aAppResult['meta']['notifications']){
+    protected function _getAppNotifications()
+    {
+        $oCache = new AhCache($this->_sCache_notificationsLog, $this->_sAppId);
+        $aCached = $oCache->read();
+        if (isset($this->_aAppResult['meta']['notifications']) && $aCached !== $this->_aAppResult['meta']['notifications']) {
             $oCache->write($this->_aAppResult['meta']['notifications']);
             return $this->_aAppResult['meta']['notifications'];
         } else {
@@ -202,18 +208,19 @@ class notificationhandler {
      * check if a defined sleep time was reached
      * @return boolean
      */
-    public function isSleeptime(){
-        if(isset($this->_aNotificationOptions['sleeptimes']) && is_array($this->_aNotificationOptions['sleeptimes']) && count($this->_aNotificationOptions['sleeptimes'])){
+    public function isSleeptime()
+    {
+        if (isset($this->_aNotificationOptions['sleeptimes']) && is_array($this->_aNotificationOptions['sleeptimes']) && count($this->_aNotificationOptions['sleeptimes'])) {
             $sNow = date("Y-m-d D H:i");
-            foreach($this->_aNotificationOptions['sleeptimes'] as $sRegex){
+            foreach ($this->_aNotificationOptions['sleeptimes'] as $sRegex) {
                 if (preg_match($sRegex, $sNow)) {
                     return $sRegex;
-                }                
+                }
             }
         }
         return false;
     }
-    
+
     /**
      * save last app status data to conpare with the next time
      * 
@@ -221,17 +228,18 @@ class notificationhandler {
      * @param array  $aData  data
      * @return boolean
      */
-    protected function _saveAppResult(){
-        $oCache=new AhCache($this->_sCache_lastResult, $this->_sAppId);
+    protected function _saveAppResult()
+    {
+        $oCache = new AhCache($this->_sCache_lastResult, $this->_sAppId);
         return $oCache->write($this->_aAppResult);
         return false;
     }
-    
-    
+
+
     // ----------------------------------------------------------------------
     // public functions - check changes (create/ update) and delete appdata
     // ----------------------------------------------------------------------
-    
+
 
     /**
      * helper function: get type of change between current and last state
@@ -239,80 +247,84 @@ class notificationhandler {
      * the value is stored in $this->_iAppResultChange
      * @return integer
      */
-    protected function _detectChangetype($aCompareItem=false){
-        if(!$this->_sAppId){
-            die("ERROR: ".__METHOD__." no application was initialized ... use setApp() first");
+    protected function _detectChangetype($aCompareItem = false)
+    {
+        if (!$this->_sAppId) {
+            die("ERROR: " . __METHOD__ . " no application was initialized ... use setApp() first");
         }
-        if(!$aCompareItem){
-            $aCompareItem=$this->_aAppLastResult ? $this->_aAppLastResult : false;
+        if (!$aCompareItem) {
+            $aCompareItem = $this->_aAppLastResult ? $this->_aAppLastResult : false;
         }
-        if(!$aCompareItem || !is_array($aCompareItem)){
-            $this->_iAppResultChange=CHANGETYPE_NEW;
+        if (!$aCompareItem || !is_array($aCompareItem)) {
+            $this->_iAppResultChange = CHANGETYPE_NEW;
         } else {
-            if(isset($aCompareItem['result']['result']) && isset($this->_aAppResult['result']['result'])
-                && $aCompareItem['result']['result']!==$this->_aAppResult['result']['result']
-            ){
-                $this->_iAppResultChange=CHANGETYPE_CHANGE;
+            if (
+                isset($aCompareItem['result']['result']) && isset($this->_aAppResult['result']['result'])
+                && $aCompareItem['result']['result'] !== $this->_aAppResult['result']['result']
+            ) {
+                $this->_iAppResultChange = CHANGETYPE_CHANGE;
             } else {
-                $this->_iAppResultChange=CHANGETYPE_NOCHANGE;
+                $this->_iAppResultChange = CHANGETYPE_NOCHANGE;
             }
         }
         return $this->_iAppResultChange;
     }
-    
-    
+
+
     /**
      * set application with its current check result
      * @param string  $sAppId  application id
      * @param array   $aData   data of current check; can be false if you want to access last status
      * @return boolean
      */
-    public function setApp($sAppId){
-        $this->_sAppId=$sAppId;
-        $this->_aAppResult=$this->getAppResult();
-        $this->_iAppResultChange=false;
-        $this->_aAppLastResult=$this->getAppLastResult();
+    public function setApp($sAppId)
+    {
+        $this->_sAppId = $sAppId;
+        $this->_aAppResult = $this->getAppResult();
+        $this->_iAppResultChange = false;
+        $this->_aAppLastResult = $this->getAppLastResult();
         // echo "DEBUG: ".__METHOD__ . " current data = <pre>".print_r($this->_aAppResult, 1)."</pre>";
         return true;
     }
-    
+
     /**
      * 
      * @param type $sKey
      * @param type $aData
      */
-    public function notify(){
-        if(!$this->_sAppId){
-            die("ERROR: ".__METHOD__." no application was initialized ... use setApp() first");
+    public function notify()
+    {
+        if (!$this->_sAppId) {
+            die("ERROR: " . __METHOD__ . " no application was initialized ... use setApp() first");
         }
-        if ($this->isSleeptime()){
+        if ($this->isSleeptime()) {
             return false;
         }
-        $iChangetype=$this->_detectChangetype();
-        $iResult=$this->_aAppResult['result']['result'];
+        $iChangetype = $this->_detectChangetype();
+        $iResult = $this->_aAppResult['result']['result'];
 
         // get the highest value for a delay
-        $iMaxDelay=max(array_values($this->_aDelayNotification));
+        $iMaxDelay = max(array_values($this->_aDelayNotification));
 
-        $bDoNotify=false;
+        $bDoNotify = false;
         switch ($iChangetype) {
             case CHANGETYPE_NOCHANGE:
                 // increase counter
-                $iCounter=(isset($this->_aAppLastResult['result']['counter']) ? $this->_aAppLastResult['result']['counter']+1 : $iMaxDelay+1);
-                $this->_aAppResult['laststatus']=isset($this->_aAppLastResult['laststatus']) ? $this->_aAppLastResult['laststatus'] : false;
+                $iCounter = (isset($this->_aAppLastResult['result']['counter']) ? $this->_aAppLastResult['result']['counter'] + 1 : $iMaxDelay + 1);
+                $this->_aAppResult['laststatus'] = isset($this->_aAppLastResult['laststatus']) ? $this->_aAppLastResult['laststatus'] : false;
                 break;
 
             case CHANGETYPE_CHANGE:
                 // store last different application status - @see getMessageReplacements
-                $this->_aAppResult['laststatus']=$this->_aAppLastResult;
+                $this->_aAppResult['laststatus'] = $this->_aAppLastResult;
                 // reset counter
-                $iCounter=0;
+                $iCounter = 0;
                 break;
 
             case CHANGETYPE_NEW:
                 // reset counter
-                $iCounter=0;
-                $bDoNotify=true;
+                $iCounter = 0;
+                $bDoNotify = true;
                 break;
 
             default:
@@ -320,34 +332,32 @@ class notificationhandler {
         }
 
         // setting $this->_aAppResult['laststatus'] above can create recursion
-        if(isset($this->_aAppResult['laststatus']['laststatus'])){
+        if (isset($this->_aAppResult['laststatus']['laststatus'])) {
             unset($this->_aAppResult['laststatus']['laststatus']);
             $this->_saveAppResult();
         }
-                
+
         // handle delayed notification:
         // actions as long counter is lower max delay only
-        if ($iCounter<=$iMaxDelay){
+        if ($iCounter <= $iMaxDelay) {
 
             // store cache (_saveAppResult()) with result data and current counter
-            $this->_aAppResult['result']['counter']=$iCounter;
+            $this->_aAppResult['result']['counter'] = $iCounter;
             $this->_saveAppResult();
 
             // not needed for CHANGETYPE_NEW: detect if count of repeats
             // with the same current status reached the notification delay value
-            if (!$bDoNotify && $iCounter===$this->_aDelayNotification[$iResult]){
-                
-                $iLastCounter=isset($this->_aAppResult['laststatus']['result']['counter'])
-                    ? $this->_aAppResult['laststatus']['result']['counter']
-                    : -1
-                ;
-                $iLastResult=isset($this->_aAppResult['laststatus']['result']['result'])
-                    ? $this->_aAppResult['laststatus']['result']['result']
-                    : -1
-                ;
+            if (!$bDoNotify && $iCounter === $this->_aDelayNotification[$iResult]) {
 
-                if ($iLastResult >= 0 && $iLastCounter >=0 && $iLastCounter >= $this->_aDelayNotification[$iLastResult] ){              
-                    $bDoNotify=true;
+                $iLastCounter = isset($this->_aAppResult['laststatus']['result']['counter'])
+                    ? $this->_aAppResult['laststatus']['result']['counter']
+                    : -1;
+                $iLastResult = isset($this->_aAppResult['laststatus']['result']['result'])
+                    ? $this->_aAppResult['laststatus']['result']['result']
+                    : -1;
+
+                if ($iLastResult >= 0 && $iLastCounter >= 0 && $iLastCounter >= $this->_aDelayNotification[$iLastResult]) {
+                    $bDoNotify = true;
                 }
             }
             /*
@@ -360,24 +370,25 @@ class notificationhandler {
             }
             */
         }
-        if($bDoNotify){
+        if ($bDoNotify) {
             // on delayed sending: overwrite change type to send correct information
-            if ($this->_iAppResultChange==CHANGETYPE_NOCHANGE) {
-                $this->_iAppResultChange=CHANGETYPE_CHANGE;
+            if ($this->_iAppResultChange == CHANGETYPE_NOCHANGE) {
+                $this->_iAppResultChange = CHANGETYPE_CHANGE;
             }
             $this->sendAllNotifications();
         }
         return true;
     }
-    
+
     /**
      * delete application
      * @param string  $sAppId  app id
      * @return boolean
      */
-    public function deleteApp($sAppId){
+    public function deleteApp($sAppId)
+    {
         $this->setApp($sAppId);
-        $this->_iAppResultChange=CHANGETYPE_DELETE;
+        $this->_iAppResultChange = CHANGETYPE_DELETE;
 
         // trigger notification
         $this->sendAllNotifications();
@@ -388,7 +399,7 @@ class notificationhandler {
     // ----------------------------------------------------------------------
     // functions for notifcation log
     // ----------------------------------------------------------------------
-    
+
     /**
      * add a new item in notification log
      * 
@@ -399,60 +410,64 @@ class notificationhandler {
      * @param array    $aResult      response ($this->_aAppResult)
      * @return type
      */
-    protected function addLogitem($iChangetype, $sNewstatus, $sAppId, $sMessage, $aResult){
+    protected function addLogitem($iChangetype, $sNewstatus, $sAppId, $sMessage, $aResult)
+    {
         // reread because service and webgui could change it
-        $aData=$this->loadLogdata();
-        $this->_aLog[]=array(
-            'timestamp'=> time(),
-            'changetype'=> $iChangetype,
-            'status'=> $sNewstatus,
-            'appid'=> $sAppId,
-            'message'=> $sMessage,
-            'result'=> $aResult,
+        $aData = $this->loadLogdata();
+        $this->_aLog[] = array(
+            'timestamp' => time(),
+            'changetype' => $iChangetype,
+            'status' => $sNewstatus,
+            'appid' => $sAppId,
+            'message' => $sMessage,
+            'result' => $aResult,
         );
-        
+
         $this->cutLogitems();
         $this->saveLogdata();
         return $this->_aLog;
     }
-    
+
     /**
      * helper function - limit log to N entries
      * @return boolean
      */
-    protected function cutLogitems(){
-        if(count($this->_aLog)>$this->_iMaxLogentries){
-            while(count($this->_aLog)>$this->_iMaxLogentries){
+    protected function cutLogitems()
+    {
+        if (count($this->_aLog) > $this->_iMaxLogentries) {
+            while (count($this->_aLog) > $this->_iMaxLogentries) {
                 array_shift($this->_aLog);
             }
         }
         // FIX recusrsive data in $this->notify()
-        for($i=0; $i<count($this->_aLog); $i++){
-            if(isset($this->_aLog[$i]['result']['laststatus'])){
+        for ($i = 0; $i < count($this->_aLog); $i++) {
+            if (isset($this->_aLog[$i]['result']['laststatus'])) {
                 unset($this->_aLog[$i]['result']['laststatus']);
             }
         }
         return true;
     }
-    
+
     /**
      * get current result from cache using a shared cache object 
      * with appmonitor-server class
      * @return array
      */
-    public function getAppResult(){
-        $oCache=new AhCache("appmonitor-server", $this->_sAppId);
+    public function getAppResult()
+    {
+        $oCache = new AhCache("appmonitor-server", $this->_sAppId);
         return $oCache->read();
     }
     /**
      * get 2nd last resultset of an application
      * @return array
      */
-    public function getAppLastResult(){
-        $oCache=new AhCache($this->_sCache_lastResult, $this->_sAppId);
+    public function getAppLastResult()
+    {
+        $oCache = new AhCache($this->_sCache_lastResult, $this->_sAppId);
         return $oCache->read();
     }
-    
+
     /**
      * get current log data
      * 
@@ -461,32 +476,33 @@ class notificationhandler {
      * @param boolean $bRsort   flag to reverse sort logs; default is true (=newest entry first)
      * @return array
      */
-    public function getLogdata($aFilter=array(), $iLimit=false, $bRsort=true){
-        $aReturn=array();
-        $aData=$this->loadLogdata();
-        if($bRsort){
+    public function getLogdata($aFilter = array(), $iLimit = false, $bRsort = true)
+    {
+        $aReturn = array();
+        $aData = $this->loadLogdata();
+        if ($bRsort) {
             rsort($aData);
         }
         // filter
-        if (count($aFilter)>0){
-            foreach($aData as $aLogentry){
-                if($iLimit && count($aReturn)>=$iLimit){
+        if (count($aFilter) > 0) {
+            foreach ($aData as $aLogentry) {
+                if ($iLimit && count($aReturn) >= $iLimit) {
                     break;
                 }
-                $bAdd=false;
-                foreach ($aFilter as $sKey=>$sValue){
-                    if($aLogentry[$sKey]===$sValue){
-                        $bAdd=true;
+                $bAdd = false;
+                foreach ($aFilter as $sKey => $sValue) {
+                    if ($aLogentry[$sKey] === $sValue) {
+                        $bAdd = true;
                     }
                 }
-                if($bAdd){
-                    $aReturn[]=$aLogentry;
+                if ($bAdd) {
+                    $aReturn[] = $aLogentry;
                 }
             }
         } else {
-            $aReturn=$aData;
+            $aReturn = $aData;
         }
-        
+
         return $aReturn;
     }
 
@@ -494,29 +510,31 @@ class notificationhandler {
      * read stored log
      * @return array
      */
-    public function loadLogdata(){
-        $oCache=new AhCache($this->_sCacheIdPrefix."-log", "log");
-        $this->_aLog=$oCache->read();
-        if(!$this->_aLog){
-            $this->_aLog=array();
+    public function loadLogdata()
+    {
+        $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
+        $this->_aLog = $oCache->read();
+        if (!$this->_aLog) {
+            $this->_aLog = array();
         }
         $this->cutLogitems();
 
         return $this->_aLog;
     }
-    
+
     /**
      * save log
      * @return type
      */
-    protected function saveLogdata(){
-        if ($this->_aLog && is_array($this->_aLog) && count($this->_aLog)){            
-            $oCache=new AhCache($this->_sCacheIdPrefix."-log", "log");
-            return $this->_aLog=$oCache->write($this->_aLog);
+    protected function saveLogdata()
+    {
+        if ($this->_aLog && is_array($this->_aLog) && count($this->_aLog)) {
+            $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
+            return $this->_aLog = $oCache->write($this->_aLog);
         }
         return false;
     }
-    
+
     // ----------------------------------------------------------------------
     // functions for notifcation 
     // ----------------------------------------------------------------------
@@ -527,7 +545,8 @@ class notificationhandler {
      * @param string $sString
      * @return string
      */
-    protected function _makeReplace($aReplace, $sString) {
+    protected function _makeReplace($aReplace, $sString)
+    {
         $aFrom = array();
         $aTo = array();
         foreach ($aReplace as $sKey => $sValue) {
@@ -543,7 +562,8 @@ class notificationhandler {
      * 
      * @return array
      */
-    public function getMessageReplacements(){
+    public function getMessageReplacements()
+    {
         /*
                 [result] => Array
                 (
@@ -559,64 +579,62 @@ class notificationhandler {
                 )
 
          */
-        if ($this->_iAppResultChange===false){
+        if ($this->_iAppResultChange === false) {
             $this->_detectChangetype();
         }
-        $sMiss='-';
+        $sMiss = '-';
 
         // @see notify()
-        $aCompare=isset($this->_aAppResult['laststatus']) ? $this->_aAppResult['laststatus'] : [];
-        $aReplace=array(
+        $aCompare = isset($this->_aAppResult['laststatus']) ? $this->_aAppResult['laststatus'] : [];
+        $aReplace = array(
             '__APPID__'          => $this->_sAppId,
-            '__CHANGE__'         => isset($this->_iAppResultChange) ? $this->_tr('changetype-'. $this->_iAppResultChange) : $sMiss,
+            '__CHANGE__'         => isset($this->_iAppResultChange) ? $this->_tr('changetype-' . $this->_iAppResultChange) : $sMiss,
             '__TIME__'           => date("Y-m-d H:i:s", (time())),
-            '__URL__'            => isset($this->_aAppResult['result']['url']) ? $this->_aAppResult['result']['url'] 
-                                        : (isset($aCompare['result']['url']) ? $aCompare['result']['url'] : $sMiss),
+            '__URL__'            => isset($this->_aAppResult['result']['url']) ? $this->_aAppResult['result']['url']
+                : (isset($aCompare['result']['url']) ? $aCompare['result']['url'] : $sMiss),
             '__HOST__'           => isset($this->_aAppResult['result']['host']) ? $this->_aAppResult['result']['host'] : $sMiss,
             '__WEBSITE__'        => isset($this->_aAppResult['result']['website']) ? $this->_aAppResult['result']['website'] : $sMiss,
 
-            '__RESULT__'         => isset($this->_aAppResult['result']['result']) ? $this->_tr('Resulttype-'. $this->_aAppResult['result']['result']) : $sMiss,
-            '__ERROR__'         => isset($this->_aAppResult['result']['error']) && $this->_aAppResult['result']['error'] 
-                                        ? $this->_aAppResult['result']['error'] : '',
-            
+            '__RESULT__'         => isset($this->_aAppResult['result']['result']) ? $this->_tr('Resulttype-' . $this->_aAppResult['result']['result']) : $sMiss,
+            '__ERROR__'         => isset($this->_aAppResult['result']['error']) && $this->_aAppResult['result']['error']
+                ? $this->_aAppResult['result']['error'] : '',
+
             '__HEADER__'         => isset($this->_aAppResult['result']['header']) ? $this->_aAppResult['result']['header'] : $sMiss,
-            
+
             '__LAST-TIME__'      => isset($aCompare['result']['ts']) ? date("Y-m-d H:i:s", $aCompare['result']['ts']) : $sMiss,
-            '__LAST-RESULT__'    => isset($aCompare['result']['result']) ? $this->_tr('Resulttype-'. $aCompare['result']['result']) : $sMiss,
-            '__DELTA-TIME__'     => isset($aCompare['result']['ts']) ? 
-                    round((time() - $aCompare['result']['ts'])/ 60)." min "
-                    . "(".round((time() - $aCompare['result']['ts'])/ 60/60*4)/4 ." h)"
-                    : $sMiss    
-                    ,
-            
+            '__LAST-RESULT__'    => isset($aCompare['result']['result']) ? $this->_tr('Resulttype-' . $aCompare['result']['result']) : $sMiss,
+            '__DELTA-TIME__'     => isset($aCompare['result']['ts']) ?
+                round((time() - $aCompare['result']['ts']) / 60) . " min "
+                . "(" . round((time() - $aCompare['result']['ts']) / 60 / 60 * 4) / 4 . " h)"
+                : $sMiss,
+
         );
-        if($this->_sServerurl){
-            $aReplace['__MONITORURL__']=$this->_sServerurl . '#divweb-'.$this->_sAppId;
+        if ($this->_sServerurl) {
+            $aReplace['__MONITORURL__'] = $this->_sServerurl . '#divweb-' . $this->_sAppId;
         }
         // echo '<pre>'.print_r($this->_aAppResult['checks'], 1).'</pre>';
-        $sChecks='';
-        if(isset($this->_aAppResult['checks']) && count($this->_aAppResult['checks'])){
-            
+        $sChecks = '';
+        if (isset($this->_aAppResult['checks']) && count($this->_aAppResult['checks'])) {
+
             // force sortorder in notifications - one key for each result ... 3 is error .. 0 is OK
-            $aSortedChecks=array();
-            for($i=3; $i>=0; $i--){
-                $aSortedChecks[$i]='';
+            $aSortedChecks = array();
+            for ($i = 3; $i >= 0; $i--) {
+                $aSortedChecks[$i] = '';
             }
-            foreach($this->_aAppResult['checks'] as $aCheck){
-                $iResult=$aCheck['result'];
-                $aSortedChecks[$iResult].="\n\n"
-                        . '----- '.$aCheck['name'].' ('.$aCheck['description'].")\n"
-                        . $aCheck['value']."\n"
-                        . $this->_tr('Resulttype-'. $aCheck['result'])
-                        ;
+            foreach ($this->_aAppResult['checks'] as $aCheck) {
+                $iResult = $aCheck['result'];
+                $aSortedChecks[$iResult] .= "\n\n"
+                    . '----- ' . $aCheck['name'] . ' (' . $aCheck['description'] . ")\n"
+                    . $aCheck['value'] . "\n"
+                    . $this->_tr('Resulttype-' . $aCheck['result']);
             }
-            $aReplace['__CHECKS__']=implode("", $aSortedChecks);
+            $aReplace['__CHECKS__'] = implode("", $aSortedChecks);
         } else {
-            $aReplace['__CHECKS__']=html_entity_decode($this->_tr('msgErr-missing-section-checks'));
+            $aReplace['__CHECKS__'] = html_entity_decode($this->_tr('msgErr-missing-section-checks'));
         }
         return $aReplace;
     }
-    
+
     /**
      * helper function: generate message text frem template based on type of
      * change, its template and the values of check data
@@ -624,63 +642,63 @@ class notificationhandler {
      * @param string $sMessageId  one of changetype-[N].logmessage | changetype-[N].email.message | email.subject
      * @return integer
      */
-    public function getReplacedMessage($sMessageId){
-        $sTemplate=isset($this->_aNotificationOptions['messages'][$sMessageId]) && $this->_aNotificationOptions['messages'][$sMessageId]
-                ? $this->_aNotificationOptions['messages'][$sMessageId]
-                : $this->_tr($sMessageId)
-                ;
+    public function getReplacedMessage($sMessageId)
+    {
+        $sTemplate = isset($this->_aNotificationOptions['messages'][$sMessageId]) && $this->_aNotificationOptions['messages'][$sMessageId]
+            ? $this->_aNotificationOptions['messages'][$sMessageId]
+            : $this->_tr($sMessageId);
         // $sTemplate=$this->_tr($sMessageId);
         $sReturn = $this->_makeReplace($this->getMessageReplacements(), $sTemplate);
         return $sReturn;
     }
-    
+
     /**
      * write log entry and send notifications
      * @return boolean
      */
-    protected function sendAllNotifications(){
-        if($this->_iAppResultChange===false){
-            die("ERROR: " .__METHOD__ ." failed to detect change type - or app was not initialized.");
+    protected function sendAllNotifications()
+    {
+        if ($this->_iAppResultChange === false) {
+            die("ERROR: " . __METHOD__ . " failed to detect change type - or app was not initialized.");
             return false;
         }
 
         // take template for log message and current result type
-        $sLogMessage=$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.logmessage');
-        
+        $sLogMessage = $this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.logmessage');
+
         // override result if an app was deleted: 
         // - use current result, if it exists
         // - use RESULT_UNKNOWN if action was delete or result does not exist
-        $iResult=($this->_iAppResultChange==CHANGETYPE_DELETE) 
-                ? RESULT_UNKNOWN 
-                : (isset($this->_aAppResult['result']['result']) 
-                    ? $this->_aAppResult['result']['result'] 
-                    : RESULT_UNKNOWN
-                  )
-                ;
+        $iResult = ($this->_iAppResultChange == CHANGETYPE_DELETE)
+            ? RESULT_UNKNOWN
+            : (isset($this->_aAppResult['result']['result'])
+                ? $this->_aAppResult['result']['result']
+                : RESULT_UNKNOWN
+            );
 
         // echo "DEBUG:".__METHOD__." add log an sending messages - $sLogMessage\n";
         $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
-        
-        foreach($this->getPlugins() as $sPlugin){
+
+        foreach ($this->getPlugins() as $sPlugin) {
 
             // get plugin specific receivers
-            $aTo=array_values($this->getAppNotificationdata($sPlugin));
+            $aTo = array_values($this->getAppNotificationdata($sPlugin));
 
-            if(count($aTo)){
-                $aOptions=[
-                    '__plugin__'=>$sPlugin, 
-                    'from'=>(isset($this->_aNotificationOptions['from'][$sPlugin]) && $this->_aNotificationOptions['from'][$sPlugin]) 
-                        ? $this->_aNotificationOptions['from'][$sPlugin] 
+            if (count($aTo)) {
+                $aOptions = [
+                    '__plugin__' => $sPlugin,
+                    'from' => (isset($this->_aNotificationOptions['from'][$sPlugin]) && $this->_aNotificationOptions['from'][$sPlugin])
+                        ? $this->_aNotificationOptions['from'][$sPlugin]
                         : false,
-                    'to'=>$aTo,
-                    'subject'=>$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.subject'),
-                    'message'=>$this->getReplacedMessage('changetype-'.$this->_iAppResultChange.'.email.message'),
+                    'to' => $aTo,
+                    'subject' => $this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.subject'),
+                    'message' => $this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message'),
                 ];
                 // $sSendMethod="send_$sPlugin";
                 // $sSendMethod($aOptions);
 
-                $sClassname=$sPlugin."Notification"; // eg. "emailNotification"
-                $oPlugin=new $sClassname;
+                $sClassname = $sPlugin . "Notification"; // eg. "emailNotification"
+                $oPlugin = new $sClassname;
                 $oPlugin::send($aOptions);
             }
         }
@@ -694,10 +712,11 @@ class notificationhandler {
      * Additionally its functions will be included to be used in sendAllNotifications
      * @return array
      */
-    function getPlugins(){
-        $aReturn=[];
-        foreach(glob($this->_sPluginDir .'/*.php') as $sPlugin){
-            $aReturn[]=str_replace('.php', '', basename($sPlugin));
+    function getPlugins()
+    {
+        $aReturn = [];
+        foreach (glob($this->_sPluginDir . '/*.php') as $sPlugin) {
+            $aReturn[] = str_replace('.php', '', basename($sPlugin));
             include_once($sPlugin);
         }
         return $aReturn;
@@ -710,45 +729,45 @@ class notificationhandler {
      * @param string  $sType  optional: type email|slack; defailt: false (=return all keys)
      * @return array
      */
-    public function getAppNotificationdata($sType=false){
+    public function getAppNotificationdata($sType = false)
+    {
 
-        $aMergeMeta=array();
-        $aArray_keys=$sType ? array($sType) : array_keys($this->_aNotificationOptions);
+        $aMergeMeta = array();
+        $aArray_keys = $sType ? array($sType) : array_keys($this->_aNotificationOptions);
 
         // server side notifications:
         // echo '<pre>'.print_r($this->_aNotificationOptions, 1).'</pre>';
 
         // got from client
-        $aClientNotifications=$this->_getAppNotifications();
+        $aClientNotifications = $this->_getAppNotifications();
         // echo '<pre>'.print_r($aClientNotifications, 1).'</pre>';
 
-        
+
         // take data from web app ... meta -> notifications
         // $aMergeMeta=isset($this->_aAppLastResult['meta']['notifications']) ? $this->_aAppLastResult['meta']['notifications'] : array();
-        foreach($aArray_keys as $sNotificationType){
+        foreach ($aArray_keys as $sNotificationType) {
             // echo "DEBUG: $sNotificationType\n<pre>" . print_r($aClientNotifications[$sNotificationType], 1) . '</pre>';
-            if(isset ($aClientNotifications[$sNotificationType]) && count($aClientNotifications[$sNotificationType])){
-                foreach($aClientNotifications[$sNotificationType] as $sKey=>$Value){
-                    if(is_int($sKey)){
-                        $aMergeMeta[$sNotificationType][]=$Value;
+            if (isset($aClientNotifications[$sNotificationType]) && count($aClientNotifications[$sNotificationType])) {
+                foreach ($aClientNotifications[$sNotificationType] as $sKey => $Value) {
+                    if (is_int($sKey)) {
+                        $aMergeMeta[$sNotificationType][] = $Value;
                     } else {
-                        $aMergeMeta[$sNotificationType][$sKey]=$Value;
+                        $aMergeMeta[$sNotificationType][$sKey] = $Value;
                     }
                 }
             }
-            if (isset($this->_aNotificationOptions[$sNotificationType]) && is_array($this->_aNotificationOptions[$sNotificationType])){
-                foreach($this->_aNotificationOptions[$sNotificationType] as $sKey=>$Value){
-                    if(is_int($sKey)){
-                        $aMergeMeta[$sNotificationType][]=$Value;
+            if (isset($this->_aNotificationOptions[$sNotificationType]) && is_array($this->_aNotificationOptions[$sNotificationType])) {
+                foreach ($this->_aNotificationOptions[$sNotificationType] as $sKey => $Value) {
+                    if (is_int($sKey)) {
+                        $aMergeMeta[$sNotificationType][] = $Value;
                     } else {
-                        $aMergeMeta[$sNotificationType][$sKey]=$Value;
+                        $aMergeMeta[$sNotificationType][$sKey] = $Value;
                     }
                 }
             }
         }
-        return $sType 
-                ? (isset($aMergeMeta[$sType]) ? $aMergeMeta[$sType] : array())
-                : $aMergeMeta;
+        return $sType
+            ? (isset($aMergeMeta[$sType]) ? $aMergeMeta[$sType] : array())
+            : $aMergeMeta;
     }
-    
 }

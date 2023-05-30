@@ -36,7 +36,8 @@ require_once 'appmonitor-server.class.php';
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
  */
-class appmonitorserver_api extends appmonitorserver {
+class appmonitorserver_api extends appmonitorserver
+{
 
     // ----------------------------------------------------------------------
     // pre actions
@@ -46,7 +47,8 @@ class appmonitorserver_api extends appmonitorserver {
      * get the "api" section from configuration
      * @return array
      */
-    public function getApiConfig(){
+    public function getApiConfig()
+    {
         return isset($this->_aCfg['api']) ? $this->_aCfg['api'] : [];
     }
 
@@ -55,10 +57,11 @@ class appmonitorserver_api extends appmonitorserver {
      * Syntax: username is the key and password hash as value.
      * @return array
      */
-    public function getApiUsers(){
-        $aReturn=[];
-        foreach($this->_aCfg['users'] as $sLoopuser=>$aUserdata){
-            $aReturn[$sLoopuser]=isset($aUserdata['password']) ? $aUserdata['password'] : false;
+    public function getApiUsers()
+    {
+        $aReturn = [];
+        foreach ($this->_aCfg['users'] as $sLoopuser => $aUserdata) {
+            $aReturn[$sLoopuser] = isset($aUserdata['password']) ? $aUserdata['password'] : false;
         }
         return $aReturn;
     }
@@ -76,28 +79,29 @@ class appmonitorserver_api extends appmonitorserver {
      * @param  string  $outmode  kind of result data
      * @return type
      */
-    public function apiGetFilteredApp($aFilter=[],$outmode='all') {
-        $aReturn=[];
-        $aTmp=[];
+    public function apiGetFilteredApp($aFilter = [], $outmode = 'all')
+    {
+        $aReturn = [];
+        $aTmp = [];
 
         // sort filter items or delete empty key
-        if (isset($aFilter['tags']) && is_array($aFilter['tags']) && count($aFilter['tags'])){
+        if (isset($aFilter['tags']) && is_array($aFilter['tags']) && count($aFilter['tags'])) {
             sort($aFilter['tags']);
         } else {
             unset($aFilter['tags']);
         }
 
         // remove empty items
-        foreach(['appid', 'website'] as $sFilterKey){
-            if (isset($aFilter[$sFilterKey]) && !$aFilter[$sFilterKey]){
+        foreach (['appid', 'website'] as $sFilterKey) {
+            if (isset($aFilter[$sFilterKey]) && !$aFilter[$sFilterKey]) {
                 unset($aFilter[$sFilterKey]);
             }
         }
 
         // --- reduce apps by app internal data
-        foreach($this->_data as $sKey=>$aData){
-            $iAdd=0;
-            $iRemove=0;
+        foreach ($this->_data as $sKey => $aData) {
+            $iAdd = 0;
+            $iRemove = 0;
 
             // on empty filter: add
             if (!count($aFilter)) {
@@ -105,7 +109,7 @@ class appmonitorserver_api extends appmonitorserver {
             }
 
             if (isset($aFilter['appid'])) {
-                if ($sKey==$aFilter['appid']){
+                if ($sKey == $aFilter['appid']) {
                     $iAdd++;
                 } else {
                     $iRemove++;
@@ -113,67 +117,62 @@ class appmonitorserver_api extends appmonitorserver {
             }
 
             // tags
-            if (isset($aFilter['tags'])){
-                if(isset($aData['meta']['tags']) ) {
-                    foreach ($aFilter['tags'] as $sMustMatch){
-                        if(in_array($sMustMatch, $aData['meta']['tags'])){
+            if (isset($aFilter['tags'])) {
+                if (isset($aData['meta']['tags'])) {
+                    foreach ($aFilter['tags'] as $sMustMatch) {
+                        if (in_array($sMustMatch, $aData['meta']['tags'])) {
                             $iAdd++;
                         } else {
                             $iRemove++;
                         }
-
                     }
                 } else {
                     $iRemove++;
                 }
             }
 
-            if(isset($aFilter['website'])){
-                if(strstr($aData['meta']['website'], $aFilter['website'])){
+            if (isset($aFilter['website'])) {
+                if (strstr($aData['meta']['website'], $aFilter['website'])) {
                     $iAdd++;
                 } else {
                     $iRemove++;
                 }
             }
 
-            if ($iAdd>0 && !$iRemove){
+            if ($iAdd > 0 && !$iRemove) {
 
                 // generate a key to sort apps
                 // reverse status code to bring errors on top
-                $iAppResult=RESULT_ERROR - (isset($aData['result']['result']) ? $aData['result']['result'] : 1);
+                $iAppResult = RESULT_ERROR - (isset($aData['result']['result']) ? $aData['result']['result'] : 1);
 
                 // ... and add appname
-                $sAppName=$iAppResult.'__'.strtoupper( isset($aData['result']['website']) ? $aData['result']['website'] : 'zzz' ) . '__'.$sKey;
+                $sAppName = $iAppResult . '__' . strtoupper(isset($aData['result']['website']) ? $aData['result']['website'] : 'zzz') . '__' . $sKey;
 
-                switch($outmode){
+                switch ($outmode) {
 
-                    // short view of matching apps
+                        // short view of matching apps
                     case 'appid':
-                        $aTmp[$sAppName][$sKey]=[
-                            'website'=>isset($aData['result']['website']) ? $aData['result']['website'] : false,
-                            'url'=>isset($aData['result']['url']) ? $aData['result']['url'] : false,
+                        $aTmp[$sAppName][$sKey] = [
+                            'website' => isset($aData['result']['website']) ? $aData['result']['website'] : false,
+                            'url' => isset($aData['result']['url']) ? $aData['result']['url'] : false,
                         ];
-                        break;
-                        ;;
-                    // return an existing key only
+                        break;;;
+                        // return an existing key only
                     case 'checks':
                     case 'meta':
-                        $aTmp[$sAppName][$sKey]=isset($aData[$outmode]) ? $aData[$outmode] : false;
-                        break;
-                        ;;
-                    
-                    // all
-                    default:
-                        $aTmp[$sAppName][$sKey]=$aData;
-                    ;;
-                }
+                        $aTmp[$sAppName][$sKey] = isset($aData[$outmode]) ? $aData[$outmode] : false;
+                        break;;;
 
+                        // all
+                    default:
+                        $aTmp[$sAppName][$sKey] = $aData;;;
+                }
             }
         }
         ksort($aTmp);
-        foreach($aTmp as $aApp){
-            $sKey=array_keys($aApp)[0];
-            $aReturn[$sKey]=$aApp[$sKey];
+        foreach ($aTmp as $aApp) {
+            $sKey = array_keys($aApp)[0];
+            $aReturn[$sKey] = $aApp[$sKey];
         }
 
         return $aReturn;
@@ -188,8 +187,8 @@ class appmonitorserver_api extends appmonitorserver {
      * as subkeys
      * @return array
      */
-    public function apiGetTags() {
-        return ['tags'=>$this->_getClientTags()];
+    public function apiGetTags()
+    {
+        return ['tags' => $this->_getClientTags()];
     }
-
 }

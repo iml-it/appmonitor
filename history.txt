@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.121 2023-05-30
+  - ADDED: show failed checks in notification table
+
 v0.120 2023-05-26
   - FIX: position of long app names in app overview
   - FIX: filter function for app in overview page

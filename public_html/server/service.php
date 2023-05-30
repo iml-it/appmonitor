@@ -18,7 +18,8 @@ $iSleep = 5; // seconds
 // FUNCTIONS
 // -----------------------------------------------------------------------------
 // wrapper for signal handler
-function signal_handler($signo) {
+function signal_handler($signo)
+{
     global $oService;
     echo "calling sigHandler($signo)\n";
     return $oService->sigHandler($signo);
@@ -30,14 +31,15 @@ function signal_handler($signo) {
 echo "\n===== APPMONITOR :: service =====\n\n";
 require_once('classes/tinyservice.class.php');
 global $oService;
-$oService = new tinyservice(__FILE__, $iSleep, __DIR__.'/tmp');
+$oService = new tinyservice(__FILE__, $iSleep, __DIR__ . '/tmp');
 
 // disallow root to run it
 $oService->denyRoot();
 
 // setting a signal handler - works on *nix only - this is NOT platform independent
 if (function_exists("pcntl_signal")) {
-    declare(ticks = 1);
+
+    declare(ticks=1);
     pcntl_signal(SIGTERM, "signal_handler");
     pcntl_signal(SIGINT, "signal_handler");
     pcntl_signal(SIGHUP, "signal_handler");
