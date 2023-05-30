@@ -1100,6 +1100,25 @@ class appmonitorserver_gui extends appmonitorserver {
                 : '-'
                 ;
             $aTags=isset($this->_data[$aLogentry['appid']]["meta"]["tags"]) ? $this->_data[$aLogentry['appid']]["meta"]["tags"] : false;
+
+            $sCheckResults='';
+            $iChkCounter=0;
+            if($aLogentry['status']>0){
+                if(isset($aLogentry['result']['checks'])){
+                    foreach($aLogentry['result']['checks'] as $aCheckitem){
+                        if($aCheckitem['result']>0){
+                            $iChkCounter++;
+                            $sCheckResults.='<li class="result'.$aCheckitem['result'].'">'
+                                    . '<strong>'.$aCheckitem['name'].'</strong> - '
+                                    . $aCheckitem['value'].'<br>'
+                                .'</li>'
+                                ;
+                        }
+                    }
+                }   
+            }
+
+
             $sTable .= '<tr class="result' . $aLogentry['status'] . ' tags '.$this->_getCssclassForTag($aTags).'">'
                     .'<td class="result' . $aLogentry['status'] . '"><span style="display: none;">'.$aLogentry['status'].'</span>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
                     . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
@@ -1110,7 +1129,14 @@ class appmonitorserver_gui extends appmonitorserver {
                             : '-'
                     )
                     .'</td>'
-                    . '<td>' . $aLogentry['message'] . '</td>'
+                    . '<td>' 
+                        . $aLogentry['message'] 
+                        . ($sCheckResults
+                            ? '<ul>'.$sCheckResults.'</ul>'
+                            : ''
+                        )
+                    .'</td>'
+
                     . '</tr>';
         }
         $sTable .= '</tbody>' . "\n";
