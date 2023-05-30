@@ -5,14 +5,14 @@
  * 
  */
 require_once(__DIR__ . '/classes/appmonitor-server.class.php');
-$bDebug=false;
+$bDebug = false;
 
 global $sDivider;
-$sDivider='.';
+$sDivider = '.';
 
 
 $oMonitor = new appmonitorserver();
-$aCfg=$oMonitor->getConfigVars();
+$aCfg = $oMonitor->getConfigVars();
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -27,10 +27,11 @@ error_reporting(E_ALL);
  * show a help for the syntax of cli
  * @global array $argv
  */
-function showHelp(){
+function showHelp()
+{
     global $argv, $sDivider;
     echo "HELP:
-    ".$argv[0]." [ACTION [parameter1 [parameter2]]]
+    " . $argv[0] . " [ACTION [parameter1 [parameter2]]]
 
     ACTIONs and its parameter are:
 
@@ -62,16 +63,17 @@ function showHelp(){
     - you can chain commands. i.e. 
       --set VARNAME VALUE --show 
       They will be processed sequentially.
-";          
+";
 }
 
 /**
  * prevent that root executes this script - requires php posix module on *nix
  */
-function denyRoot(){
+function denyRoot()
+{
     if (function_exists("posix_getpwuid")) {
         $processUser = posix_getpwuid(posix_geteuid());
-        wd("detected user: ".print_r($processUser, 1));
+        wd("detected user: " . print_r($processUser, 1));
         if ($processUser['name'] == "root") {
             die("ERROR: Do not start the script as user root. Run it as the user of the application\n");
         }
@@ -86,18 +88,19 @@ function denyRoot(){
  * @param array   $aArray    array to substitute $aCfg
  * @return boolean
  */
-function checkCfgvarExists($sVarname, $aArray=false){
+function checkCfgvarExists($sVarname, $aArray = false)
+{
     global $aCfg, $sDivider;
-    if(!$aArray){
-        $aArray=$aCfg;
+    if (!$aArray) {
+        $aArray = $aCfg;
     }
-    
-    $aTmp=preg_split('/\\'.$sDivider.'/', $sVarname);
-    $sSubkey=array_shift($aTmp);
-    if(!isset($aArray[$sSubkey])){
+
+    $aTmp = preg_split('/\\' . $sDivider . '/', $sVarname);
+    $sSubkey = array_shift($aTmp);
+    if (!isset($aArray[$sSubkey])) {
         quit("a varname [$sSubkey] does not exist in the config.\n");
     }
-    if(count($aTmp)){
+    if (count($aTmp)) {
         return checkCfgvarExists(implode($sDivider, $aTmp), $aArray[$sSubkey]);
     }
     return $aArray[$sSubkey];
@@ -107,28 +110,29 @@ function checkCfgvarExists($sVarname, $aArray=false){
  * set a (new) value in array
  * 
  * @global array $aCfg
- * @param type $sVarname
+ * @param string $sVarname
  * @param type $value
  * @return boolean
  */
-function cfgSet($sVarname, $value){
+function cfgSet($sVarname, $value)
+{
     global $aCfg, $sDivider;
-    
-    $aArray=&$aCfg;
-    $aTmp=preg_split('/\\'.$sDivider.'/', $sVarname);
-    $sLastKey=array_pop($aTmp);
-    if(count($aTmp)){
-        foreach($aTmp as $sKeyname){
-            if(!isset($aArray[$sKeyname])){
-                $aArray[$sKeyname]=array();
+
+    $aArray = &$aCfg;
+    $aTmp = preg_split('/\\' . $sDivider . '/', $sVarname);
+    $sLastKey = array_pop($aTmp);
+    if (count($aTmp)) {
+        foreach ($aTmp as $sKeyname) {
+            if (!isset($aArray[$sKeyname])) {
+                $aArray[$sKeyname] = array();
             }
-            $aArray=&$aArray[$sKeyname];
+            $aArray = &$aArray[$sKeyname];
         }
     }
-    if(is_array($aArray[$sLastKey])){
-        $aArray[$sLastKey][]=$value;
+    if (is_array($aArray[$sLastKey])) {
+        $aArray[$sLastKey][] = $value;
     } else {
-        $aArray[$sLastKey]=$value;
+        $aArray[$sLastKey] = $value;
     }
     return true;
 }
@@ -136,23 +140,24 @@ function cfgSet($sVarname, $value){
 /**
  * delete a value or subkey in the array
  * @global array $aCfg
- * @param type $sVarname
+ * @param string $sVarname
  * @return boolean
  */
-function cfgRemove($sVarname){
+function cfgRemove($sVarname)
+{
     global $aCfg, $sDivider;
-    
-    $aArray=&$aCfg;
-    $aTmp=preg_split('/\\'.$sDivider.'/', $sVarname);
-    $sLastKey=array_pop($aTmp);
-    if($aTmp!==false){
-        if(count($aTmp)) foreach($aTmp as $sKeyname){
-            if(!isset($aArray[$sKeyname])){
+
+    $aArray = &$aCfg;
+    $aTmp = preg_split('/\\' . $sDivider . '/', $sVarname);
+    $sLastKey = array_pop($aTmp);
+    if ($aTmp !== false) {
+        if (count($aTmp)) foreach ($aTmp as $sKeyname) {
+            if (!isset($aArray[$sKeyname])) {
                 quit("the subkey [$sKeyname] was not found in wanted structure $sVarname");
             }
-            $aArray=&$aArray[$sKeyname];
+            $aArray = &$aArray[$sKeyname];
         }
-        if(!isset($aArray[$sLastKey])){
+        if (!isset($aArray[$sLastKey])) {
             quit("the last subkey [$sLastKey] was not found in wanted structure $sVarname");
         }
         unset($aArray[$sLastKey]);
@@ -165,7 +170,8 @@ function cfgRemove($sVarname){
  * @param string  $sMessage  text to show
  * @param integer $iExit     optional: exitcode; default=1
  */
-function quit($sMessage, $iExit=1){
+function quit($sMessage, $iExit = 1)
+{
     echo "ERROR: $sMessage\n";
     exit($iExit);
 }
@@ -174,7 +180,8 @@ function quit($sMessage, $iExit=1){
  * write debug output
  * @param type $s
  */
-function wd($s){
+function wd($s)
+{
     global $bDebug;
     echo $bDebug ? "DEBUG: $s\n" : '';
 }
@@ -198,30 +205,30 @@ denyRoot();
 
 // ----- get prameters
 
-if($argc<2){
+if ($argc < 2) {
     showHelp();
     exit(0);
 }
 array_shift($argv);
 
-while(count($argv)>0){
-    $sAction=$argv[0];
-    $sParam2=isset($argv[1]) ? $argv[1] : NULL;
-    $sParam3=isset($argv[2]) ? $argv[2] : NULL;
+while (count($argv) > 0) {
+    $sAction = $argv[0];
+    $sParam2 = isset($argv[1]) ? $argv[1] : NULL;
+    $sParam3 = isset($argv[2]) ? $argv[2] : NULL;
 
     wd("action = $sAction | varname = $sParam2 | value = $sParam3\n");
 
     // ----- do action
 
-    switch ($sAction){
+    switch ($sAction) {
 
         case "--addurl":
-            if(!$sParam2){
+            if (!$sParam2) {
                 quit("param for url to delete is required.\n");
             }
-            $sUrl=$sParam2;
+            $sUrl = $sParam2;
             wd("addurl $sUrl ...");
-            if ($oMonitor->actionAddUrl($sUrl)){
+            if ($oMonitor->actionAddUrl($sUrl)) {
                 echo "OK, url [$sUrl] was added.\n";
             } else {
                 quit("url [$sUrl] was NOT added. Maybe it is \n- not an url or\n- it is not app monitor or\n- it already exists.\n");
@@ -231,12 +238,12 @@ while(count($argv)>0){
             // $aCfg=$oMonitor->getConfigVars(); print_r($aCfg['urls']);
             break;
         case "--deleteurl":
-            if(!$sParam2){
+            if (!$sParam2) {
                 quit("param for url to delete is required.\n");
             }
-            $sUrl=$sParam2;
+            $sUrl = $sParam2;
             wd("deleteurl $sUrl ...");
-            if ($oMonitor->actionDeleteUrl($sUrl)){
+            if ($oMonitor->actionDeleteUrl($sUrl)) {
                 echo "OK, url [$sUrl] was deleted.\n";
             } else {
                 quit("url [$sUrl] was NOT deleted.\n");
@@ -247,10 +254,10 @@ while(count($argv)>0){
             break;
 
         case "--delete":
-            if(strpos($sParam2, "urls")===0){
+            if (strpos($sParam2, "urls") === 0) {
                 quit("use --deleteurl [url] to remove a client monitor url");
             }
-            if(!$sParam2){
+            if (!$sParam2) {
                 quit("param for key(structure) to delete is required.\n");
             }
             wd("delete var $sParam2 ...");
@@ -264,13 +271,13 @@ while(count($argv)>0){
             break;
 
         case "--set":
-            if(!$sParam2){
+            if (!$sParam2) {
                 quit("param for key(structure) to set is required.\n");
             }
-            if(strpos($sParam2, "urls")===0){
+            if (strpos($sParam2, "urls") === 0) {
                 quit("use --addurl [url] to add a new client monitor url");
             }
-            if(!$sParam3===NULL){
+            if (!$sParam3 === NULL) {
                 quit("param for value to to set to [$sParam2] is required.\n");
             }
             wd("set var $sParam2 to $sParam3 ...");
@@ -285,13 +292,13 @@ while(count($argv)>0){
         case "--show":
             array_shift($argv);
 
-            if(strpos($sParam2, '--')===0){
-                $sParam2='ALL';
+            if (strpos($sParam2, '--') === 0) {
+                $sParam2 = 'ALL';
             } else {
                 array_shift($argv);
             }
             echo "; show var [$sParam2]\n";
-            if(!$sParam2 || $sParam2==='ALL'){
+            if (!$sParam2 || $sParam2 === 'ALL') {
                 print_r($aCfg);
                 break;
             }
@@ -300,7 +307,7 @@ while(count($argv)>0){
             // print_r($aCfg[$sVarname]);
             break;
         default:
-            quit("not implemented action: ".$sAction."\n");
+            quit("not implemented action: " . $sAction . "\n");
             break;
     }
     echo "; ----------------------------------------------------------------------\n";
