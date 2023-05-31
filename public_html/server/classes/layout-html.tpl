@@ -47,6 +47,9 @@ desired effect
         <i class="fa-solid fa-bars"></i>
         <span class="sr-only">Toggle navigation</span>
       </a>
+        <ul class="nav navbar-nav">
+          <li><a href="#" onclick="return false;" id="totalstatus"></a></li>
+        </ul>
       
       <!-- Navbar Right Menu -->
       <div class="navbar-custom-menu">

@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.121
+ * @version 0.122
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -43,7 +43,7 @@ class appmonitorserver_gui extends appmonitorserver
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.121";
+    var $_sVersion = "0.122";
 
     /**
      * html code for icons in the web gui
@@ -538,6 +538,7 @@ class appmonitorserver_gui extends appmonitorserver
                             'count' => $sMoreHosts . $aCounter['apps'],
                             'icon' => $this->_aIco['allwebapps'],
                             'label' => $this->_tr('Webapps'),
+                            'more'=> '<span id="txtTotalstatus">'.$this->_tr('MsgResulttype-'.$iResultApps).'</span>',
                         ))
                         : '';
                     break;
@@ -1292,12 +1293,26 @@ class appmonitorserver_gui extends appmonitorserver
         $oA = new renderadminlte();
         $sHtml = ''
             // . '<h2>' . $this->_aIco["about"] . ' ' . $this->_tr('About') . '</h2>'
-            . sprintf($this->_tr('About-title'), $this->_sTitle) . '<br>'
+            . sprintf($this->_tr('About-title'), $this->_sTitle . ' v'.$this->_sVersion) . '<br>'
             . '<br>'
             . $this->_tr('About-text') . '<br>'
             . '<br>'
             . sprintf($this->_tr('About-projecturl'), $this->_sProjectUrl, $this->_sProjectUrl) . '<br>'
-            . sprintf($this->_tr('About-docs'), $this->_sDocUrl) . '<br>';
+            . sprintf($this->_tr('About-docs'), $this->_sDocUrl) . '<br>'
+            .'<br>'
+            . $this->_tr('About-vendor').
+            '<ul>
+                <li><a href="https://adminlte.io/">AdminLTE</a></li>
+                <li><a href="https://datatables.net/">datatables.net</a></li>
+                <li><a href="https://fontawesome.com/">FontAwesome</a></li>
+                <li><a href="https://jquery.com/">jQuery</a></li>
+                <li><a href="https://getbootstrap.com/">Bootstrap</a></li>
+                <li><a href="https://www.chartjs.org/">ChartJs</a></li>
+                <li><a href="https://visjs.org/">Vis.js</a></li>
+                <li><a href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
+                <li><a href="">AhCache</a></li>
+            </ul>'
+            ;
         // return $sHtml;
         return $oA->getSectionHead($this->_aIco["about"] . ' ' . $this->_tr('About'))
             . '<section class="content">'
@@ -1339,13 +1354,20 @@ class appmonitorserver_gui extends appmonitorserver
             true ||
             array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
         ) {
+
+            // --- 
             $sTopHeadline = $oA->getSectionHead(
-                '<a href="#divwebs" onclick="setTab(\'#divwebs\')"'
+                ''
+                .'<a href="#divwebs" onclick="setTab(\'#divwebs\')"'
                     . '> ' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps-header')
-                    . '</a> > <nobr>'
+                    . '</a> > '
+                    .'<span class="divhost bg-'.$this->_getAdminLteColorByResult($aEntries["result"]["result"]).'">'
+                    . '<nobr>'
+                    . $this->_tr('Resulttype-' . $aEntries["result"]["result"]).': '
                     . $this->_aIco['webapp'] . ' '
                     . $this->_getAppLabel($sAppId)
-                    . '</nobr>'
+                    . '&nbsp;</nobr>'
+                .'</span>'
             );
 
 
@@ -1380,13 +1402,14 @@ class appmonitorserver_gui extends appmonitorserver
                     }
                 }
             }
+            $sValidationContent=$sValidationContent ? $oA->getSectionRow($sValidationContent) : '';
+
             if (array_key_exists("host", $aEntries["result"])) {
 
                 // --- Counter and graphs
                 $oCounters = new counteritems($sAppId);
                 /** 
                  * @var array
-                 * 
                  */
                 $aCounters = $oCounters->getCounters();
                 $sCounters = '';
@@ -1412,20 +1435,56 @@ class appmonitorserver_gui extends appmonitorserver
                     }
                 }
 
-                $sHtml .= $oA->getSectionRow($sCounters);
+                // --- http status code
+                /*
+                $sStatusIcon = ($aEntries['result']['httpstatus']
+                    ? ($aEntries['result']['httpstatus'] >= 400
+                        ? $this->_aIco['error']
+                        : ($aEntries['result']['httpstatus'] >= 300
+                            ? $this->_aIco['warning']
+                            : $this->_aIco['ok']
+                        )
+                    )
+                    : $this->_aIco['error']
+                );
+                $sBoxHttpResponse=$oA->getSectionColumn(
+                    $oA->getBox(array(
+                        'title' => $this->_tr('Http-details'),
+                        'text' => ($aEntries['result']['error']
+                            ? $oA->getAlert(array(
+                                'type' => 'danger',
+                                'dismissible' => false,
+                                'text' => $aEntries['result']['error']
+                            ))
+                            : ''
+                        )
+                            . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
+                            . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $sStatusIcon . ' ' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
+                            . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
+                    )),
+                    2
+                );
+                */
 
-                // --- graph with checks
+                $sHtml .= $oA->getSectionRow($sCounters, $this->_tr('row-appcounters'));
+
+                // --- visual graph
                 $sHtml .=
                     $oA->getSectionRow(
-                        $oA->getSectionColumn(
+                        ''
+                        .$oA->getSectionColumn(
                             $oA->getBox(array(
                                 // 'label'=>'I am a label.',
                                 // 'collapsable'=>true,
                                 'title' => $this->_tr('Checks-visualisation'),
                                 'text' => $this->_generateMonitorGraph($aEntries["result"]["url"])
-                            ))
+                            )),
+                            12
                         )
+                        ,
+                        $this->_tr('row-visual')
                     );
+
                 // --- table with checks
                 $sHtml .=
                     $oA->getSectionRow(
@@ -1436,22 +1495,12 @@ class appmonitorserver_gui extends appmonitorserver
                                 'title' => $this->_tr('Checks'),
                                 'text' => $this->_generateMonitorTable($aEntries["result"]["url"])
                             ))
-                        )
+                            ,12
+                        ),
+                        $this->_tr('row-checks')
                     );
             }
 
-
-            // --- http status code
-            $sStatusIcon = ($aEntries['result']['httpstatus']
-                ? ($aEntries['result']['httpstatus'] >= 400
-                    ? $this->_aIco['error']
-                    : ($aEntries['result']['httpstatus'] >= 300
-                        ? $this->_aIco['warning']
-                        : $this->_aIco['ok']
-                    )
-                )
-                : $this->_aIco['error']
-            );
 
             // --- notifications & uptime for this webapp
             $aLogs = $this->oNotification->getLogdata(array('appid' => $sAppId));
@@ -1498,6 +1547,7 @@ class appmonitorserver_gui extends appmonitorserver
                     . $this->_renderGraph($aChartUptime);
             }
 
+            // Notification + Uptime + Http-results
             $sHtml .= $oA->getSectionRow(
                 $oA->getSectionColumn(
                     $oA->getBox(array(
@@ -1514,23 +1564,8 @@ class appmonitorserver_gui extends appmonitorserver
                         )),
                         3
                     )
-                    . $oA->getSectionColumn(
-                        $oA->getBox(array(
-                            'title' => $this->_tr('Http-details'),
-                            'text' => ($aEntries['result']['error']
-                                ? $oA->getAlert(array(
-                                    'type' => 'danger',
-                                    'dismissible' => false,
-                                    'text' => $aEntries['result']['error']
-                                ))
-                                : ''
-                            )
-                                . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
-                                . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $sStatusIcon . ' ' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
-                                . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
-                        )),
-                        3
-                    )
+                    ,
+                    $this->_tr('row-history')
             );
 
 
@@ -1549,6 +1584,7 @@ class appmonitorserver_gui extends appmonitorserver
                         . '' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.message'), 1)) . '<br>'
                         . '</pre>';
                 }
+                // $sDebugContent=$sDebugContent ? $oA->getSectionRow($sDebugContent) : '';
 
                 $sHtml .= $sShowHide . '<div id="' . $sDivMoredetails . '" style="display: none;">'
                     . $oA->getSectionRow(
@@ -1582,14 +1618,17 @@ class appmonitorserver_gui extends appmonitorserver
                     . '</div>';
             }
         }
-        return $sTopHeadline
-
+        return 
+        
+            ''
+            . '<div id="relnavbuttons" style="position: absolute; right: 1em; z-index: 10000;"></div>'
+            . $sTopHeadline
             . '<section class="content">
-                    
-                    ' . $oA->getSectionRow($this->_generateWebappTiles($sAppId)) . '<br>'
-            . $sValidationContent
-            . $sHtml . '
-                </section>';
+                ' . $oA->getSectionRow($this->_generateWebappTiles($sAppId)) . '<br>'
+                    . $sValidationContent
+                    . $sHtml . '
+            </section>'
+            ;
     }
     /**
      * return html code for debug page

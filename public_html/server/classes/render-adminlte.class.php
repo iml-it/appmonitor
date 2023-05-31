@@ -441,9 +441,11 @@ class renderadminlte
      * @param string   $sContent  html content to show
      * @return string
      */
-    public function getSectionRow($sContent = false)
+    public function getSectionRow($sContent = false, $sId=false)
     {
-        return '<div class="row">' . $sContent . '</div>';
+        return '<div class="row"'
+            .($sId ? ' id="'.md5($sId).'" data-title="'.$sId.'"' : '')
+            .'>' . $sContent . '</div>';
     }
 
     /**

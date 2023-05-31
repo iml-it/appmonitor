@@ -38,7 +38,9 @@ padding: 1em;}
 .divhost-inner>div{padding: 0.1em; color: #000; color: rgba(0,0,0,0.7); padding-top: 1.2em;}
 .divhost-inner div.since {text-align: center; }
 .divhost-inner div.appname a{font-size: 120%; padding: 0 0.7em; display: inline-block;}
+h1 .divhost{padding: 0.3em 0.5em;}
 
+#totalstatus{font-size: 140%;;}
 .result0{background:#ccedde; color:#284}
 .result1{background:#dfdeee; color:#657;}
 .result2{background:#fdebd0; color:#862;}

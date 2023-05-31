@@ -41,6 +41,7 @@
         "About-text": "Dies ist Freie Software und OpenSource.<br>Lizenz: GNU Lesser General Public License v3.0<br>Universit&auml;t Bern :: IML - Institut f&uuml;r Medizinische Lehre.<br><br>Eine <strong>Client</strong>-Komponente erledigt auf Anwendungsseite frei definierbare Checks und erzeugt einen Status in JSON Syntax.<br>Die <strong>Server</strong>-Komponente sammelt die Monitoring Daten aller Applikationen ein, erzeugt eine Gesamtansicht und kann Benachrichtigungen an die betroffenen Teams senden.",
         "About-projecturl": "Das Projekt ist &ouml;ffentlich und abrufbar unter <a href=\"%s\">%s</a>.",
         "About-docs": "Die <a href=\"%s\">Dokumentation</a> ist als Markdown verf&uuml;gbar. Sie k&ouml;nnen es online lesen und sie ist mit der <em>readme.md</em> im Download Archiv enthalten.",
+        "About-vendor": "<strong>Vendor Bibliotheken</strong><br>Ohne Zuhilfenahme der Komponenten Dritter w&auml;re es noch weit mehr Arbeit gewesen, dies hier umzusetzen. Ein herzliches Dankesch&ouml;n geht hiermit an:",
 
         "Hello-user": "Hallo <strong>%s</strong>!",
         "Hello-roles": "Rollen",
@@ -61,6 +62,11 @@
         "Debug-icons-html": "Html-code",
         "Debug-icons-preview": "Vorschau",
         "Debug-notificationlog": "Letzte Meldungen",
+
+        "row-appcounters": "Counter",
+        "row-visual": "Graph",
+        "row-checks": "Checks",
+        "row-history": "Meldungen",
 
         "Appstatus": "Status der Webapplikation",
         "Host": "Host", 
@@ -224,6 +230,10 @@
     "Resulttype-1": "Unbekannt",
     "Resulttype-2": "Warnung",
     "Resulttype-3": "Fehler",
+    "MsgResulttype-0": "Alles OK. Zeit zum Entspannen.",
+    "MsgResulttype-1": "Es gibt einen unbekannten Status.",
+    "MsgResulttype-2": "Bitte die Warnungen checken",
+    "MsgResulttype-3": "Houston, we have a problem!",
 
     "group-cloud": "Cloud",
     "group-database": "Datenbank",

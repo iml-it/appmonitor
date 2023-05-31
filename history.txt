@@ -1,6 +1,10 @@
 
 HISTORY
 
+v0.122 2023-05-31
+  - ADD: total status on top bar
+  - UPDATE: app detail page
+
 v0.121 2023-05-30
   - ADDED: show failed checks in notification table
 

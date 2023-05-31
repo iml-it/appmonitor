@@ -321,6 +321,27 @@ function refreshTimer() {
 // ----------------------------------------------------------------------
 
 /**
+ * init relative navigation
+ * - used on app detail page
+ * - this function is called in postLoad()
+ * @returns {bool}
+ */
+function initRelNav(){
+    var sButtons='';
+    $('div.row').each(function() {
+        if (this.id){
+            sButtons+='<button class="btn btn-default" onclick="$(\'.row\').hide(); $(\'#'+this.id+'\').show();">'+this.dataset.title+'</button> ';
+        }
+    });
+    if(sButtons){
+        sButtons+='<button class="btn btn-default" onclick="$(\'.row\').show();">X</button> ';
+        $('#relnavbuttons').html(sButtons);
+    }
+    return true;
+}
+
+
+/**
  * load content and update top navi item
  * @returns {undefined}
  */
@@ -448,6 +469,11 @@ function postLoad(bIsFirstload) {
     if ($('#badgetile_problems')){
         $('#menubagde_problems').html( $('#badgetile_problems').html() );
     }
+    if($('#txtTotalstatus').html()){
+        $('#totalstatus').html( $('#txtTotalstatus').html() );
+    }
+
+    initRelNav();
 
 }
 
@@ -474,7 +500,7 @@ function initGuiStuff() {
 
     // show the content
     showDiv();
-    
+
     // reload timer
     window.setInterval('refreshTimer()', 1000);
 

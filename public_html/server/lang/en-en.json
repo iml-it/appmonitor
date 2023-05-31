@@ -41,6 +41,7 @@
         "About-text": "This is Free software and OpenSource.<br>License: GNU Lesser General Public License v3.0<br>University of Bern :: IML - Institute of Medical Education.<br><br>The <strong>client</strong> component makes checks and creates a status file in JSON syntax.<br>The <strong>server</strong> component fetches the health status information data from (all your) application servers and renders a total view and sends notifications to the related teams.",
         "About-projecturl": "The project is public for all and located at <a href=\"%s\">%s</a>.",
         "About-docs": "The <a href=\"%s\">Documentation</a> is available as markdown. You can read it online on the project url or as <em>readme.md</em> in the downloaded archive.",
+        "About-vendor": "<strong>Vendor libs</strong><br>A very big thank you to all developers of the components that are used in this project:",
 
         "Hello-user": "Hello <strong>%s</strong>!",
         "Hello-roles": "Roles",
@@ -62,6 +63,11 @@
         "Debug-icons-html": "html code",
         "Debug-icons-preview": "Preview",
         "Debug-notificationlog": "Notification history Log",
+
+        "row-appcounters": "Counters",
+        "row-visual": "Graph",
+        "row-checks": "Checks",
+        "row-history": "History",
 
         "Appstatus": "Status of application",
         "Host": "Host", 
@@ -227,6 +233,10 @@
     "Resulttype-1": "Unknown",
     "Resulttype-2": "Warning",
     "Resulttype-3": "Error",
+    "MsgResulttype-0": "Keep calm. Everything is fine.",
+    "MsgResulttype-1": "Unknown status was found.",
+    "MsgResulttype-2": "Check the Warning.",
+    "MsgResulttype-3": "Houston, we have a problem!",
 
     "group-cloud": "Cloud",
     "group-database": "Database",
