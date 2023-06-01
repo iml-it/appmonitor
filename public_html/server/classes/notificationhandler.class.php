@@ -484,24 +484,23 @@ class notificationhandler
             rsort($aData);
         }
         // filter
-        if (count($aFilter) > 0) {
             foreach ($aData as $aLogentry) {
                 if ($iLimit && count($aReturn) >= $iLimit) {
                     break;
                 }
-                $bAdd = false;
-                foreach ($aFilter as $sKey => $sValue) {
-                    if ($aLogentry[$sKey] === $sValue) {
-                        $bAdd = true;
+                $bAdd = true;
+                if (count($aFilter) > 0) {
+                    $bAdd = false;
+                    foreach ($aFilter as $sKey => $sValue) {
+                        if ($aLogentry[$sKey] === $sValue) {
+                            $bAdd = true;
+                        }
                     }
                 }
                 if ($bAdd) {
                     $aReturn[] = $aLogentry;
                 }
             }
-        } else {
-            $aReturn = $aData;
-        }
 
         return $aReturn;
     }
@@ -517,7 +516,6 @@ class notificationhandler
         if (!$this->_aLog) {
             $this->_aLog = array();
         }
-        $this->cutLogitems();
 
         return $this->_aLog;
     }

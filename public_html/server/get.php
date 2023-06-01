@@ -12,6 +12,10 @@ require_once('classes/appmonitor-server-gui.class.php');
 
 $sItem = isset($_GET['item']) && $_GET['item'] ? $_GET['item'] : false;
 $sAppId = isset($_GET['appid']) && $_GET['appid'] ? $_GET['appid'] : false;
+$iCount = isset($_GET['count']) ? $_GET['count'] : false;
+if($iCount=='all'){
+    $iCount=false;
+}
 
 $sHtml = '';
 
@@ -28,7 +32,7 @@ switch ($sItem) {
         $sHtml .= $oMonitor->generateViewDebug();
         break;
     case 'viewnotifications':
-        $sHtml .= $oMonitor->generateViewNotifications();
+        $sHtml .= $oMonitor->generateViewNotifications($iCount);
         break;
     case 'viewproblems':
         $sHtml .= $oMonitor->generateViewProblems();

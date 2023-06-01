@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.122
+ * @version 0.123
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -43,7 +43,7 @@ class appmonitorserver_gui extends appmonitorserver
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.122";
+    var $_sVersion = "0.123";
 
     /**
      * html code for icons in the web gui
@@ -94,6 +94,10 @@ class appmonitorserver_gui extends appmonitorserver
         'plus' => '<i class="fa-solid fa-plus"></i>',
         'close' => '<i class="fa-solid fa-times"></i>',
         'save' => '<i class="fa-solid fa-paper-plane"></i>',
+        'totalstatus0' => '<i class="fa-solid fa-umbrella-beach"></i>',
+        'totalstatus1' => '<i class="fa-solid fa-ghost"></i>',
+        'totalstatus2' => '<i class="fa-regular fa-bell"></i>',
+        'totalstatus3' => '<i class="fa-solid fa-triangle-exclamation"></i>',
     );
 
     // ----------------------------------------------------------------------
@@ -538,7 +542,7 @@ class appmonitorserver_gui extends appmonitorserver
                             'count' => $sMoreHosts . $aCounter['apps'],
                             'icon' => $this->_aIco['allwebapps'],
                             'label' => $this->_tr('Webapps'),
-                            'more'=> '<span id="txtTotalstatus">'.$this->_tr('MsgResulttype-'.$iResultApps).'</span>',
+                            'more'=> '<span id="txtTotalstatus">'.$this->_aIco['totalstatus'.$iResultApps].' '.$this->_tr('MsgResulttype-'.$iResultApps).'</span>',
                         ))
                         : '';
                     break;
@@ -1104,8 +1108,8 @@ class appmonitorserver_gui extends appmonitorserver
                         if ($aCheckitem['result'] > 0) {
                             $iChkCounter++;
                             $sCheckResults .= '<li class="result' . $aCheckitem['result'] . '">'
-                                . '<strong>' . $aCheckitem['name'] . '</strong> - '
-                                . $aCheckitem['value'] . '<br>'
+                                . '<strong>' . htmlentities($aCheckitem['name']) . '</strong> - '
+                                . htmlentities($aCheckitem['value']) . '<br>'
                                 . '</li>';
                         }
                     }
@@ -1689,18 +1693,33 @@ class appmonitorserver_gui extends appmonitorserver
      * return html code for notification page
      * @return string
      */
-    public function generateViewNotifications()
+    public function generateViewNotifications($iMaxcount=false)
     {
         $oA = new renderadminlte();
-        $sHtml = $this->_generateNotificationlog();
+        $iNotifications=count($this->oNotification->loadLogdata());
+        $aLogs = $this->oNotification->getLogdata([], $iMaxcount);
+        $sButtons='';
+
+        $iMin=100; // see functions.js - function showDiv() - var count = must have the same value
+        if($iNotifications>$iMin){
+            foreach([/* '10'=>10, '50'=>50, */ $iMin=>'', 1000=>1000, 2000=>2000, 'all'=>'all'] as $sLabel=>$sParam){
+                if($iNotifications>$sLabel || $sLabel=='all'){
+                $sButtons .= '<button onclick="setTab(\'#divnotifications'.($sParam ? '-'.$sParam : '').'\')" '
+                    .'class="btn'.((int)$iMaxcount == (int)$sLabel ? ' btn-primary': '').'"'
+                    .'>'.$sLabel.'</button> ';
+                }
+            }
+        }
+        $sButtons.=$sButtons ? '<br><br>' : '';
+
         return $oA->getSectionHead($this->_aIco["notifications"] . ' ' . $this->_tr('Notifications-header'))
             . '<section class="content">'
             . $oA->getSectionRow($this->_generateWebTiles())
             . '<br>'
             . $oA->getSectionRow($oA->getSectionColumn(
                 $oA->getBox(array(
-                    'title' => $this->_tr('Notifications-header'),
-                    'text' => $sHtml
+                    'title' => $this->_tr('Notifications-header') . ' ('.$iNotifications.')',
+                    'text' => $sButtons.$this->_generateNotificationlog($aLogs)
                 )),
                 12
             )) . '
