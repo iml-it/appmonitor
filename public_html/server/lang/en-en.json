@@ -207,15 +207,15 @@
         
         "changetype-1.logmessage":    "Webapp was added to the Appmonitor: __URL__. __ERROR__",
         "changetype-1.email.subject": "[Appmonitor] :: webapp was added: __URL__.",
-        "changetype-1.email.message": "Welcome! The webapp __URL__ was added in the Appmonitor. From now on you will get notifications if the status changes.\n\nurl: __MONITORURL__\n\n__CHECKS__",
+        "changetype-1.email.message": "Welcome!<br>The webapp __URL__ was added in the Appmonitor. From now on you will get notifications if the status changes.<br><br>url: __MONITORURL__<br><br>__CHECKS__",
         
         "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__. __ERROR__",
         "changetype-2.email.subject": "[Appmonitor] :: __CHANGE__ __LAST-RESULT__ --> __RESULT__ - __URL__",
-        "changetype-2.email.message": "__TIME__\n__WEBSITE__ @ __HOST__\nStatus has changed after __DELTA-TIME__ from __LAST-RESULT__ to __RESULT__.\n\nsee current status on: __MONITORURL__\n\n__CHECKS__",
+        "changetype-2.email.message": "__TIME__<br>__WEBSITE__ @ __HOST__<br>Status has changed after __DELTA-TIME__ from __LAST-RESULT__ to <strong>__RESULT__</strong>.<br><br>see current status on: __MONITORURL__<br><br>__CHECKS__",
         
         "changetype-3.logmessage":    "Webapp was deleted from Appmonitor: __URL__.",
         "changetype-3.email.subject": "[Appmonitor] :: webapp was DELETED: __URL__.",
-        "changetype-3.email.message": "__TIME__\nThe webapp __URL__ was deleted in the Appmonitor. You will not get notifications about status changes anymore. If this is an error, then contact the sysadmin.",
+        "changetype-3.email.message": "__TIME__<br>The webapp __URL__ was deleted in the Appmonitor. You will not get notifications about status changes anymore. If this is an error, then contact the sysadmin.",
         
         "email.subject": "__CHANGE__ __LAST-RESULT__ --> __RESULT__ :: App monitor __URL__.",
 

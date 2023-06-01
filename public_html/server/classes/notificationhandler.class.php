@@ -621,9 +621,9 @@ class notificationhandler
             }
             foreach ($this->_aAppResult['checks'] as $aCheck) {
                 $iResult = $aCheck['result'];
-                $aSortedChecks[$iResult] .= "\n\n"
-                    . '----- ' . $aCheck['name'] . ' (' . $aCheck['description'] . ")\n"
-                    . $aCheck['value'] . "\n"
+                $aSortedChecks[$iResult] .= "<br><br>"
+                    . '----- <strong>' . $aCheck['name'] . '</strong> (' . $aCheck['description'] . ")<br>"
+                    . $aCheck['value'] . "<br>"
                     . $this->_tr('Resulttype-' . $aCheck['result']);
             }
             $aReplace['__CHECKS__'] = implode("", $aSortedChecks);
@@ -689,6 +689,7 @@ class notificationhandler
                         ? $this->_aNotificationOptions['from'][$sPlugin]
                         : false,
                     'to' => $aTo,
+                    'important' => true,
                     'subject' => $this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.subject'),
                     'message' => $this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message'),
                 ];

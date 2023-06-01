@@ -19,9 +19,16 @@
  * @author hahn
  * 
  * 2022-05-13 <axel.hahn@iml.unibe.ch>  created
+ * 2023-06-01 <axel.hahn@unibe.ch>      add error variable; strip html in message
  */
 
 class slackNotification{
+    /**
+     * last error
+     * @var string
+     */
+    var $sError='';
+
     /**
      * send slack notifications
      * @param  array  $aOptions  array of options
@@ -30,12 +37,13 @@ class slackNotification{
 
         // ----- checks
         if(!is_array($aOptions['to']) || !count($aOptions['to'])){
+            self::$sError=__METHOD__.'$aOptions key has no key named to to define a slack channel'.PHP_EOL;
             return false; // no slack channel in server config nor app metadata
         }
 
         // ----- send
         $data=array(
-            'text'       => $aOptions['message'],
+            'text'       => strip_tags(str_replace('<br>', "\n", $aOptions['message'])),
             'username'   => '[APPMONITOR]',
             'icon_emoji' => false
         );
@@ -50,10 +58,25 @@ class slackNotification{
         $context  = stream_context_create($options);
 
         // --- loop over slack targets
+        $sSendErrors='';
         foreach($aOptions['to'] as $sLabel=>$sChannelUrl){
-            @file_get_contents($sChannelUrl, false, $context);
+            if(!@file_get_contents($sChannelUrl, false, $context)){
+                $sSendErrors.= ($sSendErrors ? " | " : __METHOD__.' ' )
+                    . 'sending to ' .$sLabel . ' ('.$sChannelUrl.') failed.'
+                    ;
+            }
         }
+        self::$sError=$sSendErrors ? $sSendErrors : self::$sError;
 
-        return true;
+        return !$sSendErrors;
     }
+    /**
+     * get string with the last error message
+     * @return string
+     */
+    static public function error()
+    {
+        return self::$sError;
+    }
+
 }
