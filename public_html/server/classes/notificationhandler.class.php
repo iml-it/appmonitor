@@ -677,6 +677,11 @@ class notificationhandler
         // echo "DEBUG:".__METHOD__." add log an sending messages - $sLogMessage\n";
         $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
 
+        $sMessage=$this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message');
+        if ($sMessage!==strip_tags($sMessage) && !strstr($sMessage, '<html>')){
+            $sMessage='<!doctype html><html><body><div>'.$sMessage.'</div></body></html>';
+        }
+
         foreach ($this->getPlugins() as $sPlugin) {
 
             // get plugin specific receivers
@@ -691,7 +696,7 @@ class notificationhandler
                     'to' => $aTo,
                     'important' => true,
                     'subject' => $this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.subject'),
-                    'message' => $this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message'),
+                    'message' => $sMessage,
                 ];
                 // $sSendMethod="send_$sPlugin";
                 // $sSendMethod($aOptions);
