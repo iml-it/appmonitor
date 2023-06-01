@@ -94,6 +94,10 @@ class appmonitorserver_gui extends appmonitorserver
         'plus' => '<i class="fa-solid fa-plus"></i>',
         'close' => '<i class="fa-solid fa-times"></i>',
         'save' => '<i class="fa-solid fa-paper-plane"></i>',
+        'totalstatus0' => '<i class="fa-solid fa-umbrella-beach"></i>',
+        'totalstatus1' => '<i class="fa-solid fa-ghost"></i>',
+        'totalstatus2' => '<i class="fa-regular fa-bell"></i>',
+        'totalstatus3' => '<i class="fa-solid fa-triangle-exclamation"></i>',
     );
 
     // ----------------------------------------------------------------------
@@ -538,7 +542,7 @@ class appmonitorserver_gui extends appmonitorserver
                             'count' => $sMoreHosts . $aCounter['apps'],
                             'icon' => $this->_aIco['allwebapps'],
                             'label' => $this->_tr('Webapps'),
-                            'more'=> '<span id="txtTotalstatus">'.$this->_tr('MsgResulttype-'.$iResultApps).'</span>',
+                            'more'=> '<span id="txtTotalstatus">'.$this->_aIco['totalstatus'.$iResultApps].' '.$this->_tr('MsgResulttype-'.$iResultApps).'</span>',
                         ))
                         : '';
                     break;
