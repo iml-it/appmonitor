@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.124 2023-06-01
+  - UPDATE: send html emails
+
 v0.123 2023-06-01
   - UPDATE: limit count in notifications page
 
