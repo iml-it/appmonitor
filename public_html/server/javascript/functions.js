@@ -350,7 +350,7 @@ function showDiv() {
     var oOut = $('#content');
     var url = './get.php?';
 
-    var sCfgViews = {
+    var aCfgViews = {
         '#divabout': 'viewabout',
         '#divdebug': 'viewdebug',
         '#divnotifications': 'viewnotifications',
@@ -360,18 +360,25 @@ function showDiv() {
 
     var item = 'viewweblist';
     var appid = '';
+    var count = 100; // see public_html/server/classes/appmonitor-server-gui.class.php -> public function generateViewNotifications()
 
     var sDiv = aViewFilters['tab'];
     if (sDiv && sDiv.indexOf('divweb-') > 0) {
         item = 'viewweb';
         appid = sDiv.replace(/\#.*\-/, '');
+    } else if (sDiv && sDiv.indexOf('notifications-') > 0) {
+        item = 'viewnotifications';
+        count = sDiv.replace(/\#.*\-/, '');
+        if(count=="all"){
+            count=false;
+        }
     } else {
-        if (sCfgViews[sDiv]) {
-            item = sCfgViews[sDiv];
+        if (aCfgViews[sDiv]) {
+            item = aCfgViews[sDiv];
         }
 
     }
-    url += 'item=' + item + (appid ? '&appid=' + appid : '');
+    url += 'item=' + item + (appid ? '&appid=' + appid : '')+ (count ? '&count=' + count : '');
 
     // var sInfo='new content<br>DIV: '+sDiv+'<br>appid: '+appid+'<br>URL: '+url+'<br><hr>';
     var sInfo = '';
