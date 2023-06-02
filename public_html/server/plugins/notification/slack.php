@@ -42,9 +42,8 @@ class slackNotification{
         }
 
         // ----- send
-        $sMessage=strip_tags(str_replace('<br>', "\n", $aOptions['message']));
         $data=[
-            'text'       => $sMessage,
+            'text'       => self::formatMessage($aOptions['message']),
             'username'   => '[APPMONITOR]',
             'icon_emoji' => false
         ];
@@ -71,6 +70,15 @@ class slackNotification{
 
         return !$sSendErrors;
     }
+    /**
+     * generate final email message body by replacing <br> tagsand then stripping html code
+     * @param  string  $sMsg  message text
+     * @return string
+     */
+    static public function formatMessage($sMsg){
+        return strip_tags(str_replace('<br>', "\n", $sMsg));
+    }
+
     /**
      * get string with the last error message
      * @return string
