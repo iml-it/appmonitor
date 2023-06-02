@@ -111,7 +111,7 @@ class renderadminlte
      */
     protected function _checkValue($sType, $sValue, $sReferrer = false)
     {
-        if (!$sValue || !array_key_exists($sType, $this->_aValidItems)) {
+        if (!$sValue || !isset($this->_aValidItems[$sType])) {
             return false;
         }
         if (array_search($sValue, $this->_aValidItems[$sType]) === false) {

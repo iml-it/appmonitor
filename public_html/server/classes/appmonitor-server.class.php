@@ -273,7 +273,7 @@ class appmonitorserver
     public  function actionAddUrl($sUrl, $bMakeCheck = true)
     {
         if ($sUrl) {
-            if (!array_key_exists("urls", $this->_aCfg) || ($key = array_search($sUrl, $this->_aCfg["urls"])) === false) {
+            if (!isset($this->_aCfg["urls"]) || ($key = array_search($sUrl, $this->_aCfg["urls"])) === false) {
 
                 $bAdd = true;
                 if ($bMakeCheck) {
@@ -463,7 +463,7 @@ class appmonitorserver
      */
     protected function _handleParams()
     {
-        $sAction = (array_key_exists("action", $_POST)) ? $_POST["action"] : '';
+        $sAction = $_POST["action"] ?? '';
         switch ($sAction) {
             case "addurl":
                 $this->actionAddUrl($_POST["url"]);
@@ -608,11 +608,11 @@ class appmonitorserver
         $aReturn["ts"] = date("U");
         $aReturn["result"] = 1; // set "unknown" as default
 
-        if (!array_key_exists("meta", $aClientData)) {
+        if (!isset($aClientData["meta"])) {
             return $aReturn;
         }
         foreach (array("host", "website", "result") as $sField) {
-            $aReturn[$sField] = array_key_exists($sField, $aClientData["meta"]) ? $aClientData["meta"][$sField] : false;
+            $aReturn[$sField] = $aClientData["meta"][$sField] ?? false;
         }
 
         // returncodes
@@ -623,7 +623,7 @@ class appmonitorserver
             2 => 0,
             3 => 0,
         );
-        if (array_key_exists("checks", $aClientData) && count($aClientData["checks"])) {
+        if (isset($aClientData["checks"]) && count($aClientData["checks"])) {
             $aResults["total"] = count($aClientData["checks"]);
             foreach ($aClientData["checks"] as $aCheck) {
                 $iResult = $aCheck["result"];
@@ -704,7 +704,7 @@ class appmonitorserver
                     $aClientData = array();
                 } else {
                     if (
-                        is_array($aClientData) && isset($aClientData["meta"]) && array_key_exists("ttl", $aClientData["meta"]) && $aClientData["meta"]["ttl"]
+                        isset($aClientData["meta"]["ttl"]) && $aClientData["meta"]["ttl"]
                     ) {
                         $iTtl = (int) $aClientData["meta"]["ttl"];
                     }
@@ -982,20 +982,16 @@ class appmonitorserver
             // filter if a host was given
             if (
                 !$sHost ||
-                (array_key_exists("result", $aEntries) && array_key_exists("host", $aEntries["result"]) && $sHost == $aEntries["result"]["host"]
-                )
+                (isset($aEntries["result"]["host"]) && $sHost == $aEntries["result"]["host"])
             ) {
 
                 if (
-                    !array_key_exists("result", $aEntries)
-                    /*
-                          || !array_key_exists("host", $aEntries["meta"])
-                          || !array_key_exists("host", $aEntries["website"])
-                         * 
-                         */ || !array_key_exists("checks", $aEntries) || !count($aEntries["checks"])
+                    !isset($aEntries["result"])
+                    || !isset($aEntries["checks"]) || !count($aEntries["checks"])
                 ) {
-                    if ($iMaxReturn < 3)
+                    if ($iMaxReturn < 3){
                         $iMaxReturn = 3;
+                    }
                     $aMessages[] = $this->_tr('msgErr-Http-request-failed') . ' (' . $aEntries["result"]["url"] . ')';
                 } else {
                     if ($iMaxReturn < $aEntries["result"]["result"]) {
@@ -1003,7 +999,7 @@ class appmonitorserver
                     }
                     // $aMessages[] = $aEntries["result"]["host"] . ': ' . $aEntries["result"]["result"];
                     foreach ($aEntries["result"]["summary"] as $key => $value) {
-                        if (!array_key_exists($key, $aResults)) {
+                        if (!isset($aResults[$key])) {
                             $aResults[$key] = 0;
                         }
                         $aResults[$key] += $value;

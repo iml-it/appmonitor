@@ -108,10 +108,9 @@ class lang
                 $aLangBase = $aLangBase[$sSubkey];
             }
         }
-        // return (array_key_exists($sWord, $this->_aLang)) ? $this->_aLang[$sWord] : $sWord . ' (undefined in ' . $this->_aCfg['lang'] . ')';
-        return (array_key_exists($sWord, $aLangBase))
+        return isset($aLangBase[$sWord])
             ? $aLangBase[$sWord]
-            : (array_key_exists($sWord, $this->_aLang)
+            : (isset($this->_aLang[$sWord])
                 ? $this->_aLang[$sWord]
                 : $sWord . ' (undefined in ' . $sTmpPath . ' ' . $this->_sLang . ')'
             );
