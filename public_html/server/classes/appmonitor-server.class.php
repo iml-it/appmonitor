@@ -196,7 +196,7 @@ class appmonitorserver
         $this->_aCfg = array_replace_recursive($aDefaults, $aUserdata);
 
         // undo unwanted recursive merge behaviour:
-        $this->_aCfg['users'] = isset($aUserdata['users']) ? $aUserdata['users'] : $aDefaults['users'];
+        $this->_aCfg['users'] = $aUserdata['users'] ?? $aDefaults['users'];
 
         if (isset($this->_aCfg['urls']) && is_array($this->_aCfg['urls'])) {
             // add urls
@@ -243,7 +243,8 @@ class appmonitorserver
         $sCfgFile = $this->_getConfigDir() . '/' . $this->_sConfigfile;
 
         // JSON_PRETTY_PRINT reqires PHP 5.4
-        $sData = (defined('JSON_PRETTY_PRINT')) ? $sData = json_encode($this->_aCfg, JSON_PRETTY_PRINT) : $sData = json_encode($this->_aCfg);
+        $iOptions=defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
+        $sData = json_encode($this->_aCfg, $iOptions);
 
         return file_put_contents($sCfgFile, $sData);
     }
@@ -278,7 +279,7 @@ class appmonitorserver
                 $bAdd = true;
                 if ($bMakeCheck) {
                     $aHttpData = $this->_multipleHttpGet([ $sUrl ]);
-                    $sBody = isset($aHttpData[0]['response_body']) ? $aHttpData[0]['response_body'] : false;
+                    $sBody = $aHttpData[0]['response_body'] ?? false;
                     if (!is_array(json_decode($sBody, 1))) {
                         $bAdd = false;
                         $this->_addLog(
@@ -402,7 +403,7 @@ class appmonitorserver
     public function getUser($sUsername = false)
     {
         $sUsername = $sUsername ? $sUsername : $this->_user;
-        return $sUsername && isset($this->_aCfg["users"][$sUsername])
+        return ($sUsername && isset($this->_aCfg["users"][$sUsername]))
             ? $this->_aCfg["users"][$sUsername]
             : false;
     }
@@ -437,7 +438,7 @@ class appmonitorserver
         }
         // non detected authenticated users inherit data from __default_authenticated_user__
         $aDefault = $this->getUser('__default_authenticated_user__');
-        return isset($aDefault['roles']) ? $aDefault['roles'] : false;
+        return $aDefault['roles'] ?? false;
     }
 
     /**
@@ -512,12 +513,12 @@ class appmonitorserver
         $aHeader = [];
         foreach (explode("\r\n", $sHttpHeader) as $sLine) {
             preg_match_all('#^(.*)\:(.*)$#U', $sLine, $aMatches);
-            $sKey = isset($aMatches[1][0]) ? $aMatches[1][0] : '_status';
-            $sValue = isset($aMatches[2][0]) ? $aMatches[2][0] : $sLine;
+            $sKey = $aMatches[1][0] ?? '_status';
+            $sValue = $aMatches[2][0] ?? $sLine;
             $aHeader[$sKey] = $sValue;
             if ($sKey === '_status') {
                 preg_match_all('#HTTP.*([0-9][0-9][0-9])#', $sValue, $aMatches);
-                $aHeader['_statuscode'] = isset($aMatches[1][0]) ? $aMatches[1][0] : false;
+                $aHeader['_statuscode'] = $aMatches[1][0] ?? false;
             }
         }
         return $aHeader;
@@ -526,7 +527,7 @@ class appmonitorserver
     protected function _getHttpStatus($sHttpHeader)
     {
         $aHeader = $this->_getHttpStatusArray($sHttpHeader);
-        return isset($aHeader['_statuscode']) ? $aHeader['_statuscode'] : false;
+        return $aHeader['_statuscode'] ?? false;
     }
 
     /**
@@ -774,11 +775,11 @@ class appmonitorserver
                             // $oCounters->setCounter($sCounterId);
                             $oCounters->setCounter($sCounterId, [
                                 'title' => $aCheck['description'],
-                                'visual' => (isset($aCheck['visual']) ? $aCheck['visual'] : false),
+                                'visual' => $aCheck['visual'] ?? false,
                             ]);
                             $oCounters->add([
                                 'status' => $aCheck['result'],
-                                'value' => isset($aCheck['count']) ? $aCheck['count'] : $aCheck['value']
+                                'value' => $aCheck['count'] ?? $aCheck['value']
                             ]);
                         }
                     }

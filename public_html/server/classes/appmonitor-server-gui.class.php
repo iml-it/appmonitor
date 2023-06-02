@@ -157,7 +157,7 @@ class appmonitorserver_gui extends appmonitorserver
                 RESULT_WARNING,
                 RESULT_UNKNOWN,
                 RESULT_OK,
-             ] : [
+            ] : [
                 RESULT_OK,
                 RESULT_UNKNOWN,
                 RESULT_WARNING,
@@ -194,9 +194,7 @@ class appmonitorserver_gui extends appmonitorserver
             'info' => 'info',
             'ok' => 'success',
         ];
-        return isset($aAdminLteColorMapping[$sResult])
-            ? $aAdminLteColorMapping[$sResult]
-            : $sDefault;
+        return $aAdminLteColorMapping[$sResult] ?? $sDefault;
     }
     /**
      * mapper: get the css class for a given integer result code 
@@ -213,9 +211,7 @@ class appmonitorserver_gui extends appmonitorserver
             RESULT_UNKNOWN => 'gray',
             RESULT_OK => 'success',
         ];
-        return isset($aAdminLteColorMapping[$iResult])
-            ? $aAdminLteColorMapping[$iResult]
-            : $sDefault;
+        return $aAdminLteColorMapping[$iResult] ?? $sDefault;
     }
     /**
      * mapper: get the css (font)color class for a given integer result code 
@@ -232,9 +228,7 @@ class appmonitorserver_gui extends appmonitorserver
             RESULT_UNKNOWN => 'purple',
             RESULT_OK => 'green',
         ];
-        return isset($aAdminLteColorMapping[$iResult])
-            ? $aAdminLteColorMapping[$iResult]
-            : $sDefault;
+        return $aAdminLteColorMapping[$iResult] ?? $sDefault;
     }
     /**
      * mapper: get the icon key for $this->_aIco for a given integer result code 
@@ -250,9 +244,7 @@ class appmonitorserver_gui extends appmonitorserver
             RESULT_UNKNOWN => 'unknown',
             RESULT_OK => 'ok',
         ];
-        return isset($aMapping[$iResult])
-            ? $this->_aIco[$aMapping[$iResult]]
-            : false;
+        return $this->_aIco[$aMapping[$iResult]] ?? false;
     }
 
     /**
@@ -308,20 +300,20 @@ class appmonitorserver_gui extends appmonitorserver
     {
         $oA = new renderadminlte();
         $sDiv = '<div class="col-md-3 col-sm-6 col-xs-12">';
-        foreach ([ 'color', 'count', 'icon', 'label', 'more', 'result' ] as $sKey) {
+        foreach (['color', 'count', 'icon', 'label', 'more', 'result'] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
         }
         $sReturn = ''
             . $sDiv . $oA->getWidget([
-                'bgcolor' => isset($aOptions['bgcolor']) ? $aOptions['bgcolor'] : false,
+                'bgcolor' => $aOptions['bgcolor'] ?? false,
                 'color' => $this->_getAdminLteColorByResult($aOptions['result'], $aOptions['color']),
                 'icon' => $this->_getIconClass($aOptions['icon'], $aOptions['result']),
-                'onclick' => isset($aOptions['onclick']) ? $aOptions['onclick'] : false,
+                'onclick' => $aOptions['onclick'] ?? false,
                 'number' => $aOptions['count'],
                 'text' => $aOptions['label'],
-                'progressvalue' => isset($aOptions['progressvalue']) ? $aOptions['progressvalue'] : false,
+                'progressvalue' => $aOptions['progressvalue'] ?? false,
                 'progresstext' => '&nbsp;&nbsp;' . $aOptions['more'],
             ]) . '</div>';
         return $sReturn;
@@ -347,7 +339,7 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _getUptime($aLog = [])
     {
-        $aReturn = ['counter' => [ 0 => 0, 1 => 0, 2 => 0, 3 => 0 ], 'items' => [] ];
+        $aReturn = ['counter' => [0 => 0, 1 => 0, 2 => 0, 3 => 0], 'items' => []];
         $iLastTimer = date("U");
         $iTotal = 0;
         if (count($aLog)) {
@@ -637,12 +629,12 @@ class appmonitorserver_gui extends appmonitorserver
         if (!isset($aData['meta'])) {
             $aErrors[] = $this->_tr('msgErr-missing-section-meta');
         } else {
-            foreach ([ 'host', 'website', 'result' ] as $sMetakey) {
+            foreach (['host', 'website', 'result'] as $sMetakey) {
                 if (!isset($aData['meta'][$sMetakey]) || $aData['meta'][$sMetakey] === false) {
                     $aErrors[] = $this->_tr('msgErr-missing-key-meta-' . $sMetakey);
                 }
             }
-            foreach ([ 'ttl', 'time', 'notifications' ] as $sMetakey) {
+            foreach (['ttl', 'time', 'notifications'] as $sMetakey) {
                 if (!isset($aData['meta'][$sMetakey])) {
                     $aWarnings[] = $this->_tr('msgWarn-missing-key-meta-' . $sMetakey);
                 }
@@ -665,12 +657,12 @@ class appmonitorserver_gui extends appmonitorserver
         } else {
             $iCheckCounter = 0;
             foreach ($aData['checks'] as $aSingleCheck) {
-                foreach ([ 'name', 'result' ] as $sMetakey) {
+                foreach (['name', 'result'] as $sMetakey) {
                     if (!isset($aSingleCheck[$sMetakey]) || $aSingleCheck[$sMetakey] === false) {
                         $aErrors[] = sprintf($this->_tr('msgErr-missing-key-checks-' . $sMetakey), $iCheckCounter);
                     }
                 }
-                foreach ([ 'description', 'value', 'time' ] as $sMetakey) {
+                foreach (['description', 'value', 'time'] as $sMetakey) {
                     if (!isset($aSingleCheck[$sMetakey]) || $aSingleCheck[$sMetakey] === false) {
                         $aWarnings[] = sprintf($this->_tr('msgWarn-missing-key-checks-' . $sMetakey), $iCheckCounter);
                     }
@@ -741,7 +733,7 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _getHtmlInSvg($aOptions)
     {
-        $revert = [ '%21' => '!', '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')' ];
+        $revert = ['%21' => '!', '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')'];
         $svg = '<svg xmlns="http://www.w3.org/2000/svg"'
             . (isset($aOptions['width'])   ? ' width="' . (int)$aOptions['width'] . '"'  : '')
             . (isset($aOptions['height'])  ? ' height="' . (int)$aOptions['height'] . '"' : '')
@@ -906,7 +898,7 @@ class appmonitorserver_gui extends appmonitorserver
                     }
                 }
                 $aEdges[] = [
-                    'from' => ($iGroup ? $iGroup : $iParent),
+                    'from' => $iGroup ?? $iParent,
                     'to' => $iCheckId,
                     'color' => ['color' => $aShapes[$aCheck['result']]['color']],
                     'width' => $aShapes[$aCheck['result']]['width']
@@ -1005,7 +997,7 @@ class appmonitorserver_gui extends appmonitorserver
                 } else {
 
                     foreach ($aEntries["checks"] as $aCheck) {
-                        $aTags = isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
+                        $aTags = $aEntries["meta"]["tags"] ?? false;
                         if ($bHideOk && $aCheck["result"] == RESULT_OK) {
                             continue;
                         }
@@ -1030,8 +1022,8 @@ class appmonitorserver_gui extends appmonitorserver
 
                             . '<td>' . $aCheck["description"] . '</td>'
                             . '<td>' . $aCheck["value"] . '</td>'
-                            . '<td>' . (isset($aCheck["count"]) ? $aCheck["count"] : '-') . '</td>'
-                            . '<td>' . (isset($aCheck["time"]) ? $aCheck["time"] : '-') . '</td>'
+                            . '<td>' . ($aCheck["count"] ?? '-') . '</td>'
+                            . '<td>' . ($aCheck["time"]  ?? '-') . '</td>'
                             . '</tr>';
                     }
                 }
@@ -1094,10 +1086,8 @@ class appmonitorserver_gui extends appmonitorserver
             $iLastTimer = $aLogentry['timestamp'];
 
             // TODO maybe use $this->_getAdminLteColorByResult()
-            $sAppName = isset($this->_data[$aLogentry['appid']]["result"]["website"])
-                ? $this->_data[$aLogentry['appid']]["result"]["website"]
-                : '-';
-            $aTags = isset($this->_data[$aLogentry['appid']]["meta"]["tags"]) ? $this->_data[$aLogentry['appid']]["meta"]["tags"] : false;
+            $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '-';
+            $aTags = $this->_data[$aLogentry['appid']]["meta"]["tags"] ?? false;
 
             $sCheckResults = '';
             $iChkCounter = 0;
@@ -1198,7 +1188,7 @@ class appmonitorserver_gui extends appmonitorserver
         $oCounters = new counteritems($sAppId, $sCounterId);
 
         $aOptions['type'] = $aOptions['type'] ? $aOptions['type'] : 'bar';
-        $aOptions['label'] = isset($aOptions['label']) && $aOptions['label']     ? $aOptions['label']    : '';
+        $aOptions['label'] = $aOptions['label'] ?? '';
         $aOptions['size'] = isset($aOptions['size'])   && (int)$aOptions['size'] ? (int)$aOptions['size'] : 2;
         $aOptions['items'] = isset($aOptions['items']) && (int)$aOptions['items'] ? (int)$aOptions['items'] : $aOptions['size'] * 10;
         $aOptions['graphonly'] = isset($aOptions['graphonly']) ? !!$aOptions['graphonly'] : false;
@@ -1420,17 +1410,17 @@ class appmonitorserver_gui extends appmonitorserver
                         if (strpos($sCounterId, 'time') !== 0) {
                             // echo '<pre>'.print_r($oCounters->get(1), 1).'</pre>';
 
-                            $aMeta['visual'] = isset($aMeta['visual']) ? $aMeta['visual'] : 'bar';
+                            $aMeta['visual'] = $aMeta['visual'] ?? 'bar';
                             $aTmp = explode(',', $aMeta['visual']);
 
                             $sCounters .= $this->_renderCounter(
                                 $sAppId,
                                 $sCounterId,
                                 [
-                                    'type' => isset($aTmp[0]) ? $aTmp[0] : 'bar',
-                                    'size' => isset($aTmp[1]) ? $aTmp[1] : false,
-                                    'items' => isset($aTmp[2]) ? $aTmp[2] : false,
-                                    'label' => isset($aMeta['title']) ? $aMeta['title'] : $sCounterId,
+                                    'type' =>  $aTmp[0] ?? 'bar',
+                                    'size' =>  $aTmp[1] ?? false,
+                                    'items' => $aTmp[2] ?? false,
+                                    'label' => $aMeta['title'] ?? $sCounterId,
                                 ]
                             );
                         }
@@ -1504,7 +1494,7 @@ class appmonitorserver_gui extends appmonitorserver
 
 
             // --- notifications & uptime for this webapp
-            $aLogs = $this->oNotification->getLogdata([ 'appid' => $sAppId ]);
+            $aLogs = $this->oNotification->getLogdata(['appid' => $sAppId]);
 
             $aUptime = $this->_getUptime($aLogs);
             // echo '<pre>'.print_r($aUptime, 1).'</pre>';
@@ -1873,7 +1863,7 @@ class appmonitorserver_gui extends appmonitorserver
                             . '</button>';
         */
         $sSetup .= '</form>';
-        $sAppId = isset($sAppId) ? $sAppId : 'no-app-id';
+        $sAppId = $sAppId ?? 'no-app-id';
         $sDivMoredetails = 'div-http-' . $sAppId;
         $sShowHide = '<br><button class="btn btn-default" id="btn-plus-' . $sAppId . '"  onclick="$(\'#' . $sDivMoredetails . '\').slideDown(); $(this).hide(); $(\'#btn-minus-' . $sAppId . '\').show(); return false;"'
             . '> ' . $this->_aIco['plus'] . ' ' . $this->_tr('btn-details') . ' </button>'
@@ -1952,7 +1942,7 @@ class appmonitorserver_gui extends appmonitorserver
         $oA = new renderadminlte();
         $aAllWebapps = [];
 
-        $aOptions['mode'] = isset($aOptions['mode']) ? $aOptions['mode'] : 'default';
+        $aOptions['mode'] = $aOptions['mode'] ?? 'default';
         foreach ($this->_data as $sAppId => $aEntries) {
             $bHasData = true;
             if (!isset($aEntries["result"]["host"])) {
@@ -1984,7 +1974,7 @@ class appmonitorserver_gui extends appmonitorserver
             $sDivId = $this->_getDivIdForApp($sAppId);
             $sOnclick = 'setTab(\'' . $sDivId . '\')';
 
-            $aTags = isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
+            $aTags = $aEntries["meta"]["tags"] ?? false;
             $sTaglist = $aTags ? $this->_getTaglist($aTags) : '';
 
             $this->oNotification->setApp($sAppId, $this->_data[$sAppId]);
@@ -2193,7 +2183,7 @@ class appmonitorserver_gui extends appmonitorserver
     protected function _getCssclassForTag($sTag)
     {
         if (is_string($sTag)) {
-            return $this->_getCssclassForTag([ $sTag ]);
+            return $this->_getCssclassForTag([$sTag]);
             // return 'tag-'.md5($sTag);
         }
         if (is_array($sTag) && count($sTag)) {
@@ -2294,13 +2284,13 @@ class appmonitorserver_gui extends appmonitorserver
         }
         $iCounter++;
         $bIsPie = ($aOptions['type'] === 'pie');
-        $aOptions['xLabel'] = isset($aOptions['xLabel']) ? $aOptions['xLabel'] : '';
-        $aOptions['yLabel'] = isset($aOptions['yLabel']) ? $aOptions['yLabel'] : '';
-        $aOptions['xValue'] = isset($aOptions['xValue']) ? $aOptions['xValue'] : ($bIsPie ? false : true);
-        $aOptions['yValue'] = isset($aOptions['yValue']) ? $aOptions['yValue'] : ($bIsPie ? false : true);
-        $aOptions['xGrid'] = isset($aOptions['xGrid']) ? $aOptions['xGrid'] : ($bIsPie ? false : true);
-        $aOptions['yGrid'] = isset($aOptions['yGrid']) ? $aOptions['yGrid'] : ($bIsPie ? false : true);
-        $aOptions['height'] = isset($aOptions['height']) ? $aOptions['height'] : false;
+        $aOptions['xLabel'] = $aOptions['xLabel'] ?? '';
+        $aOptions['yLabel'] = $aOptions['yLabel'] ?? '';
+        $aOptions['xValue'] = $aOptions['xValue'] ?? ($bIsPie ? false : true);
+        $aOptions['yValue'] = $aOptions['yValue'] ?? ($bIsPie ? false : true);
+        $aOptions['xGrid']  = $aOptions['xGrid']  ?? ($bIsPie ? false : true);
+        $aOptions['yGrid']  = $aOptions['yGrid']  ?? ($bIsPie ? false : true);
+        $aOptions['height'] = $aOptions['height'] ?? false;
 
         $sIdCanvas = 'canvasChartJs' . $iCounter;
         $sCtx = 'ctxChartJsRg' . $iCounter;
