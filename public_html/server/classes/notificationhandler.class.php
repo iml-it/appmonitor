@@ -678,10 +678,6 @@ class notificationhandler
         $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
 
         $sMessage=$this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message');
-        if ($sMessage!==strip_tags($sMessage) && !strstr($sMessage, '<html>')){
-            $sMessage='<!doctype html><html><body><div>'.$sMessage.'</div></body></html>';
-        }
-
         foreach ($this->getPlugins() as $sPlugin) {
 
             // get plugin specific receivers
