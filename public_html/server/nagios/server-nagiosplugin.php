@@ -16,12 +16,12 @@
     /**
      * mapping of rc codes - left: appmonitor - right nagios returncodes
      */
-    $aMappingRc=array(
+    $aMappingRc=[
         0=>0,
         1=>3,
         2=>1,
         3=>2,
-    );
+    ];
     
 
 // ----------------------------------------------------------------------

@@ -16,7 +16,7 @@ class lang
 {
 
     protected $_sLang = false;   // name of current language
-    protected $_aLang = array(); // language texts
+    protected $_aLang = [];      // language texts
 
     /**
      * constructor
@@ -57,7 +57,7 @@ class lang
      */
     public function getAllLanguages()
     {
-        $aReturn = array();
+        $aReturn = [];
         $sDir = $this->_getConfigDir();
         foreach (glob($sDir . "*.json") as $sFile) {
             $aReturn[] = str_replace(".json", "", basename($sFile));

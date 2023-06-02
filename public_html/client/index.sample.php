@@ -35,16 +35,16 @@ $oMonitor->setTTL(300);
 // add a few custom checks
 // $oMonitor->addCheck(...)
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "hello plugin",
         "description" => "Test a plugin ... plugins/checks/hello.php",
-        "check" => array(
+        "check" => [
             "function" => "Hello",
-            "params" => array(
+            "params" => [
                 "message" => "Here I am",
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 
 // ----------------------------------------------------------------------

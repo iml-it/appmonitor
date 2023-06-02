@@ -38,7 +38,7 @@ class checkHttpContent extends appmonitorcheck{
     /**
      * make http request and test response body
      * @param array $aParams
-     * array(
+     * [
      *     url                 string   url to fetch
      *     timeout             integer  optional timeout in sec; default: 5
      *     headeronly          boolean  optional flag to fetch http response herader only; default: false = returns header and body
@@ -51,7 +51,7 @@ class checkHttpContent extends appmonitorcheck{
      *     bodycontains        string   test for a string in the http response body; it returns OK if the text was found
      *     bodynotcontains     string   test for a string in the http response body; it returns OK if the text was not found
      *     bodyregex           string   test for a regex in the http response body; it returns OK if the regex matches; example: "headerregex"=>"/lowercasematch/i"
-     * )
+     * ]
      */
     public function run($aParams) {
         $this->_checkArrayKeys($aParams, "url");

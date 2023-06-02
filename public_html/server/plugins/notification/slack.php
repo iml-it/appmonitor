@@ -42,19 +42,20 @@ class slackNotification{
         }
 
         // ----- send
-        $data=array(
-            'text'       => strip_tags(str_replace('<br>', "\n", $aOptions['message'])),
+        $sMessage=strip_tags(str_replace('<br>', "\n", $aOptions['message']));
+        $data=[
+            'text'       => $sMessage,
             'username'   => '[APPMONITOR]',
             'icon_emoji' => false
-        );
+        ];
 
-        $options = array(
-            'http' => array(
-            'header'  => 'Content-type: application/x-www-form-urlencoded\r\n',
-            'method'  => 'POST',
-            'content' => json_encode($data)
-            )
-        );
+        $options = [
+            'http' => [
+                'header'  => 'Content-type: application/x-www-form-urlencoded\r\n',
+                'method'  => 'POST',
+                'content' => json_encode($data)
+            ]
+        ];
         $context  = stream_context_create($options);
 
         // --- loop over slack targets

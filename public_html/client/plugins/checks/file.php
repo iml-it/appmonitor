@@ -45,7 +45,7 @@ class checkFile extends appmonitorcheck{
     /**
      * check a file
      * @param array $aParams
-     * array(
+     * [
      *     "filename"    directory that must exist
      *     "exists"      "filename" must exist/ must be absent
      *     "dir"         filetype directory
@@ -54,12 +54,12 @@ class checkFile extends appmonitorcheck{
      *     "executable"  flag executable
      *     "readable"    flag is readable
      *     "writable"    flag is writable
-     * )
+     * ]
      * @return boolean
      */
     public function run($aParams) {
-        $aOK = array();
-        $aErrors = array();
+        $aOK = [];
+        $aErrors = [];
         $this->_checkArrayKeys($aParams, "filename");
         $sFile = $aParams["filename"];
 
@@ -71,7 +71,7 @@ class checkFile extends appmonitorcheck{
                 $aErrors[] = $sMyflag;
             }
         }
-        foreach (array('dir', 'executable', 'file', 'link', 'readable', 'writable') as $sFiletest) {
+        foreach ([ 'dir', 'executable', 'file', 'link', 'readable', 'writable' ] as $sFiletest) {
             if (isset($aParams[$sFiletest])) {
                 $sTestCmd = 'return is_' . $sFiletest . '("' . $sFile . '");';
                 if (eval($sTestCmd) && $aParams[$sFiletest]) {

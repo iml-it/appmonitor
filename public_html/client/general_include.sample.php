@@ -25,11 +25,11 @@
 
 // --- check an IP range of allowed clients
 /*
-$oMonitor->checkIp(array(
+$oMonitor->checkIp([
     '127.0.0.1',
     '::1',
     '192.168.',
-));
+]);
  */
 
 // --- check a token
@@ -42,5 +42,5 @@ $oMonitor->checkIp(array(
 // ----------------------------------------------------------------------
 
 // $oMonitor->addEmail('sysadmin@example.com');
-// $oMonitor->addSlackWebhook(array("mywebhook"=> "https://hooks.slack.com/services/(...)"));
+// $oMonitor->addSlackWebhook([ "mywebhook"=> "https://hooks.slack.com/services/(...)" ]);
 

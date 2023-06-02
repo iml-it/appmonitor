@@ -21,18 +21,18 @@ $oMonitor->addTag('monitoring');
 
 // ----------------------------------------------------------------------
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "check config subdir",
         "description" => "Check config target directory",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
+            "params" => [
                 "filename" => $sApproot . "/server/config",
                 "dir" => true,
                 "writable" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 echo "OK: the plugin File check was added.\n";
 

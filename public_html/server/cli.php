@@ -124,7 +124,7 @@ function cfgSet($sVarname, $value)
     if (count($aTmp)) {
         foreach ($aTmp as $sKeyname) {
             if (!isset($aArray[$sKeyname])) {
-                $aArray[$sKeyname] = array();
+                $aArray[$sKeyname] = [];
             }
             $aArray = &$aArray[$sKeyname];
         }

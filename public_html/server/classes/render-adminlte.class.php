@@ -17,8 +17,8 @@ class renderadminlte
      * valid items for colors, boxes ....
      * @var array
      */
-    var $_aValidItems = array(
-        'bgcolor' => array(
+    var $_aValidItems = [
+        'bgcolor' => [
             'aqua',
             'aqua-active',
             'black',
@@ -51,8 +51,8 @@ class renderadminlte
             'teal-active',
             'yellow',
             'yellow-active',
-        ),
-        'color' => array(
+        ],
+        'color' => [
             'aqua',
             'black',
             'gray',
@@ -64,16 +64,16 @@ class renderadminlte
             'red',
             'teal',
             'yellow'
-        ),
-        'type' => array(
+        ],
+        'type' => [
             'danger',   // red
             'gray',     // gray
             'info',     // aqua
             'primary',  // blue
             'success',  // green
             'warning',  // yellow
-        ),
-    );
+        ],
+    ];
 
     /**
      * instance of htmlelements
@@ -140,7 +140,7 @@ class renderadminlte
      */
     public function getAlert($aOptions)
     {
-        foreach (array('type', 'dismissible', 'title', 'text') as $sKey) {
+        foreach ([ 'type', 'dismissible', 'title', 'text' ] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -179,7 +179,7 @@ class renderadminlte
      */
     public function getBadge($aOptions)
     {
-        foreach (array('bgcolor', 'title', 'text', 'type', 'id') as $sKey) {
+        foreach ([ 'bgcolor', 'title', 'text', 'type', 'id' ] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -210,7 +210,7 @@ class renderadminlte
      */
     public function getCallout($aOptions)
     {
-        foreach (array('type', 'title', 'text') as $sKey) {
+        foreach ([ 'type', 'title', 'text' ] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -249,7 +249,7 @@ class renderadminlte
      */
     public function getBox($aOptions)
     {
-        foreach (array('type', 'solid', 'collapsable', 'collapsed', 'removable', 'title', 'label', 'text', 'footer') as $sKey) {
+        foreach ([ 'type', 'solid', 'collapsable', 'collapsed', 'removable', 'title', 'label', 'text', 'footer' ] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -302,10 +302,10 @@ class renderadminlte
         // TODO
         // if subelements then add them to $sLabel with recursion
 
-        return $this->_oHtml->getTag('li', array(
+        return $this->_oHtml->getTag('li', [
             'class' => 'treeview',
             'label' => $sLabel,
-        ));
+        ]);
         /*
         return '<li class="treeview">
           <a href="#">
@@ -345,7 +345,7 @@ class renderadminlte
      */
     public function getSmallBox($aOptions)
     {
-        foreach (array('bgcolor', 'color', 'title', 'text', 'icon', 'footer') as $sKey) {
+        foreach ([ 'bgcolor', 'color', 'title', 'text', 'icon', 'footer' ] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -379,9 +379,9 @@ class renderadminlte
      *                          - progresstext  - text for progress
      * @return string
      */
-    public function getWidget($aOptions = array())
+    public function getWidget($aOptions = [])
     {
-        foreach (array('bgcolor', 'color', 'text', 'number', 'icon') as $sKey) {
+        foreach ([ 'bgcolor', 'color', 'text', 'number', 'icon' ] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -393,8 +393,8 @@ class renderadminlte
         $sAsuf = $sApre ? '</a>' : '';
 
         $aOptions['icon'] = $this->_oHtml->getIcon($aOptions['icon']);
-        // foreach(array('icon', 'text', 'number', 'progresstext') as $sKey){
-        foreach (array('icon') as $sKey) {
+        // foreach(['icon', 'text', 'number', 'progresstext'] as $sKey){
+        foreach ([ 'icon' ] as $sKey) {
             $aOptions[$sKey] = strstr($aOptions[$sKey], '<a') === false ? $sApre . $aOptions[$sKey] . $sAsuf : $aOptions[$sKey];
         }
 

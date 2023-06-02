@@ -51,7 +51,7 @@ class counteritems
      * array of used counterids 
      * @var type 
      */
-    protected $_aCounters = array();
+    protected $_aCounters = [];
     /**
      * id of the cache item
      * @var type 
@@ -91,7 +91,7 @@ class counteritems
         $this->_oCache = new AhCache($this->_sCacheIdPrefix, $this->_sCacheId);
         $this->_aCounters = $this->_oCache->read();
         if (!$this->_aCounters) {
-            $this->_aCounters = array();
+            $this->_aCounters = [];
         }
         if ($sCounterId) {
             $this->setCounter($sCounterId);
@@ -117,7 +117,7 @@ class counteritems
             return false;
         } else {
             if (!isset($this->_aCounters[$this->_sCounterId]) || is_array($aMeta)) {
-                $this->_aCounters[$this->_sCounterId] = ($aMeta ? $aMeta : array());
+                $this->_aCounters[$this->_sCounterId] = $aMeta ?? [];
                 $this->_oCache->write($this->_aCounters);
             }
             $this->_oSR = new simpleRrd($this->_sAppId . '-' . $this->_sCounterId);

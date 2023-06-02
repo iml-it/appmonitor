@@ -26,16 +26,16 @@
  * USAGE:
  * 
  * $oMonitor->addCheck(
- *     array(
+ *     [
  *         "name" => "hello plugin",
  *         "description" => "test a plugin ... plugins/checkHello.php",
- *         "check" => array(
+ *         "check" => [
  *             "function" => "Hello",
- *             "params" => array(
+ *             "params" => [
  *                 "message" => "Here I am",
- *             ),
- *         ),
- *     )
+ *             ],
+ *         ],
+ *     ]
  * );
  * ____________________________________________________________________________
  * 
@@ -69,9 +69,9 @@ class checkHello extends appmonitorcheck{
         //              count  => {float}  value
         //              visual => {string} one of bar|line|simple (+params)
         //           
-        return array(
+        return [
             RESULT_OK, 
             'Hello world! My message is: ' .$aParams['message']
-        );
+        ];
     }
 }

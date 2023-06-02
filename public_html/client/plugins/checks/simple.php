@@ -43,7 +43,7 @@ class checkSimple extends appmonitorcheck{
         $this->_checkArrayKeys($aParams, "result,value");
         // $this->_setReturn((int) $aParams["result"], $aParams["value"]);
         $aData=[];
-        foreach(array('type', 'count', 'visual') as $sMyKey){
+        foreach([ 'type', 'count', 'visual' ] as $sMyKey){
             if(isset($aParams[$sMyKey])){
                 $aData[$sMyKey]=$aParams[$sMyKey];
             }
