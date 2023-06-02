@@ -15,7 +15,7 @@
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 1.2
+ * @version 1.3
  * @author Axel Hahn
  * @link https://git-repo.iml.unibe.ch/iml-open-source/tinyrouter-php-class
  * @license GPL
@@ -27,10 +27,29 @@
 namespace iml;
 class tinyrouter{
 
+    /**
+     * requested url
+     * @var string
+     */
     public $sUrl = '';
+
+    /**
+     * used http method
+     * @var string
+     */
     public $sMethod = '';
 
+    /**
+     * array of defined routes
+     * @var array
+     */
     public $aRoutes = [];
+
+    /**
+     * array of matching route and solved vars
+     * @var array
+     */
+    protected $aMatch=[];
 
     /**
      * constructor
