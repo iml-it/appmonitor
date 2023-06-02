@@ -824,7 +824,7 @@ class appmonitorserver_gui extends appmonitorserver
             ];
 
             //
-            // --- add check node
+            // --- add check nodes
             //
             foreach ($aEntries["checks"] as $aCheck) {
                 $iCounter++;
@@ -898,7 +898,7 @@ class appmonitorserver_gui extends appmonitorserver
                     }
                 }
                 $aEdges[] = [
-                    'from' => $iGroup ?? $iParent,
+                    'from' => $iGroup ? $iGroup : $iParent,
                     'to' => $iCheckId,
                     'color' => ['color' => $aShapes[$aCheck['result']]['color']],
                     'width' => $aShapes[$aCheck['result']]['width']
@@ -1566,12 +1566,21 @@ class appmonitorserver_gui extends appmonitorserver
 
                 foreach ($this->_getResultDefs() as $i) {
                     $sMgIdPrefix = 'changetype-' . $i;
+                    /*
+                    include_once(__DIR__ . '/../plugins/notification/email.php');
+                    include_once(__DIR__ . '/../plugins/notification/slack.php');
+                    $oSlack = new slackNotification;
+                    $oEmail = new emailNotification;
+                    */
+
                     $sDebugContent .= $this->_tr('changetype-' . $i)
                         . '<pre>'
                         . '' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.logmessage'), 1)) . '<hr>'
                         . 'TO: ' . implode('; ', $this->oNotification->getAppNotificationdata('email')) . '<br>'
                         . '<strong>' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.subject'), 1)) . '</strong><br>'
                         . '' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.message'), 1)) . '<br>'
+                        // . 'Email: '.htmlentities($oEmail::formatMessage($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.message'))).'<br>'
+                        // . 'Slack: '.htmlentities($oSlack::formatMessage($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.message'))).'<br>'
                         . '</pre>';
                 }
                 // $sDebugContent=$sDebugContent ? $oA->getSectionRow($sDebugContent) : '';
