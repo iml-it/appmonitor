@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.124
+ * @version 0.125
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -43,7 +43,7 @@ class appmonitorserver_gui extends appmonitorserver
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.124";
+    var $_sVersion = "0.125";
 
     /**
      * html code for icons in the web gui
@@ -51,7 +51,7 @@ class appmonitorserver_gui extends appmonitorserver
      * 
      * @var array
      */
-    protected $_aIco = array(
+    protected $_aIco = [
         // Menu items
         'allwebapps' => '<i class="fa-solid fa-globe"></i>',
         'problems' => '<i class="fa-solid fa-exclamation-triangle"></i>',
@@ -98,7 +98,7 @@ class appmonitorserver_gui extends appmonitorserver
         'totalstatus1' => '<i class="fa-solid fa-ghost"></i>',
         'totalstatus2' => '<i class="fa-regular fa-bell"></i>',
         'totalstatus3' => '<i class="fa-solid fa-triangle-exclamation"></i>',
-    );
+    ];
 
     // ----------------------------------------------------------------------
     // protected functions
@@ -114,12 +114,12 @@ class appmonitorserver_gui extends appmonitorserver
         $oA = new renderadminlte();
         if (count($this->_aMessages)) {
             foreach ($this->_aMessages as $aLogentry) {
-                $sOut .= $oA->getAlert(array(
+                $sOut .= $oA->getAlert([
                     'type' => $this->_getAdminLteClassByLoglevel($aLogentry["level"]),
                     'dismissible' => false,
                     'title' => $this->_aIco[$aLogentry["level"]],
                     'text' => $aLogentry["message"]
-                ));
+                ]);
             }
         }
         if ($sOut) {
@@ -152,17 +152,17 @@ class appmonitorserver_gui extends appmonitorserver
     protected function _getResultDefs($bReverse = false)
     {
         return $bReverse
-            ? array(
+            ? [
                 RESULT_ERROR,
                 RESULT_WARNING,
                 RESULT_UNKNOWN,
                 RESULT_OK,
-            ) : array(
+            ] : [
                 RESULT_OK,
                 RESULT_UNKNOWN,
                 RESULT_WARNING,
                 RESULT_ERROR,
-            );
+            ];
     }
 
     /**
@@ -188,15 +188,13 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _getAdminLteClassByLoglevel($sResult, $sDefault = '')
     {
-        $aAdminLteColorMapping = array(
+        $aAdminLteColorMapping = [
             'error' => 'danger',
             'warning' => 'warning',
             'info' => 'info',
             'ok' => 'success',
-        );
-        return isset($aAdminLteColorMapping[$sResult])
-            ? $aAdminLteColorMapping[$sResult]
-            : $sDefault;
+        ];
+        return $aAdminLteColorMapping[$sResult] ?? $sDefault;
     }
     /**
      * mapper: get the css class for a given integer result code 
@@ -207,15 +205,13 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _getAdminLteClassByResult($iResult, $sDefault = '')
     {
-        $aAdminLteColorMapping = array(
+        $aAdminLteColorMapping = [
             RESULT_ERROR => 'danger',
             RESULT_WARNING => 'warning',
             RESULT_UNKNOWN => 'gray',
             RESULT_OK => 'success',
-        );
-        return isset($aAdminLteColorMapping[$iResult])
-            ? $aAdminLteColorMapping[$iResult]
-            : $sDefault;
+        ];
+        return $aAdminLteColorMapping[$iResult] ?? $sDefault;
     }
     /**
      * mapper: get the css (font)color class for a given integer result code 
@@ -226,15 +222,13 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _getAdminLteColorByResult($iResult, $sDefault = '')
     {
-        $aAdminLteColorMapping = array(
+        $aAdminLteColorMapping = [
             RESULT_ERROR => 'red',
             RESULT_WARNING => 'orange',
             RESULT_UNKNOWN => 'purple',
             RESULT_OK => 'green',
-        );
-        return isset($aAdminLteColorMapping[$iResult])
-            ? $aAdminLteColorMapping[$iResult]
-            : $sDefault;
+        ];
+        return $aAdminLteColorMapping[$iResult] ?? $sDefault;
     }
     /**
      * mapper: get the icon key for $this->_aIco for a given integer result code 
@@ -244,15 +238,13 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _getIconByResult($iResult)
     {
-        $aMapping = array(
+        $aMapping = [
             RESULT_ERROR => 'error',
             RESULT_WARNING => 'warning',
             RESULT_UNKNOWN => 'unknown',
             RESULT_OK => 'ok',
-        );
-        return isset($aMapping[$iResult])
-            ? $this->_aIco[$aMapping[$iResult]]
-            : false;
+        ];
+        return $this->_aIco[$aMapping[$iResult]] ?? false;
     }
 
     /**
@@ -304,26 +296,26 @@ class appmonitorserver_gui extends appmonitorserver
      * @param string   $sMore   more text below a horizontal line
      * @return string
      */
-    protected function _getTile($aOptions = array())
+    protected function _getTile($aOptions = [])
     {
         $oA = new renderadminlte();
         $sDiv = '<div class="col-md-3 col-sm-6 col-xs-12">';
-        foreach (array('color', 'count', 'icon', 'label', 'more', 'result') as $sKey) {
+        foreach (['color', 'count', 'icon', 'label', 'more', 'result'] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
         }
         $sReturn = ''
-            . $sDiv . $oA->getWidget(array(
-                'bgcolor' => isset($aOptions['bgcolor']) ? $aOptions['bgcolor'] : false,
+            . $sDiv . $oA->getWidget([
+                'bgcolor' => $aOptions['bgcolor'] ?? false,
                 'color' => $this->_getAdminLteColorByResult($aOptions['result'], $aOptions['color']),
                 'icon' => $this->_getIconClass($aOptions['icon'], $aOptions['result']),
-                'onclick' => isset($aOptions['onclick']) ? $aOptions['onclick'] : false,
+                'onclick' => $aOptions['onclick'] ?? false,
                 'number' => $aOptions['count'],
                 'text' => $aOptions['label'],
-                'progressvalue' => isset($aOptions['progressvalue']) ? $aOptions['progressvalue'] : false,
+                'progressvalue' => $aOptions['progressvalue'] ?? false,
                 'progresstext' => '&nbsp;&nbsp;' . $aOptions['more'],
-            )) . '</div>';
+            ]) . '</div>';
         return $sReturn;
     }
 
@@ -345,9 +337,9 @@ class appmonitorserver_gui extends appmonitorserver
      * @param type $aLog
      * @return array
      */
-    protected function _getUptime($aLog = array())
+    protected function _getUptime($aLog = [])
     {
-        $aReturn = array('counter' => array(0 => 0, 1 => 0, 2 => 0, 3 => 0), 'items' => array());
+        $aReturn = ['counter' => [0 => 0, 1 => 0, 2 => 0, 3 => 0], 'items' => []];
         $iLastTimer = date("U");
         $iTotal = 0;
         if (count($aLog)) {
@@ -386,11 +378,11 @@ class appmonitorserver_gui extends appmonitorserver
         if (isset($aHostdata['summary'])) {
             foreach ($this->_getResultDefs(true) as $i) {
                 $sMoreChecks .= ($aHostdata['summary'][$i]
-                    ? $oA->getBadge(array(
+                    ? $oA->getBadge([
                         'bgcolor' => $this->_getAdminLteColorByResult($i),
                         'title' => $aHostdata['summary'][$i] . ' x ' . $this->_tr('Resulttype-' . $i),
                         'text' => $aHostdata['summary'][$i]
-                    )) . ' '
+                    ]) . ' '
                     : ''
                 );
                 //     '<span class="badge result' . $i . '" title="' . $aHostdata['summary'][$i] . ' x ' . $this->_tr('Resulttype-' . $i) . '">' . $aHostdata['summary'][$i] . '</span>' : '');
@@ -404,55 +396,55 @@ class appmonitorserver_gui extends appmonitorserver
                     $aLast = $this->oNotification->getAppLastResult();
                     $sSince = $aLast && (int) $aLast['result']['ts'] ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['result']['ts']) : '';
                     $sReturn .= (isset($aHostdata['result']) && $bVisibility
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'result' => $aHostdata['result'],
                             'label' => $this->_tr('Appstatus'),
                             'count' => $this->_tr('Resulttype-' . $aHostdata['result']),
                             'more' => $sSince
-                        ))
+                        ])
                         : ''
                     );
                     break;
                 case 'httpcode':
                     $sReturn .= $bVisibility
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'result' => ((int)$aHostdata['httpstatus'] == 0 || $aHostdata['httpstatus'] >= 400)
                                 ? RESULT_ERROR
                                 : false,
                             'label' => $this->_tr('Http-status'),
                             'count' => $aHostdata['httpstatus'] ? $aHostdata['httpstatus'] : '??',
-                        ))
+                        ])
                         : '';
                     break;
                 case 'age':
                     $bOutdated = isset($aHostdata["outdated"]) && $aHostdata["outdated"];
                     $sReturn .= $bVisibility
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'result' => $bOutdated ? RESULT_ERROR : RESULT_OK,
                             'icon' => $this->_aIco['age'],
                             'label' => $this->_tr('age-of-result'),
                             'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
                             'more' => $this->_tr('TTL') . '=' . $aHostdata['ttl'] . 's',
-                        ))
+                        ])
                         : '';
                     break;
                 case 'checks':
                     $sReturn .= $bVisibility && isset($aHostdata['summary']['total'])
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'result' => $aHostdata['result'],
                             'icon' => $this->_aIco['check'],
                             'label' => $this->_tr('Checks-on-webapp'),
                             'count' => $aHostdata['summary']['total'] . ($aHostdata['summary']['total'] === $aHostdata['summary'][0] ? '' : ' ' . $sMoreChecks),
-                        ))
+                        ])
                         : '';
                     break;
                 case 'times':
                     $sReturn .= $bVisibility && isset($this->_data[$sAppId]['meta']['time'])
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'icon' => $this->_aIco['time'],
                             'label' => $this->_tr('Time-for-all-checks'),
                             'count' => preg_replace('/\.[0-9]*/', '', $this->_data[$sAppId]['meta']['time']),
-                        ))
+                        ])
                         : '';
                     break;
                 case 'receiver':
@@ -460,40 +452,40 @@ class appmonitorserver_gui extends appmonitorserver
                     $aEmailNotifiers = $this->oNotification->getAppNotificationdata('email');
                     $aSlackChannels = $this->oNotification->getAppNotificationdata('slack', 1);
 
-                    // $aPeople=array('email1@example.com', 'email2@example.com');
+                    // $aPeople=[ 'email1@example.com', 'email2@example.com' ];
                     $sMoreNotify = (count($aEmailNotifiers) ? '<span title="' . implode("\n", $aEmailNotifiers) . '">' . count($aEmailNotifiers) . ' x ' . $this->_aIco['notify-email'] . '</span> ' : '')
                         // .'<pre>'.print_r($this->oNotification->getAppNotificationdata(), 1).'</pre>'
                         . (count($aSlackChannels) ? '<span title="' . implode("\n", array_keys($aSlackChannels)) . '">' . count($aSlackChannels) . ' x ' . $this->_aIco['notify-slack'] . '</span> ' : '');
                     $iNotifyTargets = count($aEmailNotifiers) + count($aSlackChannels);
                     $sReturn .= $bVisibility
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'result' => $iNotifyTargets ? false : RESULT_WARNING,
                             'icon' => $this->_aIco['notifications'],
                             'label' => $this->_tr('Notify-address'),
                             'count' => $iNotifyTargets,
                             'more' => $sMoreNotify
-                        ))
+                        ])
                         : '';
                     break;
                 case 'notification':
                     $sSleeping = $this->oNotification->isSleeptime();
                     $sReturn .= $bVisibility
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'result' => ($sSleeping ? RESULT_WARNING : false),
                             'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
                             'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
                             'more' => $sSleeping,
-                        ))
+                        ])
                         : '';
                     break;
 
                 default:
-                    $sReturn .= $this->_getTile(array(
+                    $sReturn .= $this->_getTile([
                         'result' => RESULT_ERROR,
                         'label' => 'ERROR: unknown tile',
                         'count' => $key,
                         'more' => 'config -> view -> appdetails',
-                    ));
+                    ]);
                     break;
             }
         }
@@ -517,11 +509,11 @@ class appmonitorserver_gui extends appmonitorserver
         $iResultApps = false;
         foreach ($this->_getResultDefs(true) as $i) {
             $sMoreHosts .= ($aCounter['appresults'][$i]
-                ? $oA->getBadge(array(
+                ? $oA->getBadge([
                     'bgcolor' => $this->_getAdminLteColorByResult($i),
                     'title' => $aCounter['appresults'][$i] . ' x ' . $this->_tr('Resulttype-' . $i),
                     'text' => $aCounter['appresults'][$i]
-                )) . ' '
+                ]) . ' '
                 : ''
             );
             //    '<span class="badge result' . $i . '" title="' . $aCounter['appresults'][$i] . ' x ' . $this->_tr('Resulttype-' . $i) . '">'.$aCounter['appresults'][$i].'</span>' : '');
@@ -536,23 +528,23 @@ class appmonitorserver_gui extends appmonitorserver
                     // on OK hide host badges
                     $sMoreHosts = '<span id="badgetile_allapps" style="float: right">' . ($iResultApps === RESULT_OK ? '' : $sMoreHosts) . '</span>';
                     $sReturn .= $bVisibility
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'onclick' => 'setTab(\'#divwebs\');',
                             'result' => $iResultApps,
                             'count' => $sMoreHosts . $aCounter['apps'],
                             'icon' => $this->_aIco['allwebapps'],
                             'label' => $this->_tr('Webapps'),
-                            'more'=> '<span id="txtTotalstatus">'.$this->_aIco['totalstatus'.$iResultApps].' '.$this->_tr('MsgResulttype-'.$iResultApps).'</span>',
-                        ))
+                            'more' => '<span id="txtTotalstatus">' . $this->_aIco['totalstatus' . $iResultApps] . ' ' . $this->_tr('MsgResulttype-' . $iResultApps) . '</span>',
+                        ])
                         : '';
                     break;
                 case 'hosts':
                     $sReturn .= $bVisibility
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'count' => $aCounter['hosts'],
                             'icon' => $this->_aIco['host'],
                             'label' => $this->_tr('Hosts'),
-                        ))
+                        ])
                         : '';
                     break;
                 case 'checks':
@@ -563,11 +555,11 @@ class appmonitorserver_gui extends appmonitorserver
                     foreach ($this->_getResultDefs(true) as $i) {
                         $sMoreChecks .= ($aCounter['checkresults'][$i]
                             ? $oA->getBadge(
-                                array(
+                                [
                                     'bgcolor' => $this->_getAdminLteColorByResult($i),
                                     'title' => $aCounter['checkresults'][$i] . ' x ' . $this->_tr('Resulttype-' . $i),
                                     'text' => $aCounter['checkresults'][$i],
-                                )
+                                ]
                             ) . ' '
                             : '');
                         if ($aCounter['checkresults'][$i] && $iResultChecks === false) {
@@ -579,34 +571,34 @@ class appmonitorserver_gui extends appmonitorserver
                     $sMoreChecks = '<span id="badgetile_problems" style="float: right">' . ($iResultChecks === RESULT_OK ? '' : $sMoreChecks) . '</span>';
 
                     $sReturn .= $bVisibility
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'result' => $iResultChecks,
                             'count' => $sMoreChecks . $aCounter['checks'],
                             'label' => $this->_aIco['check'] . ' ' . $this->_tr('Checks-total'),
                             'onclick' => 'setTab(\'#divproblems\');',
-                        ))
+                        ])
                         : '';
                     break;
                 case 'notification':
                     $sSleeping = $this->oNotification->isSleeptime();
                     $sReturn .= $bVisibility
-                        ? $this->_getTile(array(
+                        ? $this->_getTile([
                             'result' => ($sSleeping ? RESULT_WARNING : false),
                             'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
                             'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
                             'onclick' => 'setTab(\'#divnotifications\');',
                             'more' => $sSleeping,
-                        ))
+                        ])
                         : '';
                     break;
 
                 default:
-                    $sReturn .= $this->_getTile(array(
+                    $sReturn .= $this->_getTile([
                         'result' => RESULT_ERROR,
                         'label' => 'ERROR: unknown tile',
                         'count' => $key,
                         'more' => 'config -> view -> appdetails',
-                    ));
+                    ]);
                     break;
             }
         }
@@ -628,8 +620,8 @@ class appmonitorserver_gui extends appmonitorserver
         if (!isset($this->_data[$sAppId])) {
             return false;
         }
-        $aErrors = array();
-        $aWarnings = array();
+        $aErrors = [];
+        $aWarnings = [];
 
         $aData = $this->_data[$sAppId];
 
@@ -637,12 +629,12 @@ class appmonitorserver_gui extends appmonitorserver
         if (!isset($aData['meta'])) {
             $aErrors[] = $this->_tr('msgErr-missing-section-meta');
         } else {
-            foreach (array('host', 'website', 'result') as $sMetakey) {
+            foreach (['host', 'website', 'result'] as $sMetakey) {
                 if (!isset($aData['meta'][$sMetakey]) || $aData['meta'][$sMetakey] === false) {
                     $aErrors[] = $this->_tr('msgErr-missing-key-meta-' . $sMetakey);
                 }
             }
-            foreach (array('ttl', 'time', 'notifications') as $sMetakey) {
+            foreach (['ttl', 'time', 'notifications'] as $sMetakey) {
                 if (!isset($aData['meta'][$sMetakey])) {
                     $aWarnings[] = $this->_tr('msgWarn-missing-key-meta-' . $sMetakey);
                 }
@@ -665,12 +657,12 @@ class appmonitorserver_gui extends appmonitorserver
         } else {
             $iCheckCounter = 0;
             foreach ($aData['checks'] as $aSingleCheck) {
-                foreach (array('name', 'result') as $sMetakey) {
+                foreach (['name', 'result'] as $sMetakey) {
                     if (!isset($aSingleCheck[$sMetakey]) || $aSingleCheck[$sMetakey] === false) {
                         $aErrors[] = sprintf($this->_tr('msgErr-missing-key-checks-' . $sMetakey), $iCheckCounter);
                     }
                 }
-                foreach (array('description', 'value', 'time') as $sMetakey) {
+                foreach (['description', 'value', 'time'] as $sMetakey) {
                     if (!isset($aSingleCheck[$sMetakey]) || $aSingleCheck[$sMetakey] === false) {
                         $aWarnings[] = sprintf($this->_tr('msgWarn-missing-key-checks-' . $sMetakey), $iCheckCounter);
                     }
@@ -680,10 +672,10 @@ class appmonitorserver_gui extends appmonitorserver
         }
 
         // ----- return result
-        return array(
+        return [
             'error' => $aErrors,
             'warning' => $aWarnings,
-        );
+        ];
     }
 
     /**
@@ -741,7 +733,7 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _getHtmlInSvg($aOptions)
     {
-        $revert = array('%21' => '!', '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')');
+        $revert = ['%21' => '!', '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')'];
         $svg = '<svg xmlns="http://www.w3.org/2000/svg"'
             . (isset($aOptions['width'])   ? ' width="' . (int)$aOptions['width'] . '"'  : '')
             . (isset($aOptions['height'])  ? ' height="' . (int)$aOptions['height'] . '"' : '')
@@ -832,7 +824,7 @@ class appmonitorserver_gui extends appmonitorserver
             ];
 
             //
-            // --- add check node
+            // --- add check nodes
             //
             foreach ($aEntries["checks"] as $aCheck) {
                 $iCounter++;
@@ -906,7 +898,7 @@ class appmonitorserver_gui extends appmonitorserver
                     }
                 }
                 $aEdges[] = [
-                    'from' => ($iGroup ? $iGroup : $iParent),
+                    'from' => $iGroup ? $iGroup : $iParent,
                     'to' => $iCheckId,
                     'color' => ['color' => $aShapes[$aCheck['result']]['color']],
                     'width' => $aShapes[$aCheck['result']]['width']
@@ -967,7 +959,7 @@ class appmonitorserver_gui extends appmonitorserver
         $aCheckGroups = $this->_getVisualGroups();
         $sTableClass = $sUrl ? "datatable-hosts" : "datatable-checks";
         $sTableHead = $sUrl
-            ? $this->_generateTableHead(array(
+            ? $this->_generateTableHead([
                 $this->_tr('Result'),
                 // $this->_tr('TTL'),
                 $this->_tr('Group'),
@@ -976,7 +968,7 @@ class appmonitorserver_gui extends appmonitorserver
                 $this->_tr('Output'),
                 $this->_tr('Count'),
                 $this->_tr('Time'),
-            )) : $this->_generateTableHead(array(
+            ]) : $this->_generateTableHead([
                 $this->_tr('Result'),
                 $this->_tr('Timestamp'),
                 $this->_tr('Host'),
@@ -988,16 +980,15 @@ class appmonitorserver_gui extends appmonitorserver
                 $this->_tr('Output'),
                 $this->_tr('Count'),
                 $this->_tr('Time'),
-            ));
+            ]);
         // $sReturn .= '<tbody>';
 
         foreach ($this->_data as $sAppId => $aEntries) {
 
             // filter if a host was given
             if (
-                !$sUrl ||
-                (array_key_exists("result", $aEntries) && array_key_exists("url", $aEntries["result"]) && $sUrl == $aEntries["result"]["url"]
-                )
+                !$sUrl
+                || (isset($aEntries["result"]["url"]) && $sUrl == $aEntries["result"]["url"])
             ) {
                 if (
                     $aEntries["result"]["error"]
@@ -1006,7 +997,7 @@ class appmonitorserver_gui extends appmonitorserver
                 } else {
 
                     foreach ($aEntries["checks"] as $aCheck) {
-                        $aTags = isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
+                        $aTags = $aEntries["meta"]["tags"] ?? false;
                         if ($bHideOk && $aCheck["result"] == RESULT_OK) {
                             continue;
                         }
@@ -1031,8 +1022,8 @@ class appmonitorserver_gui extends appmonitorserver
 
                             . '<td>' . $aCheck["description"] . '</td>'
                             . '<td>' . $aCheck["value"] . '</td>'
-                            . '<td>' . (isset($aCheck["count"]) ? $aCheck["count"] : '-') . '</td>'
-                            . '<td>' . (isset($aCheck["time"]) ? $aCheck["time"] : '-') . '</td>'
+                            . '<td>' . ($aCheck["count"] ?? '-') . '</td>'
+                            . '<td>' . ($aCheck["time"]  ?? '-') . '</td>'
                             . '</tr>';
                     }
                 }
@@ -1062,22 +1053,22 @@ class appmonitorserver_gui extends appmonitorserver
             return $this->_tr('Notifications-none');
         }
 
-        $aTH = array(
+        $aTH = [
             $this->_tr('Result'),
             $this->_tr('Timestamp'),
             $this->_tr('Duration'),
             $this->_tr('Change'),
             $this->_tr('Webapp'),
             $this->_tr('Message')
-        );
+        ];
         if (!$bShowDuration) {
             unset($aTH[2]);
         }
         $sTable = $this->_generateTableHead($aTH) . "\n";
         $sTable .= '<tbody>';
 
-        $aChanges = array();
-        $aResults = array();
+        $aChanges = [];
+        $aResults = [];
         $iLastTimer = date("U");
         // echo '<pre>'.print_r($aLogs, 1).'</pre>';
         foreach ($aLogs as $aLogentry) {
@@ -1095,10 +1086,8 @@ class appmonitorserver_gui extends appmonitorserver
             $iLastTimer = $aLogentry['timestamp'];
 
             // TODO maybe use $this->_getAdminLteColorByResult()
-            $sAppName = isset($this->_data[$aLogentry['appid']]["result"]["website"])
-                ? $this->_data[$aLogentry['appid']]["result"]["website"]
-                : '-';
-            $aTags = isset($this->_data[$aLogentry['appid']]["meta"]["tags"]) ? $this->_data[$aLogentry['appid']]["meta"]["tags"] : false;
+            $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '-';
+            $aTags = $this->_data[$aLogentry['appid']]["meta"]["tags"] ?? false;
 
             $sCheckResults = '';
             $iChkCounter = 0;
@@ -1155,11 +1144,10 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _renderBadgesForWebsite($sAppId, $bShort = false)
     {
-        $iResult = $this->_data[$sAppId]["result"]["result"];
-        $oA = new renderadminlte();
-        if (!array_key_exists("summary", $this->_data[$sAppId]["result"])) {
+        if (!isset($this->_data[$sAppId]["result"]["summary"])) {
             return false;
         }
+        $oA = new renderadminlte();
         $aEntries = $this->_data[$sAppId]["result"]["summary"];
         // $sHtml = $this->_tr('Result-checks') . ': <strong>' . $aEntries["total"] . '</strong> ';
         $sHtml = '';
@@ -1167,11 +1155,11 @@ class appmonitorserver_gui extends appmonitorserver
             $sKey = $i;
             if ($aEntries[$sKey] > 0) {
                 // $sHtml .= '<span class="badge result' . $i . '" title="' . $aEntries[$sKey] . ' x ' . $this->getResultValue($i) . '">' . $aEntries[$sKey] . '</span>';
-                $sHtml .= $oA->getBadge(array(
+                $sHtml .= $oA->getBadge([
                     'bgcolor' => $this->_getAdminLteColorByResult($i),
                     'title' => $aEntries[$sKey] . ' x ' . $this->getResultValue($i),
                     'text' => $aEntries[$sKey],
-                )) . ' ';
+                ]) . ' ';
                 // '<span class="badge result' . $i . '" title="' . $aEntries[$sKey] . ' x ' . $this->getResultValue($i) . '">' . $aEntries[$sKey] . '</span>';
                 if (!$bShort) {
                     $sHtml .= $this->_tr('Resulttype-' . $i) . ' ';
@@ -1194,23 +1182,23 @@ class appmonitorserver_gui extends appmonitorserver
      *                             - graphonly  bool     flag:  show graph only (without label and last value)
      * @return string
      */
-    protected function _renderCounter($sAppId, $sCounterId, $aOptions = array())
+    protected function _renderCounter($sAppId, $sCounterId, $aOptions = [])
     {
         $oA = new renderadminlte();
         $oCounters = new counteritems($sAppId, $sCounterId);
 
         $aOptions['type'] = $aOptions['type'] ? $aOptions['type'] : 'bar';
-        $aOptions['label'] = isset($aOptions['label']) && $aOptions['label']     ? $aOptions['label']    : '';
+        $aOptions['label'] = $aOptions['label'] ?? '';
         $aOptions['size'] = isset($aOptions['size'])   && (int)$aOptions['size'] ? (int)$aOptions['size'] : 2;
         $aOptions['items'] = isset($aOptions['items']) && (int)$aOptions['items'] ? (int)$aOptions['items'] : $aOptions['size'] * 10;
         $aOptions['graphonly'] = isset($aOptions['graphonly']) ? !!$aOptions['graphonly'] : false;
 
         $aResponseTimeData = $oCounters->get($aOptions['items']);
-        $aChartData = array(
-            'label' => array(),
-            'value' => array(),
-            'color' => array(),
-        );
+        $aChartData = [
+            'label' => [],
+            'value' => [],
+            'color' => [],
+        ];
         foreach ($aResponseTimeData as $aItem) {
             if (isset($aItem['data']['value'])) {
                 array_unshift($aChartData['label'], date("Y-m-d H:i:s", $aItem['timestamp']));
@@ -1247,7 +1235,7 @@ class appmonitorserver_gui extends appmonitorserver
                 break;
             case 'bar':
             case 'line':
-                $aChart = array(
+                $aChart = [
                     'type' => $aOptions['type'],
 
                     'xGrid' => false,
@@ -1262,7 +1250,7 @@ class appmonitorserver_gui extends appmonitorserver
 
                     'data' => $aChartData,
                     'height' => $aOptions['graphonly'] ? '4em' : false,
-                );
+                ];
                 $sGraph = $this->_renderGraph($aChart);
                 $sInnerTile .= ($sTopLabel ? $sTopLabel . '<strong>' . $iLast . '</strong>' : '')
                     . $sGraph;
@@ -1297,14 +1285,14 @@ class appmonitorserver_gui extends appmonitorserver
         $oA = new renderadminlte();
         $sHtml = ''
             // . '<h2>' . $this->_aIco["about"] . ' ' . $this->_tr('About') . '</h2>'
-            . sprintf($this->_tr('About-title'), $this->_sTitle . ' v'.$this->_sVersion) . '<br>'
+            . sprintf($this->_tr('About-title'), $this->_sTitle . ' v' . $this->_sVersion) . '<br>'
             . '<br>'
             . $this->_tr('About-text') . '<br>'
             . '<br>'
             . sprintf($this->_tr('About-projecturl'), $this->_sProjectUrl, $this->_sProjectUrl) . '<br>'
             . sprintf($this->_tr('About-docs'), $this->_sDocUrl) . '<br>'
-            .'<br>'
-            . $this->_tr('About-vendor').
+            . '<br>'
+            . $this->_tr('About-vendor') .
             '<ul>
                 <li><a href="https://adminlte.io/">AdminLTE</a></li>
                 <li><a href="https://datatables.net/">datatables.net</a></li>
@@ -1315,16 +1303,15 @@ class appmonitorserver_gui extends appmonitorserver
                 <li><a href="https://visjs.org/">Vis.js</a></li>
                 <li><a href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
                 <li><a href="">AhCache</a></li>
-            </ul>'
-            ;
+            </ul>';
         // return $sHtml;
         return $oA->getSectionHead($this->_aIco["about"] . ' ' . $this->_tr('About'))
             . '<section class="content">'
             . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox(array(
+                $oA->getBox([
                     'title' => $this->_tr('About'),
                     'text' => $sHtml
-                )),
+                ]),
                 12
             ))
             . '</section>';
@@ -1355,23 +1342,24 @@ class appmonitorserver_gui extends appmonitorserver
             . '> ' . $this->_aIco['close'] . ' ' . $this->_tr('btn-hide-details') . ' </button>';
 
         if (
-            true ||
-            array_key_exists("result", $aEntries) && array_key_exists("result", $aEntries["result"]) && array_key_exists("website", $aEntries["result"]) && array_key_exists("host", $aEntries["result"])
+            true
+            ||
+            (isset($aEntries["result"]) && isset($aEntries["result"]["result"]) && isset($aEntries["result"]["website"]) && isset($aEntries["result"]["host"]))
         ) {
 
             // --- 
             $sTopHeadline = $oA->getSectionHead(
                 ''
-                .'<a href="#divwebs" onclick="setTab(\'#divwebs\')"'
+                    . '<a href="#divwebs" onclick="setTab(\'#divwebs\')"'
                     . '> ' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps-header')
                     . '</a> > '
-                    .'<span class="divhost bg-'.$this->_getAdminLteColorByResult($aEntries["result"]["result"]).'">'
+                    . '<span class="divhost bg-' . $this->_getAdminLteColorByResult($aEntries["result"]["result"]) . '">'
                     . '<nobr>'
-                    . $this->_tr('Resulttype-' . $aEntries["result"]["result"]).': '
+                    . $this->_tr('Resulttype-' . $aEntries["result"]["result"]) . ': '
                     . $this->_aIco['webapp'] . ' '
                     . $this->_getAppLabel($sAppId)
                     . '&nbsp;</nobr>'
-                .'</span>'
+                    . '</span>'
             );
 
 
@@ -1380,12 +1368,12 @@ class appmonitorserver_gui extends appmonitorserver
 
             // check if request failed
             if (isset($aEntries['result']['error']) && $aEntries['result']['error']) {
-                $sValidationContent .= $oA->getAlert(array(
+                $sValidationContent .= $oA->getAlert([
                     'type' => 'danger',
                     'dismissible' => false,
                     'title' => $this->_aIco['error'] . ' ' . $this->_tr('Validator-request-error'),
                     'text' => $aEntries['result']['error']
-                ));
+                ]);
             }
 
             if (!$sValidationContent && $aValidatorResult) {
@@ -1396,19 +1384,19 @@ class appmonitorserver_gui extends appmonitorserver
                             $sDivContent .= '- ' . $sSingleMessage . '<br>';
                         }
                         $sValidationContent .= $sDivContent
-                            ? $oA->getAlert(array(
+                            ? $oA->getAlert([
                                 'type' => $sSection == 'error' ? 'danger' : $sSection,
                                 'dismissible' => false,
                                 'title' => $this->_aIco[$sSection] . ' ' . $this->_tr('Validator-' . $sSection),
                                 'text' => $sDivContent
-                            ))
+                            ])
                             : '';
                     }
                 }
             }
-            $sValidationContent=$sValidationContent ? $oA->getSectionRow($sValidationContent) : '';
+            $sValidationContent = $sValidationContent ? $oA->getSectionRow($sValidationContent) : '';
 
-            if (array_key_exists("host", $aEntries["result"])) {
+            if (isset($aEntries["result"]["host"])) {
 
                 // --- Counter and graphs
                 $oCounters = new counteritems($sAppId);
@@ -1422,18 +1410,18 @@ class appmonitorserver_gui extends appmonitorserver
                         if (strpos($sCounterId, 'time') !== 0) {
                             // echo '<pre>'.print_r($oCounters->get(1), 1).'</pre>';
 
-                            $aMeta['visual'] = isset($aMeta['visual']) ? $aMeta['visual'] : 'bar';
+                            $aMeta['visual'] = $aMeta['visual'] ?? 'bar';
                             $aTmp = explode(',', $aMeta['visual']);
 
                             $sCounters .= $this->_renderCounter(
                                 $sAppId,
                                 $sCounterId,
-                                array(
-                                    'type' => isset($aTmp[0]) ? $aTmp[0] : 'bar',
-                                    'size' => isset($aTmp[1]) ? $aTmp[1] : false,
-                                    'items' => isset($aTmp[2]) ? $aTmp[2] : false,
-                                    'label' => isset($aMeta['title']) ? $aMeta['title'] : $sCounterId,
-                                )
+                                [
+                                    'type' =>  $aTmp[0] ?? 'bar',
+                                    'size' =>  $aTmp[1] ?? false,
+                                    'items' => $aTmp[2] ?? false,
+                                    'label' => $aMeta['title'] ?? $sCounterId,
+                                ]
                             );
                         }
                     }
@@ -1452,20 +1440,20 @@ class appmonitorserver_gui extends appmonitorserver
                     : $this->_aIco['error']
                 );
                 $sBoxHttpResponse=$oA->getSectionColumn(
-                    $oA->getBox(array(
+                    $oA->getBox([
                         'title' => $this->_tr('Http-details'),
                         'text' => ($aEntries['result']['error']
-                            ? $oA->getAlert(array(
+                            ? $oA->getAlert([
                                 'type' => 'danger',
                                 'dismissible' => false,
                                 'text' => $aEntries['result']['error']
-                            ))
+                            ])
                             : ''
                         )
                             . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
                             . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $sStatusIcon . ' ' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
                             . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
-                    )),
+                        ]),
                     2
                 );
                 */
@@ -1476,16 +1464,15 @@ class appmonitorserver_gui extends appmonitorserver
                 $sHtml .=
                     $oA->getSectionRow(
                         ''
-                        .$oA->getSectionColumn(
-                            $oA->getBox(array(
-                                // 'label'=>'I am a label.',
-                                // 'collapsable'=>true,
-                                'title' => $this->_tr('Checks-visualisation'),
-                                'text' => $this->_generateMonitorGraph($aEntries["result"]["url"])
-                            )),
-                            12
-                        )
-                        ,
+                            . $oA->getSectionColumn(
+                                $oA->getBox([
+                                    // 'label'=>'I am a label.',
+                                    // 'collapsable'=>true,
+                                    'title' => $this->_tr('Checks-visualisation'),
+                                    'text' => $this->_generateMonitorGraph($aEntries["result"]["url"])
+                                ]),
+                                12
+                            ),
                         $this->_tr('row-visual')
                     );
 
@@ -1493,13 +1480,13 @@ class appmonitorserver_gui extends appmonitorserver
                 $sHtml .=
                     $oA->getSectionRow(
                         $oA->getSectionColumn(
-                            $oA->getBox(array(
+                            $oA->getBox([
                                 // 'label'=>'I am a label.',
                                 // 'collapsable'=>true,
                                 'title' => $this->_tr('Checks'),
                                 'text' => $this->_generateMonitorTable($aEntries["result"]["url"])
-                            ))
-                            ,12
+                            ]),
+                            12
                         ),
                         $this->_tr('row-checks')
                     );
@@ -1507,16 +1494,16 @@ class appmonitorserver_gui extends appmonitorserver
 
 
             // --- notifications & uptime for this webapp
-            $aLogs = $this->oNotification->getLogdata(array('appid' => $sAppId));
+            $aLogs = $this->oNotification->getLogdata(['appid' => $sAppId]);
 
             $aUptime = $this->_getUptime($aLogs);
             // echo '<pre>'.print_r($aUptime, 1).'</pre>';
 
-            $aChartData = array(
-                'label' => array(),
-                'value' => array(),
-                'color' => array(),
-            );
+            $aChartData = [
+                'label' => [],
+                'value' => [],
+                'color' => [],
+            ];
             foreach ($aUptime['counter'] as $iResult => $iResultCount) {
                 if ($iResultCount) {
                     array_unshift($aChartData['label'], $this->_tr('Resulttype-' . $iResult));
@@ -1525,12 +1512,12 @@ class appmonitorserver_gui extends appmonitorserver
                 }
             }
 
-            $aChartUptime = array(
+            $aChartUptime = [
                 'type' => 'pie',
                 // 'xLabel'=>$this->_tr('Chart-time'),
                 // 'yLabel'=>$this->_tr('Chart-responsetime'),
                 'data' => $aChartData,
-            );
+            ];
             $iFirstentry = count($aLogs) ? $aLogs[count($aLogs) - 1]['timestamp'] : date('U');
 
             $sUptime = '';
@@ -1554,22 +1541,21 @@ class appmonitorserver_gui extends appmonitorserver
             // Notification + Uptime + Http-results
             $sHtml .= $oA->getSectionRow(
                 $oA->getSectionColumn(
-                    $oA->getBox(array(
+                    $oA->getBox([
                         'title' => $this->_tr('Notifications'),
                         'text' => $this->_generateNotificationlog($aLogs, 'datatable-notifications-webapp', true)
-                    )),
+                    ]),
                     9,
                     'right'
                 )
                     . $oA->getSectionColumn(
-                        $oA->getBox(array(
+                        $oA->getBox([
                             'title' => $this->_tr('Uptime') . ' (' . $this->_tr('since') . ' ' . date('Y-m-d', $iFirstentry) . '; ~' . round((date('U') - $iFirstentry) / 60 / 60 / 24) . ' d)',
                             'text' => $sUptime
-                        )),
+                        ]),
                         3
-                    )
-                    ,
-                    $this->_tr('row-history')
+                    ),
+                $this->_tr('row-history')
             );
 
 
@@ -1580,12 +1566,21 @@ class appmonitorserver_gui extends appmonitorserver
 
                 foreach ($this->_getResultDefs() as $i) {
                     $sMgIdPrefix = 'changetype-' . $i;
+                    /*
+                    include_once(__DIR__ . '/../plugins/notification/email.php');
+                    include_once(__DIR__ . '/../plugins/notification/slack.php');
+                    $oSlack = new slackNotification;
+                    $oEmail = new emailNotification;
+                    */
+
                     $sDebugContent .= $this->_tr('changetype-' . $i)
                         . '<pre>'
                         . '' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.logmessage'), 1)) . '<hr>'
                         . 'TO: ' . implode('; ', $this->oNotification->getAppNotificationdata('email')) . '<br>'
                         . '<strong>' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.subject'), 1)) . '</strong><br>'
                         . '' . htmlentities(print_r($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.message'), 1)) . '<br>'
+                        // . 'Email: '.htmlentities($oEmail::formatMessage($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.message'))).'<br>'
+                        // . 'Slack: '.htmlentities($oSlack::formatMessage($this->oNotification->getReplacedMessage($sMgIdPrefix . '.email.message'))).'<br>'
                         . '</pre>';
                 }
                 // $sDebugContent=$sDebugContent ? $oA->getSectionRow($sDebugContent) : '';
@@ -1593,46 +1588,45 @@ class appmonitorserver_gui extends appmonitorserver
                 $sHtml .= $sShowHide . '<div id="' . $sDivMoredetails . '" style="display: none;">'
                     . $oA->getSectionRow(
                         $oA->getSectionColumn(
-                            $oA->getBox(array(
+                            $oA->getBox([
                                 // 'label'=>'I am a label.',
                                 // 'collapsable'=>true,
                                 // 'collapsed'=>false,
                                 'title' => $this->_tr('Client-source-data'),
                                 'text' => '<pre>' . htmlentities(print_r($aEntries, 1)) . '</pre>'
-                            )),
+                            ]),
                             12
                         )
                     )
                     . $oA->getSectionRow($oA->getSectionColumn(
-                        $oA->getBox(array(
+                        $oA->getBox([
                             'title' => $this->_tr('Preview-of-messages'),
                             'text' => '<pre>' . htmlentities(print_r($this->oNotification->getMessageReplacements(), 1)) . '</pre>'
 
-                        )),
+                        ]),
                         12
                     ))
                     . $oA->getSectionRow($oA->getSectionColumn(
-                        $oA->getBox(array(
+                        $oA->getBox([
                             'title' => $this->_tr('Preview-emails'),
                             'text' => $sDebugContent
 
-                        )),
+                        ]),
                         12
                     ))
                     . '</div>';
             }
         }
-        return 
-        
+        return
+
             ''
             . '<div id="relnavbuttons" style="position: absolute; right: 1em; z-index: 10000;"></div>'
             . $sTopHeadline
             . '<section class="content">
                 ' . $oA->getSectionRow($this->_generateWebappTiles($sAppId)) . '<br>'
-                    . $sValidationContent
-                    . $sHtml . '
-            </section>'
-            ;
+            . $sValidationContent
+            . $sHtml . '
+            </section>';
     }
     /**
      * return html code for debug page
@@ -1656,35 +1650,35 @@ class appmonitorserver_gui extends appmonitorserver
         return $oA->getSectionHead($this->_aIco["debug"] . ' ' . $this->_tr('Debug'))
             . '<section class="content">'
             . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox(array(
+                $oA->getBox([
                     'title' => $this->_tr('Debug-icons'),
                     'text' => '<table><tr>'
                         . '<th>#</th>'
                         . '<th>' . $this->_tr('Debug-icons-preview') . '</th>'
                         . '<th>' . $this->_tr('Debug-icons-html') . '</th>'
                         . '</tr>' . $sAlIcons . '</table>'
-                )),
+                ]),
                 12
             ))
             . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox(array(
+                $oA->getBox([
                     'title' => $this->_tr('Debug-config'),
                     'text' => '<pre>' . print_r($this->_aCfg, true) . '</pre>'
-                )),
+                ]),
                 12
             ))
             . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox(array(
+                $oA->getBox([
                     'title' => $this->_tr('Debug-urls'),
                     'text' => '<pre>' . print_r($this->_urls, true) . '</pre>'
-                )),
+                ]),
                 12
             ))
             . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox(array(
+                $oA->getBox([
                     'title' => $this->_tr('Debug-clientdata'),
                     'text' => '<pre>' . print_r($this->_data, true) . '</pre>'
-                )),
+                ]),
                 12
             ))
             . '</section>';
@@ -1693,34 +1687,34 @@ class appmonitorserver_gui extends appmonitorserver
      * return html code for notification page
      * @return string
      */
-    public function generateViewNotifications($iMaxcount=false)
+    public function generateViewNotifications($iMaxcount = false)
     {
         $oA = new renderadminlte();
-        $iNotifications=count($this->oNotification->loadLogdata());
+        $iNotifications = count($this->oNotification->loadLogdata());
         $aLogs = $this->oNotification->getLogdata([], $iMaxcount);
-        $sButtons='';
+        $sButtons = '';
 
-        $iMin=100; // see functions.js - function showDiv() - var count = must have the same value
-        if($iNotifications>$iMin){
-            foreach([/* '10'=>10, '50'=>50, */ $iMin=>'', 1000=>1000, 2000=>2000, 'all'=>'all'] as $sLabel=>$sParam){
-                if($iNotifications>$sLabel || $sLabel=='all'){
-                $sButtons .= '<button onclick="setTab(\'#divnotifications'.($sParam ? '-'.$sParam : '').'\')" '
-                    .'class="btn'.((int)$iMaxcount == (int)$sLabel ? ' btn-primary': '').'"'
-                    .'>'.$sLabel.'</button> ';
+        $iMin = 100; // see functions.js - function showDiv() - var count = must have the same value
+        if ($iNotifications > $iMin) {
+            foreach ([/* '10'=>10, '50'=>50, */$iMin => '', 1000 => 1000, 2000 => 2000, 'all' => 'all'] as $sLabel => $sParam) {
+                if ($iNotifications > $sLabel || $sLabel == 'all') {
+                    $sButtons .= '<button onclick="setTab(\'#divnotifications' . ($sParam ? '-' . $sParam : '') . '\')" '
+                        . 'class="btn' . ((int)$iMaxcount == (int)$sLabel ? ' btn-primary' : '') . '"'
+                        . '>' . $sLabel . '</button> ';
                 }
             }
         }
-        $sButtons.=$sButtons ? '<br><br>' : '';
+        $sButtons .= $sButtons ? '<br><br>' : '';
 
         return $oA->getSectionHead($this->_aIco["notifications"] . ' ' . $this->_tr('Notifications-header'))
             . '<section class="content">'
             . $oA->getSectionRow($this->_generateWebTiles())
             . '<br>'
             . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox(array(
-                    'title' => $this->_tr('Notifications-header') . ' ('.$iNotifications.')',
-                    'text' => $sButtons.$this->_generateNotificationlog($aLogs)
-                )),
+                $oA->getBox([
+                    'title' => $this->_tr('Notifications-header') . ' (' . $iNotifications . ')',
+                    'text' => $sButtons . $this->_generateNotificationlog($aLogs)
+                ]),
                 12
             )) . '
                 </section>';
@@ -1762,7 +1756,7 @@ class appmonitorserver_gui extends appmonitorserver
 
             . ($bShowFailedHosts && "$sNoDataHtml$sAppsHtml"
                 ? $oA->getSectionRow($oA->getSectionColumn(
-                    $oA->getBox(array(
+                    $oA->getBox([
                         'title' => $this->_tr('Problems-webapps-header'),
                         'text' =>
                         $this->_tr('Problems-webapps-hints') . '<br><br>'
@@ -1779,7 +1773,7 @@ class appmonitorserver_gui extends appmonitorserver
                             . '<div id="divwebs">'
                             . $sNoDataHtml . $sAppsHtml
                             . '</div>'
-                    )),
+                    ]),
                     12
                 ))
                 : ''
@@ -1787,10 +1781,10 @@ class appmonitorserver_gui extends appmonitorserver
             )
 
             . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox(array(
+                $oA->getBox([
                     'title' => $this->_tr('Problems-checks-header'),
                     'text' => $this->_tr('Problems-checks-hints') . '<br><br>' . $sChecksHtml
-                )),
+                ]),
                 12
             ))
             . '
@@ -1807,12 +1801,12 @@ class appmonitorserver_gui extends appmonitorserver
         $oA = new renderadminlte();
         // $this->setUser('hahn');
         if (!$this->hasRole('ui-config')) {
-            return $oA->getAlert(array(
+            return $oA->getAlert([
                 'type' => 'danger',
                 'dismissible' => false,
                 'title' => $this->_aIco['error'] . ' ' . $this->_tr('msgErr-access-denied'),
                 'text' => $sMessage,
-            ));
+            ]);
         }
     }
 
@@ -1832,15 +1826,14 @@ class appmonitorserver_gui extends appmonitorserver
         // list of all clients
         $sHostlist = '';
         foreach ($this->_data as $sAppId => $aData) {
-            $iResult = array_key_exists("result", $aData["result"]) ? $aData["result"]["result"] : 3;
+            $iResult = $aData["result"]["result"] ?? 3;
             $sUrl = $aData["result"]["url"];
-            $sWebsite = array_key_exists("website", $aData["result"]) ? $aData["result"]["website"] : $this->_tr('unknown') . ' (' . $sUrl . ')';
-            $sHost = array_key_exists("host", $aData["result"]) ? $aData["result"]["host"] : $this->_tr('unknown');
+            $sHost = $aData["result"]["host"] ?? $this->_tr('unknown');
 
-            $aTags = isset($aData["meta"]["tags"]) ? $aData["meta"]["tags"] : false;
+            $aTags = $aData["meta"]["tags"] ?? false;
             $sHostlist .= $oA->getSectionRow($oA->getSectionColumn(
                 '<div class="divhost result' . $iResult . ' tags ' . $this->_getCssclassForTag($aTags) . '" style="float: none; ">'
-                    . $oA->getBox(array(
+                    . $oA->getBox([
                         'title' => ''
                             . $this->_getAppLabel($sAppId),
                         'text' => ''
@@ -1859,7 +1852,7 @@ class appmonitorserver_gui extends appmonitorserver
 
                             . $this->_aIco['url'] . ' <a href="' . $sUrl . '" target="_blank">' . $sUrl . '</a><br>'
                             . $this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $sHost . '<br>'
-                    ))
+                    ])
                     . '</div>',
                 12
             ));
@@ -1879,7 +1872,7 @@ class appmonitorserver_gui extends appmonitorserver
                             . '</button>';
         */
         $sSetup .= '</form>';
-        $sAppId = isset($sAppId) ? $sAppId : 'no-app-id';
+        $sAppId = $sAppId ?? 'no-app-id';
         $sDivMoredetails = 'div-http-' . $sAppId;
         $sShowHide = '<br><button class="btn btn-default" id="btn-plus-' . $sAppId . '"  onclick="$(\'#' . $sDivMoredetails . '\').slideDown(); $(this).hide(); $(\'#btn-minus-' . $sAppId . '\').show(); return false;"'
             . '> ' . $this->_aIco['plus'] . ' ' . $this->_tr('btn-details') . ' </button>'
@@ -1893,7 +1886,7 @@ class appmonitorserver_gui extends appmonitorserver
                 $oA->getSectionColumn(
                     // box for adding new client url
                     // box for adding new client url
-                    $oA->getBox(array(
+                    $oA->getBox([
                         'title' => $this->_tr('Setup-configuration'),
                         'text' => ''
                             . $sSetup
@@ -1902,13 +1895,13 @@ class appmonitorserver_gui extends appmonitorserver
                             . '<pre>' . print_r($this->_aCfg, 1) . '</pre>'
                             . '</div>'
 
-                    )),
+                    ]),
                     6
                 )
                     . $oA->getSectionColumn(
                         // box for adding new client url
                         // box for adding new client url
-                        $oA->getBox(array(
+                        $oA->getBox([
                             'title' => $this->_tr('Setup-add-client'),
                             'text' => '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
                                 . $sFormOpenTag
@@ -1928,17 +1921,17 @@ class appmonitorserver_gui extends appmonitorserver
                                 . '</div>'
                                 . '</form><br>'
 
-                        )),
+                        ]),
                         6
                     )
                     . $oA->getSectionColumn(
-                        $oA->getBox(array(
+                        $oA->getBox([
                             'title' => $this->_tr('Setup-client-list'),
                             'text' => '<div id="divsetupfilter"></div><br>'
                                 . '<div id="divsetup">'
                                 . $sHostlist
                                 . '</div>'
-                        )),
+                        ]),
                         6
                     )
             )
@@ -1958,7 +1951,7 @@ class appmonitorserver_gui extends appmonitorserver
         $oA = new renderadminlte();
         $aAllWebapps = [];
 
-        $aOptions['mode'] = isset($aOptions['mode']) ? $aOptions['mode'] : 'default';
+        $aOptions['mode'] = $aOptions['mode'] ?? 'default';
         foreach ($this->_data as $sAppId => $aEntries) {
             $bHasData = true;
             if (!isset($aEntries["result"]["host"])) {
@@ -1990,7 +1983,7 @@ class appmonitorserver_gui extends appmonitorserver
             $sDivId = $this->_getDivIdForApp($sAppId);
             $sOnclick = 'setTab(\'' . $sDivId . '\')';
 
-            $aTags = isset($aEntries["meta"]["tags"]) ? $aEntries["meta"]["tags"] : false;
+            $aTags = $aEntries["meta"]["tags"] ?? false;
             $sTaglist = $aTags ? $this->_getTaglist($aTags) : '';
 
             $this->oNotification->setApp($sAppId, $this->_data[$sAppId]);
@@ -2007,7 +2000,7 @@ class appmonitorserver_gui extends appmonitorserver
                         . '<div class="col-md-3 col-sm-6 col-xs-12 divhost tags ' . $this->_getCssclassForTag($aTags) . '">'
                         . ($bHasData
                             ?
-                            $oA->getWidget(array(
+                            $oA->getWidget([
                                 'onclick' => $sOnclick,
                                 'bgcolor' => $sBgColor,
                                 'icon' => $sIcon,
@@ -2020,9 +2013,9 @@ class appmonitorserver_gui extends appmonitorserver
                                 'progresstext' => '&nbsp;&nbsp;'
                                     . $sValidatorinfo
                                     . $sTaglist,
-                            ))
+                            ])
                             :
-                            $oA->getWidget(array(
+                            $oA->getWidget([
                                 'onclick' => $sOnclick,
                                 'bgcolor' => $sBgColor,
                                 // 'bgcolor'=>$this->_getAdminLteColorByResult(RESULT_ERROR),
@@ -2033,7 +2026,7 @@ class appmonitorserver_gui extends appmonitorserver
                                 'progresstext' => '&nbsp;&nbsp;'
                                     . $sTaglist
                                     . $sValidatorinfo,
-                            ))
+                            ])
                         )
                         . '</div>';
                     break;;
@@ -2105,7 +2098,7 @@ class appmonitorserver_gui extends appmonitorserver
          * @var string
          */
         $sTopHeadline = $oA->getSectionHead($this->_aIco["allwebapps"] . ' ' . $this->_tr('All-webapps-header'));
-        $aAllWebapps = array();
+        $aAllWebapps = [];
 
         if (!count($this->_data)) {
             return $sTopHeadline
@@ -2113,9 +2106,9 @@ class appmonitorserver_gui extends appmonitorserver
                 $oA->getSectionRow(
                     $oA->getSectionColumn(
                         $oA->getBox(
-                            array(
+                            [
                                 'text' => $this->_showWelcomeMessage()
-                            )
+                            ]
                         )
                     )
                 )
@@ -2152,14 +2145,14 @@ class appmonitorserver_gui extends appmonitorserver
 
             . $oA->getSectionRow(
                 $oA->getSectionColumn(
-                    $oA->getBox(array(
+                    $oA->getBox([
                         // 'label'=>'I am a label.',
                         // 'collapsable'=>true,
                         // 'collapsed'=>false,
                         // 'title'=>$this->_tr('Client-source-data'),
                         'title' => strip_tags($sTopHeadline),
                         'text' => $sReturn
-                    )),
+                    ]),
                     12
                 )
             )
@@ -2199,7 +2192,7 @@ class appmonitorserver_gui extends appmonitorserver
     protected function _getCssclassForTag($sTag)
     {
         if (is_string($sTag)) {
-            return $this->_getCssclassForTag(array($sTag));
+            return $this->_getCssclassForTag([$sTag]);
             // return 'tag-'.md5($sTag);
         }
         if (is_array($sTag) && count($sTag)) {
@@ -2292,7 +2285,7 @@ class appmonitorserver_gui extends appmonitorserver
      *                       - color  (integer)  RESULT_CODE
      * @return string
      */
-    protected function _renderGraph($aOptions = array())
+    protected function _renderGraph($aOptions = [])
     {
         static $iCounter;
         if (!isset($iCounter)) {
@@ -2300,13 +2293,13 @@ class appmonitorserver_gui extends appmonitorserver
         }
         $iCounter++;
         $bIsPie = ($aOptions['type'] === 'pie');
-        $aOptions['xLabel'] = isset($aOptions['xLabel']) ? $aOptions['xLabel'] : '';
-        $aOptions['yLabel'] = isset($aOptions['yLabel']) ? $aOptions['yLabel'] : '';
-        $aOptions['xValue'] = isset($aOptions['xValue']) ? $aOptions['xValue'] : ($bIsPie ? false : true);
-        $aOptions['yValue'] = isset($aOptions['yValue']) ? $aOptions['yValue'] : ($bIsPie ? false : true);
-        $aOptions['xGrid'] = isset($aOptions['xGrid']) ? $aOptions['xGrid'] : ($bIsPie ? false : true);
-        $aOptions['yGrid'] = isset($aOptions['yGrid']) ? $aOptions['yGrid'] : ($bIsPie ? false : true);
-        $aOptions['height'] = isset($aOptions['height']) ? $aOptions['height'] : false;
+        $aOptions['xLabel'] = $aOptions['xLabel'] ?? '';
+        $aOptions['yLabel'] = $aOptions['yLabel'] ?? '';
+        $aOptions['xValue'] = $aOptions['xValue'] ?? ($bIsPie ? false : true);
+        $aOptions['yValue'] = $aOptions['yValue'] ?? ($bIsPie ? false : true);
+        $aOptions['xGrid']  = $aOptions['xGrid']  ?? ($bIsPie ? false : true);
+        $aOptions['yGrid']  = $aOptions['yGrid']  ?? ($bIsPie ? false : true);
+        $aOptions['height'] = $aOptions['height'] ?? false;
 
         $sIdCanvas = 'canvasChartJs' . $iCounter;
         $sCtx = 'ctxChartJsRg' . $iCounter;
@@ -2410,12 +2403,12 @@ class appmonitorserver_gui extends appmonitorserver
         require_once 'cdnorlocal.class.php';
         $oCdn = new axelhahn\cdnorlocal();
 
-        $oCdn = new axelhahn\cdnorlocal(array(
+        $oCdn = new axelhahn\cdnorlocal([
             'vendordir' => __DIR__ . '/../vendor',
             'vendorurl' => './vendor/',
             'debug' => 0
-        ));
-        $oCdn->setLibs(array(
+        ]);
+        $oCdn->setLibs([
             "admin-lte/2.4.10",
             "datatables/1.10.21",
             // "font-awesome/5.15.4",
@@ -2425,7 +2418,7 @@ class appmonitorserver_gui extends appmonitorserver
             "Chart.js/2.7.2",
             "vis/4.21.0",
             // "x-editable/1.5.0",
-        ));
+        ]);
         $oA = new renderadminlte();
 
         $this->loadClientData(); // required to show tags
@@ -2472,14 +2465,13 @@ class appmonitorserver_gui extends appmonitorserver
             // . '</nav>'
         ;
 
-        $sTheme = (array_key_exists('theme', $this->_aCfg) && $this->_aCfg['theme']) ? $this->_aCfg['theme'] : 'default';
+        $sTheme = $this->_aCfg['theme'] ?? 'default';
 
-
-        $aReplace = array();
+        $aReplace = [];
 
         // colorset and layout of adminlte
-        $aReplace['{{PAGE_SKIN}}'] = isset($this->_aCfg['skin']) ? $this->_aCfg['skin'] : 'skin-purple';
-        $aReplace['{{PAGE_LAYOUT}}'] = isset($this->_aCfg['layout']) ? $this->_aCfg['layout'] : 'sidebar-mini';
+        $aReplace['{{PAGE_SKIN}}'] = $this->_aCfg['skin'] ?? 'skin-purple';
+        $aReplace['{{PAGE_LAYOUT}}'] = $this->_aCfg['layout'] ?? 'sidebar-mini';
 
         // $aReplace['{{PAGE_HEADER}}']=$oA->getSectionHead($this->_aIco['title'] . ' ' . $sTitle);
         $aReplace['{{PAGE_HEADER}}'] = '';

@@ -34,12 +34,12 @@ class checkPdoConnect extends appmonitorcheck{
      * see http://php.net/manual/en/pdo.drivers.php
      * 
      * @param array $aParams
-     * array(
+     * [
      *     connect             string   connect string
      *     user                string   db user
      *     password            string   password for db user
      *     timeout             integer  optional timeout in sec; default: 5
-     * )
+     * ]
      */
     public function run($aParams) {
         $this->_checkArrayKeys($aParams, "connect,user,password");
@@ -49,7 +49,7 @@ class checkPdoConnect extends appmonitorcheck{
                 $aParams['connect'], 
                 $aParams['user'], 
                 $aParams['password'], 
-                array(
+                [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     
                     // timeout
@@ -57,7 +57,7 @@ class checkPdoConnect extends appmonitorcheck{
                     PDO::ATTR_TIMEOUT => (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp,                  
                     // mssql
                     // PDO::SQLSRV_ATTR_QUERY_TIMEOUT => $this->_iTimeoutTcp,  
-                )
+                ]
             );
             $db=null;
             return [RESULT_OK, "OK: Database was connected with PDO " . $aParams['connect']];

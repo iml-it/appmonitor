@@ -61,7 +61,7 @@ class appmonitorserver_api extends appmonitorserver
     {
         $aReturn = [];
         foreach ($this->_aCfg['users'] as $sLoopuser => $aUserdata) {
-            $aReturn[$sLoopuser] = isset($aUserdata['password']) ? $aUserdata['password'] : false;
+            $aReturn[$sLoopuser] = $aUserdata['password'] ?? false;
         }
         return $aReturn;
     }
@@ -143,24 +143,24 @@ class appmonitorserver_api extends appmonitorserver
 
                 // generate a key to sort apps
                 // reverse status code to bring errors on top
-                $iAppResult = RESULT_ERROR - (isset($aData['result']['result']) ? $aData['result']['result'] : 1);
+                $iAppResult = RESULT_ERROR - ($aData['result']['result'] ?? 1);
 
                 // ... and add appname
-                $sAppName = $iAppResult . '__' . strtoupper(isset($aData['result']['website']) ? $aData['result']['website'] : 'zzz') . '__' . $sKey;
+                $sAppName = $iAppResult . '__' . strtoupper($aData['result']['website'] ?? 'zzz') . '__' . $sKey;
 
                 switch ($outmode) {
 
                         // short view of matching apps
                     case 'appid':
                         $aTmp[$sAppName][$sKey] = [
-                            'website' => isset($aData['result']['website']) ? $aData['result']['website'] : false,
-                            'url' => isset($aData['result']['url']) ? $aData['result']['url'] : false,
+                            'website' => $aData['result']['website'] ?? false,
+                            'url' => $aData['result']['url'] ?? false,
                         ];
                         break;;;
                         // return an existing key only
                     case 'checks':
                     case 'meta':
-                        $aTmp[$sAppName][$sKey] = isset($aData[$outmode]) ? $aData[$outmode] : false;
+                        $aTmp[$sAppName][$sKey] = $aData[$outmode] ?? false;
                         break;;;
 
                         // all

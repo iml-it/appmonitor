@@ -113,7 +113,7 @@ class notificationhandler
      *                          - {string} notifications  appmionitor config settings in notification settings (for sleeptime and messages)
      * @return boolean
      */
-    public function __construct($aOptions = array())
+    public function __construct($aOptions = [])
     {
         if (isset($aOptions['lang'])) {
             $this->_loadLangTexts($aOptions['lang']);
@@ -163,7 +163,7 @@ class notificationhandler
      */
     protected function _tr($sWord)
     {
-        return $this->oLang->tr($sWord, array('notifications'));
+        return $this->oLang->tr($sWord, [ 'notifications' ]);
     }
 
     // ----------------------------------------------------------------------
@@ -414,14 +414,14 @@ class notificationhandler
     {
         // reread because service and webgui could change it
         $aData = $this->loadLogdata();
-        $this->_aLog[] = array(
+        $this->_aLog[] = [
             'timestamp' => time(),
             'changetype' => $iChangetype,
             'status' => $sNewstatus,
             'appid' => $sAppId,
             'message' => $sMessage,
             'result' => $aResult,
-        );
+        ];
 
         $this->cutLogitems();
         $this->saveLogdata();
@@ -476,9 +476,9 @@ class notificationhandler
      * @param boolean $bRsort   flag to reverse sort logs; default is true (=newest entry first)
      * @return array
      */
-    public function getLogdata($aFilter = array(), $iLimit = false, $bRsort = true)
+    public function getLogdata($aFilter = [], $iLimit = false, $bRsort = true)
     {
-        $aReturn = array();
+        $aReturn = [];
         $aData = $this->loadLogdata();
         if ($bRsort) {
             rsort($aData);
@@ -514,7 +514,7 @@ class notificationhandler
         $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
         $this->_aLog = $oCache->read();
         if (!$this->_aLog) {
-            $this->_aLog = array();
+            $this->_aLog = [];
         }
 
         return $this->_aLog;
@@ -545,8 +545,8 @@ class notificationhandler
      */
     protected function _makeReplace($aReplace, $sString)
     {
-        $aFrom = array();
-        $aTo = array();
+        $aFrom = [];
+        $aTo = [];
         foreach ($aReplace as $sKey => $sValue) {
             $aFrom[] = $sKey;
             $aTo[] = $sValue;
@@ -584,7 +584,7 @@ class notificationhandler
 
         // @see notify()
         $aCompare = isset($this->_aAppResult['laststatus']) ? $this->_aAppResult['laststatus'] : [];
-        $aReplace = array(
+        $aReplace = [
             '__APPID__'          => $this->_sAppId,
             '__CHANGE__'         => isset($this->_iAppResultChange) ? $this->_tr('changetype-' . $this->_iAppResultChange) : $sMiss,
             '__TIME__'           => date("Y-m-d H:i:s", (time())),
@@ -606,7 +606,7 @@ class notificationhandler
                 . "(" . round((time() - $aCompare['result']['ts']) / 60 / 60 * 4) / 4 . " h)"
                 : $sMiss,
 
-        );
+        ];
         if ($this->_sServerurl) {
             $aReplace['__MONITORURL__'] = $this->_sServerurl . '#divweb-' . $this->_sAppId;
         }
@@ -615,7 +615,7 @@ class notificationhandler
         if (isset($this->_aAppResult['checks']) && count($this->_aAppResult['checks'])) {
 
             // force sortorder in notifications - one key for each result ... 3 is error .. 0 is OK
-            $aSortedChecks = array();
+            $aSortedChecks = [];
             for ($i = 3; $i >= 0; $i--) {
                 $aSortedChecks[$i] = '';
             }
@@ -678,10 +678,6 @@ class notificationhandler
         $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
 
         $sMessage=$this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message');
-        if ($sMessage!==strip_tags($sMessage) && !strstr($sMessage, '<html>')){
-            $sMessage='<!doctype html><html><body><div>'.$sMessage.'</div></body></html>';
-        }
-
         foreach ($this->getPlugins() as $sPlugin) {
 
             // get plugin specific receivers
@@ -736,8 +732,8 @@ class notificationhandler
     public function getAppNotificationdata($sType = false)
     {
 
-        $aMergeMeta = array();
-        $aArray_keys = $sType ? array($sType) : array_keys($this->_aNotificationOptions);
+        $aMergeMeta = [];
+        $aArray_keys = $sType ? [ $sType ] : array_keys($this->_aNotificationOptions);
 
         // server side notifications:
         // echo '<pre>'.print_r($this->_aNotificationOptions, 1).'</pre>';
@@ -748,7 +744,7 @@ class notificationhandler
 
 
         // take data from web app ... meta -> notifications
-        // $aMergeMeta=isset($this->_aAppLastResult['meta']['notifications']) ? $this->_aAppLastResult['meta']['notifications'] : array();
+        // $aMergeMeta=isset($this->_aAppLastResult['meta']['notifications']) ? $this->_aAppLastResult['meta']['notifications'] : [];
         foreach ($aArray_keys as $sNotificationType) {
             // echo "DEBUG: $sNotificationType\n<pre>" . print_r($aClientNotifications[$sNotificationType], 1) . '</pre>';
             if (isset($aClientNotifications[$sNotificationType]) && count($aClientNotifications[$sNotificationType])) {
@@ -771,7 +767,7 @@ class notificationhandler
             }
         }
         return $sType
-            ? (isset($aMergeMeta[$sType]) ? $aMergeMeta[$sType] : array())
+            ? (isset($aMergeMeta[$sType]) ? $aMergeMeta[$sType] : [])
             : $aMergeMeta;
     }
 }

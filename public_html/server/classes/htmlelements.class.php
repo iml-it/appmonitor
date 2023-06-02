@@ -23,12 +23,12 @@ class htmlelements
      * set of auto generated icon prefixes
      * @var type 
      */
-    var $_aIcons = array(
+    var $_aIcons = [
         // 'fa-'=>'fa ',
-    );
+    ];
 
     var $_sLabel = '';
-    var $_aAttributes = array();
+    var $_aAttributes = [];
 
 
     // ----------------------------------------------------------------------
@@ -145,7 +145,7 @@ class htmlelements
             }
         }
         // do not use this .. it overrides internal attribute vars
-        // return $this->getTag('i', array('class'=>$sPrefix.$sIconclass));
+        // return $this->getTag('i', [ 'class'=>$sPrefix.$sIconclass) ];
         return '<i class="' . $sPrefix . $sIconclass . '"></i> ';
     }
 
@@ -188,7 +188,7 @@ class htmlelements
      * @param array $aOptions     array for all option fields
      * @return string
      */
-    public function getFormSelect($aAttributes, $aOptions = array())
+    public function getFormSelect($aAttributes, $aOptions = [])
     {
         // $sTpl = '<select %s>%s</select>';
 
@@ -209,7 +209,7 @@ class htmlelements
          */
     }
 
-    public function getTable($aHead, $aBody, $aTableAttributes = array())
+    public function getTable($aHead, $aBody, $aTableAttributes = [])
     {
         $sReturn = '';
         $sTdata = '';

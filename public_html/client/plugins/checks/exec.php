@@ -35,7 +35,7 @@ class checkExec extends appmonitorcheck{
     /**
      * check execution of a command
      * @param array $aParams
-     * array(
+     * [
      *     "command"        {string} command to execute
      *     "output"         {bool}   flag: show output; default: true
      *
@@ -47,7 +47,7 @@ class checkExec extends appmonitorcheck{
      *     "searchOK"       {string} search string that must be found in output
      *     "searchWarn"     {string} if search string is found check returns with warning
      *     "searchCritical" {string} if search string is found check returns with critical
-     * )
+     * ]
      * @return boolean
      */
     public function run($aParams) {

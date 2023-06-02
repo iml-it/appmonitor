@@ -32,14 +32,14 @@ class checkMysqlConnect extends appmonitorcheck{
     /**
      * check mysql connection to a database using mysqli realconnect
      * @param array $aParams
-     * array(
+     * [
      *     server              string   database hostname / ip address
      *     user                string   db user
      *     password            string   password for db user
      *     db                  string   schema / database name
      *     port                integer  optional: port
      *     timeout             integer  optional timeout in sec; default: 5
-     * )
+     * ]
      */
     public function run($aParams) {
         $this->_checkArrayKeys($aParams, "server,user,password,db");

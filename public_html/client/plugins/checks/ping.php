@@ -34,14 +34,14 @@ class checkPing extends appmonitorcheck{
     /**
      * check ping to a target
      * @param array $aParams
-     * array(
+     * [
      *     host                string   optional hostname to connect; default: 127.0.0.1
      *     timeout             integer  OBSOLET (because using exec): optional timeout in sec; default: 5
-     * )
+     * ]
      * @return boolean
      */
     public function run($aParams) {
-        $sHost = array_key_exists('host', $aParams) ? $aParams['host'] : '127.0.0.1';
+        $sHost = $aParams['host'] ?? '127.0.0.1';
 
         $sParamCount=strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? "n" : "c";
         $iRepeat=1;
@@ -73,10 +73,10 @@ class checkPing extends appmonitorcheck{
             $socket, 
             SOL_SOCKET, 
             SO_RCVTIMEO, 
-            array(
+            [
                 "sec"=>(isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp, // timeout in seconds
                 "usec"=>0
-              )
+            ]
         );
 
         $start = microtime(true);
@@ -88,11 +88,11 @@ class checkPing extends appmonitorcheck{
                 socket_close($socket);
                 return [RESULT_OK, 
                     "OK: ping to $sHost",
-                    array(
+                    [
                         'type'=>'counter',
                         'count'=>$result,
                         'visual'=>'line',
-                    )
+                    ]
 
                 ];
             } else {

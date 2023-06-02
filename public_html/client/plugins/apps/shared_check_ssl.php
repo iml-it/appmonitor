@@ -20,13 +20,13 @@
 // ----------------------------------------------------------------------
 if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
     $oMonitor->addCheck(
-        array(
+        [
             "name" => "Certificate check",
             "description" => "Check if SSL cert is valid and does not expire soon",
-            "check" => array(
+            "check" => [
                 "function" => "Cert",
-            ),
-        )
+            ],
+        ]
     );
 }
 

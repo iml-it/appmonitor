@@ -26,19 +26,19 @@
  * Example with overriding all existing params
  * 
  * $oMonitor->addCheck(
- *    array(
+ *    [
  *         "name" => "plugin ApacheProcesses",
  *         "description" => "check count running Apache processes",
- *         "check" => array(
+ *         "check" => [
  *             "function" => "ApacheProcesses",
- *             "params" => array(
+ *             "params" => [
  *                 "url" => "https://localhost/status",
  *                 "warning" => 75,
  *                 "error" => 90,
- *             ),
- *         ),
+ *             ],
+ *         ],
  *         "worstresult" => RESULT_OK
- *     )
+ *     ]
  * );
  * ____________________________________________________________________________
  * 
@@ -63,7 +63,7 @@ class checkApacheProcesses extends appmonitorcheck{
             return false;
         }
         $sRegexScoreboard = '/<pre>(.*)\<\/pre\>/U';
-        $aScore=array();
+        $aScore=[];
         $sStatusNobr = str_replace("\n", "", $sBody);
 
         if (preg_match_all($sRegexScoreboard, $sStatusNobr, $aTmpTable)) {
@@ -142,17 +142,17 @@ class checkApacheProcesses extends appmonitorcheck{
         //              count  => {float}  value
         //              visual => {string} one of bar|line|simple (+params)
         //           
-        return array(
+        return [
             $iResult, 
             ($iActive===false ? 'Apache httpd server status is not available' : 'apache processes: '.print_r($aProcesses, 1)).' '.$sComment,
             ($iActive===false 
-                ? array()
-                : array(
+                ? []
+                : [
                     'type'=>'counter',
                     'count'=>$iActive,
                     'visual'=>'line',
-                )
+                ]
             )
-        );
+        ];
     }
 }

@@ -33,11 +33,11 @@ class checkDiskfree extends appmonitorcheck{
     /**
      * check free disk space on a given directory
      * @param array $aParams
-     * array(
+     * [
      *     "directory"   directory that must exist
      *     "warning"     space for warning (optional)
      *     "critical"    minimal space
-     * )
+     * ]
      * @return boolean
      */
     public function run($aParams) {

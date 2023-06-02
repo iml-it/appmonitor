@@ -73,25 +73,39 @@ class emailNotification
             $aHeaders[]='Importance: High';
         }
 
-        $bIsHtml=$aOptions['message']!==strip_tags($aOptions['message']);
+        $sMessage=self::formatMessage($aOptions['message']);
+        $bIsHtml=$sMessage!==strip_tags($sMessage);
         if($bIsHtml){
             $aHeaders[]='Content-Type: text/html; charset="utf-8"';
-
-        } else {
-            // wrap text message to width of 70 chars
-            $aOptions['message']=wordwrap($aOptions['message'], 70, "\r\n");
         }
 
         // ----- send
         mail(
             implode(";", $aOptions['to']),
             $aOptions['subject'],
-            $aOptions['message'],
+            $sMessage,
             implode("\r\n", $aHeaders)
         );
         return true;
     }
 
+    /**
+     * generate final email message body with automatic detection for html
+     * @param  string  $sMsg  message text
+     * @return string
+     */
+    static public function formatMessage($sMsg){
+        $bIsHtml=($sMsg!==strip_tags($sMsg));
+        if($bIsHtml){
+            $sMessage=strstr($sMsg, '<html>')
+                ? $sMsg
+                : '<!doctype html><html><body><div>'.$sMsg.'</div></body></html>';
+        } else {
+            // wrap text message to width of 70 chars
+            $sMessage=wordwrap($sMsg, 70, "\r\n");
+        }
+        return $sMessage;
+    }
     /**
      * get string with the last error message
      * @return string

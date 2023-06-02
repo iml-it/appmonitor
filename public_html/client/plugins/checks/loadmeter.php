@@ -27,18 +27,18 @@
  * USAGE:
  * 
  * $oMonitor->addCheck(
- *     array(
+ *     [
  *         "name" => "plugin Load",
  *         "description" => "check current load",
- *         "check" => array(
+ *         "check" => [
  *             "function" => "Loadmeter",
- *             "params" => array(
+ *             "params" => [
  *                "warning" => 1.0,
  *                "error" => 3,
- *             ),
- *         ),
+ *             ],
+ *         ],
  *         "worstresult" => RESULT_OK
- *     )
+ *     ]
  * );
  * ____________________________________________________________________________
  * 
@@ -127,17 +127,18 @@ class checkLoadmeter extends appmonitorcheck{
         //              count  => {float}  value
         //              visual => {string} one of bar|line|simple (+params)
         //           
-        return array(
+        return [
             $iResult, 
             ($fLoad===false ? 'load value is not available' : 'current load is: '.$fLoad),
             ($fLoad===false 
-                ? array()
-                : array(
+                ? []
+                : [
                     'type'=>'counter',
                     'count'=>$fLoad,
                     'visual'=>'line',
-                )
+                ]
             )
-        );
+        ]
+        ;
     }
 }

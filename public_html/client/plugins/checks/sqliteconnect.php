@@ -33,10 +33,10 @@ class checkSqliteConnect extends appmonitorcheck{
     /**
      * check sqlite connection
      * @param array $aParams
-     * array(
+     * [
      *     db                  string   full path of sqlite file 
      *     timeout             integer  optional timeout in sec; default: 5
-     * )
+     * ]
      * @return boolean
      */
     public function run($aParams) {
@@ -56,9 +56,9 @@ class checkSqliteConnect extends appmonitorcheck{
             $o = new PDO("sqlite:" . $aParams["db"],
                 $aParams['user'], 
                 $aParams['password'], 
-                array(
+                [
                     PDO::ATTR_TIMEOUT => (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp,                  
-                )
+                ]
             );
             return [RESULT_OK, "OK: Sqlite database " . $aParams["db"] . " was connected"];
         } catch (Exception $e) {

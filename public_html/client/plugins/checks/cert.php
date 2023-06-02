@@ -22,17 +22,17 @@
  * USAGE:
  * 
  * $oMonitor->addCheck(
- *     array(
+ *     [
  *         "name" => "SSL cert",
  *         "description" => "Check SSL certificate of my domain",
- *         "check" => array(
+ *         "check" => [
  *             "function" => "Cert",
- *             "params" => array(
+ *             "params" => [
  *                 "url" => "https://www.example.com",
  *                 "warning" => "30",
- *             ),
- *         ),
- *     )
+ *             ],
+ *         ],
+ *     ]
  * );
  * ____________________________________________________________________________
  * 
@@ -54,12 +54,12 @@ class checkCert extends appmonitorcheck{
     /**
      * check SSL certificate 
      * @param array $aParams
-     * array(
+     * [
      *     "url"       optional: url to connect check; default: own protocol + server
      *     "verify"    optional: flag for verification of certificate or check for expiration only; default=true (=verification is on)
      *     "warning"   optional: count of days to warn; default=21 (=3 weeks)
      *     "critical"  optional: count of days to raise critical; default=5
-     * )
+     * ]
      * @return boolean
      */
     public function run($aParams) {

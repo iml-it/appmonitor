@@ -75,14 +75,14 @@ class appmonitor {
      * @see _createDefaultMetadata()
      * @var array
      */
-    protected $_aMeta = array();
+    protected $_aMeta = [];
 
     /**
      * repended array of all checks
      * @see addCheck()
      * @var array
      */
-    protected $_aChecks = array();
+    protected $_aChecks = [];
     
     /**
      * for time measurements: start time
@@ -107,14 +107,14 @@ class appmonitor {
      */
     protected function _createDefaultMetadata() {
         $this->_iStart = microtime(true);
-        $this->_aMeta = array(
+        $this->_aMeta = [
             "host" => false,
             "website" => false,
             "ttl" => false,
             "result" => false,
             "time" => false,
             "version" => $this->_sVersion,
-        );
+        ];
 
         // fill with default values
         $this->setHost();
@@ -192,7 +192,7 @@ class appmonitor {
      * @param type $aJob
      * @return type
      */
-    public function addCheck($aJob = array()) {
+    public function addCheck($aJob = []) {
 
         require_once 'appmonitor-checks.class.php';
         $oCheck = new appmonitorcheck();
@@ -221,10 +221,10 @@ class appmonitor {
     protected function _addNotification($sType, $sValue, $sKey = false) {
         $sTypeCleaned = preg_replace('/[^a-z]/', '', strtolower($sType));
         if (!isset($this->_aMeta['notifications'])) {
-            $this->_aMeta['notifications'] = array();
+            $this->_aMeta['notifications'] = [];
         }
         if (!isset($this->_aMeta['notifications'][$sTypeCleaned])) {
-            $this->_aMeta['notifications'][$sTypeCleaned] = array();
+            $this->_aMeta['notifications'][$sTypeCleaned] = [];
         }
         if ($sKey) {
             $this->_aMeta['notifications'][$sTypeCleaned][$sKey] = $sValue;
@@ -262,7 +262,7 @@ class appmonitor {
      */
     public function addTag($sTag) {
         if(!isset($this->_aMeta['tags'])){
-            $this->_aMeta['tags']=array();
+            $this->_aMeta['tags']=[];
         }
         $this->_aMeta['tags'][]=$sTag;
         return true;
@@ -277,7 +277,7 @@ class appmonitor {
      *                            the ip must match from the beginning, i.e.
      *                            "127.0." will allow requests from 127.0.X.Y
      */
-    public function checkIp($aAllowedIps = array()) {
+    public function checkIp($aAllowedIps = []) {
         if (!isset($_SERVER['REMOTE_ADDR']) || !count($aAllowedIps)) {
             return true;
         }
@@ -335,7 +335,7 @@ class appmonitor {
      * verify array values and in case of an error abort and show all found errors
      */
     protected function _checkData() {
-        $aErrors = array();
+        $aErrors = [];
 
         if (!count($this->_aChecks)) {
             $aErrors[] = "No checks have been defined.";
@@ -372,10 +372,10 @@ class appmonitor {
      * @return type
      */
     public function getResults() {
-        return array(
+        return [
             "meta" => $this->_aMeta,
             "checks" => $this->_aChecks,
-        );
+        ];
     }
 
     /**
@@ -397,12 +397,12 @@ class appmonitor {
         } else {
             $sOut = json_encode($this->getResults(), JSON_PRETTY_PRINT);
             if ($bHighlight) {
-                $aMsg = array(
+                $aMsg = [
                     0 => "OK",
                     1 => "UNKNOWN",
                     2 => "WARNING",
                     3 => "ERROR"
-                );
+                ];
                 foreach (array_keys($aMsg) as $iCode) {
                     $sOut = preg_replace('/(\"result\":\ ' . $iCode . ')/', '$1 <span class="result' . $iCode . '"> &lt;--- ' . $aMsg[$iCode] . ' </span>', $sOut);
                 }
@@ -464,12 +464,12 @@ class appmonitor {
         header('Content-type: text/html');
         header('Cache-Control: cache');
         header('max-age: ' . $this->_aMeta["ttl"]);
-        $aMsg = array(
+        $aMsg = [
             0 => "OK",
             1 => "UNKNOWN",
             2 => "WARNING",
             3 => "ERROR"
-        );
+        ];
 
         // $sOut = print_r($sJson, 1);
         $aData= json_decode($sJson, 1);

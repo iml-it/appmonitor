@@ -36,17 +36,17 @@ class checkPortTcp extends appmonitorcheck{
     /**
      * check if system is listening to a given port
      * @param array $aParams
-     * array(
+     * [
      *     port                integer  port
      *     host                string   optional hostname to connect; default: 127.0.0.1
      *     timeout             integer  optional timeout in sec; default: 5
-     * )
+     * ]
      * @return boolean
      */
     public function run($aParams) {
         $this->_checkArrayKeys($aParams, "port");
 
-        $sHost = array_key_exists('host', $aParams) ? $aParams['host'] : '127.0.0.1';
+        $sHost = $aParams['host'] ?? '127.0.0.1';
         $iPort = (int) $aParams['port'];
 
         if (!function_exists('socket_create')){
@@ -64,11 +64,11 @@ class checkPortTcp extends appmonitorcheck{
             $socket,
             SOL_SOCKET,  // socket level
             SO_SNDTIMEO, // timeout option
-            array(
+            [
               "sec"=>(isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp, // timeout in seconds
               "usec"=>0
-              )
-            );
+            ]
+        );
 
         $result = @socket_connect($socket, $sHost, $iPort);
         if ($result === false) {

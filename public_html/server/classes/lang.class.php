@@ -16,7 +16,7 @@ class lang
 {
 
     protected $_sLang = false;   // name of current language
-    protected $_aLang = array(); // language texts
+    protected $_aLang = [];      // language texts
 
     /**
      * constructor
@@ -57,7 +57,7 @@ class lang
      */
     public function getAllLanguages()
     {
-        $aReturn = array();
+        $aReturn = [];
         $sDir = $this->_getConfigDir();
         foreach (glob($sDir . "*.json") as $sFile) {
             $aReturn[] = str_replace(".json", "", basename($sFile));
@@ -108,10 +108,9 @@ class lang
                 $aLangBase = $aLangBase[$sSubkey];
             }
         }
-        // return (array_key_exists($sWord, $this->_aLang)) ? $this->_aLang[$sWord] : $sWord . ' (undefined in ' . $this->_aCfg['lang'] . ')';
-        return (array_key_exists($sWord, $aLangBase))
+        return isset($aLangBase[$sWord])
             ? $aLangBase[$sWord]
-            : (array_key_exists($sWord, $this->_aLang)
+            : (isset($this->_aLang[$sWord])
                 ? $this->_aLang[$sWord]
                 : $sWord . ' (undefined in ' . $sTmpPath . ' ' . $this->_sLang . ')'
             );

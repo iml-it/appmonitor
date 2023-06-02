@@ -103,7 +103,7 @@ class simpleRrd
     public function add($aDataItem)
     {
         $this->_getLogs();
-        $this->_aLog[] = array('timestamp' => time(), 'data' => $aDataItem);
+        $this->_aLog[] = [ 'timestamp' => time(), 'data' => $aDataItem ];
         $this->_cutLogitems();
         return $this->_saveLogs();
     }
@@ -128,7 +128,7 @@ class simpleRrd
      */
     public function get($iMax = false)
     {
-        $aReturn = array();
+        $aReturn = [];
         $this->_getLogs();
         $aTmp = $this->_aLog;
         if (!count($aTmp)) {

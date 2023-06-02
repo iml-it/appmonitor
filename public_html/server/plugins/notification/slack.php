@@ -42,19 +42,19 @@ class slackNotification{
         }
 
         // ----- send
-        $data=array(
-            'text'       => strip_tags(str_replace('<br>', "\n", $aOptions['message'])),
+        $data=[
+            'text'       => self::formatMessage($aOptions['message']),
             'username'   => '[APPMONITOR]',
             'icon_emoji' => false
-        );
+        ];
 
-        $options = array(
-            'http' => array(
-            'header'  => 'Content-type: application/x-www-form-urlencoded\r\n',
-            'method'  => 'POST',
-            'content' => json_encode($data)
-            )
-        );
+        $options = [
+            'http' => [
+                'header'  => 'Content-type: application/x-www-form-urlencoded\r\n',
+                'method'  => 'POST',
+                'content' => json_encode($data)
+            ]
+        ];
         $context  = stream_context_create($options);
 
         // --- loop over slack targets
@@ -70,6 +70,15 @@ class slackNotification{
 
         return !$sSendErrors;
     }
+    /**
+     * generate final email message body by replacing <br> tagsand then stripping html code
+     * @param  string  $sMsg  message text
+     * @return string
+     */
+    static public function formatMessage($sMsg){
+        return strip_tags(str_replace('<br>', "\n", $sMsg));
+    }
+
     /**
      * get string with the last error message
      * @return string

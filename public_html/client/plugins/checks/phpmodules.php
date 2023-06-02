@@ -33,10 +33,10 @@ class checkPhpmodules extends appmonitorcheck{
     /**
      * check if system is listening to a given port
      * @param array $aParams
-     * array(
+     * [
      *     required     array  list of required php modules
      *     optional     array  optional: list of optional php modules
-     * )
+     * ]
      * @return boolean
      */
     public function run($aParams) {

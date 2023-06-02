@@ -148,7 +148,7 @@ class tinyapi{
      * @return bool
      */
     public function checkMethod($aMethods=false){
-        $this->_sMethod=isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : false;
+        $this->_sMethod=$_SERVER['REQUEST_METHOD'] ?? false;
 
         if(!$this->_sMethod){
             die("ABORT: http request required.");
@@ -287,8 +287,8 @@ class tinyapi{
      */
     public function appendData($aData, $sKey=false){
         return ($sKey)
-            ? $this->aData[$sKey]=$aData
-            : $this->aData[]=$aData
+            ? $this->_aData[$sKey]=$aData
+            : $this->_aData[]=$aData
         ;
     }
 
