@@ -1,6 +1,13 @@
 
 HISTORY
 
+v0.125 2023-06-02
+This release contains code updates only without new features
+  - ADD: method formatMessage() in notification plugins
+  - UPDATE: use short array syntax
+  - UPDATE: use isset instead of array_key_exist
+  - UPDATE: use short syntax for defaults instead of short syntax of if-then-else
+
 v0.124 2023-06-01
   - UPDATE: send html emails
 
