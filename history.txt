@@ -1,6 +1,11 @@
 
 HISTORY
 
+v0.126 2023-06-07
+  - FIX: umlauts in email subject
+  - FIX: close strong tag in German email text
+  - UPDATE: create a link tag for monitor url in email text
+
 v0.125 2023-06-02
 This release contains code updates only without new features
   - ADD: method formatMessage() in notification plugins

@@ -206,11 +206,11 @@
         
         "changetype-1.logmessage":    "Webapp wurde im Appmonitor hinzugefügt: __URL__. __ERROR__",
         "changetype-1.email.subject": "[Appmonitor] :: Webapp hinzugefuegt: __URL__.",
-        "changetype-1.email.message": "Willkommen!<br>Die Webapp __URL__ wurde im Appmonitor aufgenommen. Fortan erhalten Sie Benachrichtigungen sobald sich der Status veraendert.<br><br>url: __MONITORURL__<br><br>__CHECKS__",
+        "changetype-1.email.message": "Willkommen!<br>Die Webapp __URL__ wurde im Appmonitor aufgenommen. Fortan erhalten Sie Benachrichtigungen sobald sich der Status veraendert.<br><br>url: <a href=\"__MONITORURL__\">__MONITORURL__</a><br><br>__CHECKS__",
         
         "changetype-2.logmessage":    "Der Status von __URL__ wechselte von __LAST-RESULT__ auf __RESULT__. __ERROR__",
         "changetype-2.email.subject": "[Appmonitor] :: __CHANGE__ __LAST-RESULT__ --> __RESULT__ - __URL__",
-        "changetype-2.email.message": "__TIME__<br>__WEBSITE__ @ __HOST__<br>Der Status wechselte nach __DELTA-TIME__ von __LAST-RESULT__ auf <strong>__RESULT__<strong>.<br><br>Der aktuelle Status ist einsehbar unter: __MONITORURL__<br><br>__CHECKS__",
+        "changetype-2.email.message": "__TIME__<br>__WEBSITE__ @ __HOST__<br>Der Status wechselte nach __DELTA-TIME__ von __LAST-RESULT__ auf <strong>__RESULT__</strong>.<br><br>Der aktuelle Status ist einsehbar unter: <a href=\"__MONITORURL__\">__MONITORURL__</a><br><br>__CHECKS__",
         
         "changetype-3.logmessage":    "Webapp wurde im Appmonitor entfernt: __URL__.",
         "changetype-3.email.subject": "[Appmonitor] :: Webapp wurde entfernt: __URL__.",
