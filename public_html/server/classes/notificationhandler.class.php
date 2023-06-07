@@ -691,7 +691,7 @@ class notificationhandler
                         : false,
                     'to' => $aTo,
                     'important' => true,
-                    'subject' => $this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.subject'),
+                    'subject' => html_entity_decode($this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.subject')),
                     'message' => $sMessage,
                 ];
                 // $sSendMethod="send_$sPlugin";
