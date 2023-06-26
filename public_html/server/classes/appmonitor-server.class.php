@@ -324,7 +324,7 @@ class appmonitorserver
                 $this->loadConfig();
 
                 // delete notification after config was saved
-                if (!$this->_aCfg["urls"][$key]){
+                if (!isset($this->_aCfg["urls"][$key])){
                     $this->oNotification->deleteApp($sAppId);
                     $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
                     $oCache->delete();    
