@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.127 2023-06-26
+  - FIX: error while deleting app having a slack notification
+
 v0.126 2023-06-07
   - FIX: umlauts in email subject
   - FIX: close strong tag in German email text
