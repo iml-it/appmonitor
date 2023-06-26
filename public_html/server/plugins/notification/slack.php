@@ -27,7 +27,7 @@ class slackNotification{
      * last error
      * @var string
      */
-    var $sError='';
+    public static $sError='';
 
     /**
      * send slack notifications
