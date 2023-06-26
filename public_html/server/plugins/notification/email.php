@@ -35,7 +35,7 @@ class emailNotification
      * last error
      * @var string
      */
-    var $sError='';
+    public static $sError='';
 
     /**
      * send email notification

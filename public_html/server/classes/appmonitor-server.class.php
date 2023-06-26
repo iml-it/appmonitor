@@ -32,7 +32,7 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.119
+ * @version 0.127
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -315,14 +315,23 @@ class appmonitorserver
         if ($sUrl) {
             if (($key = array_search($sUrl, $this->_aCfg["urls"])) !== false) {
                 $sAppId = $this->_generateUrlKey($sUrl);
-                $this->oNotification->deleteApp($sAppId);
 
-                $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
-                $oCache->delete();
+                // $this->oNotification->deleteApp($sAppId);
+                // $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
+                // $oCache->delete();
                 unset($this->_aCfg["urls"][$key]);
                 $this->saveConfig();
                 $this->loadConfig();
-                $this->_addLog(sprintf($this->_tr('msgOK-Url-was-removed'), $sUrl), "ok");
+
+                // delete notification after config was saved
+                if (!$this->_aCfg["urls"][$key]){
+                    $this->oNotification->deleteApp($sAppId);
+                    $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
+                    $oCache->delete();    
+                    $this->_addLog(sprintf($this->_tr('msgOK-Url-was-removed'), $sUrl), "ok");
+                } else {
+                    $this->_addLog(sprintf($this->_tr('msgErr-Url-not-removed-save-config-failed'), $sUrl), "ok");
+                }
                 return true;
             } else {
                 $this->_addLog(sprintf($this->_tr('msgErr-Url-not-removed-it-does-not-exist'), $sUrl), "error");
