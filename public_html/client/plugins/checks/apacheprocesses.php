@@ -43,6 +43,7 @@
  * ____________________________________________________________________________
  * 
  * 2019-06-07  <axel.hahn@iml.unibe.ch>
+ * 2022-07-06  <axel.hahn@iml.unibe.ch>  set group "monitor"
  * 
  */
 class checkApacheProcesses extends appmonitorcheck{
@@ -84,7 +85,7 @@ class checkApacheProcesses extends appmonitorcheck{
      * @return array
      */
     public function getGroup(){
-        return 'services';
+        return 'monitor';
     }
 
     /**
