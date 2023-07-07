@@ -31,6 +31,7 @@ $oMonitor->addCheck(
 | key              | type     | description |
 |---               |---       |---
 |url🔸             |(string)  |url to fetch
+|userpwd           |(string)  |set user and password; syntax: "[username]:[password]"
 |timeout           |(integer) |optional timeout in sec; default: 5
 |headeronly        |(boolean) |optional flag to fetch http response herader only (HEAD request); default: false = returns header and body; 
 |follow            |(boolean) |optional flag to follow a location; default: false = do not follow; If you set it to true it ries to follow (but this is not a safe method)
@@ -91,6 +92,31 @@ $oMonitor->addCheck(
 ```
 
 ### Example 3 ###
+
+Check availability of an api using user and password.
+`$aConfig["awx"]` is an example configuration hash with subkeys url, user and pasword.
+
+```php
+if(isset($aConfig['awx']) && isset($aConfig['awx']['url'])){
+
+    $oMonitor->addCheck(
+        array(
+            "name" => "AWX API",
+            "description" => "check if AWX api is available",
+            "group" => "network",
+            "check" => [
+                "function" => "HttpContent",
+                "params" => [
+                    ['url'] => $aConfig['awx']['url'],
+                    ['userpwd'] => $aConfig['awx']['user'].':'.$aConfig['awx']['password'],
+                ],
+            ],
+        )
+    );
+}
+```
+
+### Example 4 ###
 
 Check the status code: Is the http status a 307 and points to a wanted target?
 

@@ -19,6 +19,7 @@
  * 
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
  * 2022-12-21  <axel.hahn@unibe.ch>      add flag sslverify
+ * 2023-07-06  <axel.hahn@unibe.ch>      add flag userpwd
  * 
  */
 class checkHttpContent extends appmonitorcheck{
@@ -40,6 +41,7 @@ class checkHttpContent extends appmonitorcheck{
      * @param array $aParams
      * [
      *     url                 string   url to fetch
+     *     userpwd             string   set user and password; syntax: "[username]:[password]"
      *     timeout             integer  optional timeout in sec; default: 5
      *     headeronly          boolean  optional flag to fetch http response herader only; default: false = returns header and body
      *     follow              boolean  optional flag to follow a location; default: false = do not follow
@@ -68,6 +70,10 @@ class checkHttpContent extends appmonitorcheck{
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, isset($aParams["sslverify"]) ? !!$aParams["sslverify"] : 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp);
+        if (isset($aParams["userpwd"])){
+            curl_setopt($ch, CURLOPT_USERPWD, $aParams["userpwd"]);
+        }
+
         $res = curl_exec($ch);
 
         if (!$res) {
