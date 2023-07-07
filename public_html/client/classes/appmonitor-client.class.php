@@ -40,8 +40,9 @@ if (!class_exists('appmonitorcheck')){
  * 2018-11-05  0.58   axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
  * 2019-05-31  0.87   axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * 2020-05-03  0.110  axel.hahn@iml.unibe.ch  update renderHtmloutput<br>
+ * 2023-07-06  0.128  axel.hahn@unibe.ch      update httpcontent check<br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.111
+ * @version 0.128
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -86,7 +87,7 @@ class appmonitor {
     
     /**
      * for time measurements: start time
-     * @var type 
+     * @var float 
      */
     protected $_iStart = false;
     
