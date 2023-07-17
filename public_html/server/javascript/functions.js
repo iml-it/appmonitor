@@ -118,6 +118,7 @@ function getUnixTS() {
 
 /**
  * manipulate url in the browser address bar
+ * location changed by evnt listener hashchange -> see initGuiStuff()
  * 
  * @returns {undefined}
  */
@@ -514,16 +515,8 @@ function initGuiStuff() {
     // activate age timer on tiles
     window.setInterval("timerAgeInSec();", 1000);
 
-    // Revert to a previously saved state
-    window.addEventListener('popstate', function(event) {
-        if(event.state && event.state.filter){
-            aViewFilters=event.state.filter;
-            $('#content').html(event.state.content);
-            postLoad();
-        }
-        // TODO: load pages of app detail view
-        if(event.state===null){
-            // location.reload();
-        }
+    // react on browser navigation buttons and url change by setAdressbar()
+    window.addEventListener('hashchange', function(event) {
+        setTab(window.location.hash);
     });
 }

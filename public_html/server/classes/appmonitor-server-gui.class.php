@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.128
+ * @version 0.129
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -43,7 +43,7 @@ class appmonitorserver_gui extends appmonitorserver
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.128";
+    var $_sVersion = "0.129";
 
     /**
      * html code for icons in the web gui
@@ -529,7 +529,7 @@ class appmonitorserver_gui extends appmonitorserver
                     $sMoreHosts = '<span id="badgetile_allapps" style="float: right">' . ($iResultApps === RESULT_OK ? '' : $sMoreHosts) . '</span>';
                     $sReturn .= $bVisibility
                         ? $this->_getTile([
-                            'onclick' => 'setTab(\'#divwebs\');',
+                            'onclick' => 'setTab(\'#divwebs\'); return false;',
                             'result' => $iResultApps,
                             'count' => $sMoreHosts . $aCounter['apps'],
                             'icon' => $this->_aIco['allwebapps'],
@@ -575,7 +575,7 @@ class appmonitorserver_gui extends appmonitorserver
                             'result' => $iResultChecks,
                             'count' => $sMoreChecks . $aCounter['checks'],
                             'label' => $this->_aIco['check'] . ' ' . $this->_tr('Checks-total'),
-                            'onclick' => 'setTab(\'#divproblems\');',
+                            'onclick' => 'setTab(\'#divproblems\'); return false; ',
                         ])
                         : '';
                     break;
@@ -586,7 +586,7 @@ class appmonitorserver_gui extends appmonitorserver
                             'result' => ($sSleeping ? RESULT_WARNING : false),
                             'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
                             'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
-                            'onclick' => 'setTab(\'#divnotifications\');',
+                            'onclick' => 'setTab(\'#divnotifications\'); return false;',
                             'more' => $sSleeping,
                         ])
                         : '';
@@ -686,7 +686,7 @@ class appmonitorserver_gui extends appmonitorserver
     {
         return $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
             . '<br>'
-            . '<a class="btn btn-primary" href="#divsetup" onclick="setTab(this.hash);">' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>';
+            . '<a class="btn btn-primary" href="#divsetup" >' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>';
     }
 
     /**
@@ -1007,7 +1007,7 @@ class appmonitorserver_gui extends appmonitorserver
                                 '<td class="result result' . $aCheck["result"] . '"><span style="display: none;">' . $aCheck['result'] . '</span>' . $this->_tr('Resulttype-' . $aCheck["result"]) . '</td>'
                                 . '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (<span class="timer-age-in-sec">' . (date("U") - $aEntries["result"]["ts"]) . '</span>&nbsp;s)</td>'
                                 . '<td>' . $aEntries["result"]["host"] . '</td>'
-                                . '<td><a href="#" onclick="setTab(\'' . $this->_getDivIdForApp($sAppId) . '\');">' . $aEntries["result"]["website"] . '</a></td>'
+                                . '<td><a href="' . $this->_getDivIdForApp($sAppId) . '">' . $aEntries["result"]["website"] . '</a></td>'
                                 . '<td>' . $aEntries["result"]["ttl"] . '</td>';
                         } else {
                             $sReturn .= '<td class="result result' . $aCheck["result"] . '"><span style="display: none;">' . $aCheck['result'] . '</span>' . $this->_tr('Resulttype-' . $aCheck["result"]) . '</td>';
@@ -1112,7 +1112,7 @@ class appmonitorserver_gui extends appmonitorserver
                 . ($bShowDuration ?  '<td>' . round($iDelta / 60) . ' min</td>' : '')
                 . '<td>' . $this->_tr('changetype-' . $aLogentry['changetype']) . '</td>'
                 . '<td>' . ($sAppName
-                    ? '<a href="#" onclick="setTab(\'' . $this->_getDivIdForApp($aLogentry['appid']) . '\');">' . $sAppName . '</a>'
+                    ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
                     : '-'
                 )
                 . '</td>'
@@ -1350,7 +1350,7 @@ class appmonitorserver_gui extends appmonitorserver
             // --- 
             $sTopHeadline = $oA->getSectionHead(
                 ''
-                    . '<a href="#divwebs" onclick="setTab(\'#divwebs\')"'
+                    . '<a href="#divwebs"'
                     . '> ' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps-header')
                     . '</a> > '
                     . '<span class="divhost bg-' . $this->_getAdminLteColorByResult($aEntries["result"]["result"]) . '">'
@@ -1981,7 +1981,7 @@ class appmonitorserver_gui extends appmonitorserver
             $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp . $sAppId;
 
             $sDivId = $this->_getDivIdForApp($sAppId);
-            $sOnclick = 'setTab(\'' . $sDivId . '\')';
+            $sOnclick = 'setTab(\'' . $sDivId . '\'); return false;';
 
             $aTags = $aEntries["meta"]["tags"] ?? false;
             $sTaglist = $aTags ? $this->_getTaglist($aTags) : '';
@@ -2041,7 +2041,7 @@ class appmonitorserver_gui extends appmonitorserver
                         . '</div>'
                         . '<div class="col-md-4 appname">'
                         . '<strong>
-                            <a href="#" onclick="' . $sOnclick . '">
+                            <a href="'.$sDivId.'">
                                 <i class="' . $sIcon . '"></i> '
                         . $sAppLabel
                         . '</a>
