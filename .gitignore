@@ -1,3 +1,8 @@
+docker/containers
+docker/containers/*
+docker/.env
+docker/docker-compose.yml
+
 public_html/client/index-tester.php
 public_html/client/general_include.php
 public_html/client/check-matomo.settings.sample.php
