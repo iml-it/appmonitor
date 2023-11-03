@@ -13,46 +13,46 @@
 // CONFIG
 // ----------------------------------------------------------------------
 
-    /**
-     * mapping of rc codes - left: appmonitor - right nagios returncodes
-     */
-    $aMappingRc=[
-        0=>0,
-        1=>3,
-        2=>1,
-        3=>2,
-    ];
-    
+/**
+ * mapping of rc codes - left: appmonitor - right nagios returncodes
+ */
+$aMappingRc = [
+    0 => 0,
+    1 => 3,
+    2 => 1,
+    3 => 2,
+];
+
 
 // ----------------------------------------------------------------------
 // GET DATA
 // ----------------------------------------------------------------------
 
-    require_once(dirname(__DIR__).'/classes/appmonitor-server.class.php');
-    $oMonitor = new appmonitorserver();
+require_once(dirname(__DIR__) . '/classes/appmonitor-server.class.php');
+$oMonitor = new appmonitorserver();
 
-    $aData=$oMonitor->getMonitoringData();
+$aData = $oMonitor->getMonitoringData();
 
 // ----------------------------------------------------------------------
 // REFORMAT OUTPUT
 // see https://nagios-plugins.org/doc/guidelines.html
 // ----------------------------------------------------------------------
 
-    $sOut='Appmonitor-Check - returns '.$oMonitor->getResultValue($aData["return"]). ' - returncodes by server are ';
-    foreach($aData["messages"] as $sKey=>$sResult){
-        $sOut.=$sResult." ";
-    }
-    
-    // .. add some graph data
-    $sOut.=' | ';
-    
-    foreach($aData["results"] as $sKey=>$iResult){
-        $sOut.="'". ($oMonitor->getResultValue($sKey)?$oMonitor->getResultValue($sKey): $sKey2) ."'=".$iResult." ";
-    }
-    
-    echo $sOut;
+$sOut = 'Appmonitor-Check - ' . $oMonitor->getResultValue($aData["return"]) . " \n";
+foreach ($aData["messages"] as $sKey => $sResult) {
+    $sOut .= $sResult . " \n";
+}
 
-    // NAGIOS compatible exitcode
-    exit ($aMappingRc[$aData["return"]]);
+// .. add some graph data
+$sOut .= ' | ';
+
+foreach ($aData["results"] as $sKey => $iResult) {
+    $sOut .= "'" . ($oMonitor->getResultValue($sKey) ? $oMonitor->getResultValue($sKey) : $sKey2) . "'=" . $iResult . " ";
+}
+
+echo $sOut;
+
+// NAGIOS compatible exitcode
+exit($aMappingRc[$aData["return"]]);
 
 // ----------------------------------------------------------------------

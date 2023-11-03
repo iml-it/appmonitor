@@ -243,7 +243,7 @@ class appmonitorserver
         $sCfgFile = $this->_getConfigDir() . '/' . $this->_sConfigfile;
 
         // JSON_PRETTY_PRINT reqires PHP 5.4
-        $iOptions=defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
+        $iOptions = defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
         $sData = json_encode($this->_aCfg, $iOptions);
 
         return file_put_contents($sCfgFile, $sData);
@@ -278,7 +278,7 @@ class appmonitorserver
 
                 $bAdd = true;
                 if ($bMakeCheck) {
-                    $aHttpData = $this->_multipleHttpGet([ $sUrl ]);
+                    $aHttpData = $this->_multipleHttpGet([$sUrl]);
                     $sBody = $aHttpData[0]['response_body'] ?? false;
                     if (!is_array(json_decode($sBody, 1))) {
                         $bAdd = false;
@@ -324,10 +324,10 @@ class appmonitorserver
                 $this->loadConfig();
 
                 // delete notification after config was saved
-                if (!isset($this->_aCfg["urls"][$key])){
+                if (!isset($this->_aCfg["urls"][$key])) {
                     $this->oNotification->deleteApp($sAppId);
                     $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
-                    $oCache->delete();    
+                    $oCache->delete();
                     $this->_addLog(sprintf($this->_tr('msgOK-Url-was-removed'), $sUrl), "ok");
                 } else {
                     $this->_addLog(sprintf($this->_tr('msgErr-Url-not-removed-save-config-failed'), $sUrl), "ok");
@@ -621,7 +621,7 @@ class appmonitorserver
         if (!isset($aClientData["meta"])) {
             return $aReturn;
         }
-        foreach ([ "host", "website", "result" ] as $sField) {
+        foreach (["host", "website", "result"] as $sField) {
             $aReturn[$sField] = $aClientData["meta"][$sField] ?? false;
         }
 
@@ -830,7 +830,7 @@ class appmonitorserver
      */
     protected function _tr($sWord)
     {
-        return $this->oLang->tr($sWord, [ 'gui' ]);
+        return $this->oLang->tr($sWord, ['gui']);
     }
 
     // ----------------------------------------------------------------------
@@ -914,8 +914,8 @@ class appmonitorserver
     {
         $iCountApps = 0;
         $iCountChecks = 0;
-        $aResults = [ 0, 0, 0, 0 ];
-        $aCheckResults = [ 0, 0, 0, 0 ];
+        $aResults = [0, 0, 0, 0];
+        $aCheckResults = [0, 0, 0, 0];
         $aServers = [];
         foreach ($this->_data as $sKey => $aEntries) {
             $iCountApps++; // count of webapps
@@ -984,7 +984,7 @@ class appmonitorserver
         if (!count($this->_data)) {
             return [
                 'return' => 3,
-                'messages' => [ $this->_tr('msgErr-nocheck') ]
+                'messages' => [$this->_tr('msgErr-nocheck')]
             ];
         }
         foreach ($this->_data as $sKey => $aEntries) {
@@ -999,7 +999,7 @@ class appmonitorserver
                     !isset($aEntries["result"])
                     || !isset($aEntries["checks"]) || !count($aEntries["checks"])
                 ) {
-                    if ($iMaxReturn < 3){
+                    if ($iMaxReturn < 3) {
                         $iMaxReturn = 3;
                     }
                     $aMessages[] = $this->_tr('msgErr-Http-request-failed') . ' (' . $aEntries["result"]["url"] . ')';
@@ -1022,5 +1022,14 @@ class appmonitorserver
             'messages' => $aMessages,
             'results' => $aResults,
         ];
+    }
+
+    /**
+     * returns a readable result by given integer; i.e. 0=OK, 1=unknown, ...
+     * @return string
+     */
+    public function getResultValue($i)
+    {
+        return $this->_tr('Resulttype-' . $i);
     }
 }

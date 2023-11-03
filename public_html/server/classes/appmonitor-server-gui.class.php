@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.129
+ * @version 0.130
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -43,7 +43,7 @@ class appmonitorserver_gui extends appmonitorserver
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.129";
+    var $_sVersion = "0.130";
 
     /**
      * html code for icons in the web gui
@@ -2041,7 +2041,7 @@ class appmonitorserver_gui extends appmonitorserver
                         . '</div>'
                         . '<div class="col-md-4 appname">'
                         . '<strong>
-                            <a href="'.$sDivId.'">
+                            <a href="' . $sDivId . '">
                                 <i class="' . $sIcon . '"></i> '
                         . $sAppLabel
                         . '</a>
@@ -2160,16 +2160,6 @@ class appmonitorserver_gui extends appmonitorserver
                 </section>';
         // return $sReturn;
     }
-
-    /**
-     * returns a readable result by given integer; i.e. 0=OK, 1=unknown, ...
-     * @return string
-     */
-    public function getResultValue($i)
-    {
-        return $this->_tr('Resulttype-' . $i);
-    }
-
 
     /**
      * helper: get a name for the div of app data
