@@ -1,8 +1,3 @@
-docker/containers
-docker/containers/*
-docker/.env
-docker/docker-compose.yml
-
 public_html/client/index-tester.php
 public_html/client/general_include.php
 public_html/client/check-matomo.settings.sample.php
@@ -16,6 +11,7 @@ public_html/client/check-limesurvey.settings.php
 public_html/client/check-ilias.php
 public_html/client/check-ilias.settings.php
 
+public_html/server/classes/cdnorlocal-admin.class.php
 public_html/server/config/appmonitor-server-config.json
 public_html/server/javascript/*.min.js
 public_html/server/themes/**/*.min.css
