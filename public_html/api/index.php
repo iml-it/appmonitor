@@ -24,6 +24,7 @@ require_once('../server/classes/tinyrouter.class.php');
 $aRoutes=[
 
     [ "/",                                         "_help_"         ],
+    [ "/health",                                   "_health_"         ],
     [ "/v1",                                       "_list_"         ],
 
     [ "/v1/apps",                                  "_list_"                                                ],
@@ -100,6 +101,35 @@ $callback=$oRouter->getCallback();
 
 if($callback=='_list_'){
     $oApi->sendJson($oRouter->getSubitems());
+    die();
+}
+if($callback=='_health_'){
+    $aData = $oMonitor->getMonitoringData();
+    $aReturn=[
+        'health'=>[
+            'status'=>isset($aData['return'])?'OK':'error',
+            'statusmessage'=>isset($aData['return'])?'Appmonitor is up and running.':'No monitoring data available',
+        ],
+        // 'raw'=>$aData,
+        'monitoring'=>[
+            'status'=>'-1',
+            'statusmessage'=>'no monitoring data available',
+        ],
+    ];
+    if(isset($aData['return'])){
+        $aReturn['monitoring'] = [
+            'status'=>$aData['return'],
+            'statusmessage'=>$oMonitor->getResultValue($aData["return"]),
+            'apps'=>[
+                'count'=>$aData["results"]["total"],
+                0=>['count'=>$aData["results"][0],'label'=>$oMonitor->getResultValue(0)],
+                1=>['count'=>$aData["results"][1],'label'=>$oMonitor->getResultValue(1)],
+                2=>['count'=>$aData["results"][2],'label'=>$oMonitor->getResultValue(2)],
+                3=>['count'=>$aData["results"][3],'label'=>$oMonitor->getResultValue(3)],
+            ]
+        ];
+    }
+    $oApi->sendJson($aReturn);
     die();
 }
 if($callback=='_help_'){
