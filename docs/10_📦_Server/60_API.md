@@ -10,10 +10,12 @@ A non pretty url does not need any configuration on a webserver.
 
 `https://www.example.com/api/?&request=[API-URL]`
 
-To use pretty urls like `https://www.example.com/[API-URL]` you need a rewrite:
+Optional - but recommended:
+
+To use pretty urls like `https://www.example.com/[API-URL]` you need a rewrite rule. This is an example for Apache httpd:
 
 ```txt
-<location /appmonitor/api>
+<location /api>
     ...
     RewriteEngine on
     RewriteCond %{REQUEST_FILENAME} !-f
@@ -33,31 +35,31 @@ graph TD;
   --> |yes|chkRoute{Find matching route}
   --> |yes|chkList{Is a listing?}
   --> |yes|sendHeader
-  --> getData
+  --> GetData
   --> |yes|sendJson
   --> End((End))
 
-  chkMethod-->|no|onlyGet[ERROR 400: GET only]-->End
-  chkIp-->|no|denyIp[ERROR 401: access denied]-->End
-  chkUser-->|no|denyUser[ERROR 401: access denied]-->End
-  chkRole-->|no|denyUser[ERROR 401: access denied]-->End
-  chkRoute-->|no|onlyNoRoute[ERROR 400: no Route]-->End
+  chkMethod-->|no|onlyGet[ERROR 400: GET only]-->stop1((Stop))
+  chkIp-->|no|denyIp[ERROR 401: access denied]-->stop2((Stop))
+  chkUser-->|no|denyUser[ERROR 401: access denied]-->stop3((Stop))
+  chkRole-->|no|denyUser[ERROR 401: access denied]
+  chkRoute-->|no|onlyNoRoute[ERROR 400: no Route]-->stop5((Stop))
   chkList-->|yes|showSubitems-->End
 ```
 
 ## Usage ##
 
-To access data we start with the api version `/v1`.
+To access the most data data we start with the api version `/v1`.
 You get a list of allowed subitems to add.
 
 In the urls below are placeholders with a starting @ character; optionally followed by ":" and a regex that must be matched.
-
-### Application results ###
 
 To access application results we use the `/v1/apps` path.
 
 Route                        | Description
 -----------------------------| --------------
+/                            | show help
+/health                      | get health status
 /v1/apps/id                  | list existing apps
 /v1/apps/id/[appid]/[dataset]| With app id you can show a show data 
 /v1/apps/tags                | List existing tags in all apps
@@ -68,6 +70,47 @@ Variable  | Description
 appid     | is a md5 hash (0-9 and a-f)
 tag       | A tag contains letters and digits (a-z, A-Z, 0-9); multiple tags can be seperated with "," (comma) without space.
 dataset   | is one of (meta\|checks\|all)
+
+### Health ###
+
+The health check is done by a request to `/api/health`. It sends 
+
+* healt status if the application is up and running
+* monitoring status of all apps
+
+```txt
+{
+    "health": {
+        "status": "OK",
+        "statusmessage": "Appmonitor is up and running."
+    },
+    "monitoring": {
+        "status": 0,
+        "statusmessage": "OK",
+        "apps": {
+            "count": 8,
+            "0": {
+                "count": 7,
+                "label": "OK"
+            },
+            "1": {
+                "count": 0,
+                "label": "Unknown"
+            },
+            "2": {
+                "count": 1,
+                "label": "Warning"
+            },
+            "3": {
+                "count": 0,
+                "label": "Error"
+            }
+        }
+    }
+}
+```
+
+### Application results ###
 
 Detailed description:
 

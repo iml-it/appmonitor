@@ -24,6 +24,7 @@ require_once('../server/classes/tinyrouter.class.php');
 $aRoutes=[
 
     [ "/",                                         "_help_"         ],
+    [ "/health",                                   "_health_"         ],
     [ "/v1",                                       "_list_"         ],
 
     [ "/v1/apps",                                  "_list_"                                                ],
@@ -100,6 +101,10 @@ $callback=$oRouter->getCallback();
 
 if($callback=='_list_'){
     $oApi->sendJson($oRouter->getSubitems());
+    die();
+}
+if($callback=='_health_'){
+    $oApi->sendJson($oMonitor->apiGetHeatlth());
     die();
 }
 if($callback=='_help_'){

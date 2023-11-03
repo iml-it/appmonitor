@@ -67,6 +67,42 @@ class appmonitorserver_api extends appmonitorserver
     }
 
     // ----------------------------------------------------------------------
+    // /health
+    // ----------------------------------------------------------------------
+
+    /**
+     * generate JSON to show a health status
+     * @return array
+     */
+    public function apiGetHeatlth(){
+        $aData = $this->getMonitoringData();
+        $aReturn=[
+            'health'=>[
+                'status'=>isset($aData['return'])?'OK':'error',
+                'statusmessage'=>isset($aData['return'])?'Appmonitor is up and running.':'No monitoring data available',
+            ],
+            'monitoring'=>[
+                'status'=>'-1',
+                'statusmessage'=>'no monitoring data available',
+            ],
+            // 'raw'=>$aData,
+        ];
+        if(isset($aData['return'])){
+            $aReturn['monitoring'] = [
+                'status'=>$aData['return'],
+                'statusmessage'=>$this->getResultValue($aData["return"]),
+                'apps'=>[
+                    'count'=>$aData["results"]["total"],
+                    0=>['count'=>$aData["results"][0],'label'=>$this->getResultValue(0)],
+                    1=>['count'=>$aData["results"][1],'label'=>$this->getResultValue(1)],
+                    2=>['count'=>$aData["results"][2],'label'=>$this->getResultValue(2)],
+                    3=>['count'=>$aData["results"][3],'label'=>$this->getResultValue(3)],
+                ]
+            ];
+        }
+        return $aReturn;
+    }
+    // ----------------------------------------------------------------------
     // /v1/apps/*
     // ----------------------------------------------------------------------
 
@@ -77,7 +113,7 @@ class appmonitorserver_api extends appmonitorserver
      *                           tags    - array of tags that must match (AND condition)
      *                           website - substring of website
      * @param  string  $outmode  kind of result data
-     * @return type
+     * @return array
      */
     public function apiGetFilteredApp($aFilter = [], $outmode = 'all')
     {
