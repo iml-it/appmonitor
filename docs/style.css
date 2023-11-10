@@ -1,13 +1,14 @@
 /*
     override css elements of daux.io blue theme
-    version 2023-10-09
+    version 2023-11-10
 */
 :root {
     /* Axels Overrides */
     --color-text: #234;
-    --link-color: #822;
+    --link-color: #228;
     --brand-color: var(--color-text);
     --brand-background: var(--body-background);
+    --code-tag-border-color: #d8d8d8;
     --hr-color: none;
     --search-field-background: none;
     --search-field-border-color: none;
@@ -46,9 +47,10 @@
 .dark {
     /* Axels Overrides */
     --color-text: #c0c0c0;
-    --link-color: #c66;
+    --link-color: #88e;
     --brand-color: var(--color-text);
     --brand-background: var(--body-background);
+    --body-background: #101418;
     --hr-color: none;
     --code-tag-background-color_: #bcc;
     --search-field-background: none;
@@ -175,10 +177,12 @@ img{
 
 .s-content .TableOfContentsContainer h4 {
     margin: 1em 0;
-    font-size: 100%;
+    font-size: 110%;
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.1);
     padding: 0.3em;
+    font-weight: bold;
+    font-family: Arial;
 }
 ul.TableOfContents a{
     color: var(--color-text);

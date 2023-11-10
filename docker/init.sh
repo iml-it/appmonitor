@@ -11,6 +11,7 @@
 # 2022-12-20  v1.4 <axel.hahn@unibe.ch>      replace fgrep with grep -F
 # 2023-03-06  v1.5 <www.axel-hahn.de>        up with and without --build
 # 2023-08-17  v1.6 <www.axel-hahn.de>        menu selection with single key (without return)
+# 2023-11-10  v1.7 <axel.hahn@unibe.ch>      replace docker-compose with "docker compose"
 # ======================================================================
 
 cd $( dirname $0 )
@@ -19,7 +20,7 @@ cd $( dirname $0 )
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
 
-_version="1.6"
+_version="1.7"
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -259,10 +260,10 @@ while true; do
         echo "  $( _key t ) - generate files from templates"
         echo "  $( _key T ) - remove generated files"
         echo
-        echo "  $( _key u ) - startup containers    docker-compose ... up -d"
-        echo "  $( _key U ) - startup containers    docker-compose ... up -d --build"
-        echo "  $( _key s ) - shutdown containers   docker-compose stop"
-        echo "  $( _key r ) - remove containers     docker-compose rm -f"
+        echo "  $( _key u ) - startup containers    docker compose ... up -d"
+        echo "  $( _key U ) - startup containers    docker compose ... up -d --build"
+        echo "  $( _key s ) - shutdown containers   docker compose stop"
+        echo "  $( _key r ) - remove containers     docker compose rm -f"
         echo
         echo "  $( _key m ) - more infos"
         echo "  $( _key c ) - console (bash)"
@@ -300,7 +301,7 @@ while true; do
             _wait
             ;;
         u|U)
-            dockerUp="docker-compose -p "$APP_NAME" --verbose up -d --remove-orphans"
+            dockerUp="docker compose -p "$APP_NAME" --verbose up -d --remove-orphans"
             if [ "$action" = "U" ]; then
                 dockerUp+=" --build"
             fi
@@ -308,18 +309,18 @@ while true; do
                 echo "In a web browser:"
                 echo "  $frontendurl"
             else
-                echo "ERROR: docker-compose up failed :-/"
-                docker-compose -p "$APP_NAME" logs | tail
+                echo "ERROR: docker compose up failed :-/"
+                docker compose -p "$APP_NAME" logs | tail
             fi
             echo
 
             _wait
             ;;
         s)
-            docker-compose -p "$APP_NAME" stop
+            docker compose -p "$APP_NAME" stop
             ;;
         r)
-            docker-compose -p "$APP_NAME" rm -f
+            docker compose -p "$APP_NAME" rm -f
             ;;
         c)
             docker ps
