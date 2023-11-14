@@ -12,6 +12,7 @@
 # 2023-03-06  v1.5 <www.axel-hahn.de>        up with and without --build
 # 2023-08-17  v1.6 <www.axel-hahn.de>        menu selection with single key (without return)
 # 2023-11-10  v1.7 <axel.hahn@unibe.ch>      replace docker-compose with "docker compose"
+# 2023-11-13  v1.8 <axel.hahn@unibe.ch>      UNDO "docker compose"; update infos
 # ======================================================================
 
 cd $( dirname $0 )
@@ -20,7 +21,7 @@ cd $( dirname $0 )
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
 
-_version="1.7"
+_version="1.8"
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -201,6 +202,14 @@ function _showContainers(){
 }
 
 
+function _showBrowserurl(){
+    echo "In a web browser open:"
+    echo "  $frontendurl"
+    if grep "${APP_NAME}-server" /etc/hosts >/dev/null; then
+        echo "  https://${APP_NAME}-server/"
+    fi
+}
+
 # a bit stupid ... i think I need to delete it.
 function _showInfos(){
     _showContainers long
@@ -213,19 +222,20 @@ function _showInfos(){
     >/dev/tcp/localhost/${APP_PORT} 2>/dev/null && (
         echo "OK, app port ${APP_PORT} is reachable"
         echo
-        echo "In a web browser open:"
-        echo "  $frontendurl"
+        _showBrowserurl
     )
-    h3 "Check database port"
-    >/dev/tcp/localhost/${DB_PORT} 2>/dev/null && (
-        echo "OK, db port ${DB_PORT} is reachable"
-        echo
+    if [ "$DB_ADD" != "false" ]; then
+        h3 "Check database port"
+        >/dev/tcp/localhost/${DB_PORT} >/dev/null 2>&1 && (
+            echo "OK, db port ${DB_PORT} is reachable"
+            echo
+        )
         echo "In a local DB admin tool:"
         echo "  host    : localhost"
         echo "  port    : ${DB_PORT}"
         echo "  user    : root"
         echo "  password: ${MYSQL_ROOT_PASS}"
-    )
+    fi
     echo
 }
 
@@ -260,10 +270,10 @@ while true; do
         echo "  $( _key t ) - generate files from templates"
         echo "  $( _key T ) - remove generated files"
         echo
-        echo "  $( _key u ) - startup containers    docker compose ... up -d"
-        echo "  $( _key U ) - startup containers    docker compose ... up -d --build"
-        echo "  $( _key s ) - shutdown containers   docker compose stop"
-        echo "  $( _key r ) - remove containers     docker compose rm -f"
+        echo "  $( _key u ) - startup containers    docker-compose ... up -d"
+        echo "  $( _key U ) - startup containers    docker-compose ... up -d --build"
+        echo "  $( _key s ) - shutdown containers   docker-compose stop"
+        echo "  $( _key r ) - remove containers     docker-compose rm -f"
         echo
         echo "  $( _key m ) - more infos"
         echo "  $( _key c ) - console (bash)"
@@ -301,26 +311,25 @@ while true; do
             _wait
             ;;
         u|U)
-            dockerUp="docker compose -p "$APP_NAME" --verbose up -d --remove-orphans"
+            dockerUp="docker-compose -p "$APP_NAME" --verbose up -d --remove-orphans"
             if [ "$action" = "U" ]; then
                 dockerUp+=" --build"
             fi
             if $dockerUp; then
-                echo "In a web browser:"
-                echo "  $frontendurl"
+                _showBrowserurl
             else
-                echo "ERROR: docker compose up failed :-/"
-                docker compose -p "$APP_NAME" logs | tail
+                echo "ERROR: docker-compose up failed :-/"
+                docker-compose -p "$APP_NAME" logs | tail
             fi
             echo
 
             _wait
             ;;
         s)
-            docker compose -p "$APP_NAME" stop
+            docker-compose -p "$APP_NAME" stop
             ;;
         r)
-            docker compose -p "$APP_NAME" rm -f
+            docker-compose -p "$APP_NAME" rm -f
             ;;
         c)
             docker ps
