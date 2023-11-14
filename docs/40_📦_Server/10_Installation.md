@@ -1,6 +1,6 @@
 # Requirements #
 
-- PHP7 or 8 (up to 8.1)
+- PHP7 or 8 (up to 8.2)
 - php-curl
 
 # Installation #
