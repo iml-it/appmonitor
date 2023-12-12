@@ -4,15 +4,17 @@
 # DOCKER PHP DEV ENVIRONMENT :: INIT
 #
 # ----------------------------------------------------------------------
-# 2021-11-nn  v1.0 <axel.hahn@iml.unibe.ch>
-# 2022-07-19  v1.1 <axel.hahn@iml.unibe.ch>  support multiple dirs for setfacl
-# 2022-11-16  v1.2 <www.axel-hahn.de>        use docker-compose -p "$APP_NAME"
-# 2022-12-18  v1.3 <www.axel-hahn.de>        add -p "$APP_NAME" in other docker commands
-# 2022-12-20  v1.4 <axel.hahn@unibe.ch>      replace fgrep with grep -F
-# 2023-03-06  v1.5 <www.axel-hahn.de>        up with and without --build
-# 2023-08-17  v1.6 <www.axel-hahn.de>        menu selection with single key (without return)
-# 2023-11-10  v1.7 <axel.hahn@unibe.ch>      replace docker-compose with "docker compose"
-# 2023-11-13  v1.8 <axel.hahn@unibe.ch>      UNDO "docker compose"; update infos
+# 2021-11-nn  v1.0  <axel.hahn@iml.unibe.ch>
+# 2022-07-19  v1.1  <axel.hahn@iml.unibe.ch>  support multiple dirs for setfacl
+# 2022-11-16  v1.2  <www.axel-hahn.de>        use docker-compose -p "$APP_NAME"
+# 2022-12-18  v1.3  <www.axel-hahn.de>        add -p "$APP_NAME" in other docker commands
+# 2022-12-20  v1.4  <axel.hahn@unibe.ch>      replace fgrep with grep -F
+# 2023-03-06  v1.5  <www.axel-hahn.de>        up with and without --build
+# 2023-08-17  v1.6  <www.axel-hahn.de>        menu selection with single key (without return)
+# 2023-11-10  v1.7  <axel.hahn@unibe.ch>      replace docker-compose with "docker compose"
+# 2023-11-13  v1.8  <axel.hahn@unibe.ch>      UNDO "docker compose"; update infos
+# 2023-11-15  v1.9  <axel.hahn@unibe.ch>      add help; execute multiple actions by params; new menu item: open app
+# 2023-12-07  v1.10 <www.axel-hahn.de>        simplyfy console command; add php linter
 # ======================================================================
 
 cd $( dirname $0 )
@@ -21,7 +23,7 @@ cd $( dirname $0 )
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
 
-_version="1.8"
+_version="1.10"
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -39,6 +41,63 @@ function h3(){
     echo -e "\e[34m----- $*\e[0m"
 }
 
+# show help for param -h
+function showMenu(){
+    echo "  $( _key g ) - remove git data of starterkit"
+    echo
+    echo "  $( _key i ) - init application: set permissions"
+    echo "  $( _key t ) - generate files from templates"
+    echo "  $( _key T ) - remove generated files"
+    echo
+    echo "  $( _key u ) - startup containers    docker-compose ... up -d"
+    echo "  $( _key U ) - startup containers    docker-compose ... up -d --build"
+    echo "  $( _key s ) - shutdown containers   docker-compose stop"
+    echo "  $( _key r ) - remove containers     docker-compose rm -f"
+    echo
+    echo "  $( _key m ) - more infos"
+    echo "  $( _key o ) - open app [${APP_NAME}] $frontendurl"
+    echo "  $( _key c ) - console (bash)"
+    echo "  $( _key p ) - console check with php linter"
+    echo
+    echo "  $( _key q ) - quit"
+}
+function showHelp(){
+    local _self=$( basename "$0" )
+    cat <<EOH
+INITIALIZER FOR DOCKER APP v$_version
+
+A helper script written in Bash to bring up a PHP+Mysql application in docker.
+
+Source : https://git-repo.iml.unibe.ch/iml-open-source/docker-php-starterkit
+Docs   : https://os-docs.iml.unibe.ch/docker-php-starterkit/
+License: GNU GPL 3.0
+(c) Institute for Medical Education; University of Bern
+
+
+SYNTAX:
+  $_self [-h|-v]
+  $_self [menu key]
+
+OPTIONS:
+  -h   show this help and exit
+  -v   show version exit
+
+MENU KEYS:
+  In the interactive menu are some keys to init an action.
+  The same keys can be put as parameter to start this action.
+  You can add multiples keys to apply multiple actions.
+
+$( showMenu )
+
+EXAMPLES:
+
+  $_self           starts interactive mode
+  $_self u         bring up docker container(s) and stay in interactive mode
+  $_self i q       set write permissions and quit
+  $_self p q       start php linter and exit
+
+EOH
+}
 # function _gitinstall(){
 #     h2 "install/ update app from git repo ${gitrepo} in ${gittarget} ..."
 #     test -d ${gittarget} && ( cd ${gittarget}  && git pull )
@@ -191,6 +250,7 @@ function _removeGeneratedFiles(){
     done
 }
 
+# show running containers
 function _showContainers(){
     local bLong=$1
     h2 CONTAINERS
@@ -202,6 +262,7 @@ function _showContainers(){
 }
 
 
+# show urls for app container
 function _showBrowserurl(){
     echo "In a web browser open:"
     echo "  $frontendurl"
@@ -210,7 +271,7 @@ function _showBrowserurl(){
     fi
 }
 
-# a bit stupid ... i think I need to delete it.
+# detect + show ports and urls for app container and db container
 function _showInfos(){
     _showContainers long
     h2 INFO
@@ -246,39 +307,27 @@ function  _key(){
 
 # helper: wait for a return key
 function _wait(){
-    echo -n "... press RETURN > "; read -r
+    local _wait=15
+    echo -n "... press RETURN ... or wait $_wait sec > "; read -r -t $_wait
 }
 
 # ----------------------------------------------------------------------
 # MAIN
 # ----------------------------------------------------------------------
 
-action=$1
+action=$1; shift 1
 
 while true; do
-    echo
-    echo -e "\e[32m===== INITIALIZER FOR DOCKER APP [$APP_NAME] v$_version ===== \e[0m\n\r"
 
     if [ -z "$action" ]; then
 
+        echo
+        echo -e "\e[32m===== INITIALIZER FOR DOCKER APP [$APP_NAME] v$_version ===== \e[0m\n\r"
+
         _showContainers
 
-        h2 MENU
-        echo "  $( _key g ) - remove git data of starterkit"
-        echo
-        echo "  $( _key i ) - init application: set permissions"
-        echo "  $( _key t ) - generate files from templates"
-        echo "  $( _key T ) - remove generated files"
-        echo
-        echo "  $( _key u ) - startup containers    docker-compose ... up -d"
-        echo "  $( _key U ) - startup containers    docker-compose ... up -d --build"
-        echo "  $( _key s ) - shutdown containers   docker-compose stop"
-        echo "  $( _key r ) - remove containers     docker-compose rm -f"
-        echo
-        echo "  $( _key m ) - more infos"
-        echo "  $( _key c ) - console (bash)"
-        echo
-        echo "  $( _key q ) - quit"
+        h2 MENU       
+        showMenu
         echo
         echo -n "  select >"
         read -rn 1 action 
@@ -286,6 +335,8 @@ while true; do
     fi
 
     case "$action" in
+        "-h") showHelp; exit 0 ;;
+        "-v") echo $(basename $0) $_version; exit 0 ;;
         g)
             _removeGitdata
             ;;
@@ -300,21 +351,17 @@ while true; do
             _removeGeneratedFiles
             rm -rf containers
             ;;
-        # not in the menu
-        # f)
-        #     _removeGeneratedFiles
-        #     _generateFiles
-        #     _wait
-        #     ;;
         m)
             _showInfos
             _wait
             ;;
         u|U)
+            h2 "Bring up..."
             dockerUp="docker-compose -p "$APP_NAME" --verbose up -d --remove-orphans"
             if [ "$action" = "U" ]; then
                 dockerUp+=" --build"
             fi
+            echo "$dockerUp"
             if $dockerUp; then
                 _showBrowserurl
             else
@@ -326,24 +373,62 @@ while true; do
             _wait
             ;;
         s)
+            h2 "Stopping..."
             docker-compose -p "$APP_NAME" stop
             ;;
         r)
+            h2 "Removing..."
             docker-compose -p "$APP_NAME" rm -f
             ;;
         c)
-            docker ps
-            echo -n "id or name >"
-            read dockerid
-            test -z "$dockerid" || docker exec -it $dockerid /bin/bash
+            h2 "Console"
+            _containers=$( docker-compose -p "$APP_NAME" ps | sed -n "2,\$p" | awk '{ print $1}' )
+            if [ "$DB_ADD" = "false" ]; then
+                dockerid=$_containers
+            else
+                echo "Select a container:"
+                echo "$_containers" | sed "s#^#    #g"
+                echo -n "id or name >"
+                read dockerid
+            fi
+            test -z "$dockerid" || (
+                echo
+                echo "> docker exec -it $dockerid /bin/bash     (type 'exit' + Return when finished)"
+                docker exec -it $dockerid /bin/bash
+            )
+            ;;
+        p)
+            h2 "PHP $APP_PHP_VERSION linter"
+
+            dockerid="${APP_NAME}-server"
+            echo -n "Scanning ... "
+            _iFiles=$( docker exec -it $dockerid /bin/bash -c "find . -name '*.php' " | wc -l )
+
+            if [ $_iFiles -gt 0 ]; then
+                echo "found $_iFiles [*.php] files ... errors from PHP $APP_PHP_VERSION linter:"
+                time if echo $APP_PHP_VERSION | grep -E "([567]\.|8\.[012])" >/dev/null ; then
+                    docker exec -it $dockerid /bin/bash -c "find . -name '*.php' -exec php -l {} \; | grep -v '^No syntax errors detected'"
+                else
+                    docker exec -it $dockerid /bin/bash -c "php -l \$( find . -name '*.php' ) | grep -v '^No syntax errors detected' "
+                fi
+                echo
+                _wait
+            else
+                echo "Start your docker container first."
+            fi
+            ;;
+        o) 
+            h2 "Open app ..."
+            xdg-open "$frontendurl"
             ;;
         q)
+            h2 "Bye!"
             exit 0;
             ;;
         *) 
             test -n "$action" && ( echo "  ACTION FOR [$action] NOT IMPLEMENTED."; sleep 1 )
     esac
-    action=
+    action=$1; shift 1
 done
 
 
