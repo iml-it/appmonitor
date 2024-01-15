@@ -38,6 +38,13 @@ class emailNotification
     public static $sError='';
 
     /**
+     * filename to template for html email
+     * This template contains %s for the message
+     * @var string
+     */
+    protected static $_template="email_template_html.txt";
+
+    /**
      * send email notification
      * @param  array  $aOptions  array of options
      *                           - from/ to/ subject/ message: main email data
@@ -74,7 +81,7 @@ class emailNotification
         }
 
         $sMessage=self::formatMessage($aOptions['message']);
-        $bIsHtml=$sMessage!==strip_tags($sMessage);
+        $bIsHtml=$sMessage!==strip_tags($sMessage); // detect if html code was used in the message
         if($bIsHtml){
             $aHeaders[]='Content-Type: text/html; charset="utf-8"';
         }
@@ -97,9 +104,13 @@ class emailNotification
     static public function formatMessage($sMsg){
         $bIsHtml=($sMsg!==strip_tags($sMsg));
         if($bIsHtml){
-            $sMessage=strstr($sMsg, '<html>')
-                ? $sMsg
-                : '<!doctype html><html><body><div>'.$sMsg.'</div></body></html>';
+            if(!strstr($sMsg, '<html>')){
+                $sTpl=file_exists(self::$_template)
+                    ? file_get_contents(self::$_template)
+                    : '<!doctype html><html><body><div>%s</div></body></html>'
+                    ;
+                $sMsg=sprintf($sTpl, $sMsg);
+            }
         } else {
             // wrap text message to width of 70 chars
             $sMessage=wordwrap($sMsg, 70, "\r\n");

@@ -599,7 +599,9 @@ class appmonitorserver
                 'url' => $sUrl,
                 'response_header' => $sHeader,
                 'response_body' => $sBody,
-                'curlinfo' => curl_getinfo($curl_arr[$sKey])
+                'curlinfo' => curl_getinfo($curl_arr[$sKey]),
+                'curlerrorcode' =>curl_errno($curl_arr[$sKey]),
+                'curlerrormsg' =>curl_error($curl_arr[$sKey]),
             ];
             curl_multi_remove_handle($master, $curl_arr[$sKey]);
         }
@@ -749,6 +751,8 @@ class appmonitorserver
                 $aClientData["result"]["headerarray"] = $this->_getHttpStatusArray($aResult['response_header']);
                 $aClientData["result"]["httpstatus"] = $iHttpStatus;
                 $aClientData["result"]["error"] = $sError;
+                $aClientData["result"]["curlerrorcode"] = $aResult['curlerrorcode'];
+                $aClientData["result"]["curlerrormsg"] = $aResult['curlerrormsg'];
 
                 if (!isset($aClientData["result"]["website"]) || !$aClientData["result"]["website"]) {
                     $aClientData["result"]["website"] = $this->_tr('unknown');

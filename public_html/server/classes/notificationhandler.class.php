@@ -562,6 +562,7 @@ class notificationhandler
      */
     public function getMessageReplacements()
     {
+        $sMode='html';
         /*
                 [result] => Array
                 (
@@ -605,13 +606,29 @@ class notificationhandler
                 round((time() - $aCompare['result']['ts']) / 60) . " min "
                 . "(" . round((time() - $aCompare['result']['ts']) / 60 / 60 * 4) / 4 . " h)"
                 : $sMiss,
+            '__CURLERROR__'     => isset($this->_aAppResult['result']['curlerrormsg']) && $this->_aAppResult['result']['curlerrormsg'] 
+                ? $this->_aAppResult['result']['curlerrormsg'].' (curl error #'.$this->_aAppResult['result']['curlerrorcode'].')' 
+                : '',
 
         ];
         if ($this->_sServerurl) {
             $aReplace['__MONITORURL__'] = $this->_sServerurl . '#divweb-' . $this->_sAppId;
         }
         // echo '<pre>'.print_r($this->_aAppResult['checks'], 1).'</pre>';
-        $sChecks = '';
+        switch ($sMode) {
+            case 'html':
+                $aReplace['__ERROR__']='<span class="error">'.$aReplace['__ERROR__'].'</span>';
+                $aReplace['__CURLERROR__']='<span class="error">'.$aReplace['__CURLERROR__'].'</span>';
+                if ($aReplace['__RESULT__']!=$sMiss){
+                    $aReplace['__RESULT__']='<span class="result-'.$this->_aAppResult['result']['result'].'">'.$aReplace['__RESULT__'].'</span>';
+                }
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        
         if (isset($this->_aAppResult['checks']) && count($this->_aAppResult['checks'])) {
 
             // force sortorder in notifications - one key for each result ... 3 is error .. 0 is OK
@@ -677,7 +694,14 @@ class notificationhandler
         // echo "DEBUG:".__METHOD__." add log an sending messages - $sLogMessage\n";
         $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
 
-        $sMessage=$this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message');
+        $sMessage=''
+            .'<style>
+                .result-0{color: green}
+                .result-1{color: purple}
+                .result-2{color: orange}
+                .result-3, .error{color: red}
+            </style>'
+            .$this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message');
         foreach ($this->getPlugins() as $sPlugin) {
 
             // get plugin specific receivers

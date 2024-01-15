@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            .result-0{color: green}
+            .result-1{color: purple}
+            .result-2{color: orange}
+            .result-3, .error{color: red}
+        </style>
+    </head>
+    <body>
+        <div>
+            %s
+        </div>
+    </body>
+</html>

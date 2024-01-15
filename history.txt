@@ -1,6 +1,27 @@
 
 HISTORY
 
+v0.132 2024-01-15
+  - ADDED: show curl errors on failed monitoring requests
+
+v0.131 2023-12-12
+  - UPDATE: PHP 8.3 comptibility
+
+v0.131 2023-11-03
+  - ADD: security headers in apache config of docker env
+  - ADD: /api/health request
+  - UPDATE: PHP 8.2 comptibility
+
+v0.130 2023-11-03
+  - FIX: move method getResultValue from gui class to base class -> then the nagios check works again
+  - UPDATE: light changes of check output
+
+v0.129 2023-07-17
+  - FIX: navigation with browser buttons
+
+v0.128 2023-07-07
+  - ADDED: 2 apmonitor checks
+
 v0.127 2023-06-26
   - FIX: error while deleting app having a slack notification
 
