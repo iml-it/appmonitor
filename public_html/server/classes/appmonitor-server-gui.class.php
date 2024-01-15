@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.131
+ * @version 0.132
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -43,7 +43,7 @@ class appmonitorserver_gui extends appmonitorserver
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.131";
+    var $_sVersion = "0.132";
 
     /**
      * html code for icons in the web gui
@@ -1372,7 +1372,8 @@ class appmonitorserver_gui extends appmonitorserver
                     'type' => 'danger',
                     'dismissible' => false,
                     'title' => $this->_aIco['error'] . ' ' . $this->_tr('Validator-request-error'),
-                    'text' => $aEntries['result']['error']
+                    'text' => $aEntries['result']['error'].'<br>'
+                        . $aEntries['result']['curlerrormsg'].' ('.$aEntries['result']['curlerrorcode'].')'
                 ]);
             }
 
