@@ -104,13 +104,17 @@ class emailNotification
     static public function formatMessage($sMsg){
         $bIsHtml=($sMsg!==strip_tags($sMsg));
         if($bIsHtml){
-            if(!strstr($sMsg, '<html>')){
-                $sTpl=file_exists(self::$_template)
-                    ? file_get_contents(self::$_template)
-                    : '<!doctype html><html><body><div>%s</div></body></html>'
-                    ;
-                $sMsg=sprintf($sTpl, $sMsg);
-            }
+            $sMessage=strstr($sMsg, '<html>')
+                ? $sMsg
+                : '<!doctype html><html><body><div>'.$sMsg.'</div></body></html>'
+            ;
+            // if(!strstr($sMsg, '<html>')){
+            //     $sTpl=file_exists(self::$_template)
+            //         ? file_get_contents(self::$_template)
+            //         : '<!doctype html><html><body><div>%s</div></body></html>'
+            //         ;
+            //     $sMsg=sprintf($sTpl, $sMsg);
+            // }
         } else {
             // wrap text message to width of 70 chars
             $sMessage=wordwrap($sMsg, 70, "\r\n");
