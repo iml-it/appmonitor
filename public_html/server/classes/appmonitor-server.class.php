@@ -804,7 +804,7 @@ class appmonitorserver
                         . " TTL=$iTtl"
                         . " responsetime=" . floor($aResult['curlinfo']['total_time'] * 1000) . "ms"
                         . " appstatus=" . $this->_tr('Resulttype-' . $aClientData["result"]["result"])
-                        . $sError
+                        . $sError . " " . $aResult['curlerrormsg']
                 );
 
                 // write cache
