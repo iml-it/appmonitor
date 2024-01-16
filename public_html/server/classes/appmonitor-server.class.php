@@ -725,8 +725,12 @@ class appmonitorserver
                 $iHttpStatus = $this->_getHttpStatus($aResult['response_header']);
                 $sError = !$aResult['response_header']
                     ? $this->_tr('msgErr-Http-request-failed')
+                        .(isset($aResult['curlerrormsg'])
+                            ? '<br>'.sprintf($this->_tr('Curl-error'), $aResult['curlerrormsg'], $aResult['curlerrorcode'])
+                            : ''
+                        )
                     : (
-                        (!$iHttpStatus || $iHttpStatus < 200 || $iHttpStatus > 299)
+                        (!$iHttpStatus || $iHttpStatus > 299)
                         ? $this->_tr('msgErr-Http-error')
                         : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
                     );
