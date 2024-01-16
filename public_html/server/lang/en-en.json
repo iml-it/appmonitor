@@ -55,6 +55,8 @@
         "Chart-time": "Time",
         "Chart-responsetime": "Responsetime [ms]",
         
+        "Curl-error": "Curl error: %s (code #%s)",
+
         "Debug": "Debug",
         "Debug-config": "Config",
         "Debug-urls": "Urls",
@@ -209,9 +211,9 @@
         "changetype-1.email.subject": "[Appmonitor] :: webapp was added: __URL__.",
         "changetype-1.email.message": "Welcome!<br>The webapp __URL__ was added in the Appmonitor. From now on you will get notifications if the status changes.<br><br>url: <a href=\"__MONITORURL__\">__MONITORURL__</a><br><br>__CHECKS__",
         
-        "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__. __ERROR__ __CURLERROR__",
+        "changetype-2.logmessage":    "Status of __URL__ has changed from __LAST-RESULT__ to __RESULT__. __ERROR__",
         "changetype-2.email.subject": "[Appmonitor] :: __CHANGE__ __LAST-RESULT__ --> __RESULT__ - __URL__",
-        "changetype-2.email.message": "__TIME__<br>__WEBSITE__ @ __HOST__<br>Status has changed after __DELTA-TIME__ from __LAST-RESULT__ to <strong>__RESULT__</strong>.__CURLERROR__<br><br>see current status on: <a href=\"__MONITORURL__\">__MONITORURL__</a><br><br>__CHECKS__",
+        "changetype-2.email.message": "__TIME__<br>__WEBSITE__ @ __HOST__<br>Status has changed after __DELTA-TIME__ from __LAST-RESULT__ to <strong>__RESULT__</strong>.<br><br>see current status on: <a href=\"__MONITORURL__\">__MONITORURL__</a><br><br>__CHECKS__",
         
         "changetype-3.logmessage":    "Webapp was deleted from Appmonitor: __URL__.",
         "changetype-3.email.subject": "[Appmonitor] :: webapp was DELETED: __URL__.",

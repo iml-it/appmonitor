@@ -1,6 +1,9 @@
 
 HISTORY
 
+v0.133 2024-01-16
+  - UPDATE: show curl errors in notification messages too
+
 v0.132 2024-01-15
   - ADDED: show curl errors on failed monitoring requests
 

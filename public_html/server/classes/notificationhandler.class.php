@@ -607,7 +607,7 @@ class notificationhandler
                 . "(" . round((time() - $aCompare['result']['ts']) / 60 / 60 * 4) / 4 . " h)"
                 : $sMiss,
             '__CURLERROR__'     => isset($this->_aAppResult['result']['curlerrormsg']) && $this->_aAppResult['result']['curlerrormsg'] 
-                ? $this->_aAppResult['result']['curlerrormsg'].' (curl error #'.$this->_aAppResult['result']['curlerrorcode'].')' 
+                ? sprintf($this->_tr('Curl-error'), $this->_aAppResult['result']['curlerrormsg'], $this->_aAppResult['result']['curlerrorcode'])
                 : '',
 
         ];
