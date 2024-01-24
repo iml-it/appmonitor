@@ -696,10 +696,10 @@ class notificationhandler
 
         $sMessage=''
             .'<style>
-                .result-0{color: green}
-                .result-1{color: purple}
-                .result-2{color: orange}
-                .result-3, .error{color: red}
+                .result-0{color: green;  background: #dfd; }
+                .result-1{color: purple; background: #fdf; }
+                .result-2{color: orange; background: #fdb; }
+                .result-3, .error{color: red; background: #fdd; }}
             </style>'
             .$this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message');
         foreach ($this->getPlugins() as $sPlugin) {
@@ -715,7 +715,7 @@ class notificationhandler
                         : false,
                     'to' => $aTo,
                     'important' => true,
-                    'subject' => html_entity_decode($this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.subject')),
+                    'subject' => strip_tags($this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.subject')),
                     'message' => $sMessage,
                 ];
                 // $sSendMethod="send_$sPlugin";
