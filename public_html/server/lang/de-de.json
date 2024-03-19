@@ -89,7 +89,7 @@
         "Http-status": "Http-Status",
         "Http-header": "Http-Antwort-Header",
         
-        "Change": "Aenderung", 
+        "Change": "&Auml;nderung", 
         "Message": "Nachricht", 
         "Tag-filter": "Tag-Filter", 
 
@@ -223,9 +223,9 @@
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },
 
-    "changetype-0": "keine &Auml;nderung",
+    "changetype-0": "Keine Änderung",
     "changetype-1": "Neu",
-    "changetype-2": "&Auml;nderung",
+    "changetype-2": "Änderung",
     "changetype-3": "Gel&ouml;scht",
     
     "Resulttype-0": "OK",
