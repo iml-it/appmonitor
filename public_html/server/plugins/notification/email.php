@@ -13,7 +13,10 @@
  *         'to' => ['john@example.com'],
  *         'important' => true,
  *         'subject' => 'Test message',
- *         'message' => "Hello John,<br>\n"
+ *         'message' => "Hello John,\n"
+ *                 . "I am a TEST MESSAGE.\n"
+ *                 . "Regards",
+ *         'htmlmessage' => "Hello John,<br>\n"
  *                 . "I am a <strong>TEST MESSAGE</strong>.<br>\n"
  *                 . "Regards",
  *     ];
@@ -80,7 +83,10 @@ class emailNotification
             $aHeaders[]='Importance: High';
         }
 
-        $sMessage=self::formatMessage($aOptions['message']);
+        $sMessage=self::formatMessage(
+            (isset($aOptions['htmlmessage'])&&$aOptions['htmlmessage']) 
+                ? $aOptions['htmlmessage'] : $aOptions['message']
+        );
         $bIsHtml=$sMessage!==strip_tags($sMessage); // detect if html code was used in the message
         if($bIsHtml){
             $aHeaders[]='Content-Type: text/html; charset="utf-8"';
