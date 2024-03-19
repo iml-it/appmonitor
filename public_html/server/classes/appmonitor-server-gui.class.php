@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.134
+ * @version 0.135
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -43,7 +43,7 @@ class appmonitorserver_gui extends appmonitorserver
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.134";
+    var $_sVersion = "0.135";
 
     /**
      * html code for icons in the web gui

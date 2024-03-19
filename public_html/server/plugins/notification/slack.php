@@ -76,6 +76,7 @@ class slackNotification{
      * @return string
      */
     static public function formatMessage($sMsg){
+        // hint since v0.135 ''message' is textonly. this return is not really needed.
         return strip_tags(str_replace('<br>', "\n", $sMsg));
     }
 

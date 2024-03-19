@@ -641,7 +641,7 @@ class notificationhandler
                 $aSortedChecks[$iResult] .= "<br><br>"
                     . '----- <strong>' . $aCheck['name'] . '</strong> (' . $aCheck['description'] . ")<br>"
                     . $aCheck['value'] . "<br>"
-                    . $this->_tr('Resulttype-' . $aCheck['result']);
+                    . '<span class="reault-'.$aCheck['result'].'">'.$this->_tr('Resulttype-' . $aCheck['result']).'</span>';
             }
             $aReplace['__CHECKS__'] = implode("", $aSortedChecks);
         } else {
@@ -694,14 +694,7 @@ class notificationhandler
         // echo "DEBUG:".__METHOD__." add log an sending messages - $sLogMessage\n";
         $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
 
-        $sMessage=''
-            .'<style>
-                .result-0{color: green;  background: #dfd; }
-                .result-1{color: purple; background: #fdf; }
-                .result-2{color: orange; background: #fdb; }
-                .result-3, .error{color: red; background: #fdd; }}
-            </style>'
-            .$this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message');
+        $sMessage=$this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message');
         foreach ($this->getPlugins() as $sPlugin) {
 
             // get plugin specific receivers
@@ -716,7 +709,17 @@ class notificationhandler
                     'to' => $aTo,
                     'important' => true,
                     'subject' => strip_tags($this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.subject')),
-                    'message' => $sMessage,
+                    'message' => strip_tags(str_replace('<br>', "\n", $sMessage)),
+                    'htmlmessage' => '
+                        <style>
+                            body{background: #f8f8f8; font-size: 1.1em; font-family: Arial, Helvetica, sans-serif;}
+                            body>div{background: #fff; margin: 1em 5%; border: #eee 2px solid; padding: 1em; max-width: 1000px;;}
+                            .result-0{color: green;  background: #dfd; }
+                            .result-1{color: purple; background: #fdf; }
+                            .result-2{color: #a60; background: #fec; }
+                            .result-3, .error{color: #c00; background: #fdd; }
+                        </style>
+                        '.$sMessage,
                 ];
                 // $sSendMethod="send_$sPlugin";
                 // $sSendMethod($aOptions);
