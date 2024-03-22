@@ -641,7 +641,7 @@ class notificationhandler
                 $aSortedChecks[$iResult] .= "<br><br>"
                     . '----- <strong>' . $aCheck['name'] . '</strong> (' . $aCheck['description'] . ")<br>"
                     . $aCheck['value'] . "<br>"
-                    . '<span class="reault-'.$aCheck['result'].'">'.$this->_tr('Resulttype-' . $aCheck['result']).'</span>';
+                    . '<span class="result-'.$aCheck['result'].'">'.$this->_tr('Resulttype-' . $aCheck['result']).'</span>';
             }
             $aReplace['__CHECKS__'] = implode("", $aSortedChecks);
         } else {
