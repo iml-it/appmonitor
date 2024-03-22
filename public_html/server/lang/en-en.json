@@ -240,6 +240,8 @@
     "MsgResulttype-2": "Check the Warning.",
     "MsgResulttype-3": "Houston, we have a problem!",
 
+    "Curl-error": "Curl error: %s (code #%s)",
+
     "group-cloud": "Cloud",
     "group-database": "Database",
     "group-deny": "Deny",
