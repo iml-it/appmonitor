@@ -4,76 +4,84 @@
  * simple storages to keep last N items of an object
  *
  * @author hahn
+ * 
+ * 2024-07-17  axel.hahn@unibe.ch  php 8 only: use typed variables
  */
 class simpleRrd
 {
 
     /**
-     * prefix for cached items of this class
+     * Prefix for cached items of this class
      * @var string
      */
-    protected $_sCacheIdPrefix = "rrd";
+    protected string $_sCacheIdPrefix = "rrd";
 
     /**
-     * max number of kept data items
+     * Maximum number of kept data items
      * @var integer
      */
-    protected $_iMaxLogentries = 1000;
+    protected int $_iMaxLogentries = 1000;
 
     /**
-     * logdata for detected changes and sent notifications
+     * Logdata for detected changes and sent notifications
      * @var array 
      */
-    protected $_aLog = [];
+    protected array $_aLog = [];
 
     /**
-     * id of the cache item
-     * @var type 
+     * Id of the cache item
+     * @var string
      */
-    protected $_sCacheId = false;
+    protected string $_sCacheId = '';
 
     /**
-     * instance of ahcache class
-     * @var type 
+     * Instance of ahcache class
+     * @var AhCache
      */
-    protected $_oCache = false;
+    protected AhCache $_oCache;
 
     // ----------------------------------------------------------------------
     // __construct
     // ----------------------------------------------------------------------
 
-    public function __construct($sId = false)
+    /**
+     * Constructor
+     * @param string $sId  optional id to set
+     */
+    public function __construct(string $sId = false)
     {
         if ($sId) {
             $this->setId($sId);
         }
-        return true;
     }
-
 
     // ----------------------------------------------------------------------
     // protected functions - handle cache of application checkdata
     // ----------------------------------------------------------------------
+
     /**
-     * helper function - limit log to N entries
+     * Helper function - limit log to N entries
      * @return boolean
      */
-    protected function _cutLogitems()
+    protected function _cutLogitems(): bool
     {
+        $bHasChange=false;
         if (count($this->_aLog) > $this->_iMaxLogentries) {
             while (count($this->_aLog) > $this->_iMaxLogentries) {
                 array_shift($this->_aLog);
+                $bHasChange=true;
             }
         }
-        return true;
+        return $bHasChange;
     }
 
     /**
-     * get current or last stored client notification data
+     * Load current or last stored client notification data into $this->_aLog
      * this method also stores current notification data on change
-     * @return array
+     * 
+     * @return bool
      */
-    protected function _getLogs()
+    protected function _getLogs(): bool
     {
         $this->_aLog = $this->_oCache->read();
         if (!is_array($this->_aLog)) {
@@ -86,7 +94,7 @@ class simpleRrd
      * save log data
      * @return boolean
      */
-    protected function _saveLogs()
+    protected function _saveLogs(): bool
     {
         return $this->_oCache->write($this->_aLog);
     }
@@ -96,37 +104,40 @@ class simpleRrd
     // ----------------------------------------------------------------------
 
     /**
-     * add data item
-     * @param type $aDataItem
+     * Add data item.
+     * This action will limit the count of max items and save it to cache.
+     * It returns the success of save action.
+     * 
+     * @param array $aDataItem  dataitem
      * @return boolean
      */
-    public function add($aDataItem)
+    public function add($aDataItem): bool
     {
         $this->_getLogs();
-        $this->_aLog[] = [ 'timestamp' => time(), 'data' => $aDataItem ];
+        $this->_aLog[] = ['timestamp' => time(), 'data' => $aDataItem];
         $this->_cutLogitems();
         return $this->_saveLogs();
     }
 
-
     /**
-     * delete application
+     * Delete current application
      * @return boolean
      */
-    public function delete()
+    public function delete(): bool
     {
         if (!$this->_sCacheId) {
             return false;
         }
         return $this->_oCache->delete();
     }
+
     /**
-     * get array with stored items
+     * Get array with stored items
      * 
      * @param integer  $iMax  optional: limit
      * @return array
      */
-    public function get($iMax = false)
+    public function get(int $iMax = false): array
     {
         $aReturn = [];
         $this->_getLogs();
@@ -144,12 +155,12 @@ class simpleRrd
     }
 
     /**
-     * set id for this rrd value store
+     * Set id for this rrd value store
      * 
-     * @param type $sId
+     * @param string $sId
      * @return boolean
      */
-    public function setId($sId)
+    public function setId($sId): bool
     {
         $this->_sCacheId = $sId;
         $this->_oCache = new AhCache($this->_sCacheIdPrefix, $this->_sCacheId);
