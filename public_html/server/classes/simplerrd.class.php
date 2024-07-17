@@ -48,7 +48,7 @@ class simpleRrd
      * Constructor
      * @param string $sId  optional id to set
      */
-    public function __construct(string $sId = false)
+    public function __construct(string $sId = '')
     {
         if ($sId) {
             $this->setId($sId);
@@ -137,7 +137,7 @@ class simpleRrd
      * @param integer  $iMax  optional: limit
      * @return array
      */
-    public function get(int $iMax = false): array
+    public function get(int $iMax = 0): array
     {
         $aReturn = [];
         $this->_getLogs();
@@ -160,7 +160,7 @@ class simpleRrd
      * @param string $sId
      * @return boolean
      */
-    public function setId($sId): bool
+    public function setId(string $sId): bool
     {
         $this->_sCacheId = $sId;
         $this->_oCache = new AhCache($this->_sCacheIdPrefix, $this->_sCacheId);
