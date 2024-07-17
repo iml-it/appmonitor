@@ -30,12 +30,14 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.136
+ * @version 0.137
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
+ * --------------------------------------------------------------------------------<br>
+ * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -105,10 +107,10 @@ class appmonitorserver_gui extends appmonitorserver
     // ----------------------------------------------------------------------
 
     /**
-     * get all messages as html output
+     * Get all messages as html output
      * @return string
      */
-    protected function _renderLogs()
+    protected function _renderLogs(): string
     {
         $sOut = '';
         $oA = new renderadminlte();
@@ -145,11 +147,11 @@ class appmonitorserver_gui extends appmonitorserver
 
 
     /**
-     * get array with 
+     * Get array with result codes in normal or reverse order
      * @param boolean  $bReverse  optional: reverse; default is false (start with RESULT_OK)
-     * @return type
+     * @return array
      */
-    protected function _getResultDefs($bReverse = false)
+    protected function _getResultDefs(bool $bReverse = false): array
     {
         return $bReverse
             ? [
@@ -166,11 +168,11 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * helper: generate html code for table header
+     * Helper: generate html code for table header
      * @param array  $aHeaditems  items in header colums
      * @return string
      */
-    protected function _generateTableHead($aHeaditems)
+    protected function _generateTableHead(array $aHeaditems): string
     {
         $sReturn = '';
         foreach ($aHeaditems as $sKey) {
@@ -180,13 +182,13 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * mapper: get the css class for a given loglevel type
+     * Mapper: get the css class for a given loglevel type
      * 
      * @param  string  $sResult   result; one of error|warning|info|ok
      * @param  string  $sDefault  default return value on non existing value
      * @return string
      */
-    protected function _getAdminLteClassByLoglevel($sResult, $sDefault = '')
+    protected function _getAdminLteClassByLoglevel(string $sResult, string $sDefault = ''): string
     {
         $aAdminLteColorMapping = [
             'error' => 'danger',
@@ -196,14 +198,15 @@ class appmonitorserver_gui extends appmonitorserver
         ];
         return $aAdminLteColorMapping[$sResult] ?? $sDefault;
     }
+
     /**
-     * mapper: get the css class for a given integer result code 
+     * Mapper: get the css class for a given integer result code 
      * 
      * @param  string  $iResult   result; one of RESULT_ERROR|RESULT_WARNING|RESULT_UNKNOWN|RESULT_OK
      * @param  string  $sDefault  default return value on non existing value
      * @return string
      */
-    protected function _getAdminLteClassByResult($iResult, $sDefault = '')
+    protected function _getAdminLteClassByResult(int $iResult, string $sDefault = ''): string
     {
         $aAdminLteColorMapping = [
             RESULT_ERROR => 'danger',
@@ -213,14 +216,15 @@ class appmonitorserver_gui extends appmonitorserver
         ];
         return $aAdminLteColorMapping[$iResult] ?? $sDefault;
     }
+
     /**
-     * mapper: get the css (font)color class for a given integer result code 
+     * Mapper: get the css (font)color class for a given integer result code 
      * 
      * @param  string  $iResult   result; one of RESULT_ERROR|RESULT_WARNING|RESULT_UNKNOWN|RESULT_OK
      * @param  string  $sDefault  default return value on non existing value
      * @return string
      */
-    protected function _getAdminLteColorByResult($iResult, $sDefault = '')
+    protected function _getAdminLteColorByResult(int $iResult, string $sDefault = ''): string
     {
         $aAdminLteColorMapping = [
             RESULT_ERROR => 'red',
@@ -230,13 +234,13 @@ class appmonitorserver_gui extends appmonitorserver
         ];
         return $aAdminLteColorMapping[$iResult] ?? $sDefault;
     }
+
     /**
-     * mapper: get the icon key for $this->_aIco for a given integer result code 
-     * 
+     * Mapper: get the icon key for $this->_aIco for a given integer result code 
      * @param  string  $iResult   result; one of RESULT_ERROR|RESULT_WARNING|RESULT_UNKNOWN|RESULT_OK
      * @return string
      */
-    protected function _getIconByResult($iResult)
+    protected function _getIconByResult(int $iResult): string
     {
         $aMapping = [
             RESULT_ERROR => 'error',
@@ -244,16 +248,15 @@ class appmonitorserver_gui extends appmonitorserver
             RESULT_UNKNOWN => 'unknown',
             RESULT_OK => 'ok',
         ];
-        return $this->_aIco[$aMapping[$iResult]] ?? false;
+        return $this->_aIco[$aMapping[$iResult]] ?? "";
     }
 
     /**
-     * get the css class name from $this->_aIco['NAME'] 
-     * 
+     * Get the css class name from $this->_aIco['NAME'] 
      * @param string  $sIconCode  html code as $this->_aIco['NAME'] 
      * @return string
      */
-    protected function _getIconClass($sIconCode = false, $iResult = false)
+    protected function _getIconClass(string $sIconCode = '', int $iResult = -1): string
     {
         if (!$sIconCode) {
             $sIconCode = $this->_getIconByResult($iResult);
@@ -261,11 +264,11 @@ class appmonitorserver_gui extends appmonitorserver
         return preg_replace('/^.*\"(.*)\".*/', '$1', $sIconCode);
     }
     /**
-     * get a label for the web application
-     * @param type $sAppId
+     * Get a label for the web application
+     * @param string $sAppId  application id
      * @return string
      */
-    protected function _getAppLabel($sAppId)
+    protected function _getAppLabel(string $sAppId): string
     {
         if (!isset($this->_data[$sAppId])) {
             return '??';
@@ -280,7 +283,7 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * get html code for a tile widget
+     * Get html code for a tile widget
      * 
      * @param array  $aOptions  options array with these keys
      *                          - bgcolor string   for adminlte; color name
@@ -296,7 +299,7 @@ class appmonitorserver_gui extends appmonitorserver
      * @param string   $sMore   more text below a horizontal line
      * @return string
      */
-    protected function _getTile($aOptions = [])
+    protected function _getTile(array $aOptions = []): string
     {
         $oA = new renderadminlte();
         $sDiv = '<div class="col-md-3 col-sm-6 col-xs-12">';
@@ -321,7 +324,7 @@ class appmonitorserver_gui extends appmonitorserver
 
 
     /**
-     * calculate times where the app was in a given status and the uptime
+     * Calculate times where the app was in a given status and the uptime
      * the values are in seconds
      * 
      *     [counter] => Array
