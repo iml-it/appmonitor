@@ -17,7 +17,7 @@
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 1.0
+ * @version 1.1
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
