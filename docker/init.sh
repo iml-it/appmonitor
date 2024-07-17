@@ -15,6 +15,7 @@
 # 2023-11-13  v1.8  <axel.hahn@unibe.ch>      UNDO "docker compose"; update infos
 # 2023-11-15  v1.9  <axel.hahn@unibe.ch>      add help; execute multiple actions by params; new menu item: open app
 # 2023-12-07  v1.10 <www.axel-hahn.de>        simplyfy console command; add php linter
+# 2024-07-01  v1.11 <www.axel-hahn.de>        diff with colored output; suppress errors on port check
 # ======================================================================
 
 cd $( dirname $0 )
@@ -23,7 +24,7 @@ cd $( dirname $0 )
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
 
-_version="1.10"
+_version="1.11"
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -211,7 +212,7 @@ function _generateFiles(){
             _fix_no-db $_tmpfile
 
             # echo "changes for $target:"
-            diff  "../$target"  "$_tmpfile" | grep -v "$_md5" | grep -v "^---" | grep .
+            diff --color=always "../$target"  "$_tmpfile" | grep -v "$_md5" | grep -v "^---" | grep .
             if [ $? -eq 0 -o ! -f "../$target" ]; then
                 echo -n "$mytpl - changes detected - writing [$target] ... "
                 mkdir -p $( dirname  "../$target" ) || exit 2
@@ -280,22 +281,28 @@ function _showInfos(){
     docker-compose top
 
     h3 "Check app port"
-    >/dev/tcp/localhost/${APP_PORT} 2>/dev/null && (
+    if echo >/dev/tcp/localhost/${APP_PORT}; then
         echo "OK, app port ${APP_PORT} is reachable"
         echo
         _showBrowserurl
-    )
+    else
+        echo "NO, app port ${APP_PORT} is not available"
+    fi 2>/dev/null
+
     if [ "$DB_ADD" != "false" ]; then
         h3 "Check database port"
-        >/dev/tcp/localhost/${DB_PORT} >/dev/null 2>&1 && (
+        if echo >/dev/tcp/localhost/${DB_PORT}; then
             echo "OK, db port ${DB_PORT} is reachable"
             echo
-        )
-        echo "In a local DB admin tool:"
-        echo "  host    : localhost"
-        echo "  port    : ${DB_PORT}"
-        echo "  user    : root"
-        echo "  password: ${MYSQL_ROOT_PASS}"
+            echo "In a local DB admin tool you can connect it:"
+            echo "  host    : localhost"
+            echo "  port    : ${DB_PORT}"
+            echo "  user    : root"
+            echo "  password: ${MYSQL_ROOT_PASS}"
+        else
+            echo "NO, db port ${DB_PORT} is not available"
+        fi 2>/dev/null
+
     fi
     echo
 }
