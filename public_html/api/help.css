@@ -1,14 +1,14 @@
 :root{
     --bg: #f8f8f8;
-    --bg-th: #dde;
+    --bg-th: #ddd;
     --bg-pre: #eee;
     --fc: #223;
-    --fc-h1: #77a;
+    --fc-h1: #888;
 }
 
-body{background: var(--bg); color:var(--fc);font-family: arial;}
+body{background: var(--bg); color:var(--fc);font-family: arial; margin: 1em 3em; font-size: 1em;}
 h1{color: var(--fc-h1);}
-table{border: 1px dotted;}
+table{border: 1px dotted; padding: 1em; border-radius: 1em;}
 th{background: var(--bg-th); border-bottom: 1px solid;}
 td{vertical-align: top;}
 pre{background: var(--bg-pre);}

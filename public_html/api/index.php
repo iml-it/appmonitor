@@ -95,7 +95,7 @@ if(!$aFoundRoute){
 
 $oApi->stopIfOptions();
 
-$sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
+$sItem=$oRouter->getUrlParts()[1] ?? false;
 $callback=$oRouter->getCallback();
 
 
