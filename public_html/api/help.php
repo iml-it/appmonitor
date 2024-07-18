@@ -15,6 +15,7 @@ foreach($aRoutes as $aRoute){
     $oCallback=$aRoute[1];
     $sHelp.='<tr>
     <td><strong>'.$sPath.'</strong></td>
+    <td>'.($aRoute[2] ?? '-').'</td>
     <td><pre>'.print_r($oCallback, 1).'</pre></td>
     </tr>
     ';
@@ -25,10 +26,19 @@ echo '<!DOCTYPE html>
         <link rel="stylesheet" href="help.css" media="all" />
     </head>
     <body>
-        <h1>Appmonitor API</h1>
-        <table>
-        <tr><th>Route</th><th>Callback</th></tr>
-        '.$sHelp.'
-        </table>
+        <div id="main">
+            <h1>Appmonitor API</h1>
+
+            <p>
+                List of available GET routes:
+            </p>
+
+            <table>
+            <tr>
+                <th>Route</th><th>Description</th><th>Callback</th>
+            </tr>
+            '.$sHelp.'
+            </table>
+        </div>
     </body>
 </html>';
