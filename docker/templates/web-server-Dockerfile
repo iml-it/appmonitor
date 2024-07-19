@@ -4,8 +4,14 @@
 #
 FROM php:{{APP_PHP_VERSION}}-apache
 
+# install packages old
+# RUN apt-get update && apt-get install -y {{APP_APT_PACKAGES}}
+
 # install packages
-RUN apt-get update && apt-get install -y {{APP_APT_PACKAGES}}
+RUN rm -rf /var/lib/apt/lists/* 
+RUN mkdir -p /var/cache/apt/archives/partial
+RUN apt-get update
+RUN apt-get install -y {{APP_APT_PACKAGES}}
 
 # enable apache modules
 RUN a2enmod {{APP_APACHE_MODULES}}
