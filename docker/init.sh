@@ -16,15 +16,24 @@
 # 2023-11-15  v1.9  <axel.hahn@unibe.ch>      add help; execute multiple actions by params; new menu item: open app
 # 2023-12-07  v1.10 <www.axel-hahn.de>        simplyfy console command; add php linter
 # 2024-07-01  v1.11 <www.axel-hahn.de>        diff with colored output; suppress errors on port check
+# 2024-07-19  v1.12 <www.axel-hahn.de>        apply shell fixes
 # ======================================================================
 
-cd $( dirname $0 )
-. $( basename $0 ).cfg
+cd "$( dirname "$0" )" || exit 1
+
+# init used vars
+gittarget=
+frontendurl=
+
+_self=$( basename "$0" )
+
+# shellcheck source=/dev/null
+. "${_self}.cfg" || exit 1
 
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
 
-_version="1.11"
+_version="1.12"
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -44,26 +53,28 @@ function h3(){
 
 # show help for param -h
 function showMenu(){
-    echo "  $( _key g ) - remove git data of starterkit"
-    echo
-    echo "  $( _key i ) - init application: set permissions"
-    echo "  $( _key t ) - generate files from templates"
-    echo "  $( _key T ) - remove generated files"
-    echo
-    echo "  $( _key u ) - startup containers    docker-compose ... up -d"
-    echo "  $( _key U ) - startup containers    docker-compose ... up -d --build"
-    echo "  $( _key s ) - shutdown containers   docker-compose stop"
-    echo "  $( _key r ) - remove containers     docker-compose rm -f"
-    echo
-    echo "  $( _key m ) - more infos"
-    echo "  $( _key o ) - open app [${APP_NAME}] $frontendurl"
-    echo "  $( _key c ) - console (bash)"
-    echo "  $( _key p ) - console check with php linter"
-    echo
-    echo "  $( _key q ) - quit"
+    cat <<EOM
+
+    $( _key g ) - remove git data of starterkit
+    
+    $( _key i ) - init application: set permissions
+    $( _key t ) - generate files from templates
+    $( _key T ) - remove generated files
+ 
+    $( _key u ) - startup containers    docker-compose ... up -d
+    $( _key U ) - startup containers    docker-compose ... up -d --build
+    $( _key s ) - shutdown containers   docker-compose stop
+    $( _key r ) - remove containers     docker-compose rm -f
+ 
+    $( _key m ) - more infos
+    $( _key o ) - open app [${APP_NAME}] $frontendurl
+    $( _key c ) - console (bash)
+    $( _key p ) - console check with php linter
+ 
+    $( _key q ) - quit
+EOM
 }
 function showHelp(){
-    local _self=$( basename "$0" )
     cat <<EOH
 INITIALIZER FOR DOCKER APP v$_version
 
@@ -99,20 +110,16 @@ EXAMPLES:
 
 EOH
 }
-# function _gitinstall(){
-#     h2 "install/ update app from git repo ${gitrepo} in ${gittarget} ..."
-#     test -d ${gittarget} && ( cd ${gittarget}  && git pull )
-#     test -d ${gittarget} || git clone -b ${gitbranch} ${gitrepo} ${gittarget} 
-# }
 
 # set acl on local directory
 function _setWritepermissions(){
     h2 "set write permissions on ${gittarget} ..."
 
-    local _user=$( id -gn )
-    typeset -i local _user_uid=0
-    test -f /etc/subuid && _user_uid=$( grep $_user /etc/subuid 2>/dev/null | cut -f 2 -d ':' )-1
-    typeset -i local DOCKER_USER_OUTSIDE=$_user_uid+$DOCKER_USER_UID
+    local _user; _user=$( id -gn )
+    local _user_uid; typeset -i _user_uid=0
+
+    test -f /etc/subuid && _user_uid=$( grep "$_user" /etc/subuid 2>/dev/null | cut -f 2 -d ':' )-1
+    local DOCKER_USER_OUTSIDE; typeset -i DOCKER_USER_OUTSIDE=$_user_uid+$DOCKER_USER_UID
 
     set -vx
 
@@ -124,10 +131,10 @@ function _setWritepermissions(){
         sudo setfacl -bR "${mywritedir}"
 
         # default permissions: both the host user and the user with UID 33 (www-data on many systems) are owners with rwx perms
-        sudo setfacl -dRm u:${DOCKER_USER_OUTSIDE}:rwx,${_user}:rwx "${mywritedir}"
+        sudo setfacl -dRm "u:${DOCKER_USER_OUTSIDE}:rwx,${_user}:rwx" "${mywritedir}"
 
         # permissions: make both the host user and the user with UID 33 owner with rwx perms for all existing files/directories
-        sudo setfacl -Rm u:${DOCKER_USER_OUTSIDE}:rwx,${_user}:rwx "${mywritedir}"
+        sudo setfacl -Rm "u:${DOCKER_USER_OUTSIDE}:rwx,${_user}:rwx" "${mywritedir}"
     done
 
     set +vx
@@ -138,11 +145,10 @@ function _removeGitdata(){
     h2 "Remove git data of starterkit"
     echo -n "Current git remote url: "
     git config --get remote.origin.url
-    git config --get remote.origin.url 2>/dev/null | grep $selfgitrepo >/dev/null
-    if [ $? -eq 0 ]; then
+    if git config --get remote.origin.url 2>/dev/null | grep $selfgitrepo >/dev/null; then
         echo
         echo -n "Delete local .git and .gitignore? [y/N] > "
-        read answer
+        read -r answer
         test "$answer" = "y" && ( echo "Deleting ... " && rm -rf ../.git ../.gitignore )
     else
         echo "It was done already - $selfgitrepo was not found."
@@ -154,10 +160,11 @@ function _removeGitdata(){
 # see _generateFiles()
 function _fix_no-db(){
     local _file=$1
-    if [ $DB_ADD = false ]; then
-        typeset -i local iStart=$( cat ${_file} | grep -Fn "$CUTTER_NO_DATABASE" | cut -f 1 -d ':' )-1
+    if [ "$DB_ADD" = "false" ]; then
+        local iStart; typeset -i iStart
+        iStart=$( grep -Fn "$CUTTER_NO_DATABASE" "${_file}" | cut -f 1 -d ':' )-1
         if [ $iStart -gt 0 ]; then
-            sed -ni "1,${iStart}p" ${_file}
+            sed -ni "1,${iStart}p" "${_file}"
         fi
     fi
 }
@@ -170,20 +177,22 @@ function _fix_no-db(){
 function _generateFiles(){
 
     # re-read config vars
-    . $( basename $0 ).cfg
+
+    # shellcheck source=/dev/null
+    . "${_self}.cfg" || exit 1    
 
     local _tmpfile=/tmp/newfilecontent$$.tmp
     h2 "generate files from templates..."
-    for mytpl in $( ls -1 ./templates/* )
+    for mytpl in templates/*
     do
         # h3 $mytpl
         local _doReplace=1
 
         # fetch traget file from first line
-        target=$( head -1 $mytpl | grep "^# TARGET:" | cut -f 2- -d ":" | awk '{ print $1 }' )
+        target=$( head -1 "$mytpl" | grep "^# TARGET:" | cut -f 2- -d ":" | awk '{ print $1 }' )
 
         if [ -z "$target" ]; then
-            echo SKIP: $mytpl - target was not found in 1st line
+            echo "SKIP: $mytpl - target was not found in 1st line"
             _doReplace=0
         fi
 
@@ -191,31 +200,33 @@ function _generateFiles(){
         if [ $_doReplace -eq 1 ]; then
 
             # write file from line 2 to a tmp file
-            sed -n '2,$p' $mytpl >$_tmpfile
+            sed -n '2,$p' "$mytpl" >"$_tmpfile"
 
             # add generator
             # sed -i "s#{{generator}}#generated by $0 - template: $mytpl - $( date )#g" $_tmpfile
-            local _md5=$( md5sum $_tmpfile | awk '{ print $1 }' )
-            sed -i "s#{{generator}}#GENERATED BY $( basename $0 ) - template: $mytpl - $_md5#g" $_tmpfile
+            local _md5; _md5=$( md5sum $_tmpfile | awk '{ print $1 }' )
+            sed -i "s#{{generator}}#GENERATED BY $_self - template: $mytpl - $_md5#g" $_tmpfile
 
             # loop over vars to make the replacement
-            grep "^[a-zA-Z]" $( basename $0 ).cfg | while read line
+            grep "^[a-zA-Z]" "$_self.cfg" | while read -r line
             do
                 # echo replacement: $line
-                mykey=$( echo $line | cut -f 1 -d '=' )
-                myvalue="$( eval echo \"\${$mykey}\" )"
-                # grep "{{$mykey}}" $_tmpfile
+                mykey=$( echo "$line" | cut -f 1 -d '=' )
+                myvalue="$( eval echo \"\$"$mykey"\" )"
 
-                # TODO: multiline values fail here in replacement with sed 
-                sed -i "s#{{$mykey}}#${myvalue}#g" $_tmpfile
+                if grep "{{$mykey}}" $_tmpfile >/dev/null; then
+
+                    # TODO: multiline values fail here in replacement with sed 
+                    sed -i -e "s#{{$mykey}}#${myvalue}#g" $_tmpfile
+                fi
             done
+
             _fix_no-db $_tmpfile
 
             # echo "changes for $target:"
-            diff --color=always "../$target"  "$_tmpfile" | grep -v "$_md5" | grep -v "^---" | grep .
-            if [ $? -eq 0 -o ! -f "../$target" ]; then
+            if diff --color=always "../$target"  "$_tmpfile" | grep -v "$_md5" | grep -v "^---" | grep . || [ ! -f "../$target" ]; then
                 echo -n "$mytpl - changes detected - writing [$target] ... "
-                mkdir -p $( dirname  "../$target" ) || exit 2
+                mkdir -p "$( dirname  ../"$target" )" || exit 2
                 mv "$_tmpfile" "../$target" || exit 2
                 echo OK
             else
@@ -232,20 +243,20 @@ function _generateFiles(){
 # a traget file.
 function _removeGeneratedFiles(){
     h2 "remove generated files..."
-    for mytpl in $( ls -1 ./templates/* )
+    for mytpl in templates/*
     do
-        h3 $mytpl
+        h3 "$mytpl"
 
         # fetch traget file from first line
-        target=$( head -1 $mytpl | grep "^# TARGET:" | cut -f 2- -d ":" | awk '{ print $1 }' )
+        target=$( head -1 "$mytpl" | grep "^# TARGET:" | cut -f 2- -d ":" | awk '{ print $1 }' )
 
-        if [ ! -z "$target" -a -f "../$target" ]; then
+        if [ -n "$target" ] && [ -f "../$target" ]; then
             echo -n "REMOVING "
             ls -l "../$target" || exit 2
             rm -f "../$target" || exit 2
             echo OK
         else
-            echo SKIP: $target
+            echo "SKIP: $target"
         fi
         
     done
@@ -258,7 +269,7 @@ function _showContainers(){
     if [ -z "$bLong" ]; then
         docker-compose -p "$APP_NAME" ps
     else
-        docker ps | grep $APP_NAME
+        docker ps | grep "$APP_NAME"
     fi
 }
 
@@ -281,7 +292,7 @@ function _showInfos(){
     docker-compose top
 
     h3 "Check app port"
-    if echo >/dev/tcp/localhost/${APP_PORT}; then
+    if echo >"/dev/tcp/localhost/${APP_PORT}"; then
         echo "OK, app port ${APP_PORT} is reachable"
         echo
         _showBrowserurl
@@ -291,7 +302,7 @@ function _showInfos(){
 
     if [ "$DB_ADD" != "false" ]; then
         h3 "Check database port"
-        if echo >/dev/tcp/localhost/${DB_PORT}; then
+        if echo >"/dev/tcp/localhost/${DB_PORT}"; then
             echo "OK, db port ${DB_PORT} is reachable"
             echo
             echo "In a local DB admin tool you can connect it:"
@@ -309,7 +320,7 @@ function _showInfos(){
 
 # helper for menu: print an inverted key
 function  _key(){
-    printf "\e[4;7m ${1} \e[0m"
+    echo -en "\e[4;7m ${1} \e[0m"
 }
 
 # helper: wait for a return key
@@ -343,7 +354,7 @@ while true; do
 
     case "$action" in
         "-h") showHelp; exit 0 ;;
-        "-v") echo $(basename $0) $_version; exit 0 ;;
+        "-v") echo "$_self $_version"; exit 0 ;;
         g)
             _removeGitdata
             ;;
@@ -364,7 +375,7 @@ while true; do
             ;;
         u|U)
             h2 "Bring up..."
-            dockerUp="docker-compose -p "$APP_NAME" --verbose up -d --remove-orphans"
+            dockerUp="docker-compose -p $APP_NAME --verbose up -d --remove-orphans"
             if [ "$action" = "U" ]; then
                 dockerUp+=" --build"
             fi
@@ -394,14 +405,14 @@ while true; do
                 dockerid=$_containers
             else
                 echo "Select a container:"
-                echo "$_containers" | sed "s#^#    #g"
+                sed "s#^#    #g" <<< "$_containers"
                 echo -n "id or name >"
-                read dockerid
+                read -r dockerid
             fi
             test -z "$dockerid" || (
                 echo
                 echo "> docker exec -it $dockerid /bin/bash     (type 'exit' + Return when finished)"
-                docker exec -it $dockerid /bin/bash
+                docker exec -it "$dockerid" /bin/bash
             )
             ;;
         p)
@@ -409,14 +420,15 @@ while true; do
 
             dockerid="${APP_NAME}-server"
             echo -n "Scanning ... "
-            _iFiles=$( docker exec -it $dockerid /bin/bash -c "find . -name '*.php' " | wc -l )
+            typeset -i _iFiles
+            _iFiles=$( docker exec -it "$dockerid" /bin/bash -c "find . -name '*.php' " | wc -l )
 
             if [ $_iFiles -gt 0 ]; then
                 echo "found $_iFiles [*.php] files ... errors from PHP $APP_PHP_VERSION linter:"
-                time if echo $APP_PHP_VERSION | grep -E "([567]\.|8\.[012])" >/dev/null ; then
-                    docker exec -it $dockerid /bin/bash -c "find . -name '*.php' -exec php -l {} \; | grep -v '^No syntax errors detected'"
+                time if echo "$APP_PHP_VERSION" | grep -E "([567]\.|8\.[012])" >/dev/null ; then
+                    docker exec -it "$dockerid" /bin/bash -c "find . -name '*.php' -exec php -l {} \; | grep -v '^No syntax errors detected'"
                 else
-                    docker exec -it $dockerid /bin/bash -c "php -l \$( find . -name '*.php' ) | grep -v '^No syntax errors detected' "
+                    docker exec -it "$dockerid" /bin/bash -c "php -l \$( find . -name '*.php' ) | grep -v '^No syntax errors detected' "
                 fi
                 echo
                 _wait
