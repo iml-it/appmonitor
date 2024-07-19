@@ -8,8 +8,6 @@ Free software and Open Source from University of Bern :: IML - Institute of Medi
 
 📄 Source: <https://github.com/iml-it/appmonitor> \
 📜 License: GNU GPL 3.0 \
-📗 You can read the docs online: <https://os-docs.iml.unibe.ch/appmonitor/>
-Or have a look to the [docs](docs/) subdirectory.
-
+📗 Docs: <https://os-docs.iml.unibe.ch/appmonitor/>
 
 ![Client](docs/images/server_web_app_details.png "Client view in monitor web gui")
