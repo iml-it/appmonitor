@@ -45,7 +45,7 @@ class appmonitorserver_gui extends appmonitorserver
     var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
     var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
     var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.136";
+    var $_sVersion = "0.137";
 
     /**
      * html code for icons in the web gui
