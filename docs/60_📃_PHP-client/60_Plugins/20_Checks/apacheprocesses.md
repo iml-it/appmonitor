@@ -10,7 +10,7 @@ The returned counts of active workers is for all domains running on the same hos
 ## Requirements ##
 
 - works for apache httpd only; not for other webservers (i.e. NginX, ...)
-- server status must be available (default: http://localhost/server-status) - to do so, enable mod_status and verify that ExtendedStatus = On)
+- server status must be available (default: <http://localhost/server-status>) - to do so, enable mod_status and verify that ExtendedStatus = On)
 - IMPORTANT: limit the access to the server status page to the required systems (i.e. IP restriction).
 
 ## Syntax ##
@@ -24,7 +24,7 @@ $oMonitor->addCheck(
             "function" => "ApacheProcesses",
             "params" => array(
                 "url"     => [url for apache httpd server status page],
-                "warning" => [warn on min N active workers],
+                "warning" => [warn on min N percent of active workers],
                 "error"   => [error limit],
             ),
         ),
