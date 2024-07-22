@@ -201,7 +201,7 @@ function _generateFiles(){
 
     local _tmpfile=/tmp/newfilecontent$$.tmp
     h2 "generate files from templates..."
-    time for mytpl in templates/*
+    for mytpl in templates/*
     do
         # h3 $mytpl
         local _doReplace=1
