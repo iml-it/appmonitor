@@ -18,6 +18,7 @@
 # 2024-07-01  v1.11 <www.axel-hahn.de>        diff with colored output; suppress errors on port check
 # 2024-07-19  v1.12 <axel.hahn@unibe.ch>      apply shell fixes
 # 2024-07-22  v1.13 <axel.hahn@unibe.ch>      show info if there is no database container; speedup replacements
+# 2024-07-22  v1.14 <axel.hahn@unibe.ch>      show colored boxes with container status
 # ======================================================================
 
 cd "$( dirname "$0" )" || exit 1
@@ -34,7 +35,7 @@ _self=$( basename "$0" )
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
 
-_version="1.13"
+_version="1.14"
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -272,23 +273,60 @@ function _removeGeneratedFiles(){
 function _showContainers(){
     local bLong=$1
     local _out
-    h2 CONTAINERS
+
     _out=$( if [ -z "$bLong" ]; then
         docker-compose -p "$APP_NAME" ps
     else
-        docker ps | grep "$APP_NAME"
+        # docker ps | grep "$APP_NAME"
+        docker-compose -p "$APP_NAME" ps
     fi)
+
+    local Status=
+    local colWeb=
+    local colDb=
+
+    local fgGray="\e[1;30m"
+    local fgRed="\e[31m"
+    local fgGreen="\e[32m"
+
+    colDb="$fgRed"
+    colWeb="$fgRed"
+
+    h2 CONTAINERS
     if [ "$( wc -l <<< "$_out" )"  -eq 1 ]; then
         if [ "$DB_ADD" = "false" ]; then
-            echo "The web container is <$APP_NAME> is not running. This app has no database container."
+            colDb="$fgGray"
+            Status="The web container is <$APP_NAME> is not running. This app has no database container."
         else
-            echo "No container is running for <$APP_NAME>."
+            Status="No container is running for <$APP_NAME>."
         fi
     else
-        echo "$_out"
+        grep -q "${APP_NAME}-server" <<< "$_out" && colWeb="$fgGreen"
+        grep -q "${APP_NAME}-db" <<< "$_out"  && colDb="$fgGreen"
         if [ "$DB_ADD" = "false" ]; then
-            echo "INFO: This app has no database container."
+            colDb="$fgGray"
+            Status="INFO: This app has no database container."
         fi
+    fi
+
+    printf "$colWeb  ________________________  $colDb   ________________________    \e[0m \n"
+    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" ""                        ""
+    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" "Webserver"               "Database"
+    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" "${APP_NAME}-web"         "${APP_NAME}-db"
+    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" "PHP ${APP_PHP_VERSION}"  "${MYSQL_IMAGE}"
+    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" ":${APP_PORT}"            ":${DB_PORT}"
+    printf "$colWeb |________________________| $colDb  |________________________|   \e[0m \n"
+
+    echo
+    echo "$Status"
+    echo
+
+    if [ -n "$bLong" ]; then
+        echo "$_out"
+
+        h2 STATS
+        docker stats --no-stream
+        echo
     fi
 
 }
@@ -308,8 +346,13 @@ function _showInfos(){
     _showContainers long
     h2 INFO
 
-    h3 "processes"
-    docker-compose top
+    h3 "processes webserver"
+    # docker-compose top
+    docker top "${APP_NAME}-server"
+    if [ ! "$DB_ADD" = "false" ]; then
+        h3 "processes database"
+        docker top "${APP_NAME}-db"
+    fi
 
     h3 "Check app port"
     if echo >"/dev/tcp/localhost/${APP_PORT}"; then
@@ -360,7 +403,11 @@ while true; do
     if [ -z "$action" ]; then
 
         echo
-        echo -e "\e[32m----===###| INITIALIZER FOR DOCKER v$_version | $APP_NAME |###===---\e[0m"
+        echo "+------------------------------------------------------------------"
+        echo "|"
+        echo "|  Initializer for docker v$_version            <<  $APP_NAME  >>"
+        echo "|"
+        echo ":"
 
         _showContainers
 
