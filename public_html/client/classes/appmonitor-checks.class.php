@@ -51,7 +51,7 @@ if (!defined('RESULT_OK')) {
  * 2021-10-28  0.93  axel.hahn@iml.unibe.ch  add plugins<br>
  * 2021-12-14  0.93  axel.hahn@iml.unibe.ch  split plugins into single files; added key group in a check<br>
  * 2023-06-02  0.125 axel.hahn@unibe.ch      replace array_key_exists for better readability
- * 2024-07-19  0.137  axel.hahn@unibe.ch      php 8 only: use typed variables
+ * 2024-07-22  0.137 axel.hahn@unibe.ch      php 8 only: use typed variables
  * --------------------------------------------------------------------------------<br>
  * @version 0.137
  * @author Axel Hahn
