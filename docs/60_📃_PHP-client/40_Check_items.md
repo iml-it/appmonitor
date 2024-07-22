@@ -1,6 +1,4 @@
-# Check functions in detail #
-
-## Introduction ##
+## Check functions in detail
 
 A check makes a single test like verify if a file exists, a database can be connected and so on. A check will be added with `$oMonitor->addCheck(...)`. You can add as many checks as you want.
 
@@ -10,7 +8,7 @@ And I suggest to add many checks to verify in many details if your application h
 
 The available checks are the files in public_html/client/plugins/checks/.
 
-## General include of a check ##
+## General include of a check
 
 Have a look to Let's have a look to public_html/client/index.sample.php.
 
@@ -33,36 +31,36 @@ $oMonitor = new appmonitor();
 
 // now you can use addCheck() multiple times.
 $oMonitor->addCheck(
-  array(
+  [
     "name" => "[short name of the check]",
     "description" => "[an a bit longer description]",
     "group" => "[optional: name of a group]",
     "parent" => "[optional: reference a name of another check]",
     "check" => [Array for the check],
     "worstresult" => RESULT_WARNING
-  )
+  ]
 );
 ```
 
-| key          | type     | description |
-|---           |---       |---
-|name🔸        |(string)  | "id" if the check
-|description🔸 |(string)  | a short description
-|group         |(string)  | optional override name of a group
+| key          | type     | description                         |
+|---           |---       |---                                  |
+|name🔸        |(string)  | "id" if the check                   |
+|description🔸 |(string)  | a short description                 |
+|group         |(string)  | optional override name of a group   |
 |parent        |(string)  | optional set a "name" of another check to create a deoendency chain |
-|check🔸       |(array)   | check to perform
-|worstresult   |(integer) | optional: limit maximum error level if the check fails<br>if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING.
+|check🔸       |(array)   | check to perform                    |
+|worstresult   |(integer) | optional: limit maximum error level if the check fails; if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING. |
 
 🔸 required
 
 The key `check` contains 2 subkeys:
 
 ```php
-	"function" => "[Name of a defined check]",
-	"params" => [key->value array; count and keys depend on the function]
+  "function" => "[Name of a defined check]",
+  "params" => [key->value array; count and keys depend on the function]
 ```
 
-### Groups ###
+## Groups
 
 This functionality has impact in the rendered view in the web ui only.
 
@@ -102,20 +100,20 @@ A default group is set in all by default shipped checks.
 
 You can override it by setting another group.
 
-| Group      | Description |
-|---         |---
-| cloud      | cloud icon |
-| database   | database icon |
-| deny       | deny sign |
-| disk       | hard disk icon |
-| file       | file icon |
-| folder     | folder icon |
+| Group      | Description        |
+|---         |---                 |
+| cloud      | cloud icon         |
+| database   | database icon      |
+| deny       | deny sign          |
+| disk       | hard disk icon     |
+| file       | file icon          |
+| folder     | folder icon        |
 | monitor    | monitor graph icon |
-| network    | globe icon |
-| security   | keys icon |
-| service    | cogs icon |
+| network    | globe icon         |
+| security   | keys icon          |
+| service    | cogs icon          |
 
-### Chaining with parent ###
+## Chaining with a parent
 
 With a chaining value you can reference another check by giving its name value.
 

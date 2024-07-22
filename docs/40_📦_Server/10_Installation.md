@@ -1,16 +1,16 @@
-# Requirements #
+## Requirements
 
 - PHP7 or 8 (up to 8.3)
 - php-curl
 
-# Installation #
+## Installation
 
-## Install the server ##
+### Install the server
 
 Below a document root of a website create a directory [webroot]/appmonitor/ (sure it works to install the server into webroot too).
 
-- download zip file from Github: https://github.com/iml-it/appmonitor
-- create a subdir "appmonitor" below your webroot 
+- download zip file from Github: <https://github.com/iml-it/appmonitor>
+- create a subdir "appmonitor" below your webroot
 - extract all files of the public_html subdir from this archive into [webroot]/appmonitor/
 - verify the installation with your browser
   <http://localhost/appmonitor/server/>
@@ -18,7 +18,7 @@ Below a document root of a website create a directory [webroot]/appmonitor/ (sur
 - Go to the setup.
 - Add the url <http://localhost/appmonitor/client/check-appmonitor-server.php> to integrate a first check.
 
-## Install server with git ##
+### Install server with git
 
 To use git you need access to the webserver configuration to be able to define a webroot that must point to the public_html folder.
 
@@ -38,7 +38,7 @@ You will see a welcome message. Go to the settings page and add this url:
 `http://localhost/client/check-appmonitor-server.php`
 This is the self check of the appmonitor server.
 
-## Using a Docker container ##
+### Using a Docker container
 
 The repository includes my development environment.
 
@@ -60,7 +60,7 @@ cd appmonitor
 ./docker/init.sh
 ```
 
-There you have a menu. 
+There you have a menu.
 
 ```txt
 >>>>> MENU
@@ -98,11 +98,11 @@ In the webbrowser open <http://localhost:8001/>. You will see a welcome message.
 `http://localhost/client/check-appmonitor-server.php`
 This is the self check of the appmonitor server.
 
-## Production use ##
+### Production use
 
 If you are happy with the first clicks around then continue the next chaprters.
 
-# Used 3rd party tools #
+## Used 3rd party tools
 
 I use several libraries to save time and to use stable components. I just wanna say thank you to all of them.
 

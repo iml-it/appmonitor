@@ -1,4 +1,4 @@
-# Backup #
+## Backup
 
 The Appmonitor writes here:
 
@@ -7,9 +7,9 @@ The Appmonitor writes here:
 
 The recommendation is to update the whole application dir. The size won't exceed a few megabyte.
 
-# Update software #
+## Update software
 
-## Installation with git ##
+### On installation with git
 
 Using git is the most simple way to update the software.
 
@@ -18,8 +18,8 @@ cd [appdir]
 git pull
 ```
 
-## Installation with zip ##
+### On installation with zip
 
-Download the zip file from Github: https://github.com/iml-it/appmonitor.
+Download the zip file from Github: <https://github.com/iml-it/appmonitor>.
 
 Extract all files and put all files below the master subdir into your current installation dir - overwrite existing files.

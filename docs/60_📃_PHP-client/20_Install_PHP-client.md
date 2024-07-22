@@ -1,10 +1,10 @@
-# Get started #
+## Get started
 
 The project package contains the PHP client and the server.
 
 If you run an application, CMS, Blog, ... and if it is using PHP then you need the client part only.
 
-# Install with a script #
+## Install with a script
 
 There is a script in `public_html/client/git_update_appmonitor.sh` that automates the manual steps above.
 It acts linke an installer and updater.
@@ -17,7 +17,7 @@ Requirements for the installer:
 - rsync
 - git
 
-## Get the installer ##
+### Get the installer
 
 1) Below the document root of a website create a new directory, i.e. [webroot]/appmonitor/
 2) Copy git_update_appmonitor.sh there or fetch it as raw file
@@ -72,7 +72,7 @@ The Video shows the installation "somewhere":
 
 ```
 
-## First run: install ##
+### First run: install
 
 Install files by executing it: `./git_update_appmonitor.sh`.
 
@@ -80,16 +80,16 @@ The Video shows the first run of the installer:
 
 ![Installation](../images/tty_install_php_client_run.gif)
 
-# Manual installation #
+## Manual installation
 
-## Get sources ##
+### Get sources
 
 Get the files
 
 - with git pull or
 - download and extract the archive in a temporary directory
 
-## Copy needed files ##
+### Copy needed files
 
 Copy the files of subdir "client" from [package]/public_html/.
 

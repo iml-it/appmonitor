@@ -1,7 +1,4 @@
-
-# Notification #
-
-## Introduction ##
+## Introduction
 
 Notifications will be triggered if ...
 
@@ -25,7 +22,7 @@ config are global receivers getting the notifications for all applications.
 When sending a notification it loops over all known notification plugins
 and sends messages with all methods as long a TO item exists.
 
-### Email ##
+### Email
 
 * **FROM** address is taken from server config notification -> from -> email
 * **TO** is an array of email addresses; they are merged from
@@ -38,7 +35,7 @@ For more details to the subject and message see the section for message texts be
 
 The email is send as plain text and high priority.
 
-### Slack ###
+### Slack
 
 * FROM - not needed
 * **TO** is an array with label + url as items; they are merged from
@@ -50,7 +47,7 @@ The email is send as plain text and high priority.
 A slack message ist using "[APPMONITOR]" as sending user without icon.
 As message text it takes the same generated text like for the email.
 
-## Message texts ##
+## Message texts
 
 The sent messages are language dependent texts and the appmonitor is
 shipped with a default. In the language file they are defined in the subkey "notifications".
@@ -104,7 +101,7 @@ Remarks:
 * (2) It requires that a saved state with another status for this url. Value is "-" if there is no state change logged yet
 * (3) requires a value for "serverurl" in the config
 
-To preview the texts you can 
+To preview the texts you can
 
 * set "debug" to true in you config
 * add role "ui-debug" for your user in ./server/config/appmonitor-server-config.json

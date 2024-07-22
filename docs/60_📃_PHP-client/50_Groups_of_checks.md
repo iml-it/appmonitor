@@ -1,6 +1,4 @@
-# Bundled checks for an application #
-
-## Introduction ##
+## Bundled checks for an application
 
 For a product which has multiple or thousands of instances it is useful, tho have a pre defined set of checks.
 

@@ -1,9 +1,9 @@
-# Introduction #
+## Introduction
 
-The php client contains a few checks. You can extend the functionality by 
-writing custom plugins. 
+The php client contains a few checks. You can extend the functionality by
+writing custom plugins.
 
-# Conventions #
+## Conventions
 
 * custom checks are in the "plugins/checks/" subdirectory
 * naming convention: they must be lowercase - [name of your check] + ".php"
@@ -19,7 +19,7 @@ $oMonitor = new appmonitor();
 print_r($oMonitor->listChecks());
 ```
 
-# Example #
+## Example
 
 A good starting point is the file [client]/plugins/hello.php
 
@@ -67,7 +67,7 @@ _checkArrayKeys()
 $this->_checkArrayKeys($aParams, "message");
 ```
 
-After making the magic things things of your custom check you need to 
+After making the magic things things of your custom check you need to
 return a result set as an array.
 
 The class appmonitorcheck that calls your plugin will put your response
