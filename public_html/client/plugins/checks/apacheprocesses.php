@@ -145,7 +145,7 @@ class checkApacheProcesses extends appmonitorcheck
      * @param array $aParams  parameters
      * @return array
      */
-    public function run(array $aParams)
+    public function run(array $aParams): array
     {
 
         // --- (1) verify if array key(s) exist:
