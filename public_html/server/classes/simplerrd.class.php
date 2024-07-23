@@ -5,7 +5,7 @@
  *
  * @author hahn
  * 
- * 2024-07-17  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-07-23  axel.hahn@unibe.ch  php 8 only: use typed variables
  */
 class simpleRrd
 {
@@ -83,10 +83,8 @@ class simpleRrd
      */
     protected function _getLogs(): bool
     {
-        $this->_aLog = $this->_oCache->read();
-        if (!is_array($this->_aLog)) {
-            $this->_aLog = [];
-        }
+        $cachedata = $this->_oCache->read();
+        $this->_aLog = (is_array($cachedata)) ? $cachedata : [];
         return true;
     }
 
