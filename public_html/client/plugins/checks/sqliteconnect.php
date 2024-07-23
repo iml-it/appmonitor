@@ -18,15 +18,17 @@
  * ____________________________________________________________________________
  * 
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 
  */
-class checkSqliteConnect extends appmonitorcheck{
+class checkSqliteConnect extends appmonitorcheck
+{
     /**
-     * get default group of this check
-     * @param array   $aParams
-     * @return array
+     * Get default group of this check
+     * @return string
      */
-    public function getGroup(){
+    public function getGroup()
+    {
         return 'database';
     }
 
@@ -37,33 +39,44 @@ class checkSqliteConnect extends appmonitorcheck{
      *     db                  string   full path of sqlite file 
      *     timeout             integer  optional timeout in sec; default: 5
      * ]
-     * @return boolean
+     * @return array
      */
-    public function run($aParams) {
+    public function run($aParams): array
+    {
         $this->_checkArrayKeys($aParams, "db");
         if (!file_exists($aParams["db"])) {
-            return [RESULT_ERROR, "ERROR: Sqlite database file " . $aParams["db"] . " does not exist."];
+            return [
+                RESULT_ERROR,
+                "ERROR: Sqlite database file " . $aParams["db"] . " does not exist."
+            ];
         }
-        if(!isset($aParams['user'])){
-            $aParams['user']='';
+        if (!isset($aParams['user'])) {
+            $aParams['user'] = '';
         }
-        if(!isset($aParams['password'])){
-            $aParams['password']='';
+        if (!isset($aParams['password'])) {
+            $aParams['password'] = '';
         }
         try {
             // $db = new SQLite3($sqliteDB);
             // $db = new PDO("sqlite:".$sqliteDB);
-            $o = new PDO("sqlite:" . $aParams["db"],
-                $aParams['user'], 
-                $aParams['password'], 
+            $o = new PDO(
+                "sqlite:" . $aParams["db"],
+                $aParams['user'],
+                $aParams['password'],
                 [
-                    PDO::ATTR_TIMEOUT => (isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp,                  
+                    PDO::ATTR_TIMEOUT => (isset($aParams["timeout"]) && (int) $aParams["timeout"]) ? (int) $aParams["timeout"] : $this->_iTimeoutTcp,
                 ]
             );
-            return [RESULT_OK, "OK: Sqlite database " . $aParams["db"] . " was connected"];
+            return [
+                RESULT_OK,
+                "OK: Sqlite database " . $aParams["db"] . " was connected"
+            ];
         } catch (Exception $e) {
-            return [RESULT_ERROR, "ERROR: Sqlite database " . $aParams["db"] . " was not connected. " . $e->getMessage()];
+            return [
+                RESULT_ERROR, 
+                "ERROR: Sqlite database " . $aParams["db"] . " was not connected. " . $e->getMessage()
+            ];
         }
     }
-    
+
 }

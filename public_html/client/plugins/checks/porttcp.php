@@ -21,35 +21,38 @@
  * 2022-07-05  <axel.hahn@iml.unibe.ch>  send unknown if socket module is not activated.
  * 2022-09-16  <axel.hahn@iml.unibe.ch>  read error before closing socket.
  * 2022-12-05  <axel.hahn@unibe.ch>      add @ sign at socket functions to prevent warning
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 
  */
-class checkPortTcp extends appmonitorcheck{
+class checkPortTcp extends appmonitorcheck
+{
     /**
-     * get default group of this check
-     * @param array   $aParams
-     * @return array
+     * Get default group of this check
+     * @return string
      */
-    public function getGroup(){
+    public function getGroup(): string
+    {
         return 'network';
     }
 
     /**
-     * check if system is listening to a given port
+     * Check if system is listening to a given port
      * @param array $aParams
      * [
      *     port                integer  port
      *     host                string   optional hostname to connect; default: 127.0.0.1
      *     timeout             integer  optional timeout in sec; default: 5
      * ]
-     * @return boolean
+     * @return array
      */
-    public function run($aParams) {
+    public function run(array $aParams): array
+    {
         $this->_checkArrayKeys($aParams, "port");
 
         $sHost = $aParams['host'] ?? '127.0.0.1';
         $iPort = (int) $aParams['port'];
 
-        if (!function_exists('socket_create')){
+        if (!function_exists('socket_create')) {
             return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform tcp test. The socket module is not enabled in the php installation."];
         }
 
@@ -65,14 +68,14 @@ class checkPortTcp extends appmonitorcheck{
             SOL_SOCKET,  // socket level
             SO_SNDTIMEO, // timeout option
             [
-              "sec"=>(isset($aParams["timeout"]) && (int)$aParams["timeout"]) ? (int)$aParams["timeout"] : $this->_iTimeoutTcp, // timeout in seconds
-              "usec"=>0
+                "sec" => (isset($aParams["timeout"]) && (int) $aParams["timeout"]) ? (int) $aParams["timeout"] : $this->_iTimeoutTcp, // timeout in seconds
+                "usec" => 0
             ]
         );
 
         $result = @socket_connect($socket, $sHost, $iPort);
         if ($result === false) {
-            $aResult=[RESULT_ERROR, "ERROR: $sHost:$iPort failed. " . socket_strerror(socket_last_error($socket))];
+            $aResult = [RESULT_ERROR, "ERROR: $sHost:$iPort failed. " . socket_strerror(socket_last_error($socket))];
             socket_close($socket);
             return $aResult;
         } else {
@@ -80,5 +83,5 @@ class checkPortTcp extends appmonitorcheck{
             return [RESULT_OK, "OK: $sHost:$iPort was connected."];
         }
     }
-    
+
 }

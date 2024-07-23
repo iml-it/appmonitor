@@ -18,67 +18,69 @@
  * ____________________________________________________________________________
  * 
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 
  */
-class checkDiskfree extends appmonitorcheck{
+class checkDiskfree extends appmonitorcheck
+{
     /**
-     * get default group of this check
-     * @param array   $aParams
-     * @return array
+     * Get default group of this check
+     * @return string
      */
-    public function getGroup(){
+    public function getGroup(): string
+    {
         return 'disk';
     }
 
     /**
-     * check free disk space on a given directory
+     * Check free disk space on a given directory
      * @param array $aParams
      * [
      *     "directory"   directory that must exist
      *     "warning"     space for warning (optional)
      *     "critical"    minimal space
      * ]
-     * @return boolean
+     * @return array
      */
-    public function run($aParams) {
-        $this->_checkArrayKeys($aParams, "directory", "critical");
-        
+    public function run(array $aParams): array
+    {
+        $this->_checkArrayKeys($aParams, "directory,critical");
+
         $sDirectory = $aParams["directory"];
-        if(!is_dir($sDirectory)){
+        if (!is_dir($sDirectory)) {
             return [
-                RESULT_ERROR, 
-                'directory [' . $sDirectory . '] does not exist. Maybe it is wrong or is not mounted.'
+                RESULT_ERROR,
+                "directory [$sDirectory] does not exist. Maybe it is wrong or is not mounted."
             ];
         }
-        
+
         $iWarn = isset($aParams["warning"]) ? $this->_getSize($aParams["warning"]) : false;
         $iCritical = $this->_getSize($aParams["critical"]);
-        $iSpaceLeft=disk_free_space($sDirectory);
-        
-        
-        $sMessage='[' . $sDirectory . '] has '.$this->_getHrSize($iSpaceLeft).' left.';
-        
-        if($iWarn){
-            if($iWarn<=$iCritical){
+        $iSpaceLeft = disk_free_space($sDirectory);
+
+        $sMessage = '[' . $sDirectory . '] has ' . $this->_getHrSize($iSpaceLeft) . ' left.';
+
+        if ($iWarn) {
+            if ($iWarn <= $iCritical) {
                 header('HTTP/1.0 503 Service Unavailable');
                 die("ERROR in a Diskfree check - warning value must be larger than critical.<pre>" . print_r($aParams, true));
             }
-            if ($iWarn<$iSpaceLeft){
+            if ($iWarn < $iSpaceLeft) {
                 return [
-                    RESULT_OK, 
-                    $sMessage.' Warning level is not reached yet (still '.$this->_getHrSize($iSpaceLeft-$iWarn).' over warning limit).'
+                    RESULT_OK,
+                    "$sMessage Warning level is not reached yet (still " . $this->_getHrSize($iSpaceLeft - $iWarn) . "over warning limit)."
                 ];
             }
-            if ($iWarn>$iSpaceLeft && $iCritical<$iSpaceLeft){
+            if ($iWarn > $iSpaceLeft && $iCritical < $iSpaceLeft) {
                 return [
-                    RESULT_WARNING, 
-                    $sMessage.' Warning level '.$this->_getHrSize($iWarn).' was reached (space is '.$this->_getHrSize($iWarn-$iSpaceLeft).' below warning limit; still '.$this->_getHrSize($iSpaceLeft-$iCritical).' over critical limit).'
+                    RESULT_WARNING,
+                    $sMessage . ' Warning level ' . $this->_getHrSize($iWarn) . ' was reached (space is ' . $this->_getHrSize($iWarn - $iSpaceLeft) . ' below warning limit; still ' . $this->_getHrSize($iSpaceLeft - $iCritical) . ' over critical limit).'
                 ];
             }
         }
         // check space
-        if ($iCritical<$iSpaceLeft){
-            return [RESULT_OK, $sMessage .' Minimum is not reached yet (still '.$this->_getHrSize($iSpaceLeft-$iCritical).' over critical limit).'];
+        if ($iCritical < $iSpaceLeft) {
+            return [RESULT_OK, $sMessage . ' Minimum is not reached yet (still ' . $this->_getHrSize($iSpaceLeft - $iCritical) . ' over critical limit).'];
         } else {
             return [RESULT_ERROR, $sMessage];
         }

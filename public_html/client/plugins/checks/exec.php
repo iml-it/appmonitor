@@ -20,20 +20,22 @@
  * ____________________________________________________________________________
  * 
  * 2022-09-19  <axel.hahn@iml.unibe.ch>
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 
  */
-class checkExec extends appmonitorcheck{
+class checkExec extends appmonitorcheck
+{
     /**
-     * get default group of this check
-     * @param array   $aParams - see run() method
-     * @return array
+     * Get default group of this check
+     * @return string
      */
-    public function getGroup($aParams){
+    public function getGroup()
+    {
         return 'service';
     }
 
     /**
-     * check execution of a command
+     * Check execution of a command
      * @param array $aParams
      * [
      *     "command"        {string} command to execute
@@ -48,74 +50,78 @@ class checkExec extends appmonitorcheck{
      *     "searchWarn"     {string} if search string is found check returns with warning
      *     "searchCritical" {string} if search string is found check returns with critical
      * ]
-     * @return boolean
+     * @return array
      */
-    public function run($aParams) {
+    public function run(array $aParams): array
+    {
         $this->_checkArrayKeys($aParams, "command");
-        $_sCmd=$aParams['command'];
-        $_bShowOutput=isset($aParams['output'])        ? !!$aParams['output']       : true;
+        $_sCmd = $aParams['command'];
+        $_bShowOutput = isset($aParams['output']) ? !!$aParams['output'] : true;
 
-        $_aRcOK=isset($aParams['exitOK'])              ? $aParams['exitOK']       : [];
-        $_aRcWarning=isset($aParams['exitWarn'])       ? $aParams['exitWarn']     : [];
-        $_aRcCritical=isset($aParams['exitCritical'])  ? $aParams['exitCritical'] : [];
+        $_aRcOK = isset($aParams['exitOK']) ? $aParams['exitOK'] : [];
+        $_aRcWarning = isset($aParams['exitWarn']) ? $aParams['exitWarn'] : [];
+        $_aRcCritical = isset($aParams['exitCritical']) ? $aParams['exitCritical'] : [];
 
-        $_sMode='default';
-        if(count($_aRcOK) + count($_aRcWarning) + count($_aRcCritical)){
-            $_sMode='exitcode';
+        $_sMode = 'default';
+        if (count($_aRcOK) + count($_aRcWarning) + count($_aRcCritical)) {
+            $_sMode = 'exitcode';
         }
 
-        exec($_sCmd,$aOutput, $iRc);
-        $_sOut=$_bShowOutput ? '<br>'.implode("<br>", $aOutput) : '';
+        exec($_sCmd, $aOutput, $iRc);
+        $_sOut = $_bShowOutput ? '<br>' . implode("<br>", $aOutput) : '';
 
-        switch($_sMode){
+        switch ($_sMode) {
             // non-zero exitcode is an error
             case "default":
                 if ($iRc) {
                     return [
-                        RESULT_ERROR, 
-                        'command failed with exitcode '.$iRc.': [' . $_sCmd . ']'.$_sOut
+                        RESULT_ERROR,
+                        'command failed with exitcode ' . $iRc . ': [' . $_sCmd . ']' . $_sOut
                     ];
                 } else {
-                    return[
-                        RESULT_OK, 
-                        'OK [' . $_sCmd . '] ' .$_sOut
+                    return [
+                        RESULT_OK,
+                        "OK [$_sCmd] $_sOut"
                     ];
-                };
-                break;;
+                }
+                ;
+                // break;
+                ;
 
             // handle given custom exitcodes
             case "exitcode":
-                if (in_array($iRc, $_aRcCritical)){
+                if (in_array($iRc, $_aRcCritical)) {
                     return [
-                        RESULT_ERROR, 
-                        'Critical exitcode '.$iRc.' detected: [' . $_sCmd . ']'.$_sOut
+                        RESULT_ERROR,
+                        "Critical exitcode $iRc detected: [$_sCmd] $_sOut"
                     ];
                 }
-                if (in_array($iRc, $_aRcWarning)){
+                if (in_array($iRc, $_aRcWarning)) {
                     return [
-                        RESULT_WARNING, 
-                        'Warning exitcode '.$iRc.' detected: [' . $_sCmd . ']'.$_sOut
+                        RESULT_WARNING,
+                        "Warning exitcode $iRc detected: [$_sCmd] $_sOut"
                     ];
                 }
-                if ($iRc == 0 || in_array($iRc, $_aRcOK)){
+                if ($iRc == 0 || in_array($iRc, $_aRcOK)) {
                     return [
-                        RESULT_OK, 
-                        'OK exitcode '.$iRc.' detected: [' . $_sCmd . ']'.$_sOut
+                        RESULT_OK,
+                        "OK exitcode $iRc detected: [$_sCmd] $_sOut"
                     ];
                 }
                 return [
-                    RESULT_UNKNOWN, 
-                    'UNKNOWN - unhandled exitcode '.$iRc.' detected: [' . $_sCmd . ']'.$_sOut
+                    RESULT_UNKNOWN,
+                    "UNKNOWN - unhandled exitcode $iRc detected: [$_sCmd] $_sOut"
                 ];
             case "search":
-                return[
-                    RESULT_UNKNOWN, 
-                    'UNKNOWN method [' . $_sMode . '] - is not implemented yet.'
+                return [
+                    RESULT_UNKNOWN,
+                    "UNKNOWN method [$_sMode] - is not implemented yet."
                 ];
-                break;;
+                // break;
+                ;
             default:
-                return[
-                    RESULT_UNKNOWN, 
+                return [
+                    RESULT_UNKNOWN,
                     'UNKNOWN mode [' . htmlentities($_sMode) . '].'
                 ];
         } // switch($_sMode)

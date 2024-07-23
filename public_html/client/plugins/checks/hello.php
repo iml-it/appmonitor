@@ -40,17 +40,20 @@
  * ____________________________________________________________________________
  * 
  * 2019-06-05  <axel.hahn@iml.unibe.ch>
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 
  */
-class checkHello extends appmonitorcheck{
-    
+class checkHello extends appmonitorcheck
+{
+
     /**
-     * 
+     * Run the check
      * @param array   $aParams
      * @return array
      */
-    public function run($aParams){
-        
+    public function run(array $aParams): array
+    {
+
         // --- (1) verify if array key(s) exist:
         $this->_checkArrayKeys($aParams, "message");
 
@@ -70,8 +73,8 @@ class checkHello extends appmonitorcheck{
         //              visual => {string} one of bar|line|simple (+params)
         //           
         return [
-            RESULT_OK, 
-            'Hello world! My message is: ' .$aParams['message']
+            RESULT_OK,
+            'Hello world! My message is: ' . $aParams['message']
         ];
     }
 }

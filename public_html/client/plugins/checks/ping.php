@@ -20,40 +20,43 @@
  * 2022-07-05  <axel.hahn@iml.unibe.ch>
  * 2022-09-16  <axel.hahn@iml.unibe.ch>  read error before closing socket.
  * 2022-11-22  <axel.hahn@iml.unibe.ch>  Use exec with detecting MS Win for the ping parameter for count of pings
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  */
-class checkPing extends appmonitorcheck{
+class checkPing extends appmonitorcheck
+{
     /**
-     * get default group of this check
-     * @param array   $aParams
-     * @return array
+     * Get default group of this check
+     * @return string
      */
-    public function getGroup(){
+    public function getGroup(): string
+    {
         return 'network';
     }
 
     /**
-     * check ping to a target
+     * Check ping to a target
      * @param array $aParams
      * [
      *     host                string   optional hostname to connect; default: 127.0.0.1
      *     timeout             integer  OBSOLET (because using exec): optional timeout in sec; default: 5
      * ]
-     * @return boolean
+     * @return array
      */
-    public function run($aParams) {
+    public function run(array $aParams): array
+    {
         $sHost = $aParams['host'] ?? '127.0.0.1';
 
-        $sParamCount=strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? "n" : "c";
-        $iRepeat=1;
-        
-        $sCommand="ping -$sParamCount $iRepeat $sHost 2>&1";
-        exec($sCommand, $aOut, $iRc);
-        $sOut=implode("\n", $aOut);
+        $sParamCount = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? "n" : "c";
+        $iRepeat = 1;
 
-        if ($iRc>0){
-            return [RESULT_ERROR, "ERROR: ping to $sHost failed.\n".$sOut];
+        $sCommand = "ping -$sParamCount $iRepeat $sHost 2>&1";
+        exec($sCommand, $aOut, $iRc);
+        $sOut = implode("\n", $aOut);
+
+        if ($iRc > 0) {
+            return [RESULT_ERROR, "ERROR: ping to $sHost failed.\n" . $sOut];
         }
-        return [RESULT_OK, "OK: ping to $sHost\n".$sOut];
+        return [RESULT_OK, "OK: ping to $sHost\n" . $sOut];
 
         /*
             Socket functions require root :-/

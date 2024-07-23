@@ -40,11 +40,12 @@
  * 2022-05-02  <axel.hahn@iml.unibe.ch>  set warning to 21 days (old value was 30); add "critical" param
  * 2022-05-03  <axel.hahn@iml.unibe.ch>  critical limit is a warning only (because app is still functional)
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
+ * 
  */
 class checkCert extends appmonitorcheck
 {
     /**
-     * get default group of this check
+     * Get default group of this check
      * @return string
      */
     public function getGroup(): string
@@ -53,7 +54,7 @@ class checkCert extends appmonitorcheck
     }
 
     /**
-     * check SSL certificate 
+     * Check SSL certificate 
      * @param array $aParams
      * [
      *     "url"       optional: url to connect check; default: own protocol + server
