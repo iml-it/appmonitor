@@ -12,6 +12,7 @@
  * 2019-05-17  aded check http to config- and tmp dir
  * 2021-11-nn  removed all checks ... created as single files
  * 2022-03-28  move checks into plugins/apps/
+ * 2024-07-23  php 8: short array syntax
  */
 
 // ----------------------------------------------------------------------
@@ -19,65 +20,65 @@
 // ----------------------------------------------------------------------
 
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "write to ./tmp/",
         "description" => "Check cache storage",
         // "group" => "folder",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
-                "filename" => $sApproot . "/server/tmp",
+            "params" => [
+                "filename" => "$sApproot/server/tmp",
                 "dir" => true,
                 "writable" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "write to ./config/",
         "description" => "Check config target directory",
         // "group" => "folder",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
-                "filename" => $sApproot . "/server/config",
+            "params" => [
+                "filename" => "$sApproot/server/config",
                 "dir" => true,
                 "writable" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "check config file",
         "description" => "The config file must be writable",
         "parent" => "write to ./config/",
         // "group" => "file",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
-                "filename" => $sApproot . "/server/config/appmonitor-server-config.json",
+            "params" => [
+                "filename" => "$sApproot/server/config/appmonitor-server-config.json",
                 "file" => true,
                 "writable" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "PHP modules",
         "description" => "Check needed PHP modules",
         // "group" => "folder",
-        "check" => array(
+        "check" => [
             "function" => "Phpmodules",
-            "params" => array(
+            "params" => [
                 "required" => ["curl"],
                 "optional" => [],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 
 // ----------------------------------------------------------------------
@@ -89,21 +90,21 @@ $sBaseUrl = 'http'.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] ? 's' : '')
         .'://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT']
         .dirname(dirname($_SERVER['REQUEST_URI']));
 
-foreach(array('server/config', 'server/tmp') as $sMyDir){
+foreach(['server/config', 'server/tmp'] as $sMyDir){
     $oMonitor->addCheck(
-        array(
+        [
             "name" => "http to $sMyDir",
             "description" => "Check if the $sMyDir directory is not accessible (counts as warning on fail)",
             "group" => "deny",
-            "check" => array(
+            "check" => [
                 "function" => "HttpContent",
-                "params" => array(
-                    "url" => $sBaseUrl . "/$sMyDir/readme.md",
+                "params" => [
+                    "url" => "$sBaseUrl/$sMyDir/readme.md",
                     "status" => 403,
-                ),
-            ),
+                ],
+            ],
             "worstresult" => RESULT_WARNING
-        )
+        ]
     );
 }
 
@@ -114,48 +115,48 @@ require_once($sApproot.'/server/classes/appmonitor-server.class.php');
 $oServer=new appmonitorserver();
 $iCount=count($oServer->getAppIds());
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "appcounter",
         "description" => "Monitored apps",
         "group" => "monitor",
         "parent" => "check config file",
-        "check" => array(
+        "check" => [
             "function" => "Simple",
-            "params" => array(
+            "params" => [
                 "result" => RESULT_OK,
                 "value" => "Found monitored web apps: $iCount",
                 "count" => $iCount,
                 "visual" => "simple",
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 // ----------------------------------------------------------------------
 // check running service
 // ----------------------------------------------------------------------
 require_once($sApproot.'/server/classes/tinyservice.class.php');
 ob_start();
-$oService = new tinyservice($sApproot.'/server/service.php', 15, $sApproot.'/server/tmp');
+$oService = new tinyservice("$sApproot/server/service.php", 15, "$sApproot/server/tmp");
 $sIsStopped=$oService->canStart();
 $out=ob_get_contents();
 ob_clean();
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "running service",
         "description" => "Check if the service is running",
         "group" => "service",
-        "check" => array(
+        "check" => [
             "function" => "Simple",
-            "params" => array(
+            "params" => [
                 "result" => ($sIsStopped ? RESULT_WARNING : RESULT_OK),
                 "value" => ($sIsStopped 
                     ? "Info: Service is NOT running. Apps are checked interactively only (if the appmonitor web ui is running). | Output: $out" 
                     : "OK, service is running. | Output: $out"
-                ),
-            ),
-        ),
+                )
+            ],
+        ],
         "worstresult" => RESULT_OK        
-    )
+    ]
 );
 // ----------------------------------------------------------------------
 // check certificate if https is used
