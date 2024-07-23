@@ -78,22 +78,22 @@ As an example a snippet from server/lang/en-en.json:
 
 These texts can contain placeholders.
 
-| Placeholder          | Description                                                |
-|---                   |---                                                         |
-| _\_\_APPID___        | Id of application                                          |
-| _\_\_CHANGE___       | One of new\|no change\|change\|deleted (1)                 |
-| _\_\_CURLERROR___    | Error message from curl library if the request failed.     |
-| _\_\_DELTA-TIME___   | Delta since last state change i.e. NN min (HH h) (2)       |
-| _\_\_ERROR___        | Error message of a failed response                         |
-| _\_\_HEADER___       | Http response header (maybe for an email message)          |
-| _\_\_HOST___         | Hostname (from client meta -> host)                        |
-| _\_\_LAST-RESULT___  | Result of last check; see RESULT (2)                       |
-| _\_\_LAST-TIME___    | Time of last check; see TIME (2)                           |
-| _\_\_MONITORURL___   | Url to monitoring page (3)                                 |
-| _\_\_RESULT___       | One of OK\|Unknown\|Warning\|Error (1)                     |
-| _\_\_TIME___         | Current time YYYY-MM-DD hh:mm:ss                           |
-| _\_\_URL___          | Url of web application check                               |
-| _\_\_WEBSITE___      | Name of the website/ service (from client meta -> website) |
+| Placeholder          | Description
+|---                   |---
+| _\_\_APPID___        | Id of application
+| _\_\_CHANGE___       | One of new\|no change\|change\|deleted (1)
+| _\_\_CURLERROR___    | Error message from curl library if the request failed.
+| _\_\_DELTA-TIME___   | Delta since last state change i.e. NN min (HH h) (2)
+| _\_\_ERROR___        | Error message of a failed response
+| _\_\_HEADER___       | Http response header (maybe for an email message)
+| _\_\_HOST___         | Hostname (from client meta -> host)
+| _\_\_LAST-RESULT___  | Result of last check; see RESULT (2)
+| _\_\_LAST-TIME___    | Time of last check; see TIME (2)
+| _\_\_MONITORURL___   | Url to monitoring page (3)
+| _\_\_RESULT___       | One of OK\|Unknown\|Warning\|Error (1)
+| _\_\_TIME___         | Current time YYYY-MM-DD hh:mm:ss
+| _\_\_URL___          | Url of web application check
+| _\_\_WEBSITE___      | Name of the website/ service (from client meta -> website)
 
 Remarks:
 

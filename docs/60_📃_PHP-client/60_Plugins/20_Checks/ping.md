@@ -8,22 +8,22 @@ Check if the local server or another host is listening to a given port number.
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Ping",
         "description" => "ping to a server",
-        "check" => array(
+        "check" => [
             "function" => "Ping",
-            "params" => array(
+            "params" => [
                 "host" => [hostname]
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
 ## Parameters ##
 
-| key      | type     | description |
+| key      | type     | description
 |---       |---       |---
 |host      |(string)  |optional: hostname or ip address to connect to; if unavailable 127.0.0.1 will be tested
 
@@ -31,15 +31,15 @@ $oMonitor->addCheck(
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Ping",
         "description" => "ping to www.example.com",
-        "check" => array(
+        "check" => [
             "function" => "Ping",
-            "params" => array(
+            "params" => [
                 "host" => "www.example.com"
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```

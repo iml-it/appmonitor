@@ -61,16 +61,16 @@ $oMonitor->setTTL(300);
 // add a few custom checks
 // $oMonitor->addCheck(...)
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "hello plugin",
         "description" => "Test a plugin ... plugins/checks/hello.php",
-        "check" => array(
+        "check" => [
             "function" => "Hello",
-            "params" => array(
+            "params" => [
                 "message" => "Here I am",
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 
 // ----------------------------------------------------------------------
@@ -118,11 +118,11 @@ The php client offers 2 possibilities:
 If the http request does not come from one of the pre defined ip ranges the request will stop with http 403 error.
 
 ```php
-$oMonitor->checkIp(array(
+$oMonitor->checkIp([
   '127.0.0.1',  
   '::1',
   '192.168.',
-));
+]);
 ```
 
 ### Usage of a token

@@ -42,14 +42,14 @@ $oMonitor->addCheck(
 );
 ```
 
-| key          | type     | description                         |
-|---           |---       |---                                  |
-|name🔸        |(string)  | "id" if the check                   |
-|description🔸 |(string)  | a short description                 |
-|group         |(string)  | optional override name of a group   |
-|parent        |(string)  | optional set a "name" of another check to create a deoendency chain |
-|check🔸       |(array)   | check to perform                    |
-|worstresult   |(integer) | optional: limit maximum error level if the check fails; if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING. |
+| key          | type     | description
+|---           |---       |---
+|name🔸        |(string)  | "id" if the check
+|description🔸 |(string)  | a short description
+|group         |(string)  | optional override name of a group
+|parent        |(string)  | optional set a "name" of another check to create a deoendency chain
+|check🔸       |(array)   | check to perform
+|worstresult   |(integer) | optional: limit maximum error level if the check fails; if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING.
 
 🔸 required
 
@@ -100,18 +100,18 @@ A default group is set in all by default shipped checks.
 
 You can override it by setting another group.
 
-| Group      | Description        |
-|---         |---                 |
-| cloud      | cloud icon         |
-| database   | database icon      |
-| deny       | deny sign          |
-| disk       | hard disk icon     |
-| file       | file icon          |
-| folder     | folder icon        |
-| monitor    | monitor graph icon |
-| network    | globe icon         |
-| security   | keys icon          |
-| service    | cogs icon          |
+| Group      | Description
+|---         |---
+| cloud      | cloud icon
+| database   | database icon
+| deny       | deny sign
+| disk       | hard disk icon
+| file       | file icon
+| folder     | folder icon
+| monitor    | monitor graph icon
+| network    | globe icon
+| security   | keys icon
+| service    | cogs icon
 
 ## Chaining with a parent
 

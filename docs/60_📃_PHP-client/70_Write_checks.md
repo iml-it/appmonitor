@@ -33,16 +33,16 @@ require_once('classes/appmonitor-client.class.php');
 $oMonitor = new appmonitor();
 // (...)
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "check plugin",
         "description" => "test an external plugin plugins/checkHello.php",
-        "check" => array(
+        "check" => [
             "function" => "Hello",
-            "params" => array(
+            "params" => [
                 "message" => "Here I am",
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
@@ -93,10 +93,10 @@ with return code and a message - but no counter.
 //              count  => {float}  value
 //              visual => {string} one of bar|line|simple (+params)
 //           
-return array(
+return [
     RESULT_OK, 
     'Hello world! My message is: ' .$aParams['message']
-);
+];
 ```
 
 This returns an OK with the message "Hello world! My message is: Here I am".

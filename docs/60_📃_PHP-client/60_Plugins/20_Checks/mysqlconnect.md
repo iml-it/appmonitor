@@ -8,20 +8,20 @@ verify a database connection with mysqli real connect function.
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Mysql Master",
         "description" => "Connect mysql db X on server Y",
-        "check" => array(
+        "check" => [
             "function" => "MysqlConnect",
-            "params" => array(
+            "params" => [
                 "server"   => $aDb['host'],
                 "user"     => $aDb['user'],
                 "password" => $aDb['pass'],
                 "db"       => $aDb['path'],
                 "port"     => $aDb['port'], // optional
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
@@ -29,7 +29,7 @@ $oMonitor->addCheck(
 
 Parameters:
 
-| key      | type     | description |
+| key      | type     | description
 |---       |---       |---
 |server🔸  |(string)  |hostname/ ip of mysql server
 |user🔸    |(string)  |mysql username
@@ -54,37 +54,37 @@ $sActive=$aConfig['default-connection'];
 $aDb=$aConfig['connections'][$sActive];
 
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "check config file",
         "description" => "The config file must be writable",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
+            "params" => [
                 "filename" => $sConfigfile,
                 "file" => true,
                 "writable" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Mysql Connect",
         "description" => "Connect mysql server " . $aDb['server'] 
                          . " as user " . $aDb['username'] 
                          . " to scheme " . $aDb['database'],
         "parent" => "check config file",
-        "check" => array(
+        "check" => [
             "function" => "MysqlConnect",
-            "params" => array(
+            "params" => [
                 "server"   => $aDb['server'],
                 "user"     => $aDb['username'],
                 "password" => $aDb['password'],
                 "db"       => $aDb['database'],
                 // "port"     => $aDb['port'],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```

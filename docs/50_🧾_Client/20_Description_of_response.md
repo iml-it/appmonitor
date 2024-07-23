@@ -159,18 +159,18 @@ The last
 
 Valid values for "group" are:
 
-| Group      | Description        |
-|---         |---                 |
-| cloud      | cloud icon         |
-| database   | database icon      |
-| deny       | deny sign          |
-| disk       | hard disk icon     |
-| file       | file icon          |
-| folder     | folder icon        |
-| monitor    | monitor graph icon |
-| network    | globe icon         |
-| security   | keys icon          |
-| service    | cogs icon          |
+| Group      | Description
+|---         |---
+| cloud      | cloud icon
+| database   | database icon
+| deny       | deny sign
+| disk       | hard disk icon
+| file       | file icon
+| folder     | folder icon
+| monitor    | monitor graph icon
+| network    | globe icon
+| security   | keys icon
+| service    | cogs icon
 
 Using the keys "groups" and "parents" result in chains in the graphical view:
 

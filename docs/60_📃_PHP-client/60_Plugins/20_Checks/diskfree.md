@@ -8,31 +8,31 @@ Check if a given filesystem / directory that it has enough space.
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "check file storage",
         "description" => "The file storage have some space left",
-        "check" => array(
+        "check" => [
             "function" => "Diskfree",
-            "params" => array(
+            "params" => [
                 "directory" => "[directory]",
                 "warning"   => [size],
                 "critical"  => [size],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
 ## Parameters ##
 
-| key        | type     | description |
+| key        | type     | description
 |---         |---       |---
 |result🔸    |(integer) | result code <br>After loading the client class you can use constants to keep the code more readable<br>RESULT_OK = OK (0)<br>RESULT_UKNOWN = unknown (1)<br>RESULT_WARNING = Warning (2) <br>RESULT_ERROR = Error (3)
 |value🔸     |(string)  | ouput text to describe the result
 |count       |(float)   | optional; if a count exists in a check then a tile will be rendered
 |visual      |(string)  | optional; used if a "count" was given. see counter description [Description of response](../../../20_Client/20_Description_of_response.md)
 
-| key        | type     | description |
+| key        | type     | description
 |---         |---       |---
 |directory🔸 |(string)  | directory to check
 |warning     |{integer\|string} | size for warning level
@@ -49,7 +49,7 @@ The values for warning and critical
 - warning level must be higher than critical value
 - units can be mixed in warning and critical value
 
-supported size units are 
+supported size units are
 
 - 'B' byte
 - 'KB' kilobyte

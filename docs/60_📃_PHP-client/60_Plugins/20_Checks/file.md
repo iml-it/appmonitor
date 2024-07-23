@@ -4,7 +4,7 @@
 
 Check if a file for file, link or directory. Use the parameter "filename" to set the full filename.
 
-Other given parameters are flags to check. Its values can be set to true (flag must must be true) or false (flag must fail to return a true result). Missing flags won't be checked. 
+Other given parameters are flags to check. Its values can be set to true (flag must must be true) or false (flag must fail to return a true result). Missing flags won't be checked.
 
 Giving just a filename without any other flag returns true.
 
@@ -12,24 +12,24 @@ Giving just a filename without any other flag returns true.
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "file check",
         "description" => "file check",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
+            "params" => [
                 "filename" => [string: Full Path],
                 "exists"   => [boolean],
                 "[flag]"   => [boolean],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
 ## Parameters ##
 
-| key      | type     | description |
+| key      | type     | description
 |---       |---       |---
 |filename🔸|(string)  |filename or directory to check
 |exists    |(boolean) |"filename" must exist/ must be absent
@@ -50,18 +50,18 @@ Check if "filename" is a directory and is writable
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "tmp subdir",
         "description" => "Check cache storage",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
+            "params" => [
                 "filename" => $sApproot . "/server/tmp",
                 "dir"      => true,
                 "writable" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
@@ -71,16 +71,16 @@ With *"exists" => false* you can check if a file does not exist (flag is checked
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Maintenance mode",
         "description" => "Check if Maintenance mode is not activated by a flag file",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
+            "params" => [
                 "filename" => "/var/www/maintenance_is_active.txt",
                 "exists"      => false,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
