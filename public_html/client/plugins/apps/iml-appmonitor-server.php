@@ -171,42 +171,42 @@ include 'shared_check_ssl.php';
  * AS A DEMO: using a custom plugin:
  * 
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "plugin test",
         "description" => "minimal test of the plugin plugins/checkHello.php",
-        "check" => array(
+        "check" => [
             "function" => "Hello",
-            "params" => array(
+            "params" => []
                 "message" => "Here I am",
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "plugin Load",
         "description" => "check current load",
-        "check" => array(
+        "check" => [
             "function" => "Loadmeter",
-            "params" => array(
+            "params" => [
                 "warning" => 1.0,
                 "error" => 3,
-            ),
-        ),
+            ],
+        ],
         "worstresult" => RESULT_OK
-    )
+    ]
 );
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "plugin ApacheProcesses",
         "description" => "check count running Apache processes",
-        "check" => array(
+        "check" => [
             "function" => "ApacheProcesses",
-            "params" => array(
-            ),
-        ),
+            "params" => [
+            ],
+        ],
         "worstresult" => RESULT_OK
-    )
+    ]
 );
 */
 
