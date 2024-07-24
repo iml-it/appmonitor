@@ -432,7 +432,7 @@ class appmonitor
     }
 
     /**
-     * output appmonitor client status as single html page
+     * Output appmonitor client status as single html page
      * 
      * @example <code>
      * ob_start();<br>
