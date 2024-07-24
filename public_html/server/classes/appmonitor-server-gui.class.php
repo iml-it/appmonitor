@@ -42,10 +42,29 @@ require_once 'render-adminlte.class.php';
 class appmonitorserver_gui extends appmonitorserver
 {
 
-    var $_sProjectUrl = "https://github.com/iml-it/appmonitor";
-    var $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
-    var $_sTitle = "Appmonitor Server";
-    var $_sVersion = "0.137";
+    /**
+     * Url of the project source
+     * @var string
+     */
+    protected string $_sProjectUrl = "https://github.com/iml-it/appmonitor";
+
+    /**
+     * Url of the docs
+     * @var string
+     */
+    protected string $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
+
+    /**
+     * Title/ project name
+     * @var string
+     */
+    protected string $_sTitle = "Appmonitor Server";
+
+    /**
+     * Version
+     * @var string
+     */
+    protected string $_sVersion = "0.137";
 
     /**
      * html code for icons in the web gui
@@ -53,7 +72,7 @@ class appmonitorserver_gui extends appmonitorserver
      * 
      * @var array
      */
-    protected $_aIco = [
+    protected array $_aIco = [
         // Menu items
         'allwebapps' => '<i class="fa-solid fa-globe"></i>',
         'problems' => '<i class="fa-solid fa-exclamation-triangle"></i>',
@@ -310,15 +329,15 @@ class appmonitorserver_gui extends appmonitorserver
         }
         $sReturn = ''
             . $sDiv . $oA->getWidget([
-                'bgcolor' => $aOptions['bgcolor'] ?? false,
-                'color' => $this->_getAdminLteColorByResult($aOptions['result'], $aOptions['color']),
-                'icon' => $this->_getIconClass($aOptions['icon'], $aOptions['result']),
-                'onclick' => $aOptions['onclick'] ?? false,
-                'number' => $aOptions['count'],
-                'text' => $aOptions['label'],
-                'progressvalue' => $aOptions['progressvalue'] ?? false,
-                'progresstext' => '&nbsp;&nbsp;' . $aOptions['more'],
-            ]) . '</div>';
+                        'bgcolor' => $aOptions['bgcolor'] ?? false,
+                        'color' => $this->_getAdminLteColorByResult($aOptions['result'], $aOptions['color']),
+                        'icon' => $this->_getIconClass($aOptions['icon'], $aOptions['result']),
+                        'onclick' => $aOptions['onclick'] ?? false,
+                        'number' => $aOptions['count'],
+                        'text' => $aOptions['label'],
+                        'progressvalue' => $aOptions['progressvalue'] ?? false,
+                        'progresstext' => '&nbsp;&nbsp;' . $aOptions['more'],
+                    ]) . '</div>';
         return $sReturn;
     }
 
@@ -337,10 +356,10 @@ class appmonitorserver_gui extends appmonitorserver
      *     [items] => Array (...)
      *     [total] => [integer]
      * 
-     * @param type $aLog
+     * @param array $aLog
      * @return array
      */
-    protected function _getUptime($aLog = [])
+    protected function _getUptime(array $aLog = []): array
     {
         $aReturn = ['counter' => [0 => 0, 1 => 0, 2 => 0, 3 => 0], 'items' => []];
         $iLastTimer = date("U");
@@ -365,12 +384,12 @@ class appmonitorserver_gui extends appmonitorserver
 
 
     /**
-     * get html code for tiles of a single webapp
+     * Get html code for tiles of a single webapp
      * 
      * @param string  $sAppId  webapp id
      * @return string
      */
-    protected function _generateWebappTiles($sAppId)
+    protected function _generateWebappTiles(string $sAppId): string
     {
         $aHostdata = $this->_data[$sAppId]['result'];
         $this->oNotification->setApp($sAppId);
@@ -411,7 +430,7 @@ class appmonitorserver_gui extends appmonitorserver
                 case 'httpcode':
                     $sReturn .= $bVisibility
                         ? $this->_getTile([
-                            'result' => ((int)$aHostdata['httpstatus'] == 0 || $aHostdata['httpstatus'] >= 400)
+                            'result' => ((int) $aHostdata['httpstatus'] == 0 || $aHostdata['httpstatus'] >= 400)
                                 ? RESULT_ERROR
                                 : false,
                             'label' => $this->_tr('Http-status'),
@@ -501,7 +520,7 @@ class appmonitorserver_gui extends appmonitorserver
      * 
      * @return string
      */
-    protected function _generateWebTiles()
+    protected function _generateWebTiles(): string
     {
         $sReturn = '';
         $aCounter = $this->_getCounter();
@@ -614,11 +633,12 @@ class appmonitorserver_gui extends appmonitorserver
      * check the response jspon data of a given appid and generate an array
      * with errors and warnings. the return is an array with the subkeys
      * [ 'error'=>[ ... ],  'warning'=>[ ... ] ]
+     * It returns false on error (no data for given appid)
      * 
      * @param  string  $sAppId  id of an app
-     * @return array
+     * @return bool|array
      */
-    protected function _checkClientResponse($sAppId)
+    protected function _checkClientResponse(string $sAppId): bool|array
     {
         if (!isset($this->_data[$sAppId])) {
             return false;
@@ -682,10 +702,10 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * get html code to show a welcome message if no webapp was setup so far.
+     * Get html code to show a welcome message if no webapp was setup so far.
      * @return string
      */
-    protected function _showWelcomeMessage()
+    protected function _showWelcomeMessage(): string
     {
         return $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
             . '<br>'
@@ -696,23 +716,12 @@ class appmonitorserver_gui extends appmonitorserver
      * Get an array with group items of the checks
      * @return array
      */
-    protected function _getVisualGroups()
+    protected function _getVisualGroups(): array
     {
         $iGroup = 10000; // starting node id for groups
         $aReturn = [];
         $sBaseUrl = dirname($_SERVER['SCRIPT_NAME']) . '/images/icons/';
-        foreach ([
-            'cloud',
-            'database',
-            'deny',
-            'disk',
-            'file',
-            'folder',
-            'monitor',
-            'network',
-            'security',
-            'service',
-        ] as $sGroupname) {
+        foreach (['cloud', 'database', 'deny', 'disk', 'file', 'folder', 'monitor', 'network', 'security', 'service',] as $sGroupname) {
             $aReturn[$sGroupname] = [
                 'id' => $iGroup++,
                 'label' => $this->_tr('group-' . $sGroupname),
@@ -725,7 +734,7 @@ class appmonitorserver_gui extends appmonitorserver
 
 
     /**
-     * get image as data: string to embed 
+     * Get image as data: string to embed 
      * @param  array  $aOptions  hash with option keys
      *                           - bgcolor  background of svg rect
      *                           - width    width of svg rect
@@ -734,17 +743,17 @@ class appmonitorserver_gui extends appmonitorserver
      *                           - content  html code of div
      * @return string
      */
-    protected function _getHtmlInSvg($aOptions)
+    protected function _getHtmlInSvg(array $aOptions): string
     {
         $revert = ['%21' => '!', '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')'];
         $svg = '<svg xmlns="http://www.w3.org/2000/svg"'
-            . (isset($aOptions['width'])   ? ' width="' . (int)$aOptions['width'] . '"'  : '')
-            . (isset($aOptions['height'])  ? ' height="' . (int)$aOptions['height'] . '"' : '')
+            . (isset($aOptions['width']) ? ' width="' . (int) $aOptions['width'] . '"' : '')
+            . (isset($aOptions['height']) ? ' height="' . (int) $aOptions['height'] . '"' : '')
             . ' >'
             . '<rect x="0" y="0"'
-            . (isset($aOptions['width'])   ? ' width="' . (int)$aOptions['width'] . '"'  : '')
-            . (isset($aOptions['height'])  ? ' height="' . (int)$aOptions['height'] . '"' : '')
-            . (isset($aOptions['bgcolor']) ? ' fill="' . $aOptions['bgcolor'] . '"'      : '')
+            . (isset($aOptions['width']) ? ' width="' . (int) $aOptions['width'] . '"' : '')
+            . (isset($aOptions['height']) ? ' height="' . (int) $aOptions['height'] . '"' : '')
+            . (isset($aOptions['bgcolor']) ? ' fill="' . $aOptions['bgcolor'] . '"' : '')
             . ' stroke-width="20" stroke="#ffffff" >'
             . '</rect>'
             . '<foreignObject x="15" y="10" width="100%" height="100%">'
@@ -762,12 +771,12 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * helper for _generateMonitorGraph: find node id of parent check
-     * it returns fals if none was found
+     * Helper for _generateMonitorGraph: find node id of parent check
+     * it returns false if none was found
      * 
      * @return string|bool
      */
-    protected function _findNodeId($sNeedle, $sKey, $aNodes)
+    protected function _findNodeId($sNeedle, $sKey, $aNodes): bool|string
     {
         foreach ($aNodes as $aNode) {
             if (isset($aNode[$sKey]) && $aNode[$sKey] === $sNeedle) {
@@ -776,11 +785,13 @@ class appmonitorserver_gui extends appmonitorserver
         }
         return false;
     }
+
     /**
-     * Get html code for visual view of all checks
+     * Get html code for visual view of all checks (treeview)
+     * @param string $sUrl  url of application to show
      * @return string
      */
-    protected function _generateMonitorGraph($sUrl)
+    protected function _generateMonitorGraph(string $sUrl): string
     {
         $sReturn = '';
 
@@ -791,10 +802,10 @@ class appmonitorserver_gui extends appmonitorserver
         $iCounter = 1;
 
         $aShapes = [
-            RESULT_OK      => ['color' => '#55aa55', 'width' => 3],
+            RESULT_OK => ['color' => '#55aa55', 'width' => 3],
             RESULT_UNKNOWN => ['color' => '#605ca8', 'width' => 3, 'shape' => 'ellipse'],
             RESULT_WARNING => ['color' => '#f39c12', 'width' => 6, 'shape' => 'dot'],
-            RESULT_ERROR   => ['color' => '#ff3333', 'width' => 9, 'shape' => 'star'],
+            RESULT_ERROR => ['color' => '#ff3333', 'width' => 9, 'shape' => 'star'],
         ];
 
         foreach ($this->_data as $sAppId => $aEntries) {
@@ -947,13 +958,14 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * helper: generate html code with all checks.
-     * if a hast is given it renders the data for this host only
+     * Helper: generate html code for a table with all checks.
+     * If an url is given it renders the data for this host only
      * 
-     * @param  string  $sUrl  optional filter by url; default: all
+     * @param  string  $sUrl     optional filter by url; default: all
+     * @param  bool    $bHideOk  optional flag to hide all OK checks; default: false (=show all)
      * @return string
      */
-    protected function _generateMonitorTable($sUrl = false, $bHideOk = false)
+    protected function _generateMonitorTable(string $sUrl = '', bool $bHideOk = false): string
     {
         $sReturn = '';
         if (!count($this->_data)) {
@@ -1026,7 +1038,7 @@ class appmonitorserver_gui extends appmonitorserver
                             . '<td>' . $aCheck["description"] . '</td>'
                             . '<td>' . $aCheck["value"] . '</td>'
                             . '<td>' . ($aCheck["count"] ?? '-') . '</td>'
-                            . '<td>' . ($aCheck["time"]  ?? '-') . '</td>'
+                            . '<td>' . ($aCheck["time"] ?? '-') . '</td>'
                             . '</tr>';
                     }
                 }
@@ -1040,16 +1052,16 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * get html code for notification log page
+     * Get html code for notification log page
      * 
      * @param array   $aLogs          array with logs; if false then all logs will be fetched
      * @param string  $sTableClass    custom classname for the datatable; for custom datatable settings (see functions.js)
-     * @param bool    $bShowDuration  flag: show duration
+     * @param bool    $bShowDuration  flag: show duration; default: false
      * @return string
      */
-    protected function _generateNotificationlog($aLogs = false, $sTableClass = 'datatable-notifications', $bShowDuration = false)
+    protected function _generateNotificationlog(array $aLogs = [], string $sTableClass = 'datatable-notifications', bool $bShowDuration = false): string
     {
-        if ($aLogs === false) {
+        if (!count($aLogs)) {
             $aLogs = $this->oNotification->getLogdata();
         }
         if (!count($aLogs)) {
@@ -1112,12 +1124,12 @@ class appmonitorserver_gui extends appmonitorserver
             $sTable .= '<tr class="result' . $aLogentry['status'] . ' tags ' . $this->_getCssclassForTag($aTags) . '">'
                 . '<td class="result' . $aLogentry['status'] . '"><span style="display: none;">' . $aLogentry['status'] . '</span>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
                 . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
-                . ($bShowDuration ?  '<td>' . round($iDelta / 60) . ' min</td>' : '')
+                . ($bShowDuration ? '<td>' . round($iDelta / 60) . ' min</td>' : '')
                 . '<td>' . $this->_tr('changetype-' . $aLogentry['changetype']) . '</td>'
                 . '<td>' . ($sAppName
-                    ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
-                    : '-'
-                )
+                ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
+                : '-'
+            )
                 . '</td>'
                 . '<td>'
                 . $aLogentry['message']
@@ -1140,12 +1152,14 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * get html code for badged list with errors, warnings, unknown, ok
+     * Get html code for badged list with errors, warnings, unknown, ok
+     * It returns false if the givn appid has no data
+     * 
      * @param string $sAppId  id of app to show
      * @param bool   $bShort  display type short (counter only) or long (with texts)
      * @return string|boolean
      */
-    protected function _renderBadgesForWebsite($sAppId, $bShort = false)
+    protected function _renderBadgesForWebsite(string $sAppId, bool $bShort = false): bool|string
     {
         if (!isset($this->_data[$sAppId]["result"]["summary"])) {
             return false;
@@ -1173,7 +1187,7 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * get html code to render a counter tile with bars / line / simple
+     * Get html code to render a counter tile with bars / line / simple
      * 
      * @param string  $sAppId      name of the app
      * @param string  $sCounterId  name of the counter
@@ -1185,15 +1199,15 @@ class appmonitorserver_gui extends appmonitorserver
      *                             - graphonly  bool     flag:  show graph only (without label and last value)
      * @return string
      */
-    protected function _renderCounter($sAppId, $sCounterId, $aOptions = [])
+    protected function _renderCounter(string $sAppId, string $sCounterId, array $aOptions = []): string
     {
         $oA = new renderadminlte();
         $oCounters = new counteritems($sAppId, $sCounterId);
 
         $aOptions['type'] = $aOptions['type'] ? $aOptions['type'] : 'bar';
         $aOptions['label'] = $aOptions['label'] ?? '';
-        $aOptions['size'] = isset($aOptions['size'])   && (int)$aOptions['size'] ? (int)$aOptions['size'] : 2;
-        $aOptions['items'] = isset($aOptions['items']) && (int)$aOptions['items'] ? (int)$aOptions['items'] : $aOptions['size'] * 10;
+        $aOptions['size'] = isset($aOptions['size']) && (int) $aOptions['size'] ? (int) $aOptions['size'] : 2;
+        $aOptions['items'] = isset($aOptions['items']) && (int) $aOptions['items'] ? (int) $aOptions['items'] : $aOptions['size'] * 10;
         $aOptions['graphonly'] = isset($aOptions['graphonly']) ? !!$aOptions['graphonly'] : false;
 
         $aResponseTimeData = $oCounters->get($aOptions['items']);
@@ -1269,21 +1283,21 @@ class appmonitorserver_gui extends appmonitorserver
             : $oA->getSectionColumn(
 
                 '<div class="box counter"'
-                    . (($iAge > $iTtl * 2) ? ' style="opacity: ' . (0.9 - ($iAge / $iTtl) * 0.05) . '"' : '')
-                    . '>'
-                    . '<div class="box-body">'
-                    . $sInnerTile
-                    . '</div>'
-                    . '</div>',
+                . (($iAge > $iTtl * 2) ? ' style="opacity: ' . (0.9 - ($iAge / $iTtl) * 0.05) . '"' : '')
+                . '>'
+                . '<div class="box-body">'
+                . $sInnerTile
+                . '</div>'
+                . '</div>',
                 $aOptions['size']
             );
     }
 
     /**
-     * return html code for a about page
+     * Get html code for a about page
      * @return string
      */
-    public function generateViewAbout()
+    public function generateViewAbout(): string
     {
         $oA = new renderadminlte();
         $sHtml = ''
@@ -1310,22 +1324,24 @@ class appmonitorserver_gui extends appmonitorserver
         // return $sHtml;
         return $oA->getSectionHead($this->_aIco["about"] . ' ' . $this->_tr('About'))
             . '<section class="content">'
-            . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox([
-                    'title' => $this->_tr('About'),
-                    'text' => $sHtml
-                ]),
-                12
-            ))
+            . $oA->getSectionRow(
+                $oA->getSectionColumn(
+                    $oA->getBox([
+                        'title' => $this->_tr('About'),
+                        'text' => $sHtml
+                    ]),
+                    12
+                )
+            )
             . '</section>';
     }
 
     /**
-     * return html code for a view of monitoring data for a single web app
+     * Get html code for a view of monitoring data for a single web app
      * @param string  $sAppId  appid
      * @return string
      */
-    public function generateViewApp($sAppId)
+    public function generateViewApp(string $sAppId): string
     {
         // $this->loadClientData();
         $oA = new renderadminlte();
@@ -1353,16 +1369,16 @@ class appmonitorserver_gui extends appmonitorserver
             // --- 
             $sTopHeadline = $oA->getSectionHead(
                 ''
-                    . '<a href="#divwebs"'
-                    . '> ' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps-header')
-                    . '</a> > '
-                    . '<span class="divhost bg-' . $this->_getAdminLteColorByResult($aEntries["result"]["result"]) . '">'
-                    . '<nobr>'
-                    . $this->_tr('Resulttype-' . $aEntries["result"]["result"]) . ': '
-                    . $this->_aIco['webapp'] . ' '
-                    . $this->_getAppLabel($sAppId)
-                    . '&nbsp;</nobr>'
-                    . '</span>'
+                . '<a href="#divwebs"'
+                . '> ' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps-header')
+                . '</a> > '
+                . '<span class="divhost bg-' . $this->_getAdminLteColorByResult($aEntries["result"]["result"]) . '">'
+                . '<nobr>'
+                . $this->_tr('Resulttype-' . $aEntries["result"]["result"]) . ': '
+                . $this->_aIco['webapp'] . ' '
+                . $this->_getAppLabel($sAppId)
+                . '&nbsp;</nobr>'
+                . '</span>'
             );
 
 
@@ -1420,8 +1436,8 @@ class appmonitorserver_gui extends appmonitorserver
                                 $sAppId,
                                 $sCounterId,
                                 [
-                                    'type' =>  $aTmp[0] ?? 'bar',
-                                    'size' =>  $aTmp[1] ?? false,
+                                    'type' => $aTmp[0] ?? 'bar',
+                                    'size' => $aTmp[1] ?? false,
                                     'items' => $aTmp[2] ?? false,
                                     'label' => $aMeta['title'] ?? $sCounterId,
                                 ]
@@ -1467,15 +1483,15 @@ class appmonitorserver_gui extends appmonitorserver
                 $sHtml .=
                     $oA->getSectionRow(
                         ''
-                            . $oA->getSectionColumn(
-                                $oA->getBox([
-                                    // 'label'=>'I am a label.',
-                                    // 'collapsable'=>true,
-                                    'title' => $this->_tr('Checks-visualisation'),
-                                    'text' => $this->_generateMonitorGraph($aEntries["result"]["url"])
-                                ]),
-                                12
-                            ),
+                        . $oA->getSectionColumn(
+                            $oA->getBox([
+                                // 'label'=>'I am a label.',
+                                // 'collapsable'=>true,
+                                'title' => $this->_tr('Checks-visualisation'),
+                                'text' => $this->_generateMonitorGraph($aEntries["result"]["url"])
+                            ]),
+                            12
+                        ),
                         $this->_tr('row-visual')
                     );
 
@@ -1533,7 +1549,7 @@ class appmonitorserver_gui extends appmonitorserver
                         '<tr class="result' . $i . '">'
                         . '<td class="result' . $i . '">' . $this->_tr('Resulttype-' . $i) . '</td>'
                         . '<td style="text-align: right">' . round($aUptime['counter'][$i] / 60) . ' min</td>'
-                        . '<td style="text-align: right"> ' .  number_format($aUptime['counter'][$i] * 100 / $aUptime['total'], 3) . ' %</td>'
+                        . '<td style="text-align: right"> ' . number_format($aUptime['counter'][$i] * 100 / $aUptime['total'], 3) . ' %</td>'
                         . '</tr>'
                         : '';
                 }
@@ -1551,13 +1567,13 @@ class appmonitorserver_gui extends appmonitorserver
                     9,
                     'right'
                 )
-                    . $oA->getSectionColumn(
-                        $oA->getBox([
-                            'title' => $this->_tr('Uptime') . ' (' . $this->_tr('since') . ' ' . date('Y-m-d', $iFirstentry) . '; ~' . round((date('U') - $iFirstentry) / 60 / 60 / 24) . ' d)',
-                            'text' => $sUptime
-                        ]),
-                        3
-                    ),
+                . $oA->getSectionColumn(
+                    $oA->getBox([
+                        'title' => $this->_tr('Uptime') . ' (' . $this->_tr('since') . ' ' . date('Y-m-d', $iFirstentry) . '; ~' . round((date('U') - $iFirstentry) / 60 / 60 / 24) . ' d)',
+                        'text' => $sUptime
+                    ]),
+                    3
+                ),
                 $this->_tr('row-history')
             );
 
@@ -1601,22 +1617,26 @@ class appmonitorserver_gui extends appmonitorserver
                             12
                         )
                     )
-                    . $oA->getSectionRow($oA->getSectionColumn(
-                        $oA->getBox([
-                            'title' => $this->_tr('Preview-of-messages'),
-                            'text' => '<pre>' . htmlentities(print_r($this->oNotification->getMessageReplacements(), 1)) . '</pre>'
+                    . $oA->getSectionRow(
+                        $oA->getSectionColumn(
+                            $oA->getBox([
+                                'title' => $this->_tr('Preview-of-messages'),
+                                'text' => '<pre>' . htmlentities(print_r($this->oNotification->getMessageReplacements(), 1)) . '</pre>'
 
-                        ]),
-                        12
-                    ))
-                    . $oA->getSectionRow($oA->getSectionColumn(
-                        $oA->getBox([
-                            'title' => $this->_tr('Preview-emails'),
-                            'text' => $sDebugContent
+                            ]),
+                            12
+                        )
+                    )
+                    . $oA->getSectionRow(
+                        $oA->getSectionColumn(
+                            $oA->getBox([
+                                'title' => $this->_tr('Preview-emails'),
+                                'text' => $sDebugContent
 
-                        ]),
-                        12
-                    ))
+                            ]),
+                            12
+                        )
+                    )
                     . '</div>';
             }
         }
@@ -1632,10 +1652,10 @@ class appmonitorserver_gui extends appmonitorserver
             </section>';
     }
     /**
-     * return html code for debug page
+     * Get html code for debug page
      * @return string
      */
-    public function generateViewDebug()
+    public function generateViewDebug(): string
     {
         if (!$this->hasRole('ui-debug')) {
             return $this->_access_denied(sprintf($this->_tr('msgErr-access-denied-role-not-found'), $this->getUserid(), 'ui-debug'));
@@ -1652,45 +1672,54 @@ class appmonitorserver_gui extends appmonitorserver
         }
         return $oA->getSectionHead($this->_aIco["debug"] . ' ' . $this->_tr('Debug'))
             . '<section class="content">'
-            . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox([
-                    'title' => $this->_tr('Debug-icons'),
-                    'text' => '<table><tr>'
-                        . '<th>#</th>'
-                        . '<th>' . $this->_tr('Debug-icons-preview') . '</th>'
-                        . '<th>' . $this->_tr('Debug-icons-html') . '</th>'
-                        . '</tr>' . $sAlIcons . '</table>'
-                ]),
-                12
-            ))
-            . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox([
-                    'title' => $this->_tr('Debug-config'),
-                    'text' => '<pre>' . print_r($this->_aCfg, true) . '</pre>'
-                ]),
-                12
-            ))
-            . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox([
-                    'title' => $this->_tr('Debug-urls'),
-                    'text' => '<pre>' . print_r($this->_urls, true) . '</pre>'
-                ]),
-                12
-            ))
-            . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox([
-                    'title' => $this->_tr('Debug-clientdata'),
-                    'text' => '<pre>' . print_r($this->_data, true) . '</pre>'
-                ]),
-                12
-            ))
+            . $oA->getSectionRow(
+                $oA->getSectionColumn(
+                    $oA->getBox([
+                        'title' => $this->_tr('Debug-icons'),
+                        'text' => '<table><tr>'
+                            . '<th>#</th>'
+                            . '<th>' . $this->_tr('Debug-icons-preview') . '</th>'
+                            . '<th>' . $this->_tr('Debug-icons-html') . '</th>'
+                            . '</tr>' . $sAlIcons . '</table>'
+                    ]),
+                    12
+                )
+            )
+            . $oA->getSectionRow(
+                $oA->getSectionColumn(
+                    $oA->getBox([
+                        'title' => $this->_tr('Debug-config'),
+                        'text' => '<pre>' . print_r($this->_aCfg, true) . '</pre>'
+                    ]),
+                    12
+                )
+            )
+            . $oA->getSectionRow(
+                $oA->getSectionColumn(
+                    $oA->getBox([
+                        'title' => $this->_tr('Debug-urls'),
+                        'text' => '<pre>' . print_r($this->_urls, true) . '</pre>'
+                    ]),
+                    12
+                )
+            )
+            . $oA->getSectionRow(
+                $oA->getSectionColumn(
+                    $oA->getBox([
+                        'title' => $this->_tr('Debug-clientdata'),
+                        'text' => '<pre>' . print_r($this->_data, true) . '</pre>'
+                    ]),
+                    12
+                )
+            )
             . '</section>';
     }
     /**
-     * return html code for notification page
+     * Get html code for notification page
+     * @param int  $iMaxcount  max number of entries; default=0 (all)
      * @return string
      */
-    public function generateViewNotifications($iMaxcount = false)
+    public function generateViewNotifications($iMaxcount = 0): string
     {
         $oA = new renderadminlte();
         $iNotifications = count($this->oNotification->loadLogdata());
@@ -1699,10 +1728,10 @@ class appmonitorserver_gui extends appmonitorserver
 
         $iMin = 100; // see functions.js - function showDiv() - var count = must have the same value
         if ($iNotifications > $iMin) {
-            foreach ([/* '10'=>10, '50'=>50, */$iMin => '', 1000 => 1000, 2000 => 2000, 'all' => 'all'] as $sLabel => $sParam) {
+            foreach ([/* '10'=>10, '50'=>50, */ $iMin => '', 1000 => 1000, 2000 => 2000, 'all' => 'all'] as $sLabel => $sParam) {
                 if ($iNotifications > $sLabel || $sLabel == 'all') {
                     $sButtons .= '<button onclick="setTab(\'#divnotifications' . ($sParam ? '-' . $sParam : '') . '\')" '
-                        . 'class="btn' . ((int)$iMaxcount == (int)$sLabel ? ' btn-primary' : '') . '"'
+                        . 'class="btn' . ($iMaxcount == (int) $sLabel ? ' btn-primary' : '') . '"'
                         . '>' . $sLabel . '</button> ';
                 }
             }
@@ -1713,20 +1742,22 @@ class appmonitorserver_gui extends appmonitorserver
             . '<section class="content">'
             . $oA->getSectionRow($this->_generateWebTiles())
             . '<br>'
-            . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox([
-                    'title' => $this->_tr('Notifications-header') . ' (' . $iNotifications . ')',
-                    'text' => $sButtons . $this->_generateNotificationlog($aLogs)
-                ]),
-                12
-            )) . '
+            . $oA->getSectionRow(
+                $oA->getSectionColumn(
+                    $oA->getBox([
+                        'title' => $this->_tr('Notifications-header') . ' (' . $iNotifications . ')',
+                        'text' => $sButtons . $this->_generateNotificationlog($aLogs)
+                    ]),
+                    12
+                )
+            ) . '
                 </section>';
     }
     /**
-     * return html code for notification page
+     * Get html code for notification page
      * @return string
      */
-    public function generateViewProblems()
+    public function generateViewProblems(): string
     {
         $oA = new renderadminlte();
         $bShowFailedHosts = false;
@@ -1758,38 +1789,42 @@ class appmonitorserver_gui extends appmonitorserver
             . '<br>'
 
             . ($bShowFailedHosts && "$sNoDataHtml$sAppsHtml"
-                ? $oA->getSectionRow($oA->getSectionColumn(
-                    $oA->getBox([
-                        'title' => $this->_tr('Problems-webapps-header'),
-                        'text' =>
-                        $this->_tr('Problems-webapps-hints') . '<br><br>'
-                            . (isset($aWebapps[false])
-                                ? $this->_aIco['host'] . ' ' . $this->_tr('Problems-webapps-hints-host') . '<br>'
-                                : ''
-                            )
-                            . (isset($aWebapps[true])
-                                ? $this->_aIco['webapp'] . ' ' . $this->_tr('Problems-webapps-hints-package') . '<br>'
-                                : ''
-                            )
-                            . '<br>'
-                            . '<div id="divwebsfilter"></div><br>'
-                            . '<div id="divwebs">'
-                            . $sNoDataHtml . $sAppsHtml
-                            . '</div>'
-                    ]),
-                    12
-                ))
+                ? $oA->getSectionRow(
+                    $oA->getSectionColumn(
+                        $oA->getBox([
+                            'title' => $this->_tr('Problems-webapps-header'),
+                            'text' =>
+                                $this->_tr('Problems-webapps-hints') . '<br><br>'
+                                . (isset($aWebapps[false])
+                                    ? $this->_aIco['host'] . ' ' . $this->_tr('Problems-webapps-hints-host') . '<br>'
+                                    : ''
+                                )
+                                . (isset($aWebapps[true])
+                                    ? $this->_aIco['webapp'] . ' ' . $this->_tr('Problems-webapps-hints-package') . '<br>'
+                                    : ''
+                                )
+                                . '<br>'
+                                . '<div id="divwebsfilter"></div><br>'
+                                . '<div id="divwebs">'
+                                . $sNoDataHtml . $sAppsHtml
+                                . '</div>'
+                        ]),
+                        12
+                    )
+                )
                 : ''
 
             )
 
-            . $oA->getSectionRow($oA->getSectionColumn(
-                $oA->getBox([
-                    'title' => $this->_tr('Problems-checks-header'),
-                    'text' => $this->_tr('Problems-checks-hints') . '<br><br>' . $sChecksHtml
-                ]),
-                12
-            ))
+            . $oA->getSectionRow(
+                $oA->getSectionColumn(
+                    $oA->getBox([
+                        'title' => $this->_tr('Problems-checks-header'),
+                        'text' => $this->_tr('Problems-checks-hints') . '<br><br>' . $sChecksHtml
+                    ]),
+                    12
+                )
+            )
             . '
                 </section>';
     }
@@ -1799,7 +1834,7 @@ class appmonitorserver_gui extends appmonitorserver
      * @param  string  $sMessage  message text to display
      * @return string
      */
-    public function _access_denied($sMessage)
+    public function _access_denied(string $sMessage): string
     {
         $oA = new renderadminlte();
         // $this->setUser('hahn');
@@ -1814,10 +1849,10 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * return html code for setup page
+     * Get html code for setup page
      * @return string
      */
-    public function generateViewSetup()
+    public function generateViewSetup(): string
     {
         $oA = new renderadminlte();
         $sFormOpenTag = '<form action="?#divsetup" class="form-horizontal" method="POST">';
@@ -1834,8 +1869,9 @@ class appmonitorserver_gui extends appmonitorserver
             $sHost = $aData["result"]["host"] ?? $this->_tr('unknown');
 
             $aTags = $aData["meta"]["tags"] ?? false;
-            $sHostlist .= $oA->getSectionRow($oA->getSectionColumn(
-                '<div class="divhost result' . $iResult . ' tags ' . $this->_getCssclassForTag($aTags) . '" style="float: none; ">'
+            $sHostlist .= $oA->getSectionRow(
+                $oA->getSectionColumn(
+                    '<div class="divhost result' . $iResult . ' tags ' . $this->_getCssclassForTag($aTags) . '" style="float: none; ">'
                     . $oA->getBox([
                         'title' => ''
                             . $this->_getAppLabel($sAppId),
@@ -1857,8 +1893,9 @@ class appmonitorserver_gui extends appmonitorserver
                             . $this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $sHost . '<br>'
                     ])
                     . '</div>',
-                12
-            ));
+                    12
+                )
+            );
         }
 
         $sSetup = $sFormOpenTag . '<input type="hidden" name="action" value="savesettings">';
@@ -1901,55 +1938,55 @@ class appmonitorserver_gui extends appmonitorserver
                     ]),
                     6
                 )
-                    . $oA->getSectionColumn(
-                        // box for adding new client url
-                        // box for adding new client url
-                        $oA->getBox([
-                            'title' => $this->_tr('Setup-add-client'),
-                            'text' => '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
-                                . $sFormOpenTag
-                                . '<div class="input-group">'
-                                . '<div class="input-group-addon">'
-                                . $this->_aIco['url']
-                                . '</div>'
-                                . '<input type="hidden" name="action" value="addurl">'
-                                . '<input type="text" class="form-control" name="url" size="100" value="" '
-                                . 'placeholder="https://[domain]/appmonitor/client/" '
-                                . 'pattern="http.*://..*" '
-                                . 'required="required" '
-                                . '>'
-                                . '<span class="input-group-btn">'
-                                . '<button class="btn btn-success">' . $this->_aIco['add'] . ' ' . $this->_tr('btn-addUrl') . '</button>'
-                                . '</span>'
-                                . '</div>'
-                                . '</form><br>'
+                . $oA->getSectionColumn(
+                    // box for adding new client url
+                    // box for adding new client url
+                    $oA->getBox([
+                        'title' => $this->_tr('Setup-add-client'),
+                        'text' => '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
+                            . $sFormOpenTag
+                            . '<div class="input-group">'
+                            . '<div class="input-group-addon">'
+                            . $this->_aIco['url']
+                            . '</div>'
+                            . '<input type="hidden" name="action" value="addurl">'
+                            . '<input type="text" class="form-control" name="url" size="100" value="" '
+                            . 'placeholder="https://[domain]/appmonitor/client/" '
+                            . 'pattern="http.*://..*" '
+                            . 'required="required" '
+                            . '>'
+                            . '<span class="input-group-btn">'
+                            . '<button class="btn btn-success">' . $this->_aIco['add'] . ' ' . $this->_tr('btn-addUrl') . '</button>'
+                            . '</span>'
+                            . '</div>'
+                            . '</form><br>'
 
-                        ]),
-                        6
-                    )
-                    . $oA->getSectionColumn(
-                        $oA->getBox([
-                            'title' => $this->_tr('Setup-client-list'),
-                            'text' => '<div id="divsetupfilter"></div><br>'
-                                . '<div id="divsetup">'
-                                . $sHostlist
-                                . '</div>'
-                        ]),
-                        6
-                    )
+                    ]),
+                    6
+                )
+                . $oA->getSectionColumn(
+                    $oA->getBox([
+                        'title' => $this->_tr('Setup-client-list'),
+                        'text' => '<div id="divsetupfilter"></div><br>'
+                            . '<div id="divsetup">'
+                            . $sHostlist
+                            . '</div>'
+                    ]),
+                    6
+                )
             )
             . '</section>';
     }
 
 
     /**
-     * return html code for a list of all apps
+     * Get html code for a list of all apps
      * @param  bool    $bSkipOk   flag: do not show apps with status "OK"? (for warning page)
      * @param  array   $aOptions  options; valid keys are:
      *                              - mode  render mode; one of legacy|default
      * @return array
      */
-    function _generateWeblist($bSkipOk = false, $aOptions = [])
+    function _generateWeblist(bool $bSkipOk = false, array $aOptions = []): array
     {
         $oA = new renderadminlte();
         $aAllWebapps = [];
@@ -2032,7 +2069,8 @@ class appmonitorserver_gui extends appmonitorserver
                             ])
                         )
                         . '</div>';
-                    break;;
+                    break;
+                    ;
                 default:
                     $sOut = '<div 
                         class="col-md-12 divhost divhost-outer tags ' . $this->_getCssclassForTag($aTags) . ' bg-' . $sBgColor . '" 
@@ -2056,16 +2094,16 @@ class appmonitorserver_gui extends appmonitorserver
                         . '</div>'
                         . '<div class="col-md-2">' . $sTaglist . '</div>'
                         . '<div class="col-md-4" style="background: rgba(255,255,255,0.4);">' . $this->_renderCounter(
-                            $sAppId,
-                            "_responsetime",
-                            [
-                                'type' => 'bar',
-                                'label' => '',
-                                'size' => 10,
-                                'items' => 75,
-                                'graphonly' => true,
-                            ]
-                        ) . '</div>'
+                                $sAppId,
+                                "_responsetime",
+                                [
+                                    'type' => 'bar',
+                                    'label' => '',
+                                    'size' => 10,
+                                    'items' => 75,
+                                    'graphonly' => true,
+                                ]
+                            ) . '</div>'
 
                         /*
                         . '<div class="col-md-1">
@@ -2075,7 +2113,8 @@ class appmonitorserver_gui extends appmonitorserver
                             </div>'
                         */
                         . '</div></div>';
-                    break;;
+                    break;
+                    ;
             }
 
 
@@ -2090,10 +2129,10 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * return html code for a view list of websites with colored boxes based on site status
+     * get html code for a view list of websites with colored boxes based on site status
      * @return string
      */
-    public function generateViewWeblist()
+    public function generateViewWeblist(): string
     {
         $sReturn = '';
         $oA = new renderadminlte();
@@ -2165,24 +2204,24 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * helper: get a name for the div of app data
+     * Helper: get a name for the div of app data
      * it is used to build an url; the "-" will be used to parse the app id
      * 
-     * @param type $sAppid
+     * @param string $sAppid
      * @return type
      */
-    protected function _getDivIdForApp($sAppid)
+    protected function _getDivIdForApp(string $sAppid): string
     {
         return '#divweb-' . $sAppid;
     }
 
     /**
-     * get name for css class of a tag
+     * Get name for css class of a tag
      * 
      * @param string|array $sTag
-     * @return type
+     * @return string
      */
-    protected function _getCssclassForTag($sTag)
+    protected function _getCssclassForTag(string|array $sTag): string
     {
         if (is_string($sTag)) {
             return $this->_getCssclassForTag([$sTag]);
@@ -2196,15 +2235,16 @@ class appmonitorserver_gui extends appmonitorserver
             }
             return $sReturn;
         }
-        return false;
+        return '';
     }
+
     /**
-     * get name for css class of a tag
+     * Get name for css class of a tag
      * 
      * @param string|array $aTags
-     * @return type
+     * @return string
      */
-    protected function _getTaglist($aTags)
+    protected function _getTaglist(string|array $aTags): string
     {
         if (is_array($aTags) && count($aTags)) {
             $sReturn = '';
@@ -2216,15 +2256,15 @@ class appmonitorserver_gui extends appmonitorserver
             }
             return $sReturn;
         }
-        return false;
+        return '';
     }
 
     /**
-     * render the dropdown with all application tags 
+     * Render the dropdown with all application tags 
      * 
      * @return string
      */
-    protected function _renderTagfilter()
+    protected function _renderTagfilter(): string
     {
         $sReturn = '';
         $aTaglist = $this->_getClientTags();
@@ -2244,7 +2284,7 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * render a single menu item for the top navigation
+     * Render a single menu item for the top navigation
      * 
      * @param string $sHref   href atribute
      * @param string $sclass  css class of a tag
@@ -2252,7 +2292,7 @@ class appmonitorserver_gui extends appmonitorserver
      * @param string $sLabel  label of the link (and title as well)
      * @return string
      */
-    protected function _renderMenuItem($sHref, $sclass, $sIcon, $sLabel)
+    protected function _renderMenuItem(string $sHref, string $sclass, string $sIcon, string $sLabel): string
     {
         return '<li><a href="' . $sHref . '" class="' . $sclass . '" title="' . strip_tags($sLabel) . '">' . $this->_aIco[$sIcon] . '<span>&nbsp; ' . $sLabel . '</span></a></li>';
     }
@@ -2278,7 +2318,7 @@ class appmonitorserver_gui extends appmonitorserver
      *                       - color  (integer)  RESULT_CODE
      * @return string
      */
-    protected function _renderGraph($aOptions = [])
+    protected function _renderGraph(array $aOptions = []): string
     {
         static $iCounter;
         if (!isset($iCounter)) {
@@ -2290,8 +2330,8 @@ class appmonitorserver_gui extends appmonitorserver
         $aOptions['yLabel'] = $aOptions['yLabel'] ?? '';
         $aOptions['xValue'] = $aOptions['xValue'] ?? ($bIsPie ? false : true);
         $aOptions['yValue'] = $aOptions['yValue'] ?? ($bIsPie ? false : true);
-        $aOptions['xGrid']  = $aOptions['xGrid']  ?? ($bIsPie ? false : true);
-        $aOptions['yGrid']  = $aOptions['yGrid']  ?? ($bIsPie ? false : true);
+        $aOptions['xGrid'] = $aOptions['xGrid'] ?? ($bIsPie ? false : true);
+        $aOptions['yGrid'] = $aOptions['yGrid'] ?? ($bIsPie ? false : true);
         $aOptions['height'] = $aOptions['height'] ?? false;
 
         $sIdCanvas = 'canvasChartJs' . $iCounter;
@@ -2388,10 +2428,10 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * render html output of monitoring output (whole page)
+     * Get html output of monitoring output (whole page)
      * @return string
      */
-    public function renderHtml()
+    public function renderHtml(): string
     {
         require_once 'cdnorlocal.class.php';
         $oCdn = new axelhahn\cdnorlocal();
@@ -2430,16 +2470,16 @@ class appmonitorserver_gui extends appmonitorserver
             . $this->_tr('Hello-roles') . ': ' . ($aRoles && count($aRoles) ? implode(', ', $aRoles) : '-') . "\n"
             . ''
             . '">' . sprintf($this->_tr('Hello-user'), $this->getUsername()) . '</a><br></li>'
-            . $this->_renderMenuItem('#divwebs',          'allwebapps', 'allwebapps',    $this->_tr('All-webapps') . ' <span id="menubagde_allapps" style="float: right" ></span>')
-            . $this->_renderMenuItem('#divproblems',      'problems',   'problems',      $this->_tr('Problems') . ' <span id="menubagde_problems" style="float: right" ></span>')
-            . $this->_renderMenuItem('#divnotifications', 'checks',     'notifications', $this->_tr('Notifications'))
+            . $this->_renderMenuItem('#divwebs', 'allwebapps', 'allwebapps', $this->_tr('All-webapps') . ' <span id="menubagde_allapps" style="float: right" ></span>')
+            . $this->_renderMenuItem('#divproblems', 'problems', 'problems', $this->_tr('Problems') . ' <span id="menubagde_problems" style="float: right" ></span>')
+            . $this->_renderMenuItem('#divnotifications', 'checks', 'notifications', $this->_tr('Notifications'))
             . ($this->hasRole('ui-debug')
-                ? $this->_renderMenuItem('#divsetup',         'setup',      'setup',         $this->_tr('Setup'))
+                ? $this->_renderMenuItem('#divsetup', 'setup', 'setup', $this->_tr('Setup'))
                 : ''
             )
-            . $this->_renderMenuItem('#divabout',         'about',      'about',         $this->_tr('About'))
+            . $this->_renderMenuItem('#divabout', 'about', 'about', $this->_tr('About'))
             . ($this->_aCfg['debug'] && $this->hasRole('ui-debug')
-                ? $this->_renderMenuItem('#divdebug',     'debug',      'debug',         $this->_tr('Debug'))
+                ? $this->_renderMenuItem('#divdebug', 'debug', 'debug', $this->_tr('Debug'))
                 : ''
             )
 
@@ -2523,7 +2563,7 @@ class appmonitorserver_gui extends appmonitorserver
 
             // @since v0.99: vis (visjs.org)
             . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('vis') . '/vis.min.js') . '" type="text/javascript"></script>'
-            . '<link href="'  . $oCdn->getFullUrl($oCdn->getLibRelpath('vis') . '/vis-network.min.css') . '" rel="stylesheet">'
+            . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('vis') . '/vis-network.min.css') . '" rel="stylesheet">'
 
 
             . '<script src="javascript/visjs-network.class.js"></script>'
