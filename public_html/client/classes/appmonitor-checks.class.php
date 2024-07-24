@@ -141,9 +141,9 @@ class appmonitorcheck
     /**
      * Set the result value of a check
      * @param integer  $iResult  result code; one of RESULT_OK|RESULT_WARNING|RESULT_ERROR|RESULT_UNKNOWN
-     * @return true
+     * @return bool
      */
-    protected function _setResult(int $iResult): true
+    protected function _setResult(int $iResult): bool
     {
         $this->_aData["result"] = (int) $iResult;
         return true;
