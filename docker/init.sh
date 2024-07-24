@@ -19,6 +19,7 @@
 # 2024-07-19  v1.12 <axel.hahn@unibe.ch>      apply shell fixes
 # 2024-07-22  v1.13 <axel.hahn@unibe.ch>      show info if there is no database container; speedup replacements
 # 2024-07-22  v1.14 <axel.hahn@unibe.ch>      show colored boxes with container status
+# 2024-07-24  v1.15 <axel.hahn@unibe.ch>      update menu output
 # ======================================================================
 
 cd "$( dirname "$0" )" || exit 1
@@ -32,10 +33,18 @@ _self=$( basename "$0" )
 # shellcheck source=/dev/null
 . "${_self}.cfg" || exit 1
 
+_version="1.15"
+
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
 
-_version="1.14"
+fgGray="\e[1;30m"
+fgRed="\e[31m"
+fgGreen="\e[32m"
+fgBrown="\e[33m"
+fgBlue="\e[34m"
+fgReset="\e[0m"
+
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -44,13 +53,13 @@ _version="1.14"
 # draw a headline 2
 function h2(){
     echo
-    echo -e "\e[33m>>>>> $*\e[0m"
+    echo -e "$fgBrown>>>>> $*$fgReset"
 }
 
 # draw a headline 3
 function h3(){
     echo
-    echo -e "\e[34m----- $*\e[0m"
+    echo -e "$fgBlue----- $*$fgReset"
 }
 
 # show help for param -h
@@ -274,6 +283,18 @@ function _showContainers(){
     local bLong=$1
     local _out
 
+    local sUp=".. UP"
+    local sDown=".. down"
+
+    local Status=
+    local StatusWeb="$sDown"
+    local StatusDb=""
+    local colWeb=
+    local colDb=
+
+    colDb="$fgRed"
+    colWeb="$fgRed"
+
     _out=$( if [ -z "$bLong" ]; then
         docker-compose -p "$APP_NAME" ps
     else
@@ -281,44 +302,41 @@ function _showContainers(){
         docker-compose -p "$APP_NAME" ps
     fi)
 
-    local Status=
-    local colWeb=
-    local colDb=
-
-    local fgGray="\e[1;30m"
-    local fgRed="\e[31m"
-    local fgGreen="\e[32m"
-
-    colDb="$fgRed"
-    colWeb="$fgRed"
-
     h2 CONTAINERS
     if [ "$( wc -l <<< "$_out" )"  -eq 1 ]; then
         if [ "$DB_ADD" = "false" ]; then
             colDb="$fgGray"
-            Status="The web container is <$APP_NAME> is not running. This app has no database container."
+            Status="The web container is not running. This app has no database container."
         else
+            StatusDb="down"
             Status="No container is running for <$APP_NAME>."
         fi
     else
         grep -q "${APP_NAME}-server" <<< "$_out" && colWeb="$fgGreen"
+        grep -q "${APP_NAME}-server" <<< "$_out" && StatusWeb="$sUp"
+
         grep -q "${APP_NAME}-db" <<< "$_out"  && colDb="$fgGreen"
+        StatusDb="$sDown"
+        grep -q "${APP_NAME}-db" <<< "$_out"  && StatusDb="$sUp"
+
         if [ "$DB_ADD" = "false" ]; then
             colDb="$fgGray"
+            StatusDb=""
             Status="INFO: This app has no database container."
         fi
     fi
 
-    printf "$colWeb  ________________________  $colDb   ________________________    \e[0m \n"
-    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" ""                        ""
-    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" "Webserver"               "Database"
-    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" "${APP_NAME}-web"         "${APP_NAME}-db"
-    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" "PHP ${APP_PHP_VERSION}"  "${MYSQL_IMAGE}"
-    printf "$colWeb |  %-20s  |  $colDb |  %-20s  | \e[0m \n" ":${APP_PORT}"            ":${DB_PORT}"
-    printf "$colWeb |________________________| $colDb  |________________________|   \e[0m \n"
+    printf "$colWeb     __________________________  $colDb   __________________________    $fgReset \n"
+    printf "$colWeb    |  %-22s  |  $colDb |  %-22s  | $fgReset \n" ""                             ""
+    printf "$colWeb    |  %-22s  |  $colDb |  %-22s  | $fgReset \n" "${APP_NAME}-web ${StatusWeb}" "${APP_NAME}-db ${StatusDb}"
+    printf "$colWeb    |  %-22s  |  $colDb |  %-22s  | $fgReset \n" "  PHP ${APP_PHP_VERSION}"     "  ${MYSQL_IMAGE}"
+    printf "$colWeb    |  %-22s  |  $colDb |  %-22s  | $fgReset \n" "  :${APP_PORT}"               "  :${DB_PORT}"
+    printf "$colWeb    |__________________________| $colDb  |__________________________|   $fgReset \n"
 
-    echo
-    echo "$Status"
+    if [ -n "$Status" ]; then
+        echo
+        echo "$Status"
+    fi
     echo
 
     if [ -n "$bLong" ]; then
@@ -402,12 +420,13 @@ while true; do
 
     if [ -z "$action" ]; then
 
+        echo "_______________________________________________________________________________"
         echo
-        echo "+------------------------------------------------------------------"
-        echo "|"
-        echo "|  Initializer for docker v$_version            <<  $APP_NAME  >>"
-        echo "|"
-        echo ":"
+        echo
+        echo "  ${APP_NAME^^} :: Initializer for docker"
+        echo "                                                                         ______"
+        echo "________________________________________________________________________/ $_version"
+        echo
 
         _showContainers
 
