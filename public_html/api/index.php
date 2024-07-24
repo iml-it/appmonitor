@@ -23,29 +23,29 @@ require_once('../server/classes/tinyrouter.class.php');
 
 $aRoutes=[
 
-    [ "/",                                         "_help_"         ],
-    [ "/health",                                   "_health_"         ],
-    [ "/v1",                                       "_list_"         ],
+    [ "/",                                         "_help_"                                                , "Show help."],
+    [ "/health",                                   "_health_"                                              , "Health check for mintoring tools."],
+    [ "/v1",                                       "_list_"                                                , "Version 1"],
 
-    [ "/v1/apps",                                  "_list_"                                                ],
+    [ "/v1/apps",                                  "_list_"                                                , "List available subdirs"],
 
     // single application data
-    [ "/v1/apps/id",                               ["method"=>"apiGetFilteredApp", "outmode" => "appid"]   ],
-    [ "/v1/apps/id/@appid:[0-9a-f]*",              "_list_"                                                ],
+    [ "/v1/apps/id",                               ["method"=>"apiGetFilteredApp", "outmode" => "appid"]   , "List all apps with ids"],
+    [ "/v1/apps/id/@appid:[0-9a-f]*",              "_list_"                                                , "List available subdirs"],
 
-    [ "/v1/apps/id/@appid:[0-9a-f]*/all",          ["method"=>"apiGetFilteredApp", "outmode" => "all"]     ],
-    [ "/v1/apps/id/@appid:[0-9a-f]*/checks",       ["method"=>"apiGetFilteredApp", "outmode" => "checks"]  ],
-    [ "/v1/apps/id/@appid:[0-9a-f]*/meta",         ["method"=>"apiGetFilteredApp", "outmode" => "meta"]    ],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/all",          ["method"=>"apiGetFilteredApp", "outmode" => "all"]     , "Show Metadata and checks"],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/checks",       ["method"=>"apiGetFilteredApp", "outmode" => "checks"]  , "Show checks only"],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/meta",         ["method"=>"apiGetFilteredApp", "outmode" => "meta"]    , "Show metzadata only"],
 
     // multipe applications having a list of tags
-    [ "/v1/apps/tags",                              ["method"=>"apiGetTags"]                               ],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*",        "_list_"                                               ],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/all",    ["method"=>"apiGetFilteredApp", "outmode" => "all"]    ],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/checks", ["method"=>"apiGetFilteredApp", "outmode" => "checks"] ],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/meta",   ["method"=>"apiGetFilteredApp", "outmode" => "meta"]   ],
+    [ "/v1/apps/tags",                              ["method"=>"apiGetTags"]                               , "List all available tags"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*",        "_list_"                                               , "List available subdirs"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/all",    ["method"=>"apiGetFilteredApp", "outmode" => "all"]    , "Show Metadata and checks"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/checks", ["method"=>"apiGetFilteredApp", "outmode" => "checks"] , "Show checks only"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/meta",   ["method"=>"apiGetFilteredApp", "outmode" => "meta"]   , "Show metzadata only"],
 
     // tags
-    [ "/v1/tags",                                   ["method"=>"apiGetTags"]                               ],
+    [ "/v1/tags",                                   ["method"=>"apiGetTags"]                               , "List all available tags"],
     
 
 ];
@@ -95,7 +95,7 @@ if(!$aFoundRoute){
 
 $oApi->stopIfOptions();
 
-$sItem=isset($oRouter->getUrlParts()[1]) ? $oRouter->getUrlParts()[1] : false;
+$sItem=$oRouter->getUrlParts()[1] ?? false;
 $callback=$oRouter->getCallback();
 
 

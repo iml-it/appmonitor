@@ -15,23 +15,23 @@ A warning or error can be raised on wrong written module names too.
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "PHP modules",
         "description" => "Check needed PHP modules",
-        "check" => array(
+        "check" => [
             "function" => "Phpmodules",
-            "params" => array(
+            "params" => [
                 "required" => [list-of-package-names],
                 "optional" => [list-of-package-names],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
 ## Parameters ##
 
-| key      | type     | description |
+| key      | type     | description
 |---       |---       |---
 |required  |(array)   |list of required php modules
 |optional  |(array)   |list of optional php modules
@@ -46,16 +46,16 @@ Ensure that named PHP modules are installed.
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "PHP modules",
         "description" => "Check needed PHP modules",
-        "check" => array(
+        "check" => [
             "function" => "Phpmodules",
-            "params" => array(
+            "params" => [
                 "required" => ["curl", "pdo"]
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
@@ -69,30 +69,30 @@ module is missing you need to
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Needed PHP modules",
         "description" => "Check needed PHP modules",
-        "check" => array(
+        "check" => [
             "function" => "Phpmodules",
-            "params" => array(
+            "params" => [
                 "required" => ["curl"],
                 // "optional" => [],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Optional PHP modules",
         "description" => "Check optional PHP modules",
-        "check" => array(
+        "check" => [
             "function" => "Phpmodules",
-            "params" => array(
+            "params" => [
                 // "required" => [],
                 "optional" => ["xml"],
-            ),
-        ),
+            ],
+        ],
         "worstresult" => RESULT_OK
-    )
+    ]
 );
 ```

@@ -1,7 +1,6 @@
+## Configuration
 
-# Configuration #
-
-The config is in json syntax. The files are located in 
+The config is in json syntax. The files are located in
 _[webroot-appmonitor]/server/config/appmonitor-server-config.json_
 
 File                                    | Description
@@ -9,10 +8,10 @@ File                                    | Description
 appmonitor-server-config.json           | Custom settings
 appmonitor-server-config-defaults.json  | DO NOT OVERWRITE - Defaultsetup
 
-On the first start of the web gui the defaults will be used. 
+On the first start of the web gui the defaults will be used.
 By entering a first client appmonitor url the user config will be written.
 
-If you would like to setup it manually without webgui then copy 
+If you would like to setup it manually without webgui then copy
 appmonitor-server-config-defaults.json to appmonitor-server-config.json
 (same name - without "-defaults")
 
@@ -92,7 +91,7 @@ _urls_          | \{array\} list of urls
 
 The values with arrays are described below.
 
-## api ##
+### api
 
 Configure api access.
 
@@ -117,7 +116,7 @@ Example:
     ...
 ```
 
-## curl ##
+### curl
 
 Curl settings.
 
@@ -125,24 +124,24 @@ Here can be the subkeys
 
 - `timeout`: integer value in seconds; default is 15. If you use a service then you can tweak: set servicecache to true and a higher timeout in curl -> timeout
 
-## notifications ##
+### notifications
 
 notification targets (optional)
 
 Here can be the subkeys
 
-- `email`: flat list of email addresses that get notifications for *\*all\** added applications. Maybe you want to add devops and sysadmins here.
+- `email`: flat list of email addresses that get notifications for \*\*all\*\* added applications. Maybe you want to add devops and sysadmins here.
 - `slack`: key-value list with a readable label for the target channel and the Slack webhook url.
-- `from`:  sender information which user is delivering notifications ... in the subkeys 
+- `from`:  sender information which user is delivering notifications ... in the subkeys
   - `email`: email address for notifications (is reply-to address too)
   - `slack`: sender name ("Appmonitor" is default)
 - `sleeptimes`: flat array of time definitions when no notification will be sent. Each entry is a regex. If any matches the current system time (PHP function date("Y-m-d D H:i") - it returns the date in YYYY-MM-DD, the short weekday plus hour, ":" and minutes: "2018-07-04 Mon 09:23"). Pay attention to the dividers: "-" is used for dates and ":" to divide hour and minute. The example will disable Notifications:
   - `/(Sat|Sun)/` --> Saturday and Sunday
-  - `/[2][1-3]<span class="mark">:</span>/` --> digit 2 + 1..3 before ":" --> daily from 21:00-23:59
-  - `/[0][0-4]<span class="mark">:</span>/` --> digit 0 + 0..4 before ":" --> daily from 00:00-04:59
+  - `/[2][1-3]:/` --> digit 2 + 1..3 before ":" --> daily from 21:00-23:59
+  - `/[0][0-4]:/` --> digit 0 + 0..4 before ":" --> daily from 00:00-04:59
   - other examples
-	- `/2018<span class="mark">-</span>08<span class="mark">-</span>01/` --> disable notification on complete 1st of August 2018 (Swiss holiday)
-	- `/[0-9]{4}<span class="mark">-</span>12<span class="mark">-</span>/` --> 4 digits is a year then "minus" + month 12 --> disables notification in December of each year
+    - `/2018-08-01/` --> disable notification on complete 1st of August 2018 (Swiss holiday)
+    - `/[0-9]{4}-12-/` --> 4 digits is a year then "minus" + month 12 --> disables notification in December of each year
 
 ```json
     ...
@@ -164,15 +163,14 @@ Here can be the subkeys
     ...
 ```
 
-## users ##
+### users
 
 The users section defines users and its roles to access the api or web ui.
+The subkey is the user id of a user. There are special user ids:
 
-The subkey is the user id of a user. There are 2 special user ids:
-
-* `*` - contains the roles for anonymous access
-* `__default_authenticated_user__` - default roles for an by the webserver authenticated user
-* `[userid]` - a user id for api or web ui access. Allowed chars are a-z (lowercase) and 0-9. 
+- `*` - contains the roles for anonymous access
+- `__default_authenticated_user__` - default roles for an by the webserver authenticated user
+- `[userid]` - a user id for api or web ui access. Allowed chars are a-z (lowercase) and 0-9.
 
 If you create your first user then copy the entries for \* and __default_authenticated_user__ from default config.
 
@@ -197,7 +195,7 @@ php -r 'echo password_hash("your-password-here", PASSWORD_BCRYPT);'
 
 BUT: we recommend to use webservers protection with basic authentication for better performance.
 
-All users without password field or *password: false* will match for users with webservers basic authentication.
+All users without password field or `password: false` will match for users with webservers basic authentication.
 
 Existing roles:
 
@@ -237,6 +235,6 @@ Example:
     ...
 ```
 
-## urls ##
+### urls
 
 The urls key is a flat list of urls to fetch appmonitor checks.

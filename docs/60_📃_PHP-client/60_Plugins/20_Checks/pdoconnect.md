@@ -11,24 +11,24 @@ BUT: I just started with Mysql. To implement more types go to classes/appmonitor
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Mysql Master",
         "description" => "Connect mysql db X on server Y",
-        "check" => array(
+        "check" => [
             "function" => "PdoConnect",
-            "params" => array(
+            "params" => [
                 "connect"  => [pdo connect string],
                 "user"     => [database user],
                 "password" => [password],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
 ## Parameters ##
 
-| key      | type     | description |
+| key      | type     | description
 |---       |---       |---
 |connect🔸 |(string)  |connect string, i.e. 'mysql:host=localhost;port=3306;dbname=mydatabase;'
 |user🔸    |(string)  |mysql username

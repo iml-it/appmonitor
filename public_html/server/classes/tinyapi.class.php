@@ -15,32 +15,39 @@
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 1.0
+ * @version 1.1
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package -
  * 
-**/
+ * 2024-07-18  axel.hahn@unibe.ch  php 8 only: use typed variables
+ **/
 
 namespace iml;
-class tinyapi{
+
+class tinyapi
+{
 
     /**
-     * @var  array  list of allowes methods
+     * List of allowed methods
+     * @var array
      */
-    protected $_aAllowedMethods = [ 'OPTIONS', 'GET', 'PUT', 'POST', 'DELETE' ];
-    /**
-     * @var  array  list of regex to allow set of ips; empty list = allow all
-     */
-    protected $_aAllowedIps = [ ];
+    protected array $_aAllowedMethods = ['OPTIONS', 'GET', 'PUT', 'POST', 'DELETE'];
 
     /**
-     * @var  array  list of allowed users with username and optional password hash; empty list = allow all
+     * List of regex to allow set of ips; empty list = allow all
+     * @var  array
      */
-    protected $_aAllowedUsers = [ 
-        [ '*' => false ],          // anonymous requests
+    protected array $_aAllowedIps = [];
+
+    /**
+     * List of allowed users with username and optional password hash; empty list = allow all
+     * @var array
+     */
+    protected array $_aAllowedUsers = [
+        ['*' => false],          // anonymous requests
         // [ '_' => false ],       // take authenticated user from $_SERVER environemnt
 
         // OR
@@ -49,54 +56,61 @@ class tinyapi{
         // [ 'api1'        => '[passwordhash1]' ],
         // [ 'apiN'        => '[passwordhashN]' ],
     ];
-    
-    protected $_aAllowBasicAuth = true;
+
+    /**
+     * Flag if basic auth is allowed
+     * @var bool
+     */
+    protected bool $_aAllowBasicAuth = true;
 
     // protected $_aHeaders = [ ];
 
     /**
-     * @var  array  response data
+     * Response data
+     * @var  array
      */
-    protected $_aData = [];
+    protected array $_aData = [];
 
     /**
-     * @var  string  current method
+     * Current method
+     * @var string
      */
-    protected $_sMethod = false;
+    protected string $_sMethod = '';
 
     /**
-     * @var  string  current method
+     * Prettyfy json
+     * @var  string
      */
-    protected $_bPretty = false;
-    
+    protected bool $_bPretty = false;
+
     /**
      * constructor
      * @param  array  $aRequirements  optional: requirements with subkeys
      *                                  methods 
      *                                  ips
      */
-    public function __construct($aRequirements=false){
-        if (isset($aRequirements['methods'])){
+    public function __construct(array $aRequirements = [])
+    {
+        if (isset($aRequirements['methods'])) {
             $this->allowMethods($aRequirements['methods']);
         }
-        if (isset($aRequirements['ips'])){
+        if (isset($aRequirements['ips'])) {
             $this->allowIPs($aRequirements['ips']);
         }
-        if (isset($aRequirements['users'])){
+        if (isset($aRequirements['users'])) {
             $this->allowUsers($aRequirements['users']);
         }
-        if (isset($aRequirements['pretty'])){
+        if (isset($aRequirements['pretty'])) {
             $this->setPretty($aRequirements['pretty']);
         }
         header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Headers: *");
         header('Access-Control-Allow-Credentials: true');
         // Access-Control-Allow-Headers
-        return true;
     }
 
 
-    
+
     // ----------------------------------------------------------------------
     // STEP 1
     // ensure requirents
@@ -104,92 +118,95 @@ class tinyapi{
 
 
     /**
-     * set allowed http methods
+     * Set allowed http methods
      * @param  array  aMethods  array of strings containing GET, PUT, POST, DELETE, OPTIONS
      * @return bool
      */
-    public function allowMethods($aMethods){
-        if(is_array($aMethods)){
-            $this->_aAllowedMethods=$aMethods;
-            header("Access-Control-Allow-Methods: " . implode(", ", $this->_aAllowedMethods) );
+    public function allowMethods(array $aMethods): bool
+    {
+        $this->_aAllowedMethods = $aMethods;
+        if (count($aMethods)){
+            header("Access-Control-Allow-Methods: " . implode(", ", $this->_aAllowedMethods));
         }
         return true;
     }
+
     /**
-     * set allowed ip addresses by a given list of regex
+     * Set allowed ip addresses by a given list of regex
      * @param  array  aIpRegex  array of regex
      * @return bool
      */
-    public function allowIPs($aIpRegex){
-        if(is_array($aIpRegex)){
-            $this->_aAllowedIps=$aIpRegex;
-        }
+    public function allowIPs(array $aIpRegex): bool
+    {
+        $this->_aAllowedIps = $aIpRegex;
         return true;
     }
+
     /**
-     * set allowed users
+     * Set allowed users
      * @param  array  aUsers  array of allowed users; key= username; value = password hash (BASIC AUTH)
      *                 '*'          =>  false,          - allow anonymous requests
      *                 'apiuser'    => '[passwordhash]' - an api user that can send an basic auth header
      * @return bool
      */
-    public function allowUsers($aUsers){
-        if(is_array($aUsers)){
-            $this->_aAllowedUsers=$aUsers;
-        }
-
+    public function allowUsers(array $aUsers): bool
+    {
+        $this->_aAllowedUsers = $aUsers;
         return true;
     }
     // ----------------------------------------------------------------------
 
     /**
-     * check allowed http methods
+     * Check allowed http methods
      * @param  array  aMethods  optional: array of strings containing GET, PUT, POST, DELETE, OPTIONS
      * @return bool
      */
-    public function checkMethod($aMethods=false){
-        $this->_sMethod=$_SERVER['REQUEST_METHOD'] ?? false;
+    public function checkMethod(array $aMethods = []): bool
+    {
+        $this->_sMethod = $_SERVER['REQUEST_METHOD'] ?? false;
 
-        if(!$this->_sMethod){
+        if (!$this->_sMethod) {
             die("ABORT: http request required.");
         }
-        $this->allowMethods($aMethods);
-        if (!in_array($this->_sMethod, $this->_aAllowedMethods)){
-            $this->sendError(400, 'ERROR: Method '.$this->_sMethod.' is not supported.');
+        // $this->allowMethods($aMethods);
+        if (!in_array($this->_sMethod, $this->_aAllowedMethods)) {
+            $this->sendError(400, 'ERROR: Method ' . $this->_sMethod . ' is not supported.');
         }
         return true;
     }
     /**
-     * check allowed ip addresses by a given list of regex
-     * @param  array  aIpRegex  optional: array of regex
+     * Check allowed ip addresses by a given list of regex.
+     * It aborts if no ip address was detected.
+     * If access is not allowed it sends a 401 header and aborts.
+     * 
      * @return bool
      */
-    public function checkIp($aIpRegex=false){
-        $this->allowIPs($aIpRegex);
+    public function checkIp(): bool
+    {
 
-        $sMyIp='';
+        $sMyIp = '';
 
         // use first found match as ip address
-        foreach([ 'REMOTE_ADDR', 'HTTP_FORWARDED_FOR' ] as $sIpKey){
-            if(isset($_SERVER[$sIpKey])){
-                $sMyIp.=$_SERVER[$sIpKey];
+        foreach (['REMOTE_ADDR', 'HTTP_FORWARDED_FOR'] as $sIpKey) {
+            if (isset($_SERVER[$sIpKey])) {
+                $sMyIp .= $_SERVER[$sIpKey];
                 break;
             }
         }
-        if(!$sMyIp){
+        if (!$sMyIp) {
             die("ABORT: ip address was not detected.");
         }
-    
+
         // allow if no ip was given ... or verify if a list of regex exists
-        $bAllowed=count($this->_aAllowedIps) ? false : true;
-        foreach($this->_aAllowedIps as $sRegex) {
-            if (preg_match("/$sRegex/", $sMyIp)){
-                $bAllowed=true;
+        $bAllowed = count($this->_aAllowedIps) ? false : true;
+        foreach ($this->_aAllowedIps as $sRegex) {
+            if (preg_match("/$sRegex/", $sMyIp)) {
+                $bAllowed = true;
                 break;
             }
         }
-        if(!$bAllowed){
-            $this->sendError(401, 'ERROR: IP '.$sMyIp.' is not allowed.');
+        if (!$bAllowed) {
+            $this->sendError(401, 'ERROR: IP ' . $sMyIp . ' is not allowed.');
         }
 
         return true;
@@ -214,20 +231,21 @@ class tinyapi{
      * 
      * @return string
      */
-    public function checkUser(){
+    public function checkUser(): string
+    {
 
         // detect a sent basic authentication in request header
-        $aHeaders=apache_request_headers();
-        if(is_array($aHeaders) && isset($aHeaders['Authorization'])){
-            $sAuthline=preg_replace('/^Basic /','', $aHeaders['Authorization']);
-            
-            $aAuth=explode(':', base64_decode($sAuthline));
-            if(is_array($aAuth) && count($aAuth)==2){
-                list($sGivenUser, $sGivenPw)=$aAuth;
+        $aHeaders = apache_request_headers();
+        if (is_array($aHeaders) && isset($aHeaders['Authorization'])) {
+            $sAuthline = preg_replace('/^Basic /', '', $aHeaders['Authorization']);
 
-                foreach($this->_aAllowedUsers as $sLoopuser => $sPwHash){
-                    if($sLoopuser==$sGivenUser) {
-                        if (password_verify($sGivenPw, $sPwHash)){
+            $aAuth = explode(':', base64_decode($sAuthline));
+            if (is_array($aAuth) && count($aAuth) == 2) {
+                list($sGivenUser, $sGivenPw) = $aAuth;
+
+                foreach ($this->_aAllowedUsers as $sLoopuser => $sPwHash) {
+                    if ($sLoopuser == $sGivenUser) {
+                        if (password_verify($sGivenPw, $sPwHash)) {
                             return $sLoopuser;
                         } else {
                             $this->sendError(403, 'ERROR: Authentication failed.');
@@ -235,10 +253,10 @@ class tinyapi{
                     }
                 }
             }
-        } 
+        }
 
         // check if a user ist set with basic auth
-        foreach([ 'PHP_AUTH_USER' ] as $sUserkey) {
+        foreach (['PHP_AUTH_USER'] as $sUserkey) {
             if (isset($_SERVER[$sUserkey]) && $this->_aAllowBasicAuth) {
                 return $_SERVER[$sUserkey];
             }
@@ -246,10 +264,11 @@ class tinyapi{
 
         // if no user is set, then check as anonymous
         // allow i no user was set ... or user '*' was found
-        if(!$this->_aAllowedUsers 
-            || ( is_array($this->_aAllowedUsers) && !count($this->_aAllowedUsers) )
+        if (
+            !$this->_aAllowedUsers
+            || (is_array($this->_aAllowedUsers) && !count($this->_aAllowedUsers))
             || isset($this->_aAllowedUsers['*'])
-        ){
+        ) {
             return '*';
         }
 
@@ -268,89 +287,104 @@ class tinyapi{
     // ----------------------------------------------------------------------
 
     /**
-     * set response data; "should" be an array
+     * Set response data; "should" be an array
      * @param  array  $aData  response data
      * @return boolean
      */
-    public function setData($aData){
-        return $this->_aData=$aData;
+    public function setData(array $aData): bool
+    {
+        $this->_aData = $aData;
+        return true;
     }
 
     /**
-     * append response data; "should" be an array
+     * Append response data
      * If no key as 2nd param is given the given array will be added as new array element.
      * With a given key the key will be used to set data (existing key will be replaced)
      * 
-     * @param  array   $aData  response data
+     * @param  mixed   $data   additional response data
      * @param  string  $sKey   optional: use key 
      * @return boolean
      */
-    public function appendData($aData, $sKey=false){
-        return ($sKey)
-            ? $this->_aData[$sKey]=$aData
-            : $this->_aData[]=$aData
-        ;
+    public function appendData(mixed $aData, string $sKey = ''): bool
+    {
+        if ($sKey){
+            $this->_aData[$sKey] = $aData;
+        } else {
+            $this->_aData[] = $aData;
+        }
+        return true;
     }
 
     /**
-     * set response data; "should" be an array
+     * Set response data; "should" be an array
      * @param  array  $aData  response data
      * @return boolean
      */
-    public function setPretty($bPretty){
-        return $this->_bPretty=!!$bPretty;
+    public function setPretty(bool $bPretty): bool
+    {
+        return $this->_bPretty = !!$bPretty;
     }
 
     // ----------------------------------------------------------------------
     // send response
     // ----------------------------------------------------------------------
 
-    public function stopIfOptions(){
-        if ($this->_sMethod == 'OPTIONS' ) {
+    /**
+     * If http method is OPTIONS, send json and stop.
+     * @return void
+     */
+    public function stopIfOptions(): void
+    {
+        if ($this->_sMethod == 'OPTIONS') {
             $this->sendJson();
         }
-    }   
+    }
 
     /**
-     * send error message using the sendJson method.
+     * Send error message using the sendJson method.
      * @param  integer  $iHttpstatus     http statuscode
      * @param  string   $sErrormessage   string with error message
+     * @return void
      */
-    public function sendError($iHttpstatus, $sErrormessage){
-        return $this->sendJson([
-            'http'=>$iHttpstatus, 
-            'error'=>$sErrormessage,
+    public function sendError(int $iHttpstatus, string $sErrormessage): void
+    {
+        $this->sendJson([
+            'http' => $iHttpstatus,
+            'error' => $sErrormessage,
         ]);
     }
 
     /**
-     * send API response:
+     * Send API response:
      * set content type in http response header and transform data to json
      * and stop.
      * @param  array  $aData  array of data to send
+     * @return void
      */
-    public function sendJson($aData=false){
-        $_aHeader=[
-            '400'=>['header'=>'Bad request'],
-            '401'=>['header'=>'Not autorized'],
-            '403'=>['header'=>'Forbidden'],
-            '404'=>['header'=>'Not Found']
+    public function sendJson(array $aData = []): void
+    {
+        $_aHeader = [
+            '400' => ['header' => 'Bad request'],
+            '401' => ['header' => 'Not autorized'],
+            '403' => ['header' => 'Forbidden'],
+            '404' => ['header' => 'Not Found']
         ];
-        if($aData){
+        if (count($aData)) {
             $this->setData($aData);
         }
         header('Content-Type: application/json');
-        if(isset($this->_aData['http'])){
-            $iStatusCode=$this->_aData['http'];
-            if(isset($_aHeader[$iStatusCode]['header'])){
-                $this->_aData['_header']='HTTP/1.1 '. $iStatusCode.' '.$_aHeader[$iStatusCode]['header'];
+        if (isset($this->_aData['http'])) {
+            $iStatusCode = $this->_aData['http'];
+            if (isset($_aHeader[$iStatusCode]['header'])) {
+                $this->_aData['_header'] = 'HTTP/1.1 ' . $iStatusCode . ' ' . $_aHeader[$iStatusCode]['header'];
                 // do not send non 200 header if method is OPTIONS
-                if ($this->_sMethod !== 'OPTIONS' ) {
+                if ($this->_sMethod !== 'OPTIONS') {
                     header($this->_aData['_header']);
                 }
             }
         }
-        $iJsonOptions=$this->_bPretty ? JSON_PRETTY_PRINT : 0;
+        $iJsonOptions = $this->_bPretty ? JSON_PRETTY_PRINT : 0;
         echo json_encode($this->_aData, $iJsonOptions);
         die();
     }

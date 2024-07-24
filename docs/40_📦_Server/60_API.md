@@ -1,10 +1,10 @@
-# API (WIP) #
+## Introduction
 
 With the API you have read only access to information. Only GET requets are supported.
 
 You get a result as JSON object.
 
-## Installation ##
+## Installation
 
 A non pretty url does not need any configuration on a webserver.
 
@@ -23,7 +23,7 @@ To use pretty urls like `https://www.example.com/[API-URL]` you need a rewrite r
 </location>
 ```
 
-## How does it work? ##
+## How does it work?
 
 ```mermaid
 graph TD;
@@ -47,7 +47,7 @@ graph TD;
   chkList-->|yes|showSubitems-->End
 ```
 
-## Usage ##
+## Usage
 
 To access the most data data we start with the api version `/v1`.
 You get a list of allowed subitems to add.
@@ -61,7 +61,7 @@ Route                        | Description
 /                            | show help
 /health                      | get health status
 /v1/apps/id                  | list existing apps
-/v1/apps/id/[appid]/[dataset]| With app id you can show a show data 
+/v1/apps/id/[appid]/[dataset]| With app id you can show a show data
 /v1/apps/tags                | List existing tags in all apps
 /v1/apps/tags/[tag]/[dataset]| show data of all matching apps
 
@@ -71,9 +71,9 @@ appid     | is a md5 hash (0-9 and a-f)
 tag       | A tag contains letters and digits (a-z, A-Z, 0-9); multiple tags can be seperated with "," (comma) without space.
 dataset   | is one of (meta\|checks\|all)
 
-### Health ###
+### Health
 
-The health check is done by a request to `/api/health`. It sends 
+The health check is done by a request to `/api/health`. It sends
 
 * healt status if the application is up and running
 * monitoring status of all apps
@@ -110,7 +110,7 @@ The health check is done by a request to `/api/health`. It sends
 }
 ```
 
-### Application results ###
+### Application results
 
 Detailed description:
 
@@ -134,11 +134,11 @@ Detailed description:
 
     * `/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/all` returns the largest result set with all metadata and checks. Next to the data from /meta or /checks you get more details like summary, timestamp of result, http response header.
 
-### Tags ###
+### Tags
 
 `/va/tags/` shows a list of the tags that are in use in all applications.
 
-## Response ##
+## Response
 
 A valid api request has the http status code 200.
 

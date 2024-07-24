@@ -21,6 +21,8 @@ require_once 'simplerrd.class.php';
  * </code>
  *
  * @author hahn
+ * 
+ * 2024-07-17  axel.hahn@unibe.ch  php 8 only: use typed variables
  */
 class counteritems
 {
@@ -28,62 +30,74 @@ class counteritems
     // ----- storing counter values
 
     /**
-     * id of the application
-     * @var type 
+     * Id of the application
+     * @var string
      */
-    protected $_sAppId = false;
-    /**
-     * id of the counter
-     * @var type 
-     */
-    protected $_sCounterId = false;
+    protected string $_sAppId = '';
 
     /**
-     * instance of simpleRrd to keep N history values
-     * @var type 
+     * Id of the counter
+     * @var string
      */
-    protected $_oSR = false;
+    protected string $_sCounterId = '';
+
+    /**
+     * Instance of simpleRrd object to keep N history values
+     * @var simpleRrd
+     */
+    protected simpleRrd $_oSR;
 
 
     // ----- save used counters
 
     /**
      * array of used counterids 
-     * @var type 
+     * @var array
      */
-    protected $_aCounters = [];
+    protected array $_aCounters = [];
+
     /**
-     * id of the cache item
-     * @var type 
+     * Id of the cache item
+     * @var string
      */
-    protected $_sCacheId = false;
-    protected $_sCacheIdPrefix = 'counterids';
+    protected string $_sCacheId = '';
+
+    /**
+     * Prefix of cache ids
+     * @var string
+     */
+    protected string $_sCacheIdPrefix = 'counterids';
 
     /**
      * instance of ahcache class
-     * @var type 
+     * @var AhCache  
      */
-    protected $_oCache = false;
+    protected AhCache $_oCache;
 
     // ----------------------------------------------------------------------
     // __construct
     // ----------------------------------------------------------------------
 
-    public function __construct($sAppid = false, $sCounterId = false)
+    /**
+     * Constructur with optional app and counter
+     * @see settApp
+     * @param string $sAppid      optional: id of an app
+     * @param string $sCounterId  optional: name of a counter
+     */
+    public function __construct(string $sAppid = '', string $sCounterId = '')
     {
         if ($sAppid) {
             $this->setApp($sAppid, $sCounterId);
         }
-        return true;
     }
 
     /**
-     * set application
+     * Set application id
      * @param string $sAppid      id of an app
      * @param string $sCounterId  optional: name of a counter
      * @return boolean
      */
-    public function setApp($sAppid, $sCounterId = false)
+    public function setApp(string $sAppid, string $sCounterId = ''): bool
     {
         $this->_sCounterId = false;
         $this->_sAppId = $sAppid;
@@ -100,24 +114,24 @@ class counteritems
     }
 
     /**
-     * set counter name
+     * Set counter name
      * @param string $sCounterId  name of a counter
      * @param array  $aMeta       metadata with these keys
      *                            - title  - text above value
      *                            - visual - viaualisation type
      * @return boolean
      */
-    public function setCounter($sCounterId, $aMeta = false)
+    public function setCounter(string $sCounterId, array $aMeta = [])
     {
         $this->_sCounterId = $sCounterId;
 
-        $this->_oSR = false;
+        unset($this->_oSR);
         if (!$this->_sAppId || !$this->_sCounterId) {
             echo 'FATAL ERROR in ' . __METHOD__ . ' - you need to setApp() before using setCounter()<br>' . "\n";
             return false;
         } else {
-            if (!isset($this->_aCounters[$this->_sCounterId]) || is_array($aMeta)) {
-                $this->_aCounters[$this->_sCounterId] = $aMeta ?? [];
+            if (!isset($this->_aCounters[$this->_sCounterId]) || count($aMeta)) {
+                $this->_aCounters[$this->_sCounterId] = $aMeta;
                 $this->_oCache->write($this->_aCounters);
             }
             $this->_oSR = new simpleRrd($this->_sAppId . '-' . $this->_sCounterId);
@@ -125,20 +139,20 @@ class counteritems
         }
     }
     /**
-     * get all stored counters of the current app
+     * Get all stored counters of the current app
      * @return array
      */
-    public function getCounters()
+    public function getCounters(): array
     {
         return $this->_aCounters;
     }
 
     /**
-     * delete a single counter history
-     * @param type $sCounterId
+     * Delete a single counter history
+     * @param string $sCounterId  delete data of another than the current counter id
      * @return boolean
      */
-    public function deleteCounter($sCounterId = false)
+    public function deleteCounter(string $sCounterId = ''): bool
     {
         if (!$sCounterId) {
             $this->setCounter($sCounterId);
@@ -158,21 +172,21 @@ class counteritems
     // ----------------------------------------------------------------------
 
     /**
-     * add a value to the current counter
+     * Add a value to the current counter
      * @param array  $aItem  array item to add
      * @return boolean
      */
-    public function add($aItem)
+    public function add(array $aItem): bool
     {
         return $this->_oSR->add($aItem);
     }
 
 
     /**
-     * delete all application counters
+     * Delete all application counters
      * @return boolean
      */
-    public function delete()
+    public function delete(): bool
     {
         $aCounters = $this->getCounters();
         if (count($aCounters)) {
@@ -183,11 +197,11 @@ class counteritems
         return true;
     }
     /**
-     * get last N values
+     * Get last N values
      * @param integer  $iMax  optional: get last N values; default: get all stored values
      * @return array
      */
-    public function get($iMax = false)
+    public function get(int $iMax = 0): array
     {
         return $this->_oSR->get($iMax);
     }

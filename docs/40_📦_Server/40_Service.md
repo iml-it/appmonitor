@@ -1,8 +1,10 @@
+## Introduction
+
 The server instance can be used by just using the web interface. For your first tests you don't need a running service. But it is highly recommended for a production use.
 
 The service that is a permanently running loop that fetches updated information of the outdated client data and sends notification data around the clock (respecting the sleep times).
 
-# Run as systemd service #
+## Run as systemd service
 
 This method works on newer Linux OS with systemd, i.e. CentOS 7.
 
@@ -34,13 +36,13 @@ Check it with
 
 Then work these commands:
 
-```
+```shell
 systemctl start appmonitor
 systemctl status appmonitor
 systemctl stop appmonitor
 ```
 
-# Manual start #
+## Manual start
 
 This method does runs on all OS (MS Windows, Mac, Linux).
 

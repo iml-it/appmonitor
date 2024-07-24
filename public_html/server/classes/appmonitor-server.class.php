@@ -32,62 +32,84 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.127
+ * @version 0.137
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
+ * --------------------------------------------------------------------------------<br>
+ * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
  */
 class appmonitorserver
 {
 
     /**
-     * key value hash with all clients to fetch appmon client status from
+     * Key value hash with all clients to fetch appmon client status from
      * key is a hash; value the client url
      * @var array
      */
-    protected $_urls = [];
+    protected array $_urls = [];
 
     /**
-     * hash with response data of all clients
+     * Hash with response data of all clients
      * @var array
      */
-    protected $_data = [];
+    protected array $_data = [];
 
     /**
-     * loaded config data
+     * Loaded config data
      * @var array
      */
-    protected $_aCfg = [];
+    protected array $_aCfg = [];
 
     /**
-     * default TTL if a client does not send its own TTL value
+     * Default TTL if a client does not send its own TTL value
      * value is in sec
+     * 
      * @var integer
      */
-    protected $_iTtl = 300;
+    protected int $_iTtl = 300;
 
     /**
-     * default TTL if a client does not send its own TTL value
-     * value is in sec
+     * Default TTL if a client does not send its own TTL value
+     * Value is in sec
+     * 
      * @var integer
      */
-    protected $_iTtlOnError = 60;
+    protected int $_iTtlOnError = 60;
 
     /**
      * name of the config file to load
      * @var type 
      */
-    protected $_sConfigfile = "appmonitor-server-config.json";
-    protected $_aMessages = [];
+    protected string $_sConfigfile = "appmonitor-server-config.json";
+
+    /**
+     * Array of messages to log
+     * @var array
+     */
+    protected array $_aMessages = [];
+
     /**
      * language texts object
-     * @var object
+     * @var lang object
      */
-    protected $oLang = false;
-    protected $_bIsDemo = false; // set true to disallow changing config in webgui
-    protected $curl_opts = [
+    protected lang $oLang;
+
+    /**
+     * Flag if the demo mode is used
+     * Set true to disallow changing config in webgui
+     * 
+     * @var bool
+     */
+    protected bool $_bIsDemo = false;
+
+    /**
+     * Array of curl default option for http requests
+     * @var array
+     */
+    protected array $curl_opts = [
         CURLOPT_HEADER => true,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 15,
@@ -97,27 +119,34 @@ class appmonitorserver
         CURLOPT_USERAGENT => 'Appmonitor (using curl; see https://github.com/iml-it/appmonitor to install your own monitoring instance;)',
         // CURLMOPT_MAXCONNECTS => 10
     ];
-    protected $_aCounter = false;
 
     /**
-     * flag: show output on STDOUT 
+     * Flag: show output on STDOUT 
      * @see send()
+     * 
      * @var bool
      */
-    protected $_bShowLog = false;
+    protected bool $_bShowLog = false;
 
     /**
      * notificationhandler object to send email/ slack messages
      * it is initialized in method loadConfig()
-     * @var object
+     * 
+     * @var notificationhandler object
      */
-    var $oNotification = false;
+    public notificationhandler $oNotification;
 
     /**
-     * detected user name to handle with roles
+     * Detected user name to handle with roles
      * see config -> users -> USERNAME
+     * 
+     * @var string
      */
-    protected $_user = '*';
+    protected string $_user = '*';
+
+    // ----------------------------------------------------------------------
+    // Constructor
+    // ----------------------------------------------------------------------
 
     /**
      * constructor
@@ -137,34 +166,41 @@ class appmonitorserver
     // ----------------------------------------------------------------------
 
     /**
-     * return config dir ... it is one dir up and "config"
-     * @return type
+     * Return config dir ... it is one dir up and "config"
+     * @return string
      */
-    protected function _getConfigDir()
+    protected function _getConfigDir(): string
     {
         return dirname(__DIR__) . '/config';
     }
 
     /**
-     * load language texts
+     * Load language texts and put it into $this->oLang
+     * @return bool
      */
     protected function _loadLangTexts()
     {
-        return $this->oLang = new lang($this->_aCfg['lang']);
+        $this->oLang = new lang($this->_aCfg['lang']);
+        return true;
     }
 
     /**
-     * get a flat array with all application ids and website + url
+     * Get a flat array with all application ids and website + url
      * as subkeys
+     * 
      * @return array
      */
-    public function getAppIds()
+    public function getAppIds(): array
     {
         $this->_getClientData(true);
         return array_keys($this->_data);
     }
 
-    public function getConfigVars()
+    /**
+     * Get a hash with all configuration items
+     * @return array
+     */
+    public function getConfigVars(): array
     {
         return $this->_aCfg;
     }
@@ -174,8 +210,10 @@ class appmonitorserver
      * This method 
      * - fills $this->_aCfg
      * - newly initializes $this->oNotification
+     * 
+     * @return void
      */
-    public function loadConfig()
+    public function loadConfig(): void
     {
         $aUserdata = [];
         $aDefaults = [];
@@ -205,7 +243,7 @@ class appmonitorserver
             }
         }
         if (isset($this->_aCfg['curl']['timeout'])) {
-            $this->curl_opts[CURLOPT_TIMEOUT] = (int)$this->_aCfg['curl']['timeout'];
+            $this->curl_opts[CURLOPT_TIMEOUT] = (int) $this->_aCfg['curl']['timeout'];
         }
 
         $this->oNotification = new notificationhandler([
@@ -218,7 +256,7 @@ class appmonitorserver
      * load monitoring data ... if not done yet; used in gui and api
      * @return boolean
      */
-    public function loadClientData()
+    public function loadClientData(): bool
     {
         if (!count($this->_data)) {
             $this->_getClientData();
@@ -228,21 +266,21 @@ class appmonitorserver
 
 
     /**
-     * save the current config
+     * Save the current or new config data as file.
+     * @param  array  $aNewCfg  new configuration data
      * @return boolean
      */
-    public function saveConfig($aNewCfg = false)
+    public function saveConfig(array $aNewCfg = []): bool
     {
         if ($this->_bIsDemo) {
             $this->_addLog($this->_tr('msgErr-demosite'), "error");
             return false;
         }
-        if ($aNewCfg && is_array($aNewCfg)) {
+        if (count($aNewCfg)) {
             $this->_aCfg = $aNewCfg;
         }
         $sCfgFile = $this->_getConfigDir() . '/' . $this->_sConfigfile;
 
-        // JSON_PRETTY_PRINT reqires PHP 5.4
         $iOptions = defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
         $sData = json_encode($this->_aCfg, $iOptions);
 
@@ -250,13 +288,13 @@ class appmonitorserver
     }
 
     /**
-     * add a logging message to display in web gui in a message box
+     * Add a logging message to display in web gui in a message box
      * 
-     * @param type $sMessage
-     * @param type $sLevel
+     * @param  string  $sMessage  Message text
+     * @param  string  $sLevel    level: info, warning, error
      * @return boolean
      */
-    protected function _addLog($sMessage, $sLevel = "info")
+    protected function _addLog(string $sMessage, string $sLevel = "info")
     {
         $this->_aMessages[] = [
             'time' => microtime(true),
@@ -267,11 +305,12 @@ class appmonitorserver
     }
 
     /**
-     * setup action: add a new url and save the config
-     * @param string $sUrl
-     * @param bool   $bMakeCheck
+     * Setup action: add a new url and save the config
+     * @param string $sUrl        url to add
+     * @param bool   $bMakeCheck  Flag: check a valid url and response is JSON
+     * @return bool
      */
-    public  function actionAddUrl($sUrl, $bMakeCheck = true)
+    public function actionAddUrl(string $sUrl, bool $bMakeCheck = true): bool
     {
         if ($sUrl) {
             if (!isset($this->_aCfg["urls"]) || ($key = array_search($sUrl, $this->_aCfg["urls"])) === false) {
@@ -307,10 +346,11 @@ class appmonitorserver
     }
 
     /**
-     * delete an url to fetch and trigger to save the new config file
-     * @param type $sUrl
+     * Setup action: Delete an url to fetch and trigger to save the new config file
+     * @param string $sUrl   url to delete in the config
+     * @return bool
      */
-    public function actionDeleteUrl($sUrl)
+    public function actionDeleteUrl(string $sUrl): bool
     {
         if ($sUrl) {
             if (($key = array_search($sUrl, $this->_aCfg["urls"])) !== false) {
@@ -373,9 +413,10 @@ class appmonitorserver
     // ----------------------------------------------------------------------
 
     /**
-     * detect a user from $_SERVER env 
+     * Return a detected user from $_SERVER env
+     * @return string
      */
-    public function getAlreadyAuthenticatedUser()
+    public function getAlreadyAuthenticatedUser(): string
     {
         // check if a user ist set with basic auth
         foreach ($this->_aCfg['userfields'] as $sUserkey) {
@@ -387,29 +428,30 @@ class appmonitorserver
     }
 
     /**
-     * get current username that was detected or set
+     * Get current username that was detected or set
      * @return string
      */
-    public function getUserid()
+    public function getUserid(): string
     {
         return $this->_user;
     }
+
     /**
-     * get current username that was detected or set
+     * Get current username that was detected or set
      * @return string
      */
-    public function getUsername()
+    public function getUsername(): string
     {
         $aUser = $this->getUser();
-        return isset($aUser['username']) ? print_r($aUser['username'], 1) : '[' . $this->_user . ']';
+        return isset($aUser['username']) ? print_r($aUser['username'], 1) : "[$this->_user]";
     }
 
     /**
-     * get meta fields for current or given user
-     * @param  string  $sUsername  optional: override user id 
-     * @return 
+     * Get meta fields for current or given user
+     * @param  string  $sUsername  optional: override current user id 
+     * @return bool|array
      */
-    public function getUser($sUsername = false)
+    public function getUser(string $sUsername = ''): bool|array
     {
         $sUsername = $sUsername ? $sUsername : $this->_user;
         return ($sUsername && isset($this->_aCfg["users"][$sUsername]))
@@ -418,22 +460,23 @@ class appmonitorserver
     }
 
     /**
-     * set a username to work with
+     * Set a username to work with
      * @param  string  $sNewUser  username; it should be a user in config users key (or you loose all access)
      * @return bool
      */
-    public function setUser($sNewUser)
+    public function setUser(string $sNewUser): bool
     {
         $this->_user = preg_replace('/[^a-z0-9\*]/', '', $sNewUser);
         return true;
     }
 
     /**
-     * get roles of a user. If the user itself has no roles
+     * Get roles of a user. If the user itself has no roles
      * but was authenticated by the webserver then it gets
      * default roles from user "__default_authenticated_user__"
+     * @return bool|array
      */
-    public function getRoles()
+    public function getRoles():bool|array
     {
         $aUser = $this->getUser();
         if (is_array($aUser)) {
@@ -451,11 +494,11 @@ class appmonitorserver
     }
 
     /**
-     * return if a user has a given role
+     * Return if a user has a given role
      * @param  string  $sRequiredRole  name of the role to verify
-     * @return true
+     * @return bool
      */
-    public function hasRole($sRequiredRole)
+    public function hasRole(string $sRequiredRole): bool
     {
         $aRoles = $this->getRoles();
         if (is_array($aRoles) && count($aRoles)) {
@@ -469,7 +512,10 @@ class appmonitorserver
     // ----------------------------------------------------------------------
 
     /**
-     * helper function: handle url parameters
+     * Helper function: handle url parameters
+     * - action = "addurl|deleteurl" + url = "..."
+     * 
+     * @return void
      */
     protected function _handleParams()
     {
@@ -490,10 +536,10 @@ class appmonitorserver
     }
 
     /**
-     * get a flat array of tags sent from all clients
+     * Get a flat array of tags sent from all clients
      * @return array
      */
-    protected function _getClientTags()
+    protected function _getClientTags(): array
     {
         $aTags = [];
         foreach ($this->_data as $aEntries) {
@@ -509,15 +555,15 @@ class appmonitorserver
     }
 
     /**
-     * generate array with http status values from a string
+     * Generate array with http status values from a string
      * 
      * @param string $sHttpHeader
      * @return array
      */
-    protected function _getHttpStatusArray($sHttpHeader)
+    protected function _getHttpStatusArray(string $sHttpHeader): array
     {
         if (!$sHttpHeader) {
-            return false;
+            return [];
         }
         $aHeader = [];
         foreach (explode("\r\n", $sHttpHeader) as $sLine) {
@@ -533,22 +579,28 @@ class appmonitorserver
         return $aHeader;
     }
 
-    protected function _getHttpStatus($sHttpHeader)
+    /**
+     * Get http status code from a given header 
+     * It returns false if no status code was found (http request failed and has no response)
+     * @param  string  $sHttpHeader  http response header
+     * @return bool|int
+     */
+    protected function _getHttpStatus(string $sHttpHeader): bool|int
     {
         $aHeader = $this->_getHttpStatusArray($sHttpHeader);
         return $aHeader['_statuscode'] ?? false;
     }
 
     /**
-     * helper function for multi_curl_exec
+     * Helper function for multi_curl_exec
      * hint from kempo19b
      * http://php.net/manual/en/function.curl-multi-select.php
      * 
      * @param CurlMultiHandle  $mh             multicurl master handle
      * @param boolean          $still_running  
-     * @return type
+     * @return int
      */
-    protected function full_curl_multi_exec($mh, &$still_running)
+    protected function full_curl_multi_exec($mh, &$still_running): int
     {
         do {
             $rv = curl_multi_exec($mh, $still_running);
@@ -556,7 +608,20 @@ class appmonitorserver
         return $rv;
     }
 
-    protected function _multipleHttpGet($aUrls)
+    /**
+     * Ececute multiple http requests in parallel and return an array
+     * with url as key and its result infos in subkeys
+     *   - 'url'              {string} url
+     *   - 'response_header'  {string} http response header
+     *   - 'response_body'    {string} http response body
+     *   - 'curlinfo'         {array}  curl request infos
+     *   - 'curlerrorcode'    {int}    curl error code
+     *   - 'curlerrormsg'     {string} curl error message
+     *
+     * @param array $aUrls  array of urls to fetch
+     * @return array
+     */
+    protected function _multipleHttpGet(array $aUrls): array
     {
         $aResult = [];
 
@@ -600,8 +665,8 @@ class appmonitorserver
                 'response_header' => $sHeader,
                 'response_body' => $sBody,
                 'curlinfo' => curl_getinfo($curl_arr[$sKey]),
-                'curlerrorcode' =>curl_errno($curl_arr[$sKey]),
-                'curlerrormsg' =>curl_error($curl_arr[$sKey]),
+                'curlerrorcode' => curl_errno($curl_arr[$sKey]),
+                'curlerrormsg' => curl_error($curl_arr[$sKey]),
             ];
             curl_multi_remove_handle($master, $curl_arr[$sKey]);
         }
@@ -610,11 +675,13 @@ class appmonitorserver
     }
 
     /**
-     * helpfer function: get client data from meta and generate a key
+     * Helper function: get client data from meta and generate a key
      * "result" with whole summary
-     * @param type $aClientdata
+     * 
+     * @param array $aClientdata
+     * @return array
      */
-    protected function _generateResultArray($aClientData)
+    protected function _generateResultArray($aClientData): array
     {
         $aReturn = [];
         $aReturn["ts"] = date("U");
@@ -647,11 +714,11 @@ class appmonitorserver
     }
 
     /**
-     * detect outdated application checks by reading cached data
+     * Detect outdated application checks by reading cached data
      * if age (since last write) is larger 2 x TTL then it uis marked as outdated.
-     * REMARK: 
+     * @return void
      */
-    protected function _detect_outdated_appchecks()
+    protected function _detect_outdated_appchecks(): void
     {
         foreach ($this->_urls as $sKey => $sUrl) {
             $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
@@ -681,11 +748,13 @@ class appmonitorserver
     }
 
     /**
-     * get all client data; it fetches all given urls
+     * Get all client data; it fetches all given urls
+     * 
+     * 
      * @param boolean  $ForceCache  flag: use cache; default: false (=automatic selection by source and config "servicecache")
      * @return boolean
      */
-    protected function _getClientData($ForceCache = false)
+    protected function _getClientData(bool $ForceCache = false): bool
     {
         if (!$ForceCache) {
             $ForceCache = isset($_SERVER['REQUEST_METHOD']) && isset($this->_aCfg['servicecache']) && $this->_aCfg['servicecache'];
@@ -725,10 +794,10 @@ class appmonitorserver
                 $iHttpStatus = $this->_getHttpStatus($aResult['response_header']);
                 $sError = !$aResult['response_header']
                     ? $this->_tr('msgErr-Http-request-failed')
-                        .(isset($aResult['curlerrormsg'])
-                            ? '<br>'.sprintf($this->_tr('Curl-error'), $aResult['curlerrormsg'], $aResult['curlerrorcode'])
-                            : ''
-                        )
+                    . (isset($aResult['curlerrormsg'])
+                        ? '<br>' . sprintf($this->_tr('Curl-error'), $aResult['curlerrormsg'], $aResult['curlerrorcode'])
+                        : ''
+                    )
                     : (
                         (!$iHttpStatus || $iHttpStatus > 299)
                         ? $this->_tr('msgErr-Http-error')
@@ -803,12 +872,12 @@ class appmonitorserver
                 }
                 $this->send(
                     ""
-                        . $aResult['url']
-                        . " Httpstatus=" . $iHttpStatus
-                        . " TTL=$iTtl"
-                        . " responsetime=" . floor($aResult['curlinfo']['total_time'] * 1000) . "ms"
-                        . " appstatus=" . $this->_tr('Resulttype-' . $aClientData["result"]["result"])
-                        . $sError . " " . $aResult['curlerrormsg']
+                    . $aResult['url']
+                    . " Httpstatus=" . $iHttpStatus
+                    . " TTL=$iTtl"
+                    . " responsetime=" . floor($aResult['curlinfo']['total_time'] * 1000) . "ms"
+                    . " appstatus=" . $this->_tr('Resulttype-' . $aClientData["result"]["result"])
+                    . $sError . " " . $aResult['curlerrormsg']
                 );
 
                 // write cache
@@ -832,11 +901,11 @@ class appmonitorserver
     }
 
     /**
-     * translate a text with language file
+     * Translate a text with language file
      * @param string $sWord
      * @return string
      */
-    protected function _tr($sWord)
+    protected function _tr(string $sWord): string
     {
         return $this->oLang->tr($sWord, ['gui']);
     }
@@ -845,17 +914,22 @@ class appmonitorserver
     // setter
     // ----------------------------------------------------------------------
 
-    protected function _generateUrlKey($sUrl)
+    /**
+     * Helper function: generate a unique url key
+     * @param string $sUrl
+     * @return string
+     */
+    protected function _generateUrlKey(string $sUrl): string
     {
         return md5($sUrl);
     }
 
     /**
-     * add appmonitor url
-     * @param string $sUrl
+     * Add appmonitor url to current object
+     * @param string $sUrl  url to add
      * @return boolean
      */
-    public function addUrl($sUrl)
+    public function addUrl($sUrl): bool
     {
         $sKey = $this->_generateUrlKey($sUrl);
         $this->_urls[$sKey] = $sUrl;
@@ -863,11 +937,11 @@ class appmonitorserver
     }
 
     /**
-     * remove appmonitor url
-     * @param string $sUrl
+     * remove appmonitor url from current object
+     * @param string $sUrl url to remove
      * @return boolean
      */
-    public function removeUrl($sUrl)
+    public function removeUrl(string $sUrl): bool
     {
         $sKey = $this->_generateUrlKey($sUrl);
         if (array_key_exists($sKey, $this->_urls)) {
@@ -878,10 +952,10 @@ class appmonitorserver
     }
 
     /**
-     * switch demo mode on off
+     * switch demo mode on and off
      * TODO: check how switch demo mode and handle parameters
-     * @param type $bBool
-     * @return type
+     * @param bool $bBool
+     * @return bool
      */
     public function setDemoMode($bBool = true)
     {
@@ -893,11 +967,11 @@ class appmonitorserver
     // ----------------------------------------------------------------------
 
     /**
-     * get human readable time
+     * Get a human readable time of a given age in seconds
      * @param int $iSec  seconds
      * @return string
      */
-    protected function _hrTime($iSec)
+    protected function _hrTime(int $iSec): string
     {
         $sReturn = '';
         $sReturn = $iSec . " sec";
@@ -914,11 +988,11 @@ class appmonitorserver
     }
 
     /**
-     * helper function for counters for overview over all web apps
+     * Helper function for counters for overview over all web apps
      * 
-     * @return type
+     * @return array
      */
-    protected function _getCounter()
+    protected function _getCounter(): array
     {
         $iCountApps = 0;
         $iCountChecks = 0;
@@ -946,37 +1020,41 @@ class appmonitorserver
             'hosts' => count($aServers),
             'appresults' => $aResults,
             'checks' => $iCountChecks,
-            'checks' => $iCountChecks,
             'checkresults' => $aCheckResults
         ];
     }
 
     /**
-     * set flag for logging to standard output
+     * Set flag for logging to standard output
+     * @param bool $bShow  new logging flag
+     * @return bool
      */
-    public function setLogging($bShow)
+    public function setLogging(bool $bShow): bool
     {
         return $this->_bShowLog = !!$bShow;
     }
+
     /**
-     * write a message to STDOUT (if actiated or logging is on)
+     * Write a message to STDOUT (if actiated or logging is on)
      *
      * @param string   $sMessage  message text
-     * @param boolean  $bShow     flag to write to stdout (overrides internal value)
+     * @param boolean  $bShow     flag to write to stdout (overrides set show log value)
      * @return boolean
      */
-    public function send($sMessage, $bShow = false)
+    public function send(string $sMessage, $bShow = false): bool
     {
         echo ($bShow || $this->_bShowLog)
             ? (date("Y-m-d H:i:s") . " " . $sMessage . "\n")
             : '';
+        return true;
     }
+
     /**
-     * get all client data and final result as array
+     * Get all client data and final result as array
      * @param   string  $sHost  filter by given hostname
      * @return  array
      */
-    public function getMonitoringData($sHost = false)
+    public function getMonitoringData(string $sHost = ''): array
     {
 
         $iMaxReturn = 0;
@@ -1033,10 +1111,10 @@ class appmonitorserver
     }
 
     /**
-     * returns a readable result by given integer; i.e. 0=OK, 1=unknown, ...
+     * Get a readable result by given integer; i.e. 0=OK, 1=unknown, ...
      * @return string
      */
-    public function getResultValue($i)
+    public function getResultValue(int $i): string
     {
         return $this->_tr('Resulttype-' . $i);
     }

@@ -39,20 +39,22 @@
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
  * 2022-05-02  <axel.hahn@iml.unibe.ch>  set warning to 21 days (old value was 30); add "critical" param
  * 2022-05-03  <axel.hahn@iml.unibe.ch>  critical limit is a warning only (because app is still functional)
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 
  */
-class checkCert extends appmonitorcheck{
+class checkCert extends appmonitorcheck
+{
     /**
-     * get default group of this check
-     * @param array   $aParams
-     * @return array
+     * Get default group of this check
+     * @return string
      */
-    public function getGroup(){
+    public function getGroup(): string
+    {
         return 'security';
     }
 
     /**
-     * check SSL certificate 
+     * Check SSL certificate 
      * @param array $aParams
      * [
      *     "url"       optional: url to connect check; default: own protocol + server
@@ -60,62 +62,60 @@ class checkCert extends appmonitorcheck{
      *     "warning"   optional: count of days to warn; default=21 (=3 weeks)
      *     "critical"  optional: count of days to raise critical; default=5
      * ]
-     * @return boolean
+     * @return array
      */
-    public function run($aParams) {
-        $sUrl = isset($aParams["url"]) 
-                ? $aParams["url"] 
-                : 'http'. ($_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] .':' . $_SERVER['SERVER_PORT']
-                ;
-        $bVerify =   isset($aParams["verify"])   ? !!$aParams["verify"]        : true;
-        $iWarn   =   isset($aParams["warning"])  ? (int)($aParams["warning"])  : 21;
-        $iCrtitcal = isset($aParams["critical"]) ? (int)($aParams["critical"]) : 5;
+    public function run(array $aParams): array
+    {
+        $sUrl = $aParams["url"] ?? 'http' . ($_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'];
+        $bVerify = isset($aParams["verify"]) ? !!$aParams["verify"] : true;
+        $iWarn = isset($aParams["warning"]) ? (int) ($aParams["warning"]) : 21;
+        $iCrtitcal = isset($aParams["critical"]) ? (int) ($aParams["critical"]) : 5;
 
-        $sMessage="Checked url: $sUrl ... ";
-        $certinfo=$this->_certGetInfos($sUrl, $bVerify);
-        if(isset($certinfo['_error'])){
+        $sMessage = "Checked url: $sUrl ... ";
+        $certinfo = $this->_certGetInfos($sUrl, $bVerify);
+        if (isset($certinfo['_error'])) {
             return [
-                RESULT_ERROR, 
+                RESULT_ERROR,
                 $certinfo['_error'] . $sMessage
             ];
         }
-        
-        $sDNS=isset($certinfo['extensions']['subjectAltName']) ? $certinfo['extensions']['subjectAltName'] : false;
-        $sHost=parse_url($sUrl,PHP_URL_HOST);
-        if(strstr($sDNS, 'DNS:'.$sHost)===false){
+
+        $sDNS = $certinfo['extensions']['subjectAltName'] ?? false;
+        $sHost = parse_url($sUrl, PHP_URL_HOST);
+        if (strstr($sDNS, "DNS:$sHost") === false) {
             return [
-                RESULT_ERROR, 
-                'Wrong certificate: '.$sHost.' is not listed as DNS alias in ['.$sDNS.']  ' . $sMessage
+                RESULT_ERROR,
+                "Wrong certificate: $sHost is not listed as DNS alias in [$sDNS]. $sMessage"
             ];
         }
-        
+
         $iDaysleft = round(($certinfo['validTo_time_t'] - date('U')) / 60 / 60 / 24);
-        $sMessage.= 'Issuer: '. $sIssuer=$certinfo['issuer']['O'] 
-                . '; valid from: '. date("Y-m-d H:i", $certinfo['validFrom_time_t'])
-                . ' to '.date("Y-m-d H:i", $certinfo['validTo_time_t']).' '
-                . ( $iDaysleft ? "($iDaysleft days left)" : "expired since ".(-$iDaysleft)." days.")
-                ;
-        if ($iDaysleft<=0) {
+        $sMessage .= 'Issuer: ' . $certinfo['issuer']['O']
+            . '; valid from: ' . date("Y-m-d H:i", $certinfo['validFrom_time_t'])
+            . ' to ' . date("Y-m-d H:i", $certinfo['validTo_time_t']) . ' '
+            . ($iDaysleft ? "($iDaysleft days left)" : "expired since " . (-$iDaysleft) . " days.")
+        ;
+        if ($iDaysleft <= 0) {
             return [
-                RESULT_ERROR, 
+                RESULT_ERROR,
                 'Expired! ' . $sMessage
             ];
         }
-        if ($iDaysleft<=$iWarn) {
+        if ($iDaysleft <= $iWarn) {
             return [
-                RESULT_WARNING, 
-                ($iDaysleft<=$iCrtitcal
-                 ? 'Expires very soon! '
-                 : 'Expires soon. ' 
-                ). $sMessage
+                RESULT_WARNING,
+                ($iDaysleft <= $iCrtitcal
+                    ? 'Expires very soon! '
+                    : 'Expires soon. '
+                ) . $sMessage
             ];
         }
         // echo '<pre>';
         return [
-            RESULT_OK, 
-            'OK. ' 
-                .($bVerify ? 'Certificate is valid. ' : '(Verification is disabled; Check for expiration only.) ' )
-                . $sMessage
+            RESULT_OK,
+            'OK. '
+            . ($bVerify ? 'Certificate is valid. ' : '(Verification is disabled; Check for expiration only.) ')
+            . $sMessage
         ];
     }
 

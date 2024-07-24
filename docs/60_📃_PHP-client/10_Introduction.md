@@ -1,4 +1,4 @@
-# Requirements #
+## Requirements
 
 The delivered PHP client (you can implement a client in other languages) needs
 
@@ -6,9 +6,9 @@ The delivered PHP client (you can implement a client in other languages) needs
 - small: less 1 MB + docs
 - low requirements: even no database required
 
-# Quick start #
+## Quick start
 
-## Check on Appmonitor server ##
+### Check on Appmonitor server
 
 The project package contains the PHP client and the server. The PHP client is used for the Appmonitor server to verify its own installation.
 

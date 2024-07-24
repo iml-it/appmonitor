@@ -8,35 +8,37 @@ Check if a SSL certificate is still valid ... and does not expire soon.
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Certificate check",
         "description" => "Check if SSL cert is valid and does not expire soon",
-        "check" => array(
+        "check" => [
             "function" => "Cert",
-            "params" => array(
+            "params" => [
                 "url"      => [url-to-check],
                 "verify"   => [flag-for-verification],
                 "warning"  => [days-before-cert-expires],
                 "critical" => [days-before-cert-expires],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
 ## Parameters ##
 
-| key      | type     | description |
+| key      | type     | description
 |---       |---       |---
-|url       |(string)  |url to connect check i.e. https://example.com:3000; default: own protocol + server of your webapp
+|url       |(string)  |url to connect check i.e. <https://example.com:3000>; default: own protocol + server of your webapp
 |verify    |(boolean) |optional: flag verify certificate; default = true
 |warning   |(integer) |optional: count of days to warn; default=21
 |critical  |(integer) |optional: count of days to raise critical; default=5
 
-I recommend to set verify to *true*. If you should get a warning like 
+I recommend to set verify to *true*. If you should get a warning like
 
-    PHP Warning:  stream_socket_client(): SSL operation failed with code 1. OpenSSL Error messages:
-    error:14090086:SSL routines:ssl3_get_server_certificate:certificate verify failed in (...)appmonitor-checks.class.php on line NNN
+```text
+PHP Warning:  stream_socket_client(): SSL operation failed with code 1. OpenSSL Error messages:
+error:14090086:SSL routines:ssl3_get_server_certificate:certificate verify failed in (...)appmonitor-checks.class.php on line NNN
+```
 
 ... then set it back to *false* to make a test for expiration only.
 
@@ -65,14 +67,14 @@ In most cases you can use this snippet to check the ssl certificate of the own i
 ```php
 if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
     $oMonitor->addCheck(
-        array(
+        [
             "name" => "Certificate check",
             "description" => "Check if SSL cert is valid and does not expire soon",
-            "check" => array(
+            "check" => [
                 "function" => "Cert",
-            ),
-        )
-    );
+            ],
+        ]
+    ];
 }
 ```
 
