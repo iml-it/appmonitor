@@ -118,7 +118,7 @@ class counteritems
      * @param string $sCounterId  name of a counter
      * @param array  $aMeta       metadata with these keys
      *                            - title  - text above value
-     *                            - visual - viaualisation type
+     *                            - visual - visualisation type
      * @return boolean
      */
     public function setCounter(string $sCounterId, array $aMeta = [])
