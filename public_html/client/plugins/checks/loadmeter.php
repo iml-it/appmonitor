@@ -44,6 +44,7 @@
  * 
  * 2019-06-06  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
+ * 2024-07-25  <axel.hahn@unibe.ch>      float return with 2 digits behind comma
  * 
  */
 class checkLoadmeter extends appmonitorcheck
@@ -132,12 +133,12 @@ class checkLoadmeter extends appmonitorcheck
         //           
         return [
             $iResult,
-            ($fLoad === false ? 'load value is not available' : 'current load is: ' . $fLoad),
+            ($fLoad === false ? 'load value is not available' : 'current load is: ' . round($fLoad, 2)),
             ($fLoad === false
                 ? []
                 : [
                     'type' => 'counter',
-                    'count' => $fLoad,
+                    'count' => round($fLoad, 2),
                     'visual' => 'line',
                 ]
             )
