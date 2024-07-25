@@ -227,8 +227,8 @@ class appmonitorcheck
 
     /**
      * Perform a check
-     * @param array $aConfig  configuration array for a check
-     * Array
+     * @param array $aConfig  configuration array for a check, eg.
+     * <code>
      * [
      *     [name] => Dummy
      *     [description] => Dummy Test
@@ -238,7 +238,7 @@ class appmonitorcheck
      *                                        // its keys depend on the function  
      *     ]
      * ]
-     * 
+     * </code>
      * @return array
      */
     public function makeCheck(array $aConfig): array

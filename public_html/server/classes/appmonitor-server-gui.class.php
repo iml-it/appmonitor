@@ -470,9 +470,9 @@ class appmonitorserver_gui extends appmonitorserver
                         : '';
                     break;
                 case 'receiver':
-                    $this->oNotification->setApp($sAppId, $this->_data[$sAppId]);
+                    $this->oNotification->setApp($sAppId);
                     $aEmailNotifiers = $this->oNotification->getAppNotificationdata('email');
-                    $aSlackChannels = $this->oNotification->getAppNotificationdata('slack', 1);
+                    $aSlackChannels = $this->oNotification->getAppNotificationdata('slack');
 
                     // $aPeople=[ 'email1@example.com', 'email2@example.com' ];
                     $sMoreNotify = (count($aEmailNotifiers) ? '<span title="' . implode("\n", $aEmailNotifiers) . '">' . count($aEmailNotifiers) . ' x ' . $this->_aIco['notify-email'] . '</span> ' : '')
@@ -1261,7 +1261,7 @@ class appmonitorserver_gui extends appmonitorserver
                     'xValue' => false,
 
                     'yGrid' => false,
-                    'yLabel' => $aOptions['label'],
+                    // 'yLabel' => $aOptions['label'],
                     'yLabel' => false,
                     'yValue' => false,
 
@@ -1846,6 +1846,7 @@ class appmonitorserver_gui extends appmonitorserver
                 'text' => $sMessage,
             ]);
         }
+        return '';
     }
 
     /**
@@ -2026,7 +2027,7 @@ class appmonitorserver_gui extends appmonitorserver
             $aTags = $aEntries["meta"]["tags"] ?? false;
             $sTaglist = $aTags ? $this->_getTaglist($aTags) : '';
 
-            $this->oNotification->setApp($sAppId, $this->_data[$sAppId]);
+            $this->oNotification->setApp($sAppId);
 
             $aLastStatus = $this->oNotification->getAppLastResult();
             $sSince = isset($aLastStatus['laststatus']['result']['ts'])
@@ -2208,7 +2209,7 @@ class appmonitorserver_gui extends appmonitorserver
      * it is used to build an url; the "-" will be used to parse the app id
      * 
      * @param string $sAppid
-     * @return type
+     * @return string
      */
     protected function _getDivIdForApp(string $sAppid): string
     {

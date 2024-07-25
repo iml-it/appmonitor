@@ -81,7 +81,7 @@ class appmonitorserver
 
     /**
      * name of the config file to load
-     * @var type 
+     * @var string
      */
     protected string $_sConfigfile = "appmonitor-server-config.json";
 

@@ -1,14 +1,21 @@
 #!/bin/bash
 # ======================================================================
 #
-# UPDATE APPMONITOR CLIENT
+#   A P P M O N I T O R  ::  CLIENT - UPDATE
 #
-# requires git, rsync
+# This script will install or update the appmonitor client only.
+#
+# Below the document root of a website create a new directory, 
+# i.e. [webroot]/appmonitor/ and copy this script there.
+# Change the directory "cd [webroot]/appmonitor/" and execute it.
 #
 # ----------------------------------------------------------------------
-# 2022-04-11  <axel.hahn@iml.unibe.ch>  first lines
-# 2022-04-12  <axel.hahn@iml.unibe.ch>  add help; exclude unneeded files
-# 2022-05-03  <axel.hahn@iml.unibe.ch>  create general_include.php
+# requires git, rsync
+# ----------------------------------------------------------------------
+# 2022-04-11  0.1  <axel.hahn@iml.unibe.ch>  first lines
+# 2022-04-12  0.2  <axel.hahn@iml.unibe.ch>  add help; exclude unneeded files
+# 2022-05-03  0.3  <axel.hahn@iml.unibe.ch>  create general_include.php
+# 2024-07-25  0.4  <axel.hahn@iml.unibe.ch>  update quoting and comments
 # ======================================================================
 
 # ----------------------------------------------------------------------
@@ -16,14 +23,14 @@
 # ----------------------------------------------------------------------
 
 readonly git_repo_url="https://github.com/iml-it/appmonitor.git"
-readonly line="____________________________________________________________"
-readonly version="0.3"
+readonly line="______________________________________________________________________________"
+readonly version="0.4"
 
 git_target=/tmp/git_data__appmonitor
 client_from="${git_target}/public_html/client"
 client_to="."
 
-cd $( dirname "$0" ) || exit 1
+cd "$( dirname "$0" )" || exit 1
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -99,6 +106,9 @@ case "$1" in
     This is a helper script to get the files of the IML Appmonitor
     client part only.
 
+    Below the document root of a website create a new directory, 
+    i.e. [webroot]/appmonitor/ and copy this script there.
+
     This script clones and updates the repository in the /tmp 
     directory and syncs the client files of it to a given directory.
 
@@ -165,7 +175,7 @@ _fileupdate general_include.sample.php
 echo $line
 echo ">>> #3 of 3 >>> Diff"
 echo
-diff -r "$client_from" "$client_to"
+diff --color -r "$client_from" "$client_to"
 echo
 
 
