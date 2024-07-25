@@ -53,7 +53,7 @@ class checkPortTcp extends appmonitorcheck
         $iPort = (int) $aParams['port'];
 
         if (!function_exists('socket_create')) {
-            return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform tcp test. The socket module is not enabled in the php installation."];
+            return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform tcp test. The php-sockets module is not enabled in the php installation."];
         }
 
         // from http://php.net/manual/de/sockets.examples.php
