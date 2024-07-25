@@ -167,6 +167,7 @@ rsync -rav \
     --exclude "*.sample.*" \
     --exclude "example.json" \
     --exclude "check-appmonitor-server.php" \
+    --exclude "local.php" \
     $client_from/* "$client_to"
 echo
 
