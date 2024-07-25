@@ -90,7 +90,7 @@ class renderadminlte
     public function __construct()
     {
         $this->_oHtml = new htmlelements();
-        return true;
+        //return true;
     }
 
     // ----------------------------------------------------------------------
@@ -108,6 +108,7 @@ class renderadminlte
      * @param string  $sType      type; key in $_aValidItems; one of color|type
      * @param string  $sValue     value to check
      * @param string  $sReferrer  optional: method that called this function
+     * @return bool
      */
     protected function _checkValue($sType, $sValue, $sReferrer = false)
     {
@@ -131,7 +132,7 @@ class renderadminlte
     /**
      * return a alert box      
      * https://adminlte.io/themes/AdminLTE/pages/UI/general.html
-     * @param type $aOptions  hash with keys for all options
+     * @param array $aOptions  hash with keys for all options
      *                          - type - one of [none]|danger|info|primary|success|warning
      *                          - dismissible - if dismissible - one of true|false; default: false
      *                          - title
@@ -169,7 +170,7 @@ class renderadminlte
 
     /**
      * get html code for a badge
-     * @param type $aOptions  hash with keys for all options
+     * @param array $aOptions  hash with keys for all options
      *                          - type    - one of [none]|danger|info|primary|success|warning
      *                          - bgcolor - background color (without prefix "bg")
      *                          - class   - css class
@@ -202,7 +203,7 @@ class renderadminlte
     /**
      * return a callout box      
      * https://adminlte.io/themes/AdminLTE/pages/UI/general.html
-     * @param type $aOptions  hash with keys for all options
+     * @param array $aOptions  hash with keys for all options
      *                          - type - one of [none]|danger|info|primary|success|warning
      *                          - title
      *                          - text
@@ -235,7 +236,7 @@ class renderadminlte
 
     /**
      * return a content Box
-     * @param type $aOptions  hash with keys for all options
+     * @param array $aOptions  hash with keys for all options
      *                          - type - one of [none]|danger|info|primary|success|warning
      *                          - solid - one of true|false; default: false
      *                          - collapsable - one of true|false; default: false
@@ -295,6 +296,20 @@ class renderadminlte
     }
 
 
+    
+    /**
+     * Generates a menu item with a label and link options.
+     *
+     * @param array $aOptions The options for the menu item.
+     *                       - 'class' (string): The CSS class for the menu item.
+     *                       - 'label' (string): The label for the menu item.
+     * @param array $aLinkOptions The options for the link.
+     *                           - 'href' (string): The URL for the link.
+     *                           - 'text' (string): The text for the link.
+     *                           - 'class' (string): The CSS class for the link.
+     *                           - 'icon' (string): The icon for the link.
+     * @return string The generated menu item.
+     */
     public function getMenuItem($aOptions, $aLinkOptions)
     {
         $sLabel = $this->_oHtml->getTag('a', $aLinkOptions);
@@ -332,7 +347,7 @@ class renderadminlte
 
     /**
      * return a small Box
-     * @param type $aOptions  hash with keys for all options
+     * @param array $aOptions  hash with keys for all options
      *                          - type - icon color one of [none]|aqua|green|yellow|red
      *                          - bgcolor - background color one of [none]|aqua|green|yellow|red
      *                          - color - icon color one of [none]|aqua|black|gray|green|orange|maroon|navy|purple|red|teal|yellow
@@ -368,7 +383,7 @@ class renderadminlte
     }
     /**
      * return a widget
-     * @param type $aOptions  hash with keys for all options
+     * @param array $aOptions  hash with keys for all options
      *                          - bgcolor - icon color one of aqua|green|yellow|red
      *                          - color - icon color one of aqua|black|gray|green|orange|maroon|navy|purple|red|teal|yellow
      *                          - onclick
@@ -452,7 +467,7 @@ class renderadminlte
      * get html code for headline of page content
      * 
      * @param string  $sHeadline  headline as html
-     * @return type
+     * @return string
      */
     public function getSectionHead($sHeadline)
     {

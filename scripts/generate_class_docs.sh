@@ -54,13 +54,16 @@ function docgen(){
 
     echo "----- $myfile"
     echo "      $outfile"
-    ./parse-class.php --debug --out md "$APPDIR/$myfile" > "$outfile"
+    ./parse-class.php --out md "$APPDIR/$myfile" > "$outfile"
     echo
 }
 
 # ----------------------------------------------------------------------
 # MAIN
 # ----------------------------------------------------------------------
+
+
+# ./parse-class.php --out md "$APPDIR/public_html/server/classes/appmonitor-server.class.php"; exit 
 
 # generate all docs
 for myfile in $clientClassfiles
