@@ -16,6 +16,7 @@
 # 2022-04-12  0.2  <axel.hahn@iml.unibe.ch>  add help; exclude unneeded files
 # 2022-05-03  0.3  <axel.hahn@iml.unibe.ch>  create general_include.php
 # 2024-07-25  0.4  <axel.hahn@iml.unibe.ch>  update quoting and comments
+# 2024-07-30  0.5  <axel.hahn@iml.unibe.ch>  Show hint on a fresh installation
 # ======================================================================
 
 # ----------------------------------------------------------------------
@@ -23,12 +24,15 @@
 # ----------------------------------------------------------------------
 
 readonly git_repo_url="https://github.com/iml-it/appmonitor.git"
+readonly docs_url="https://os-docs.iml.unibe.ch/appmonitor/PHP_client/index.html"
 readonly line="______________________________________________________________________________"
-readonly version="0.4"
+readonly version="0.5"
 
 git_target=/tmp/git_data__appmonitor
 client_from="${git_target}/public_html/client"
 client_to="."
+isUpdate=0
+
 
 cd "$( dirname "$0" )" || exit 1
 
@@ -144,6 +148,15 @@ esac
 which rsync >/dev/null || exit 1
 which git >/dev/null || exit 1
 
+test -f general_include.php && isUpdate=1
+
+if [ $isUpdate -eq 0 ]; then
+    echo "Welcome to the Appmonitor client installer!"
+else
+    echo "Updating local files ..."
+fi
+echo
+
 echo $line
 echo ">>> #1 of 3 >>> update local git data"
 echo
@@ -179,7 +192,22 @@ echo
 diff --color -r "$client_from" "$client_to"
 echo
 
+if [ $isUpdate -eq 0 ]; then
+    _fileupdate index.sample.php
+    echo $line
+    echo
+    echo "Appmonitor client was installed."
+    echo
+    echo "Please edit index.php and general_include.php."
+    echo "If you have multiple applications below webroot then you can rename the"
+    echo "index.php to check-[appname].php"
+else
+    echo "Appmonitor client was updated."
+fi
+echo
 
+echo "Documentation: $docs_url"
+echo
 echo $line
 echo done.
 
