@@ -1,7 +1,19 @@
 #!/bin/bash
 # ======================================================================
 #
-#   A P P M O N I T O R  ::  CLIENT - UPDATE
+#   
+#    _____ _____ __                   _____         _ _           
+#   |     |     |  |      ___ ___ ___|     |___ ___|_| |_ ___ ___ 
+#   |-   -| | | |  |__   | .'| . | . | | | | . |   | |  _| . |  _|
+#   |_____|_|_|_|_____|  |__,|  _|  _|_|_|_|___|_|_|_|_| |___|_|  
+#                            |_| |_|                              
+#                             _ _         _                                            
+#                         ___| |_|___ ___| |_                                          
+#                        |  _| | | -_|   |  _|                                         
+#                        |___|_|_|___|_|_|_|   
+#                                                                 
+#
+#                         INSTALLER + UPDATER
 #
 # This script will install or update the appmonitor client only.
 #
@@ -32,6 +44,7 @@ git_target=/tmp/git_data__appmonitor
 client_from="${git_target}/public_html/client"
 client_to="."
 isUpdate=0
+wait=1
 
 
 cd "$( dirname "$0" )" || exit 1
@@ -93,13 +106,20 @@ function _gitUpdate(){
 
 cat <<ENDOFHEADER
 
-          +-----------------------------------+
-          |                                   |
-          |  INSTALLER  |                     |
-          |      +      |  Appmonitor client  |
-          |   UPDATER   |                     |
-          |                                   |
-          +--------------------------- v$version --+
+        _____ _____ __                   _____         _ _           
+       |     |     |  |      ___ ___ ___|     |___ ___|_| |_ ___ ___ 
+       |-   -| | | |  |__   | .'| . | . | | | | . |   | |  _| . |  _|
+       |_____|_|_|_|_____|  |__,|  _|  _|_|_|_|___|_|_|_|_| |___|_|  
+                                |_| |_|                              
+                                 _ _         _                                            
+                             ___| |_|___ ___| |_                                          
+                            |  _| | | -_|   |  _|                                         
+                            |___|_|_|___|_|_|_|   
+                                                                     
+    
+                          INSTALLER + UPDATER  v$version
+
+
 
 ENDOFHEADER
 
@@ -121,16 +141,20 @@ case "$1" in
 
     USAGE:
 
-    $0 [target path]
-
-        default target is [.] (current directory)
-
     $0 -h|--help
+        Show this help and exit
 
-        Show this help.
+    $0 -n|--nowait
+        Do not wait for RETURN on 1st installation
+
+    $0 [target path]
+        default target is [.] (current directory)
 
 ENDOFHELP
         exit 0
+        ;;
+    -n|--nowait)
+        wait=0
         ;;
     *)
         if test -n "$1" 
@@ -151,7 +175,20 @@ which git >/dev/null || exit 1
 test -f general_include.php && isUpdate=1
 
 if [ $isUpdate -eq 0 ]; then
-    echo "Welcome to the Appmonitor client installer!"
+    cat <<WELCOME
+    Welcome to the Appmonitor client installer!
+
+    This is a helper script to get the files of the IML Appmonitor.
+    They will be installed into the directory [$client_to].
+    If this is not correct, press Ctrl + C to abort and use a
+    parameter to set another target directory.
+
+
+WELCOME
+    if [ $wait -eq 1 ]; then
+        echo -n "    RETURN to continue ... "
+        read -r
+    fi
 else
     echo "Updating local files ..."
 fi
