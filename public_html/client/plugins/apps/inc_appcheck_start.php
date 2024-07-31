@@ -25,11 +25,11 @@ if (!$sApproot) {
 // initialize client and set very basic metadata ... if needed
 $bStandalone=!(class_exists('appmonitor') && isset($oMonitor));
 if($bStandalone){
-    require_once('../../classes/appmonitor-client.class.php');
+    require_once(__DIR__.'/../../classes/appmonitor-client.class.php');
     $oMonitor = new appmonitor();
     $oMonitor->setWebsite('Wordpress Instance');
 
-    @include '../../general_include.php';
+    @include __DIR__.'/../../general_include.php';
 }
 
 // ----------------------------------------------------------------------
