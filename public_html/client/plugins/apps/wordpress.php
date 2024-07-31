@@ -1,7 +1,7 @@
 <?php
 /* ______________________________________________________________________
  * 
- * WORK IN PROGRESS - DO NOT USE YET
+ * WORK IN PROGRESS
  * 
  * A P P M O N I T O R  ::  CLIENT - CHECK
  * ______________________________________________________________________
@@ -19,11 +19,11 @@
  * 2018-11-07  v0.01
  * 2019-05-24  v0.02  detect include or standalone mode
  * 2019-05-24  v0.03  detect include or standalone mode
- * 2024-07-30  v0.04  
+ * 2024-07-31  v0.04  first version for wordpress check in plugins/apps/ 
  */
 
 
-require 'inc_shared_appchecks_start.php';
+require 'inc_appcheck_start.php';
 
 // ----------------------------------------------------------------------
 // Read config items
@@ -96,6 +96,6 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
 
 // ----------------------------------------------------------------------
 
-require 'inc_shared_appchecks_end.php';
+require 'inc_appcheck_end.php';
 
 // ----------------------------------------------------------------------

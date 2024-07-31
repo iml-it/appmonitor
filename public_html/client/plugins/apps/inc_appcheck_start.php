@@ -1,4 +1,9 @@
 <?php
+/* ______________________________________________________________________
+ * 
+ * A P P M O N I T O R  ::  CLIENT - INCLUDE FOR APP CHECKS :: ON START
+ * ______________________________________________________________________
+ */
 
 // ----------------------------------------------------------------------
 // CHECK IF THE APPROOT IS SET
@@ -17,6 +22,7 @@ if (!$sApproot) {
     die();
 }
 
+// initialize client and set very basic metadata ... if needed
 $bStandalone=!(class_exists('appmonitor') && isset($oMonitor));
 if($bStandalone){
     require_once('../../classes/appmonitor-client.class.php');
