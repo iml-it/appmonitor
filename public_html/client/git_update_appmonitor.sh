@@ -28,7 +28,7 @@
 # 2022-04-12  0.2  <axel.hahn@iml.unibe.ch>  add help; exclude unneeded files
 # 2022-05-03  0.3  <axel.hahn@iml.unibe.ch>  create general_include.php
 # 2024-07-25  0.4  <axel.hahn@iml.unibe.ch>  update quoting and comments
-# 2024-07-30  0.5  <axel.hahn@iml.unibe.ch>  Show hint on a fresh installation
+# 2024-07-31  0.5  <axel.hahn@iml.unibe.ch>  Show more helpful information; wait on 1st install; added param -n
 # ======================================================================
 
 # ----------------------------------------------------------------------
@@ -105,20 +105,10 @@ function _gitUpdate(){
 # ----------------------------------------------------------------------
 
 cat <<ENDOFHEADER
+$line
 
-        _____ _____ __                   _____         _ _           
-       |     |     |  |      ___ ___ ___|     |___ ___|_| |_ ___ ___ 
-       |-   -| | | |  |__   | .'| . | . | | | | . |   | |  _| . |  _|
-       |_____|_|_|_|_____|  |__,|  _|  _|_|_|_|___|_|_|_|_| |___|_|  
-                                |_| |_|                              
-                                 _ _         _                                            
-                             ___| |_|___ ___| |_                                          
-                            |  _| | | -_|   |  _|                                         
-                            |___|_|_|___|_|_|_|   
-                                                                     
-    
-                          INSTALLER + UPDATER  v$version
-
+    IML Appmonitor client   ::   installer + updater  v$version
+$line
 
 
 ENDOFHEADER
@@ -126,6 +116,11 @@ ENDOFHEADER
 case "$1" in
     -h|--help)
         cat <<ENDOFHELP
+    The IML Appmonitor is free software.
+
+        Source: https://github.com/iml-it/appmonitor
+        Docs: https://os-docs.iml.unibe.ch/appmonitor
+        License: GNU GPL 3.0
 
     This is a helper script to get the files of the IML Appmonitor
     client part only.
@@ -140,15 +135,19 @@ case "$1" in
     On additional runs it updates the files.
 
     USAGE:
+        $0 [OPTIONS] [TARGET]
 
-    $0 -h|--help
-        Show this help and exit
+    OPTIONS:
+        -h|--help
+            Show this help and exit
+        -n|--nowait
+            Do not wait for RETURN on 1st installation.
+            Use it for an unattended installation.
 
-    $0 -n|--nowait
-        Do not wait for RETURN on 1st installation
-
-    $0 [target path]
-        default target is [.] (current directory)
+    PARAMETERS:
+        TARGET 
+            optional target path for the client files
+            default target is "." (current directory)
 
 ENDOFHELP
         exit 0
@@ -176,12 +175,16 @@ test -f general_include.php && isUpdate=1
 
 if [ $isUpdate -eq 0 ]; then
     cat <<WELCOME
-    Welcome to the Appmonitor client installer!
+    Welcome to the Appmonitor client installation!
 
-    This is a helper script to get the files of the IML Appmonitor.
-    They will be installed into the directory [$client_to].
-    If this is not correct, press Ctrl + C to abort and use a
-    parameter to set another target directory.
+
+    This is a helper script to get the client files of the IML Appmonitor.
+    They will be installed into the directory "$client_to" $( test "$client_to" = "." && (echo; echo -n "    "; pwd) )
+
+        If this is not correct, press Ctrl + C to abort and use a
+        parameter to set another target directory.
+
+        "$( basename "$0" ) -h" shows a help and more options.
 
 
 WELCOME
@@ -231,13 +234,23 @@ echo
 
 if [ $isUpdate -eq 0 ]; then
     _fileupdate index.sample.php
-    echo $line
-    echo
-    echo "Appmonitor client was installed."
-    echo
-    echo "Please edit index.php and general_include.php."
-    echo "If you have multiple applications below webroot then you can rename the"
-    echo "index.php to check-[appname].php"
+    cat <<INTRODUCTION
+$line
+
+
+    DONE!
+    The Appmonitor client was installed.
+
+    - Please edit index.php and general_include.php.
+
+    - If you have multiple applications below webroot then you can 
+      rename the file index.php to check-[appname].php eg.
+      check-cms.php, check-blog.php, ... 
+
+    - Start "$( basename "$0" )" again to perform an update.
+      Maybe you want to create a cronjob for this.
+
+INTRODUCTION
 else
     echo "Appmonitor client was updated."
 fi
