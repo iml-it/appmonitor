@@ -163,6 +163,24 @@ $oMonitor->addCheck(
 // ----------------------------------------------------------------------
 include 'shared_check_ssl.php';
 
+
+$oMonitor->addCheck(
+    [
+        "name" => "plugin Load",
+        "description" => "current load",
+        "group" => 'monitor',
+        "parent" => false,
+        "check" => [
+            "function" => "Loadmeter",
+            "params" => [
+                "warning" => 1.0,
+                "error" => 3,
+            ],
+        ],
+        "worstresult" => RESULT_OK
+    ]
+);
+
 // ----------------------------------------------------------------------
 // plugin test
 // ----------------------------------------------------------------------
