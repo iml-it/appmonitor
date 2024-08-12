@@ -556,7 +556,7 @@ class notificationhandler
     {
         if ($this->_aLog && is_array($this->_aLog) && count($this->_aLog)) {
             $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
-            return $this->_aLog = $oCache->write($this->_aLog);
+            return $oCache->write($this->_aLog);
         }
         return false;
     }
