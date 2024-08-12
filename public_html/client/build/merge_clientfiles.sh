@@ -7,23 +7,24 @@
 # and check plugins.
 #
 # ----------------------------------------------------------------------
-# 2021-11-05  v0.1  www.axel-hahn.de  1st initial working version
+# 2021-11-05  v0.1  www.axel-hahn.de    1st initial working version
+# 2024-07-23  v0.2  axel.hahn@unibe.ch  update quoting + shellcheck fixes
 # ======================================================================
 
 # ----------------------------------------------------------------------
-cd $( dirname $0 )/..
+cd "$( dirname "$0" )/.." || exit
 outfile=classes/client_all_in_one.php
 
 packmethod=1
 
-test -f ${outfile} && rm -f ${outfile}
-test -f ${outfile}.tmp && rm -f ${outfile}.tmp
+test -f "${outfile}" && rm -f "${outfile}"
+test -f "${outfile}".tmp && rm -f "${outfile}.tmp"
 
 # ----------------------------------------------------------------------
 echo
 echo "===== MERGER ======"
 echo
-echo --- merge files
+echo "--- merge files"
 echo "<?php
 /*
 
@@ -41,8 +42,9 @@ for myfile in \
 	classes/appmonitor-client.class.php
 do
     echo -n "Adding $myfile ... "
-	typeset -i iCountPhp=$( grep "<?php" "$myfile" | wc -l )
-	if [ $iCountPhp -ne 1 ]; then
+	typeset -i iCountPhp; 
+	iCountPhp=$( grep -c "<?php" "$myfile"  )
+	if [ $iCountPhp -lt 1 ]; then
 		echo "ERROR: <?php was found $iCountPhp times in $myfile. ABORTING MERGE."
 		exit 1
 	fi
@@ -50,22 +52,20 @@ do
 	# REMARK:
 	# those replacements are NOT safe ... but I know that I have all functions
 	# on a single line.
-	phptmp=/tmp/$( basename $myfile )
+	phptmp="/tmp/$( basename "$myfile" )"
 
-	case $packmethod in 
+	case "$packmethod" in 
 		1)
-			cat $myfile \
-				| sed "s#require[\ \_].*;##g" \
-				>$phptmp
+			sed "s#require[\ \_].*;##g" "$myfile" >"$phptmp"
 			;;
 		2)
-			cat $myfile >$phptmp
+			cat "$myfile" >"$phptmp"
 			;;
 	esac
 
-	php -wq < $phptmp \
+	php -wq < "$phptmp" \
 		| sed "s#<?php##g" \
-		>> ${outfile}.tmp  || exit
+		>> "${outfile}.tmp"  || exit
 
 	# sed "s#\;#;\n#g" ${outfile}.tmp | grep require_once  && exit
 	echo "OK"
@@ -74,23 +74,22 @@ done
 echo
 
 # ----------------------------------------------------------------------
-echo --- PHP lint of generated file
-php -l ${outfile}.tmp 
-if [ $? -ne 0 ]; then
-    echo Keeping ${outfile}.tmp to anylyze it.
+echo "--- PHP lint of generated file"
+if ! php -l "${outfile}.tmp" ; then
+    echo "Keeping ${outfile}.tmp to anylyze it."
     echo "FAILED :-/"
     exit 1
 fi
 
-echo moving .tmp file to ${outfile} ...
+echo "Moving .tmp file to ${outfile} ..."
 mv ${outfile}.tmp ${outfile}
 ls -l ${outfile}
 echo 
 
 # ----------------------------------------------------------------------
-echo --- short test of merged client
+echo "--- short test of merged client"
 # php $( dirname $0 )/test_client_all_in_one.php || exit
-php build/test_client_all_in_one.php || exit
+php "build/test_client_all_in_one.php" || exit
 echo
 
 echo "SUCCESS."

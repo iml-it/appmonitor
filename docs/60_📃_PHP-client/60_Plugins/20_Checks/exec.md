@@ -20,27 +20,27 @@ for finetuning.
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "exec check",
         "description" => "exec check",
-        "check" => array(
+        "check" => [
             "function" => "Exec",
-            "params" => array(
+            "params" => [
                 "command"      => [string: Command],
                 "output"       => [bool: show output?]
                 // optional: handle custom exitcodes
                 "exitOK"       => [array],
                 "exitWarn"     => [array],
                 "exitCritical" => [array],
-      ),
-    ),
-  )
+            ],
+        ],
+    ]
 );
 ```
 
 ## Parameters ##
 
-| key         | type     | description |
+| key         | type     | description
 |---          |---       |---
 |command🔸    |(string)  |filename or directory to check
 |exitOK       |(array)   |array of integegers for ok exitcodes
@@ -59,17 +59,17 @@ To see the error of ls on STDERR we add `2>&1`.
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "exec test",
         "description" => "Test ls command",
-        "check" => array(
+        "check" => [
             "function" => "Exec",
-            "params" => array(
+            "params" => [
                 "command" => 'ls -l /a/non/existing/dir 2>&1',
                 "output" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
@@ -81,17 +81,17 @@ Rsync returns 24 for "Partial transfer due to vanished source files". We want to
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "exec test 2",
         "description" => "Rsync data",
-        "check" => array(
+        "check" => [
             "function" => "Exec",
-            "params" => array(
+            "params" => [
                 "command" => 'rsync -rvt /var/data/testfile* /backup',
                 "output" => false,
                 "exitOK" => [24]
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```

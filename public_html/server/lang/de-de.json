@@ -212,7 +212,7 @@
         
         "changetype-2.logmessage":    "Der Status von __URL__ wechselte von __LAST-RESULT__ auf __RESULT__. __ERROR__",
         "changetype-2.email.subject": "[Appmonitor] :: __CHANGE__ __LAST-RESULT__ --> __RESULT__ - __URL__",
-        "changetype-2.email.message": "__TIME__<br>__WEBSITE__ @ __HOST__<br>Der Status wechselte nach __DELTA-TIME__ von __LAST-RESULT__ auf <strong>__RESULT__</strong>.<br><br>Der aktuelle Status ist einsehbar unter: <a href=\"__MONITORURL__\">__MONITORURL__</a><br><br>__CHECKS__",
+        "changetype-2.email.message": "__TIME__<br>__WEBSITE__ @ __HOST__<br>Der Status wechselte nach __DELTA-TIME__ von __LAST-RESULT__ auf <strong>__RESULT__</strong>.<br><br>Der aktuelle Status ist einsehbar unter: <a href=\"__MONITORURL__\">__MONITORURL__</a><br><br>__CHECKS__<br>__CURLERROR__",
         
         "changetype-3.logmessage":    "Webapp wurde im Appmonitor entfernt: __URL__.",
         "changetype-3.email.subject": "[Appmonitor] :: Webapp wurde entfernt: __URL__.",
@@ -223,9 +223,9 @@
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },
 
-    "changetype-0": "keine &Auml;nderung",
+    "changetype-0": "Keine Änderung",
     "changetype-1": "Neu",
-    "changetype-2": "&Auml;nderung",
+    "changetype-2": "Änderung",
     "changetype-3": "Gel&ouml;scht",
     
     "Resulttype-0": "OK",
@@ -236,6 +236,8 @@
     "MsgResulttype-1": "Es gibt einen unbekannten Status.",
     "MsgResulttype-2": "Bitte die Warnungen checken",
     "MsgResulttype-3": "Houston, we have a problem!",
+
+    "Curl-error": "Curl Fehlermeldung: %s (Fehlercode #%s)",
 
     "group-cloud": "Cloud",
     "group-database": "Datenbank",

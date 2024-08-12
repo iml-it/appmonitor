@@ -43,40 +43,44 @@
  * ____________________________________________________________________________
  * 
  * 2019-06-06  <axel.hahn@iml.unibe.ch>
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
+ * 2024-07-25  <axel.hahn@unibe.ch>      float return with 2 digits behind comma
  * 
  */
-class checkLoadmeter extends appmonitorcheck{
+class checkLoadmeter extends appmonitorcheck
+{
     /**
-     * get default group of this check
-     * @param array   $aParams
-     * @return array
+     * Get default group of this check
+     * @return string
      */
-    public function getGroup(){
+    public function getGroup(): string
+    {
         return 'monitor';
     }
 
     /**
-     * detect load of a machine and return a float value
+     * Detect load of a machine and return a float value
      * windows part was taken from https://stackoverflow.com/questions/5588616/how-do-you-calculate-server-load-in-php
      * @return float
      */
-    protected function _getLoad() {
-        if (function_exists('sys_getloadavg')){
+    protected function _getLoad(): float
+    {
+        if (function_exists('sys_getloadavg')) {
             $load = sys_getloadavg();
             return $load[0];
         } else {
             // Only MS Windows has not implemented sys_getloadavg
             // try something else
-            if(class_exists('COM')){
-                $wmi=new COM('WinMgmts:\\\\.');
-                $cpus=$wmi->InstancesOf('Win32_Processor');
-                $load=0;
-                if(version_compare('4.50.0', PHP_VERSION) == 1){
-                    while($cpu = $cpus->Next()){
+            if (class_exists('COM')) {
+                $wmi = new COM('WinMgmts:\\\\.');
+                $cpus = $wmi->InstancesOf('Win32_Processor');
+                $load = 0;
+                if (version_compare('4.50.0', PHP_VERSION) == 1) {
+                    while ($cpu = $cpus->Next()) {
                         $load += $cpu->LoadPercentage;
                     }
-                }else{
-                    foreach($cpus as $cpu){
+                } else {
+                    foreach ($cpus as $cpu) {
                         $load += $cpu->LoadPercentage;
                     }
                 }
@@ -87,31 +91,31 @@ class checkLoadmeter extends appmonitorcheck{
     }
 
     /**
-     * 
-     * @param array   $aParams
+     * Run the check and get load
+     * @param array   $aParams  optional array with keys warning,error
      * @return array
      */
-    public function run($aParams){
-        
+    public function run(array $aParams): array
+    {
+
         // --- (1) verify if array key(s) exist:
         // $this->_checkArrayKeys($aParams, "...");
-
 
         // --- (2) do something magic
         // $fLoad=rand(0, 1.3);
         // $fLoad=$this->_getServerLoad();
-        $fLoad=$this->_getLoad();
-        
+        $fLoad = $this->_getLoad();
+
         // set result code
-        if($fLoad===false){
-            $iResult=RESULT_UNKNOWN;
+        if ($fLoad === false) {
+            $iResult = RESULT_UNKNOWN;
         } else {
-            $iResult=RESULT_OK;
-            if(isset($aParams['warning']) && $aParams['warning'] && $fLoad>$aParams['warning']){
-                $iResult=RESULT_WARNING;
+            $iResult = RESULT_OK;
+            if (isset($aParams['warning']) && $aParams['warning'] && $fLoad > $aParams['warning']) {
+                $iResult = RESULT_WARNING;
             }
-            if(isset($aParams['error']) && $aParams['error'] && $fLoad>$aParams['error']){
-                $iResult=RESULT_ERROR;
+            if (isset($aParams['error']) && $aParams['error'] && $fLoad > $aParams['error']) {
+                $iResult = RESULT_ERROR;
             }
         }
 
@@ -128,14 +132,14 @@ class checkLoadmeter extends appmonitorcheck{
         //              visual => {string} one of bar|line|simple (+params)
         //           
         return [
-            $iResult, 
-            ($fLoad===false ? 'load value is not available' : 'current load is: '.$fLoad),
-            ($fLoad===false 
+            $iResult,
+            ($fLoad === false ? 'load value is not available' : 'current load is: ' . round($fLoad, 2)),
+            ($fLoad === false
                 ? []
                 : [
-                    'type'=>'counter',
-                    'count'=>$fLoad,
-                    'visual'=>'line',
+                    'type' => 'counter',
+                    'count' => round($fLoad, 2),
+                    'visual' => 'line',
                 ]
             )
         ]

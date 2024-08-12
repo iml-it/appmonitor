@@ -15,19 +15,30 @@
  *    - icon  - will be added as <i class="[icon value]"></i> to the label
  * 
  * @author Axel
+ * 
+ * 2024-07-04  <axel.hahn@unibe.ch>  added type declarations; update php docs
  */
 class htmlelements
 {
 
     /**
      * set of auto generated icon prefixes
-     * @var type 
+     * @var array
      */
     var $_aIcons = [
         // 'fa-'=>'fa ',
     ];
 
+    /**
+     * label of an html tag (pseudo attribute)
+     * @var string
+     */
     var $_sLabel = '';
+
+    /**
+     * hash of attributes and values of an html tag
+     * @var array
+     */
     var $_aAttributes = [];
 
 
@@ -51,11 +62,15 @@ class htmlelements
      * generate html attibutes with all internal attributes key -> values
      * @return string
      */
-    protected function _addAttributes()
+    protected function _addAttributes(): string
     {
         $sReturn = '';
         foreach ($this->_aAttributes as $sAttr => $sValue) {
+            if (is_array($sValue)) {
+                echo "ERROR: an html tag was defined with array in attribute [$sAttr]:<br><pre>" . print_r($this->_aAttributes, 1) . "</pre>";
+            }
             $sReturn .= ' ' . $sAttr . '="' . $sValue . '"';
+
         }
         return $sReturn;
     }
@@ -70,7 +85,7 @@ class htmlelements
      * @param array $aAttributes
      * @return boolean
      */
-    protected function _setAttributes($aAttributes)
+    protected function _setAttributes(array $aAttributes): bool
     {
         $this->_sLabel = '';
         if (isset($aAttributes['icon']) && $aAttributes['icon']) {
@@ -100,7 +115,7 @@ class htmlelements
      * @param boolean  $bCloseTag     optional: set false if tag has no closing tag (= ending with "/>")
      * @return type
      */
-    public function getTag($sTag, $aAttributes, $bCloseTag = true)
+    public function getTag(string $sTag, array $aAttributes, bool $bCloseTag = true): string
     {
         $sTpl = $bCloseTag ? "<$sTag%s>%s</$sTag>" : "<$sTag %s/>%s";
         $this->_setAttributes($aAttributes);
@@ -114,25 +129,15 @@ class htmlelements
     // 
     // ----------------------------------------------------------------------
 
-
     /**
-     * get hml code for a button
-     * 
-     * @param array $aAttributes
-     * @return string
-    public function getButton($aAttributes) {
-        return $this->getTag('button', $aAttributes);
-    }
-     */
-
-    /**
-     * helper detect prefix of a string add prefix of a framework
+     * get html code for an icon
+     * includes a helper detect prefix of a string add prefix of a framework
      * i.e. value "fa-close" detects font awesome and adds "fa " as prefix
      * 
-     * @param string $sIconclass
-     * @return boolean
+     * @param string $sIconclass  name of the icon
+     * @return string
      */
-    public function getIcon($sIconclass = false)
+    public function getIcon(string $sIconclass = ''): string
     {
         if (!$sIconclass) {
             return '';
@@ -144,8 +149,6 @@ class htmlelements
                 continue;
             }
         }
-        // do not use this .. it overrides internal attribute vars
-        // return $this->getTag('i', [ 'class'=>$sPrefix.$sIconclass) ];
         return '<i class="' . $sPrefix . $sIconclass . '"></i> ';
     }
 
@@ -163,7 +166,7 @@ class htmlelements
      * @param array $aAttributes  attributes of the select tag
      * @return string
      */
-    public function getFormInput($aAttributes)
+    public function getFormInput(array $aAttributes): string
     {
         $sTpl = '<input %s/>';
         $this->_setAttributes($aAttributes);
@@ -175,7 +178,7 @@ class htmlelements
      * @param array $aAttributes  attributes of the option tag
      * @return string
      */
-    public function getFormOption($aAttributes)
+    public function getFormOption(array $aAttributes): string
     {
         $sTpl = '<option %s>%s</option>';
         $this->_setAttributes($aAttributes);
@@ -188,12 +191,12 @@ class htmlelements
      * @param array $aOptions     array for all option fields
      * @return string
      */
-    public function getFormSelect($aAttributes, $aOptions = [])
+    public function getFormSelect(array $aAttributes, array $aOptions = []): string
     {
         // $sTpl = '<select %s>%s</select>';
 
         if (!count($aOptions)) {
-            return false;
+            return '';
         }
         $sOptions = '';
         foreach ($aOptions as $aOptionAttributes) {
@@ -202,14 +205,18 @@ class htmlelements
         }
         $aAttributes['label'] = $sOptions;
         return $this->getTag('select', $aAttributes);
-        /*
-        $this->_setAttributes($aAttributes);
-        return sprintf($sTpl, $this->_addAttributes(), $sOptions);
-         * 
-         */
     }
 
-    public function getTable($aHead, $aBody, $aTableAttributes = [])
+
+    /**
+     * Generates an HTML table based on the provided header and body arrays.
+     *
+     * @param array $aHead An array of strings representing the table headers.
+     * @param array $aBody A 2-dimensional array of strings representing the table body rows and cells.
+     * @param array $aTableAttributes An optional array of attributes to be applied to the table element.
+     * @return string The HTML code for the generated table.
+     */
+    public function getTable(array $aHead, array $aBody, array $aTableAttributes = []): string
     {
         $sReturn = '';
         $sTdata = '';

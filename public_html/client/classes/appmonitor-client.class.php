@@ -1,5 +1,5 @@
 <?php
-if (!class_exists('appmonitorcheck')){
+if (!class_exists('appmonitorcheck')) {
     require_once 'appmonitor-checks.class.php';
 }
 
@@ -41,60 +41,62 @@ if (!class_exists('appmonitorcheck')){
  * 2019-05-31  0.87   axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
  * 2020-05-03  0.110  axel.hahn@iml.unibe.ch  update renderHtmloutput<br>
  * 2023-07-06  0.128  axel.hahn@unibe.ch      update httpcontent check<br>
+ * 2024-07-19  0.137  axel.hahn@unibe.ch      php 8 only: use typed variables
  * --------------------------------------------------------------------------------<br>
- * @version 0.128
+ * @version 0.137
  * @author Axel Hahn
  * @link TODO
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
  */
-class appmonitor {
+class appmonitor
+{
+
+    /**
+     * Name and Version number
+     * @var string
+     */
+    protected string $_sVersion = 'php-client-v0.137';
 
     /**
      * config: default ttl for server before requesting the client check again
      * value is in seconds
      * @var int
      */
-    protected $_sVersion = 'php-client-v0.128';
-
-    /**
-     * config: default ttl for server before requesting the client check again
-     * value is in seconds
-     * @var int
-     */
-    protected $_iDefaultTtl = 300;
+    protected int $_iDefaultTtl = 300;
 
     /**
      * internal counter: greatest return value of all checks
-     * @var type 
+     * @var integer 
      */
-    protected $_iMaxResult = false;
+    protected int $_iMaxResult = -1;
 
     /**
      * responded metadata of a website
      * @see _createDefaultMetadata()
      * @var array
      */
-    protected $_aMeta = [];
+    protected array $_aMeta = [];
 
     /**
-     * repended array of all checks
+     * Response array of all checks
      * @see addCheck()
      * @var array
      */
-    protected $_aChecks = [];
-    
+    protected array $_aChecks = [];
+
     /**
      * for time measurements: start time
      * @var float 
      */
-    protected $_iStart = false;
-    
+    protected float $_iStart = 0;
+
     /**
      * constructor: init data
      */
-    public function __construct() {
+    public function __construct()
+    {
         $this->_createDefaultMetadata();
     }
 
@@ -103,10 +105,11 @@ class appmonitor {
     // ----------------------------------------------------------------------
 
     /**
-     * create basic array values for metadata
+     * Create basic array values for metadata
      * @return boolean
      */
-    protected function _createDefaultMetadata() {
+    protected function _createDefaultMetadata(): bool
+    {
         $this->_iStart = microtime(true);
         $this->_aMeta = [
             "host" => false,
@@ -129,21 +132,26 @@ class appmonitor {
     // ----------------------------------------------------------------------
 
     /**
-     * set the physical hostname for metadata; if no host is given then
+     * Set the physical hostname for metadata; if no host is given then
      * the php_uname("n") will be used to set one.
      * 
      * @param string $s  hostname
      * @return bool
      */
-    public function setHost($s = false) {
+    public function setHost(string $s = ''): bool
+    {
         if (!$s) {
             $s = php_uname("n");
         }
-        return $this->_aMeta["host"] = $s;
+        if (!$s) {
+            return false;
+        }
+        $this->_aMeta["host"] = $s;
+        return true;
     }
 
     /**
-     * set a name for this website or application and its environment 
+     * Set a name for this website or application and its environment 
      * (dev, test, prod); 
      * 
      * If you have several application in subdirectories, i.e. /blog,  /shop...
@@ -151,14 +159,19 @@ class appmonitor {
      * 
      * if no argument is given the name of HTTP_HOST will be used
      * 
-     * @param string $sNewHost  hostname
-     * @return bool
+     * @param string $sWebsite  Name of the website or web application
+     * @return boolean
      */
-    public function setWebsite($s = false) {
-        if (!$s && isset($_SERVER["HTTP_HOST"])) {
-            $s = $_SERVER["HTTP_HOST"];
+    public function setWebsite($sWebsite = ''): bool
+    {
+        if (!$sWebsite && isset($_SERVER["HTTP_HOST"])) {
+            $sWebsite = $_SERVER["HTTP_HOST"];
         }
-        return $this->_aMeta["website"] = $s;
+        if (!$sWebsite) {
+            return false;
+        }
+        $this->_aMeta["website"] = $sWebsite;
+        return true;
     }
 
     /**
@@ -168,58 +181,67 @@ class appmonitor {
      * @param int $iTTl TTL value in sec
      * @return boolean
      */
-    public function setTTL($iTTl = false) {
-        if (!$iTTl) {
+    public function setTTL($iTTl = 0)
+    {
+        if ($iTTl == 0) {
             $iTTl = $this->_iDefaultTtl;
         }
         return $this->_aMeta["ttl"] = $iTTl;
     }
 
     /**
-     * set final result in meta data; if no value was given then it
+     * Set final result in meta data; if no value was given then it
      * sets the biggest value of any check.
-     * @param integer  $iResult  set resultcode
+     * 
+     * @param integer  $iResult  set resultcode; one of RESULT_OK|RESULT_WARNING|RESULT_ERROR|RESULT_UNKNOWN
      * @return boolean
      */
-    public function setResult($iResult = false) {
-        if ($iResult === false) {
+    public function setResult(int $iResult = -1): bool
+    {
+        if ($iResult === -1) {
             $iResult = $this->_iMaxResult; // see addCheck()
         }
-        return $this->_aMeta["result"] = $iResult;
+        $this->_aMeta["result"] = $iResult;
+        return true;
     }
 
     /**
-     * add a check array;
-     * @param type $aJob
-     * @return type
+     * Add a check array
+     * @param array  $aJob  array with check data
+     * @return boolean
      */
-    public function addCheck($aJob = []) {
+    public function addCheck($aJob = []): bool
+    {
 
         require_once 'appmonitor-checks.class.php';
         $oCheck = new appmonitorcheck();
         $aCheck = $oCheck->makecheck($aJob);
-        
+
         // limit result code
-        $iMyResult=isset($aJob['worstresult']) 
-                ? min($aCheck["result"], $aJob['worstresult'])
-                : $aCheck["result"]
-                ;
+        $iMyResult = isset($aJob['worstresult'])
+            ? min($aCheck["result"], $aJob['worstresult'])
+            : $aCheck["result"]
+        ;
 
         if (!$this->_iMaxResult || $iMyResult > $this->_iMaxResult) {
             $this->_iMaxResult = $iMyResult;
         }
-        return $this->_aChecks[] = $aCheck;
+        $this->_aChecks[] = $aCheck;
+        return true;
     }
 
     /**
-     * add an item to notifications meta data
+     * Add an item to notifications meta data
+     * @see addEmail()
+     * @see addSlack()
      * 
      * @param string $sType   type ... one of email|slack
-     * @param type $sValue    value
-     * @param type $sKey      optional key (for key->value instead of list of values)
+     * @param string $sValue    value
+     * @param string $sKey      optional key (for key->value instead of list of values)
      * @return boolean
      */
-    protected function _addNotification($sType, $sValue, $sKey = false) {
+    protected function _addNotification(string $sType, string $sValue, string $sKey = ''): bool
+    {
         $sTypeCleaned = preg_replace('/[^a-z]/', '', strtolower($sType));
         if (!isset($this->_aMeta['notifications'])) {
             $this->_aMeta['notifications'] = [];
@@ -236,12 +258,13 @@ class appmonitor {
     }
 
     /**
-     * add an email to notifications list
+     * Add an email to notifications list
      * 
      * @param string $sEmailAddress  email address to add
      * @return boolean
      */
-    public function addEmail($sEmailAddress) {
+    public function addEmail(string $sEmailAddress)
+    {
         return $this->_addNotification('email', $sEmailAddress);
     }
 
@@ -249,36 +272,41 @@ class appmonitor {
      * Add slack channel for notification
      * @param string  $sLabel
      * @param string  $sSlackWebhookUrl
-     * @return type
+     * @return boolean
      */
-    public function addSlackWebhook($sLabel, $sSlackWebhookUrl) {
+    public function addSlackWebhook(string $sLabel, string $sSlackWebhookUrl): bool
+    {
         return $this->_addNotification('slack', $sSlackWebhookUrl, $sLabel);
     }
+
     /**
-     * add a tag for grouping in the server gui
+     * Add a tag for grouping in the server gui.
+     * Spaces will be replaced with underscore
      * 
-     * @param string  $sLabel
-     * @param string  $sSlackWebhookUrl
-     * @return type
+     * @param string  $sTag  tag to add
+     * @return boolean
      */
-    public function addTag($sTag) {
-        if(!isset($this->_aMeta['tags'])){
-            $this->_aMeta['tags']=[];
+    public function addTag(string $sTag): bool
+    {
+        if (!isset($this->_aMeta['tags'])) {
+            $this->_aMeta['tags'] = [];
         }
-        $this->_aMeta['tags'][]=$sTag;
+        $this->_aMeta['tags'][] = str_replace(' ', '_', $sTag);
         return true;
     }
 
     /**
-     * check referers IP address if it matches any entry in the list
+     * Check referers IP address if it matches any entry in the list
      * requires http request; CLI is always allowed
      * On deny this method exits with 403 response
      * 
      * @param array $aAllowedIps  array of allowed ip addresses / ranges
      *                            the ip must match from the beginning, i.e.
      *                            "127.0." will allow requests from 127.0.X.Y
+     * @return boolean
      */
-    public function checkIp($aAllowedIps = []) {
+    public function checkIp(array $aAllowedIps = []): bool
+    {
         if (!isset($_SERVER['REMOTE_ADDR']) || !count($aAllowedIps)) {
             return true;
         }
@@ -297,11 +325,12 @@ class appmonitor {
      * requires http request; CLI is always allowed
      * On deny this method exits with 403 response
      * 
-     * @param type $sVarname
-     * @param type $sToken
+     * @param string  $sVarname  name of GET variable
+     * @param string  $sToken    value
      * @return boolean
      */
-    public function checkToken($sVarname, $sToken) {
+    public function checkToken(string $sVarname, string $sToken): bool
+    {
         if (!isset($_GET)) {
             return true;
         }
@@ -322,7 +351,8 @@ class appmonitor {
      * all function names.
      * @return array
      */
-    public function listChecks() {
+    public function listChecks(): array
+    {
         require_once 'appmonitor-checks.class.php';
         $oCheck = new appmonitorcheck();
         return $oCheck->listChecks();
@@ -334,8 +364,10 @@ class appmonitor {
 
     /**
      * verify array values and in case of an error abort and show all found errors
+     * @return boolean
      */
-    protected function _checkData() {
+    protected function _checkData(): bool
+    {
         $aErrors = [];
 
         if (!count($this->_aChecks)) {
@@ -360,19 +392,22 @@ class appmonitor {
     // ----------------------------------------------------------------------
 
     /**
-     * stop processing the client checks and abort with an error
-     * @param string $sMessage
+     * Stop processing the client checks and abort with an error
+     * @param string $sMessage  text to show after a 503 headline
+     * @return void
      */
-    public function abort($sMessage){
+    public function abort(string $sMessage): void
+    {
         header('HTTP/1.0 503 Service Unavailable');
-        die('<h1>503 Service Unavailable</h1>'.$sMessage);
+        die('<h1>503 Service Unavailable</h1>' . $sMessage);
     }
-    
+
     /**
-     * get full array for response with metadata and Checks
-     * @return type
+     * Get full array for response with metadata and checks
+     * @return array
      */
-    public function getResults() {
+    public function getResults(): array
+    {
         return [
             "meta" => $this->_aMeta,
             "checks" => $this->_aChecks,
@@ -380,74 +415,24 @@ class appmonitor {
     }
 
     /**
-     * output appmonitor values as JSON
-     * @param bool  $bPretty     turn on pretty print; default is false
-     * @param bool  $bHighlight  print syntax highlighted html code; $bPretty must be true to enable
+     * Send http response with header and appmonitor JSON data
+     * @return string
      */
-    public function render($bPretty = false, $bHighlight = false) {
+    public function render(): string
+    {
         $this->_checkData();
         $this->_aMeta['time'] = number_format((microtime(true) - $this->_iStart) * 1000, 3) . 'ms';
+        $sOut=json_encode($this->getResults());
 
-        // JSON_PRETTY_PRINT reqires PHP 5.4
-        if (!defined('JSON_PRETTY_PRINT')) {
-            $bPretty = false;
-        }
-        if (!$bPretty) {
-            $bHighlight = false;
-            $sOut = json_encode($this->getResults());
-        } else {
-            $sOut = json_encode($this->getResults(), JSON_PRETTY_PRINT);
-            if ($bHighlight) {
-                $aMsg = [
-                    0 => "OK",
-                    1 => "UNKNOWN",
-                    2 => "WARNING",
-                    3 => "ERROR"
-                ];
-                foreach (array_keys($aMsg) as $iCode) {
-                    $sOut = preg_replace('/(\"result\":\ ' . $iCode . ')/', '$1 <span class="result' . $iCode . '"> &lt;--- ' . $aMsg[$iCode] . ' </span>', $sOut);
-                }
-
-                $sOut = preg_replace('/:\ \"(.*)\"/U', ': "<span style="color:#66e;">$1</span>"', $sOut);
-                $sOut = preg_replace('/:\ ([0-9]*)/', ': <span style="color:#3a3; font-weight: bold;">$1</span>', $sOut);
-                $sOut = preg_replace('/\"(.*)\":/U', '"<span style="color:#840;">$1</span>":', $sOut);
-
-                $sOut = preg_replace('/([{\[])/', '$1<blockquote>', $sOut);
-                $sOut = preg_replace('/([}\]])/', '</blockquote>$1', $sOut);
-                $sOut = str_replace('    ', '', $sOut);
-                // $sOut = preg_replace('/([{}])/', '<span style="color:#a00; ">$1</span>', $sOut);
-                // $sOut = preg_replace('/([\[\]])/', '<span style="color:#088; ">$1</span>', $sOut);
-
-                $sOut = '<!DOCTYPE html><html><head>'
-                        . '<style>'
-                        . 'body{background:#e0e8f8; color:#235; font-family: verdana,arial;}'
-                        . 'blockquote{background:rgba(0,0,0,0.03); border-left: 0px solid rgba(0,0,0,0.06); margin: 0 0 0 3em; padding: 0; border-radius: 1em; border-top-left-radius: 0;}'
-                        . 'blockquote blockquote:hover{; }'
-                        . 'blockquote blockquote blockquote:hover{border-color: #808;}'
-                        . 'pre{background:rgba(0,0,0,0.05); padding: 1em; border-radius: 1em;}'
-                        . '.result0{background:#aca; border-right: 0em solid #080;}'
-                        . '.result1{background:#666; border-right: 0em solid #ccc;}'
-                        . '.result2{background:#fc9; border-right: 0em solid #860;}'
-                        . '.result3{background:#800; border-right: 0em solid #f00;}'
-                        . '</style>'
-                        . '<title>' . __CLASS__ . '</title>'
-                        . '</head><body>'
-                        . '<h1>' . __CLASS__ . ' :: debug</h1>'
-                        . '<pre>'
-                        . $sOut
-                        . '</pre></body></html>';
-            }
-        }
-        if (!$bHighlight) {
-            header('Content-type: application/json');
-            header('Cache-Control: cache');
-            header('max-age: ' . $this->_aMeta["ttl"]);
-        }
+        header('Content-type: application/json');
+        header('Cache-Control: cache');
+        header('max-age: ' . $this->_aMeta["ttl"]);
         echo $sOut;
         return $sOut;
     }
+
     /**
-     * output appmonitor client status as single html page
+     * Output appmonitor client status as single html page
      * 
      * @example <code>
      * ob_start();<br>
@@ -458,9 +443,10 @@ class appmonitor {
      * </code>
      * 
      * @param string  $sJson  JSON of client output
+     * @return string
      */
-    public function renderHtmloutput($sJson) {
-
+    public function renderHtmloutput(string $sJson): string
+    {
 
         header('Content-type: text/html');
         header('Cache-Control: cache');
@@ -473,61 +459,79 @@ class appmonitor {
         ];
 
         // $sOut = print_r($sJson, 1);
-        $aData= json_decode($sJson, 1);
+        $aData = json_decode($sJson, 1);
 
         // ----- Ausgabe human readable
-        $sOut='';
-        $sOut.='<h2>Metadata</h2>'
-                . '<div class="meta'.(isset($aData['meta']['result'])  ? ' result'.$aData['meta']['result'] : '' ) .'">'
-                . 'Status: '  . (isset($aData['meta']['result'])  ? $aMsg[$aData['meta']['result']] : '?').'<br>'
-                . '</div>'
-                . 'Host: '    . (isset($aData['meta']['host'])    ? '<span class="string">' . $aData['meta']['host']   .'</span>'    : '?').'<br>'
-                . 'Website: ' . (isset($aData['meta']['website']) ? '<span class="string">' . $aData['meta']['website'].'</span>'  : '?').'<br>'
-                . 'Execution time: '    . (isset($aData['meta']['time'])    ? '<span class="float">'  . $aData['meta']['time']  .'</span>'  : '?').'<br>'
-                . 'Client: '    . (isset($aData['meta']['version'])    ? '<span class="float">'  . $aData['meta']['version']  .'</span>'  : '?').'<br>'
+        $sOut = '';
+        $sOut .= ''
+            . '<h2>Metadata</h2>'
+            . '<div class="meta' . (isset($aData['meta']['result']) ? ' result' . $aData['meta']['result'] : '') . '">'
+            . 'Status: ' . (isset($aData['meta']['result']) ? $aMsg[$aData['meta']['result']] : '?') . '<br>'
+            . '</div>'
+            . 'Host: ' . (isset($aData['meta']['host']) ? '<span class="string">' . $aData['meta']['host'] . '</span>' : '?') . '<br>'
+            . 'Website: ' . (isset($aData['meta']['website']) ? '<span class="string">' . $aData['meta']['website'] . '</span>' : '?') . '<br>'
+            . 'Execution time: ' . (isset($aData['meta']['time']) ? '<span class="float">' . $aData['meta']['time'] . '</span>' : '?') . '<br>'
+            . 'Client: ' . (isset($aData['meta']['version']) ? '<span class="string">' . $aData['meta']['version'] . '</span>' : '?') . '<br>'
 
-                .'<h2>Checks</h2>'
-                ;
-        if (isset($aData['checks'][0]) && count($aData['checks'])){
-            foreach($aData['checks'] as $aCheck){
-               $sOut.= ''
-               . '<span class="result'.$aCheck['result'].'"> <strong>'.$aCheck['name'].'</strong></span> <br>'
-               . '<div class="check">'
+            . '<h2>Checks</h2>'
+        ;
+        if (isset($aData['checks'][0]) && count($aData['checks'])) {
+            foreach ($aData['checks'] as $aCheck) {
+                $sOut .= ''
+                    . '<span class="result' . $aCheck['result'] . '"> <strong>' . $aCheck['name'] . '</strong></span> <br>'
+                    . '<div class="check">'
                     . '<div class="description">'
-                        . $aCheck['description'].'<br>'
-                        . $aCheck['value'].'<br>'
+                    . $aCheck['description'] . '<br>'
+                    . $aCheck['value'] . '<br>'
                     . '</div>'
-                    . 'Execution time: ' . (isset($aCheck['time']) ? $aCheck['time'] : ' - ').'<br>'
-                    . 'Group: '  . (isset($aCheck['group']) ? $aCheck['group'] : '-').'<br>'
-                    . 'parent: ' . (isset($aCheck['parent']) ? $aCheck['parent']: '-').'<br>'
-                    . 'Status: ' . $aMsg[$aCheck['result']].'<br>'
-                   . '</div>'
-                   ;
+                    . 'Execution time: <span class="float">' . (isset($aCheck['time']) ? $aCheck['time'] : ' - ') . '</span><br>'
+                    . 'Group: <span class="string">' . (isset($aCheck['group']) ? $aCheck['group'] : '-') . '</span><br>'
+                    . 'parent: <span class="string">' . (isset($aCheck['parent']) ? $aCheck['parent'] : '-') . '</span><br>'
+                    . 'Status: ' . $aMsg[$aCheck['result']] . '<br>'
+                    . '</div>'
+                ;
             }
         }
-        $sOut.= '<h2>List of farbcodes</h2>';
-        foreach ($aMsg as $i=>$sText){
-            $sOut.= '<span class="result'.$i.'">'. $sText.'</span> ';
+        $sOut .= '<h2>List of farbcodes</h2>';
+        foreach ($aMsg as $i => $sText) {
+            $sOut .= '<span class="result' . $i . '">' . $sText . '</span> ';
         }
-        $sOut.='<h2>Raw result data</h2><pre>'.json_encode($aData, JSON_PRETTY_PRINT).'</pre>';
+
+        $sRaw=json_encode($aData, JSON_PRETTY_PRINT);
+        $sRaw = preg_replace('/:\ \"(.*)\"/U', ': "<span class="string">$1</span>"', $sRaw);
+        $sRaw = preg_replace('/:\ ([0-9]*)/', ': <span class="int">$1</span>', $sRaw);
+        $sRaw = preg_replace('/\"(.*)\":/U', '"<span class="key">$1</span>":', $sRaw);
+
+        $sOut .= '<h2>Raw result data</h2><pre id="raw">' . $sRaw . '</pre>';
+
+
         $sOut = '<!DOCTYPE html><html><head>'
-                . '<style>'
-                . 'body{background:#fff; color:#444; font-family: verdana,arial; margin: 3em;}'
-                . 'h1{color:#346;}'
-                . 'h2{color:#569; margin-top: 1.5em;}'
-                . '.check{border: 1px solid; padding: 0.4em; margin-bottom: 2em;}'
-                . '.description{font-style: italic; padding: 0.4em 1em;}'
-                . '.result0{background:#aca; border-left: 1em solid #080; padding: 0.5em; }'
-                . '.result1{background:#ccc; border-left: 1em solid #aaa; padding: 0.5em; }'
-                . '.result2{background:#fc9; border-left: 1em solid #860; padding: 0.5em; }'
-                . '.result3{background:#f88; border-left: 1em solid #f00; padding: 0.5em; }'
-                . '</style>'
-                . '<title>' . __CLASS__ . '</title>'
-                . '</head><body>'
-                . '<h1>' . __CLASS__ . ' :: client status</h1>'
-                . $sOut
-                . '</body></html>';
-        echo $sOut;
+            . '<style>'
+            . 'body{background:#eee; color:#444; font-family: verdana,arial; margin: 0; }'
+            . 'body>div#content{background: #fff; border-radius: 2em; border: 4px solid #abc; box-shadow: 0.5em 0.5em 2em #aaa; margin: 2em 10%; padding: 2em;}'
+            . 'h1{color:#346; margin: 0;}'
+            . 'h2{color:#569; margin-top: 2em;}'
+            . 'pre{background:#f4f4f8; padding: 1em; overflow-x:auto; }'
+            . '#raw .key{color:#808;}'
+            . '#raw .int{color:#3a3; font-weight: bold;}'
+            . '#raw .string{color:#66e;}'
+            . '.check{border: 1px solid #ccc; padding: 0.4em; margin-bottom: 2em;}'
+            . '.description{font-style: italic; padding: 0.4em 1em;}'
+            . '.float{color:#080;}'
+            . '.meta{margin-bottom: 1em;}'
+            . '.result0{background:#aca; border-left: 1em solid #080; padding: 0.5em; }'
+            . '.result1{background:#ccc; border-left: 1em solid #aaa; padding: 0.5em; }'
+            . '.result2{background:#fc9; border-left: 1em solid #860; padding: 0.5em; }'
+            . '.result3{background:#f88; border-left: 1em solid #f00; padding: 0.5em; }'
+            . '.string{color:#338;}'
+            . '</style>'
+            . '<title>' . __CLASS__ . '</title>'
+            . '</head><body>'
+            . '<div id="content">'
+            . '<h1>' . __CLASS__ . ' :: client status</h1>'
+            . $sOut
+            . '</div>'
+            . '</body></html>';
         return $sOut;
     }
 

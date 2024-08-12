@@ -13,25 +13,25 @@ $o = new PDO("sqlite:".$aParams["db"],(...));
 
 ```php
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Slite test",
         "description" => "Connect sqlite database file",
-        "check" => array(
+        "check" => [
             "function" => "SqliteConnect",
-            "params" => array(
+            "params" => [
                 "db"       => [database file],
                 "user"     => [username],
                 "password" => [password],
                 "timeout"  => [time],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```
 
 ## Parameters ##
 
-| key      | type     | description |
+| key      | type     | description
 |---       |---       |---
 |db🔸      |(string)  |full path of the sqlite database file
 |user      |(string)  |optional: username; default: empty
@@ -45,15 +45,15 @@ $oMonitor->addCheck(
 ```php
 $sSqlitefile=$aConfig['dataDir'].'/database/logs.db';
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Sqlite DB for action logs",
         "description" => "Connect sqlite db ". basename($sSqlitefile),
-        "check" => array(
+        "check" => [
             "function" => "SqliteConnect",
-            "params" => array(
+            "params" => [
                 "db"=>$sSqlitefile
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 ```

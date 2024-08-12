@@ -1,6 +1,9 @@
-# Plugins/checks folder #
-
-In the folder plugins/checks/ are the files that contain the logic of a single check.
+<html>
+<div class="hero">
+    <h2>Plugins/checks/ folder</h2>
+    In the folder plugins/checks/ are the files that contain the logic of a single check.
+</div>
+</html>
 
 ## Included checks ##
 

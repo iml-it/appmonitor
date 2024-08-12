@@ -1,6 +1,6 @@
 <?php
 
-if(!defined('RESULT_OK')){
+if (!defined('RESULT_OK')) {
     define("RESULT_OK", 0);
     define("RESULT_UNKNOWN", 1);
     define("RESULT_WARNING", 2);
@@ -51,76 +51,79 @@ if(!defined('RESULT_OK')){
  * 2021-10-28  0.93  axel.hahn@iml.unibe.ch  add plugins<br>
  * 2021-12-14  0.93  axel.hahn@iml.unibe.ch  split plugins into single files; added key group in a check<br>
  * 2023-06-02  0.125 axel.hahn@unibe.ch      replace array_key_exists for better readability
+ * 2024-07-22  0.137 axel.hahn@unibe.ch      php 8 only: use typed variables
  * --------------------------------------------------------------------------------<br>
- * @version 0.125
+ * @version 0.137
  * @author Axel Hahn
  * @link TODO
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
  */
-class appmonitorcheck {
+class appmonitorcheck
+{
     // ----------------------------------------------------------------------
     // CONFIG
     // ----------------------------------------------------------------------
-    
+
     /**
      * starting time using microtime
-     * @var float|string
+     * @var float
      */
-    protected $_iStart=0;
+    protected float $_iStart = 0;
 
     /**
      * config container
      * @var array
      */
-    protected $_aConfig = [];
+    protected array $_aConfig = [];
 
     /**
      * data of all checks
      * @var array
      */
-    protected $_aData = [];
-    
+    protected array $_aData = [];
 
     /**
      * flat array with units for sizes
      * @var array
      */
-    protected $_units = [ 'B', 'KB', 'MB', 'GB', 'TB' ];
-    
+    protected array $_units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
     /**
      * timeout in sec for tcp socket connections
-     * @var type 
+     * @var integer
      */
-    protected $_iTimeoutTcp=5;
-    
+    protected int $_iTimeoutTcp = 5;
+
     /**
      * point to the plugin directory
      * @var string
      */
-    protected $_sPluginDir=__DIR__.'/../plugins';
+    protected string $_sPluginDir = __DIR__ . '/../plugins';
 
     // ----------------------------------------------------------------------
     // CONSTRUCTOR
     // ----------------------------------------------------------------------
 
     /**
-     * constructor (nothing)
+     * Constructor (nothing here)
      */
-    public function __construct() {
-        
+    public function __construct()
+    {
+
     }
-    
+
     // ----------------------------------------------------------------------
     // PRIVATE FUNCTIONS
     // ----------------------------------------------------------------------
 
     /**
-     * internal: create basic array values for metadata
+     * Internal: create basic array values for metadata
      * @return boolean
      */
-    protected function _createDefaultMetadata() {
+    protected function _createDefaultMetadata(): bool
+    {
 
         $this->_aData = [
             "name" => $this->_aConfig["name"],
@@ -136,33 +139,38 @@ class appmonitorcheck {
     }
 
     /**
-     * set a result value of a check
-     * @param type $iResult
-     * @return type
+     * Set the result value of a check
+     * @param integer  $iResult  result code; one of RESULT_OK|RESULT_WARNING|RESULT_ERROR|RESULT_UNKNOWN
+     * @return bool
      */
-    protected function _setResult($iResult) {
-        return $this->_aData["result"] = (int) $iResult;
+    protected function _setResult(int $iResult): bool
+    {
+        $this->_aData["result"] = (int) $iResult;
+        return true;
     }
 
     /**
-     * set a result value of a check
-     * @param type $iResult
-     * @return type
+     * Set a result value of a check
+     * @param string  $s  value; message text for this result
+     * @return bool
      */
-    protected function _setOutput($s) {
-        return $this->_aData["value"] = (string) $s;
+    protected function _setOutput(string $s): bool
+    {
+        $this->_aData["value"] = $s;
+        return true;
     }
-    
+
     /**
-     * put counter data to result set
-     * @param type $aParams
+     * Put counter data to result set
+     * @param array  $aParams  array  with possible keys type, count, visual
      * @return boolean
      */
-    protected function _setCounter($aParams){
-        if(is_array($aParams) && count($aParams)){
-            foreach([ 'type', 'count', 'visual' ] as $sMyKey){
-                if(isset($aParams[$sMyKey])){
-                    $this->_aData[$sMyKey]=$aParams[$sMyKey];
+    protected function _setCounter(array $aParams): bool
+    {
+        if (is_array($aParams) && count($aParams)) {
+            foreach (['type', 'count', 'visual'] as $sMyKey) {
+                if (isset($aParams[$sMyKey])) {
+                    $this->_aData[$sMyKey] = $aParams[$sMyKey];
                 }
             }
         }
@@ -170,41 +178,43 @@ class appmonitorcheck {
     }
 
     /**
-     * set result and output 
-     * @param integer  $iResult   value; use a RESULT_XYZ constant
+     * Set result and output 
+     * @param integer  $iResult   result code; one of RESULT_OK|RESULT_WARNING|RESULT_ERROR|RESULT_UNKNOWN
      * @param string   $s         message text
      * @param array    $aCounter  optional: counter with array keys type, count, visual
      * @return boolean
      */
-    protected function _setReturn($iResult, $s, $aCounter=[]) {
+    protected function _setReturn(int $iResult, string $s, array $aCounter = [])
+    {
         $this->_setResult($iResult);
         $this->_setOutput($s);
         $this->_setCounter($aCounter);
         return true;
     }
-    
+
     /**
-     * check a given array if it contains wanted keys
+     * Check a given array if it contains wanted keys
      * @param array  $aConfig   array to verify
      * @param string $sKeyList  key or keys as comma seprated list 
      * @return boolean
      */
-    protected function _checkArrayKeys($aConfig, $sKeyList) {
+    protected function _checkArrayKeys($aConfig, $sKeyList)
+    {
         foreach (explode(",", $sKeyList) as $sKey) {
             if (!isset($aConfig[$sKey])) {
                 header('HTTP/1.0 503 Service Unavailable');
                 die('<h1>503 Service Unavailable</h1>'
-                        . '<h2>Details</h2>'
-                        .__METHOD__ . " - array of check parameters requires the keys [$sKeyList] - but key <code>$sKey</code> was not found in config array."
-                        . "<pre>" . print_r($aConfig, true) .'</pre>'
+                    . '<h2>Details</h2>'
+                    . __METHOD__ . " - array of check parameters requires the keys [$sKeyList] - but key <code>$sKey</code> was not found in config array."
+                    . "<pre>" . print_r($aConfig, true) . '</pre>'
                 );
             }
             if (is_null($aConfig[$sKey])) {
                 header('HTTP/1.0 503 Service Unavailable');
                 die('<h1>503 Service Unavailable</h1>'
-                        . '<h2>Details</h2>'
-                        .__METHOD__ . " - key <code>$sKey</code> is empty in config array"
-                        . "<pre>" . print_r($aConfig, true) .'</pre>'
+                    . '<h2>Details</h2>'
+                    . __METHOD__ . " - key <code>$sKey</code> is empty in config array"
+                    . "<pre>" . print_r($aConfig, true) . '</pre>'
                 );
             }
         }
@@ -216,9 +226,9 @@ class appmonitorcheck {
     // ----------------------------------------------------------------------
 
     /**
-     * perform a check
-     * @param type $aConfig
-     * Array
+     * Perform a check
+     * @param array $aConfig  configuration array for a check, eg.
+     * <code>
      * [
      *     [name] => Dummy
      *     [description] => Dummy Test
@@ -228,10 +238,11 @@ class appmonitorcheck {
      *                                        // its keys depend on the function  
      *     ]
      * ]
-     * 
+     * </code>
      * @return array
      */
-    public function makeCheck($aConfig) {
+    public function makeCheck(array $aConfig): array
+    {
         $this->_iStart = microtime(true);
         $this->_checkArrayKeys($aConfig, "name,description,check");
         $this->_checkArrayKeys($aConfig["check"], "function");
@@ -241,53 +252,53 @@ class appmonitorcheck {
 
         $sCheck = preg_replace('/[^a-zA-Z0-9]/', '', $this->_aConfig["check"]["function"]);
         $aParams = $this->_aConfig["check"]["params"] ?? [];
-        
+
         // try to load as plugin from a plugin file
-        $sPluginFile= strtolower($this->_sPluginDir.'/checks/'.$sCheck.'.php');
+        $sPluginFile = strtolower($this->_sPluginDir . '/checks/' . $sCheck . '.php');
         // echo "plugin file: $sPluginFile<br>\n";
-        $sCheckClass = 'check'.$sCheck;
-        if (!class_exists($sCheckClass)){
-            if (file_exists($sPluginFile)) {   
-                require_once($sPluginFile);
+        $sCheckClass = 'check' . $sCheck;
+        if (!class_exists($sCheckClass)) {
+            if (file_exists($sPluginFile)) {
+                require_once ($sPluginFile);
             }
         }
 
-        if (!class_exists($sCheckClass)){
+        if (!class_exists($sCheckClass)) {
             header('HTTP/1.0 503 Service Unavailable');
             die('<h1>503 Service Unavailable</h1>'
-                    . '<h2>Details</h2>'
-                    .__METHOD__ . " - check class not found: <code>$sCheckClass</code>"
-                    . "<pre>" . print_r($aConfig, true) .'</pre>'
-                    ."<h2>Known checks</h2>\n".print_r($this->listChecks(), 1)
+                . '<h2>Details</h2>'
+                . __METHOD__ . " - check class not found: <code>$sCheckClass</code>"
+                . "<pre>" . print_r($aConfig, true) . '</pre>'
+                . "<h2>Known checks</h2>\n" . print_r($this->listChecks(), 1)
             );
         }
-            
+
         $oPlugin = new $sCheckClass;
-        $aResponse=$oPlugin->run($aParams); 
-        if(!is_array($aResponse)){
+        $aResponse = $oPlugin->run($aParams);
+        if (!is_array($aResponse)) {
             header('HTTP/1.0 503 Service Unavailable');
             die('<h1>503 Service Unavailable</h1>'
-                    . '<h2>Details</h2>'
-                    .__METHOD__ . " - plugin : $sCheck does not responses an array"
-                    . "<pre>INPUT " . print_r($aConfig, true) .'</pre>'
-                    . "<pre>RESPONSE " . print_r($aResponse, true) .'</pre>'
+                . '<h2>Details</h2>'
+                . __METHOD__ . " - plugin : $sCheck does not responses an array"
+                . "<pre>INPUT " . print_r($aConfig, true) . '</pre>'
+                . "<pre>RESPONSE " . print_r($aResponse, true) . '</pre>'
             );
         }
-        if(count($aResponse)<2){
+        if (count($aResponse) < 2) {
             header('HTTP/1.0 503 Service Unavailable');
             die('<h1>503 Service Unavailable</h1>'
-                    . '<h2>Details</h2>'
-                    .__METHOD__ . " - plugin : $sCheck does not responses the minimum of 2 array values"
-                    . "<pre>INPUT " . print_r($aConfig, true) .'</pre>'
-                    . "<pre>RESPONSE " . print_r($aResponse, true) .'</pre>'
+                . '<h2>Details</h2>'
+                . __METHOD__ . " - plugin : $sCheck does not responses the minimum of 2 array values"
+                . "<pre>INPUT " . print_r($aConfig, true) . '</pre>'
+                . "<pre>RESPONSE " . print_r($aResponse, true) . '</pre>'
             );
         }
-        if(!isset($aResponse[2])){
-            $aResponse[2]=[];
+        if (!isset($aResponse[2]) || !$aResponse[2]) {
+            $aResponse[2] = [];
         }
         $this->_setReturn($aResponse[0], $aResponse[1], $aResponse[2]);
-        if (!$this->_aData['group'] && method_exists($oPlugin, "getGroup")){
-            $this->_aData['group']=$oPlugin->getGroup($aParams);
+        if (!$this->_aData['group'] && method_exists($oPlugin, "getGroup")) {
+            $this->_aData['group'] = $oPlugin->getGroup($aParams);
         }
 
         $this->_aData['time'] = number_format((microtime(true) - $this->_iStart) * 1000, 3) . 'ms';
@@ -296,22 +307,23 @@ class appmonitorcheck {
     }
 
     /**
-     * list all available check functions. This is a helper class you can call
+     * List all available checks. This is a helper class you can call
      * to get an overview over built in functions and plugins. 
      * You get a flat array with all function names.
      * @return array
      */
-    public function listChecks() {
+    public function listChecks(): array
+    {
         $aReturn = [];
         // return internal protected fuctions named "check[whatever]"
         $class = new ReflectionClass($this);
         foreach ($class->getMethods(ReflectionMethod::IS_PROTECTED) as $oReflectionMethod) {
             if (strpos($oReflectionMethod->name, "check") === 0) {
-                $aReturn[(string) $oReflectionMethod->name]=1;
+                $aReturn[(string) $oReflectionMethod->name] = 1;
             }
         }
         // return checks from plugins subdir
-        foreach(glob($this->_sPluginDir.'/checks/*.php') as $sPluginFile){
+        foreach (glob($this->_sPluginDir . '/checks/*.php') as $sPluginFile) {
             $aReturn[str_replace('.php', '', basename($sPluginFile))] = 1;
         }
         ksort($aReturn);
@@ -319,10 +331,11 @@ class appmonitorcheck {
     }
 
     /**
-     * final call of class: send response (data array)
-     * @return type
+     * Final call of class: send response (data array)
+     * @return array
      */
-    public function respond() {
+    public function respond()
+    {
         return $this->_aData;
     }
 
@@ -331,65 +344,70 @@ class appmonitorcheck {
     // ----------------------------------------------------------------------
 
     /**
-     * helper function: read certificate data
+     * Helper function: read certificate data
      * called in checkCert()
+     * 
      * @param string  $sUrl         url to connect
      * @param boolean $bVerifyCert  flag: verify certificate; default: no check
      * @return array
      */
-    protected function _certGetInfos($sUrl, $bVerifyCert) {
-        $iTimeout=10;
-        $aUrldata=parse_url($sUrl);
+    protected function _certGetInfos(string $sUrl, bool $bVerifyCert): array
+    {
+        $iTimeout = 10;
+        $aUrldata = parse_url($sUrl);
         $sHost = isset($aUrldata['host']) ? $aUrldata['host'] : false;
         $iPort = isset($aUrldata['port']) ? $aUrldata['port'] : ((isset($aUrldata['scheme']) && $aUrldata['scheme'] === 'https') ? 443 : false);
 
-        $aSsl=['capture_peer_cert' => true ];
-        if($bVerifyCert){
-            $aSsl['verify_peer']=false;
-            $aSsl['verify_peer_name']=false;
-        };
-        $get = stream_context_create([ 'ssl' => $aSsl ]);
-        if(!$get){
-            return [ '_error' => 'Error: Cannot create stream_context' ];
+        $aSsl = ['capture_peer_cert' => true];
+        if ($bVerifyCert) {
+            $aSsl['verify_peer'] = false;
+            $aSsl['verify_peer_name'] = false;
         }
-        $errno=-1;
-        $errstr="stream_socket_client failed.";
+        ;
+        $get = stream_context_create(['ssl' => $aSsl]);
+        if (!$get) {
+            return ['_error' => 'Error: Cannot create stream_context'];
+        }
+        $errno = -1;
+        $errstr = "stream_socket_client failed.";
         $read = stream_socket_client("ssl://$sHost:$iPort", $errno, $errstr, $iTimeout, STREAM_CLIENT_CONNECT, $get);
-        if(!$read){
-            return [ '_error' => "Error $errno: $errstr; cannot create stream_socket_client with given stream_context to ssl://$sHost:$iPort; you can try to set the flag [verify] to false to check expiration date only." ];
+        if (!$read) {
+            return ['_error' => "Error $errno: $errstr; cannot create stream_socket_client with given stream_context to ssl://$sHost:$iPort; you can try to set the flag [verify] to false to check expiration date only."];
         }
         $cert = stream_context_get_params($read);
-        if(!$cert){
-            return [ '_error' => "Error: socket was connected to ssl://$sHost:$iPort - but I cannot read certificate infos with stream_context_get_params " ];
+        if (!$cert) {
+            return ['_error' => "Error: socket was connected to ssl://$sHost:$iPort - but I cannot read certificate infos with stream_context_get_params "];
         }
-        $certinfo = openssl_x509_parse($cert['options']['ssl']['peer_certificate']);
-        return $certinfo;
+        return openssl_x509_parse($cert['options']['ssl']['peer_certificate']);
     }
 
 
     /**
-     * get human readable space value
+     * Get human readable space value
      * @param integer $size
      * @return string
      */
-    protected function _getHrSize($size){
+    protected function _getHrSize(int $size): string
+    {
         $power = $size > 0 ? floor(log($size, 1024)) : 0;
         return number_format($size / pow(1024, $power), 2, '.', ',') . ' ' . $this->_units[$power];
     }
+
     /**
      * get a space in a real value if an integer has added MB|GB|...
      * @param string $sValue
      * @return integer
      */
-    protected function _getSize($sValue){
-        if(is_int($sValue)){
+    protected function _getSize(string $sValue): int
+    {
+        if (is_int($sValue)) {
             return $sValue;
         }
-        $power=0;
-        foreach($this->_units as $sUnit){
-            if (preg_match('/^[0-9\.\ ]*'.$sUnit.'/', $sValue)){
-                $i=preg_replace('/([0-9\.]*).*/', '$1', $sValue);
-                $iReal=$i*pow(1024, $power);
+        $power = 0;
+        foreach ($this->_units as $sUnit) {
+            if (preg_match('/^[0-9\.\ ]*' . $sUnit . '/', $sValue)) {
+                $i = preg_replace('/([0-9\.]*).*/', '$1', $sValue);
+                $iReal = $i * pow(1024, $power);
                 // die("FOUND: $sValue with unit ${sUnit} - 1024^$power * $i = $iReal");
                 return $iReal;
             }
@@ -397,48 +415,9 @@ class appmonitorcheck {
         }
         header('HTTP/1.0 503 Service Unavailable');
         die('<h1>503 Service Unavailable</h1>'
-                . '<h2>Details</h2>'
-                .__METHOD__ . " ERROR in space value parameter - there is no size unit in [$sValue] - allowed size units are " . implode('|', $this->_units)
+            . '<h2>Details</h2>'
+            . __METHOD__ . " ERROR in space value parameter - there is no size unit in [$sValue] - allowed size units are " . implode('|', $this->_units)
         );
     }
-
-
-    
-    /**
-     * compare function for 2 values
-     * @param string   $verifyValue  search value
-     * @param string   $sCompare     compare function; it is one of
-     *                               IS - 
-     *                               GE - greater or equal
-     *                               GT - greater
-     * @param string   $value        existing value
-     * @return boolean
-     */
-    protected function _compare($value, $sCompare, $verifyValue){
-        switch ($sCompare){
-            case "IS":
-                return $value===$verifyValue;
-                break;
-            case "GE":
-                return $value>=$verifyValue;
-                break;
-            case "GT":
-                return $value>$verifyValue;
-                break;
-            case "HAS":
-                return !!(strstr($value, $verifyValue)!==false);
-                break;
-            default:
-                header('HTTP/1.0 503 Service Unavailable');
-                die('<h1>503 Service Unavailable</h1>'
-                        . '<h2>Details</h2>'
-                        .__METHOD__ . " - FATAL ERROR: a compare function [$sCompare] is not implemented (yet)."
-                );
-                break;
-        }
-        return false;
-    }
-
-
 
 }

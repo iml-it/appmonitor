@@ -18,12 +18,14 @@
  * ____________________________________________________________________________
  * 
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 
  */
-class checkSimple extends appmonitorcheck{
-    
+class checkSimple extends appmonitorcheck
+{
+
     /**
-     * most simple check: set given values
+     * Most simple check: set given values
      * Use this function to add a counter
      * 
      * @param array $aParams
@@ -37,15 +39,16 @@ class checkSimple extends appmonitorcheck{
      *         - label         string   a label
      *         - value         float    a number
      *         - type          string   one of simple | bar | line
-     * 
+     * @return array
      */
-    public function run($aParams) {
+    public function run(array $aParams): array
+    {
         $this->_checkArrayKeys($aParams, "result,value");
         // $this->_setReturn((int) $aParams["result"], $aParams["value"]);
-        $aData=[];
-        foreach([ 'type', 'count', 'visual' ] as $sMyKey){
-            if(isset($aParams[$sMyKey])){
-                $aData[$sMyKey]=$aParams[$sMyKey];
+        $aData = [];
+        foreach (['type', 'count', 'visual'] as $sMyKey) {
+            if (isset($aParams[$sMyKey])) {
+                $aData[$sMyKey] = $aParams[$sMyKey];
             }
         }
         return [

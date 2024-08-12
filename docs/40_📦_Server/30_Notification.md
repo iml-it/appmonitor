@@ -1,7 +1,4 @@
-
-# Notification #
-
-## Introduction ##
+## Introduction
 
 Notifications will be triggered if ...
 
@@ -25,7 +22,7 @@ config are global receivers getting the notifications for all applications.
 When sending a notification it loops over all known notification plugins
 and sends messages with all methods as long a TO item exists.
 
-### Email ##
+### Email
 
 * **FROM** address is taken from server config notification -> from -> email
 * **TO** is an array of email addresses; they are merged from
@@ -38,7 +35,7 @@ For more details to the subject and message see the section for message texts be
 
 The email is send as plain text and high priority.
 
-### Slack ###
+### Slack
 
 * FROM - not needed
 * **TO** is an array with label + url as items; they are merged from
@@ -50,7 +47,7 @@ The email is send as plain text and high priority.
 A slack message ist using "[APPMONITOR]" as sending user without icon.
 As message text it takes the same generated text like for the email.
 
-## Message texts ##
+## Message texts
 
 The sent messages are language dependent texts and the appmonitor is
 shipped with a default. In the language file they are defined in the subkey "notifications".
@@ -81,22 +78,22 @@ As an example a snippet from server/lang/en-en.json:
 
 These texts can contain placeholders.
 
-| Placeholder          | Description                                                |
-|---                   |---                                                         |
-| _\_\_APPID___        | Id of application                                          |
-| _\_\_CHANGE___       | One of new\|no change\|change\|deleted (1)                 |
-| _\_\_CURLERROR___    | Error message from curl library if the request failed.     |
-| _\_\_DELTA-TIME___   | Delta since last state change i.e. NN min (HH h) (2)       |
-| _\_\_ERROR___        | Error message of a failed response                         |
-| _\_\_HEADER___       | Http response header (maybe for an email message)          |
-| _\_\_HOST___         | Hostname (from client meta -> host)                        |
-| _\_\_LAST-RESULT___  | Result of last check; see RESULT (2)                       |
-| _\_\_LAST-TIME___    | Time of last check; see TIME (2)                           |
-| _\_\_MONITORURL___   | Url to monitoring page (3)                                 |
-| _\_\_RESULT___       | One of OK\|Unknown\|Warning\|Error (1)                     |
-| _\_\_TIME___         | Current time YYYY-MM-DD hh:mm:ss                           |
-| _\_\_URL___          | Url of web application check                               |
-| _\_\_WEBSITE___      | Name of the website/ service (from client meta -> website) |
+| Placeholder          | Description
+|---                   |---
+| _\_\_APPID___        | Id of application
+| _\_\_CHANGE___       | One of new\|no change\|change\|deleted (1)
+| _\_\_CURLERROR___    | Error message from curl library if the request failed.
+| _\_\_DELTA-TIME___   | Delta since last state change i.e. NN min (HH h) (2)
+| _\_\_ERROR___        | Error message of a failed response
+| _\_\_HEADER___       | Http response header (maybe for an email message)
+| _\_\_HOST___         | Hostname (from client meta -> host)
+| _\_\_LAST-RESULT___  | Result of last check; see RESULT (2)
+| _\_\_LAST-TIME___    | Time of last check; see TIME (2)
+| _\_\_MONITORURL___   | Url to monitoring page (3)
+| _\_\_RESULT___       | One of OK\|Unknown\|Warning\|Error (1)
+| _\_\_TIME___         | Current time YYYY-MM-DD hh:mm:ss
+| _\_\_URL___          | Url of web application check
+| _\_\_WEBSITE___      | Name of the website/ service (from client meta -> website)
 
 Remarks:
 
@@ -104,7 +101,7 @@ Remarks:
 * (2) It requires that a saved state with another status for this url. Value is "-" if there is no state change logged yet
 * (3) requires a value for "serverurl" in the config
 
-To preview the texts you can 
+To preview the texts you can
 
 * set "debug" to true in you config
 * add role "ui-debug" for your user in ./server/config/appmonitor-server-config.json

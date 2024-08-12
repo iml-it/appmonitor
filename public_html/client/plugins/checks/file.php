@@ -21,29 +21,31 @@
  * ____________________________________________________________________________
  * 
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
- * 
+ * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  */
-class checkFile extends appmonitorcheck{
+class checkFile extends appmonitorcheck
+{
     /**
-     * get default group of this check
+     * Get default group of this check
      * @param array   $aParams - see run() method
-     * @return array
+     * @return string
      */
-    public function getGroup($aParams){
-        $sReturn='file';
-        if(isset($aParams['dir'])){
-            $sReturn='folder';
+    public function getGroup(array $aParams = []): string
+    {
+        $sReturn = 'file';
+        if (isset($aParams['dir'])) {
+            $sReturn = 'folder';
         }
-        foreach(['exists', 'executable', 'readable', 'writable'] as $sFlag){
-            if (isset($aParams[$sFlag]) && !$aParams[$sFlag]){
-                $sReturn='deny';
+        foreach (['exists', 'executable', 'readable', 'writable'] as $sFlag) {
+            if (isset($aParams[$sFlag]) && !$aParams[$sFlag]) {
+                $sReturn = 'deny';
             }
         }
         return $sReturn;
     }
 
     /**
-     * check a file
+     * Check a file
      * @param array $aParams
      * [
      *     "filename"    directory that must exist
@@ -55,9 +57,10 @@ class checkFile extends appmonitorcheck{
      *     "readable"    flag is readable
      *     "writable"    flag is writable
      * ]
-     * @return boolean
+     * @return array
      */
-    public function run($aParams) {
+    public function run(array $aParams): array
+    {
         $aOK = [];
         $aErrors = [];
         $this->_checkArrayKeys($aParams, "filename");
@@ -71,10 +74,10 @@ class checkFile extends appmonitorcheck{
                 $aErrors[] = $sMyflag;
             }
         }
-        foreach ([ 'dir', 'executable', 'file', 'link', 'readable', 'writable' ] as $sFiletest) {
+        foreach (['dir', 'executable', 'file', 'link', 'readable', 'writable'] as $sFiletest) {
             if (isset($aParams[$sFiletest])) {
                 $sTestCmd = 'return is_' . $sFiletest . '("' . $sFile . '");';
-                if (eval($sTestCmd) && $aParams[$sFiletest]) {
+                if (eval ($sTestCmd) && $aParams[$sFiletest]) {
                     $aOK[] = $sFiletest . '=' . ($aParams[$sFiletest] ? 'yes' : 'no');
                 } else {
                     $aErrors[] = $sFiletest . '=' . ($aParams[$sFiletest] ? 'yes' : 'no');
@@ -82,16 +85,17 @@ class checkFile extends appmonitorcheck{
             }
         }
         $sMessage = (count($aOK) ? ' flags OK: ' . implode('|', $aOK) : '')
-                . ' ' . (count($aErrors) ? ' flags FAILED: ' . implode('|', $aErrors) : '')
+            . ' ' . (count($aErrors) ? ' flags FAILED: ' . implode('|', $aErrors) : '')
         ;
         if (count($aErrors)) {
             return [
-                RESULT_ERROR, 
-                'file test [' . $sFile . '] ' . $sMessage
+                RESULT_ERROR,
+                "file test [$sFile] $sMessage"
             ];
         } else {
-            return[
-                RESULT_OK, 'file test [' . $sFile . '] ' . $sMessage
+            return [
+                RESULT_OK,
+                "file test [$sFile] $sMessage"
             ];
         }
     }

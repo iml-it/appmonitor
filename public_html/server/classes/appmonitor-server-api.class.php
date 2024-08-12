@@ -29,12 +29,14 @@ require_once 'appmonitor-server.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version v1
+ * @version v0.137
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
+ * --------------------------------------------------------------------------------<br>
+ * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
  */
 class appmonitorserver_api extends appmonitorserver
 {
@@ -44,20 +46,20 @@ class appmonitorserver_api extends appmonitorserver
     // ----------------------------------------------------------------------
 
     /**
-     * get the "api" section from configuration
+     * Get the "api" section from configuration
      * @return array
      */
-    public function getApiConfig()
+    public function getApiConfig(): array
     {
         return isset($this->_aCfg['api']) ? $this->_aCfg['api'] : [];
     }
 
     /**
-     * get an array with users in the config to apply it on tinyapi init
+     * Get an array with users in the config to apply it on tinyapi init
      * Syntax: username is the key and password hash as value.
      * @return array
      */
-    public function getApiUsers()
+    public function getApiUsers(): array
     {
         $aReturn = [];
         foreach ($this->_aCfg['users'] as $sLoopuser => $aUserdata) {
@@ -71,32 +73,33 @@ class appmonitorserver_api extends appmonitorserver
     // ----------------------------------------------------------------------
 
     /**
-     * generate JSON to show a health status
+     * Generate JSON to show a health status
      * @return array
      */
-    public function apiGetHeatlth(){
+    public function apiGetHeatlth(): array
+    {
         $aData = $this->getMonitoringData();
-        $aReturn=[
-            'health'=>[
-                'status'=>isset($aData['return'])?'OK':'error',
-                'statusmessage'=>isset($aData['return'])?'Appmonitor is up and running.':'No monitoring data available',
+        $aReturn = [
+            'health' => [
+                'status' => isset($aData['return']) ? 'OK' : 'error',
+                'statusmessage' => isset($aData['return']) ? 'Appmonitor is up and running.' : 'No monitoring data available',
             ],
-            'monitoring'=>[
-                'status'=>'-1',
-                'statusmessage'=>'no monitoring data available',
+            'monitoring' => [
+                'status' => '-1',
+                'statusmessage' => 'no monitoring data available',
             ],
             // 'raw'=>$aData,
         ];
-        if(isset($aData['return'])){
+        if (isset($aData['return'])) {
             $aReturn['monitoring'] = [
-                'status'=>$aData['return'],
-                'statusmessage'=>$this->getResultValue($aData["return"]),
-                'apps'=>[
-                    'count'=>$aData["results"]["total"],
-                    0=>['count'=>$aData["results"][0],'label'=>$this->getResultValue(0)],
-                    1=>['count'=>$aData["results"][1],'label'=>$this->getResultValue(1)],
-                    2=>['count'=>$aData["results"][2],'label'=>$this->getResultValue(2)],
-                    3=>['count'=>$aData["results"][3],'label'=>$this->getResultValue(3)],
+                'status' => $aData['return'],
+                'statusmessage' => $this->getResultValue($aData["return"]),
+                'apps' => [
+                    'count' => $aData["results"]["total"],
+                    0 => ['count' => $aData["results"][0], 'label' => $this->getResultValue(0)],
+                    1 => ['count' => $aData["results"][1], 'label' => $this->getResultValue(1)],
+                    2 => ['count' => $aData["results"][2], 'label' => $this->getResultValue(2)],
+                    3 => ['count' => $aData["results"][3], 'label' => $this->getResultValue(3)],
                 ]
             ];
         }
@@ -107,15 +110,16 @@ class appmonitorserver_api extends appmonitorserver
     // ----------------------------------------------------------------------
 
     /**
-     * get an array of all applications that match a filter
+     * Get an array of all applications that match a filter
+     * 
      * @param  array  $aFilter   filter definitions using AND condition over all filters
      *                           appid   - string of appid
      *                           tags    - array of tags that must match (AND condition)
      *                           website - substring of website
-     * @param  string  $outmode  kind of result data
+     * @param  string  $outmode  kind of result data; one of appid|checks|meta|all
      * @return array
      */
-    public function apiGetFilteredApp($aFilter = [], $outmode = 'all')
+    public function apiGetFilteredApp(array $aFilter = [], string $outmode = 'all'): array
     {
         $aReturn = [];
         $aTmp = [];
@@ -186,22 +190,28 @@ class appmonitorserver_api extends appmonitorserver
 
                 switch ($outmode) {
 
-                        // short view of matching apps
+                    // short view of matching apps
                     case 'appid':
                         $aTmp[$sAppName][$sKey] = [
                             'website' => $aData['result']['website'] ?? false,
                             'url' => $aData['result']['url'] ?? false,
                         ];
-                        break;;;
-                        // return an existing key only
+                        break;
+                        ;
+                        ;
+                    // return an existing key only
                     case 'checks':
                     case 'meta':
                         $aTmp[$sAppName][$sKey] = $aData[$outmode] ?? false;
-                        break;;;
+                        break;
+                        ;
+                        ;
 
-                        // all
+                    // all
                     default:
-                        $aTmp[$sAppName][$sKey] = $aData;;;
+                        $aTmp[$sAppName][$sKey] = $aData;
+                        ;
+                        ;
                 }
             }
         }
@@ -219,11 +229,11 @@ class appmonitorserver_api extends appmonitorserver
     // ----------------------------------------------------------------------
 
     /**
-     * get a flat array with all application ids and website + url
+     * Get a flat array with all application ids and website + url
      * as subkeys
      * @return array
      */
-    public function apiGetTags()
+    public function apiGetTags(): array
     {
         return ['tags' => $this->_getClientTags()];
     }

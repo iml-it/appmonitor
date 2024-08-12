@@ -9,29 +9,33 @@
  * 
  */
 
+ // ----------------------------------------------------------------------
+// initialize
 require_once('classes/appmonitor-client.class.php');
 $oMonitor = new appmonitor();
 
-// set a name with application name and environment or hostname
-$oMonitor->setWebsite('[My CMS on host XY]');
-
-// how often the server should ask for updates
-$oMonitor->setTTL(300);
+// ----------------------------------------------------------------------
+// set metadata
+// $oMonitor->setWebsite('My wordpress Blog');
+// $oMonitor->setTTL(300);
+// $oMonitor->addTag('cms');
+// $oMonitor->addTag('production');
 
 // a general include ... the idea is to a file with the same actions on all
 // installations and hosts that can be deployed by a software delivery service 
 // (Puppet, Ansible, ...)
 @include 'general_include.php';
 
-// add any tag to add it in the filter list in the server web gui
-// $oMonitor->addTag('cms');
-// $oMonitor->addTag('production');
-
 // ----------------------------------------------------------------------
+// include the app plugin
+
+// set variable sApproot
+// $sApproot = $_SERVER['DOCUMENT_ROOT'];
 
 // include default checks for an application
 // @require 'plugins/apps/[name-of-app].php';
 
+// ----------------------------------------------------------------------
 // add a few custom checks
 // $oMonitor->addCheck(...)
 $oMonitor->addCheck(
@@ -48,8 +52,11 @@ $oMonitor->addCheck(
 );
 
 // ----------------------------------------------------------------------
+// send the response
 
 $oMonitor->setResult();
 $oMonitor->render();
+
+// ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------

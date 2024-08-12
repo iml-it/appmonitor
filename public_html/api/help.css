@@ -1,14 +1,20 @@
 :root{
-    --bg: #f8f8f8;
-    --bg-th: #dde;
-    --bg-pre: #eee;
+    --bg: #e8e8e8;
     --fc: #223;
-    --fc-h1: #77a;
+
+    --bg-th: #acd;
+
+    --bg-pre: #e8f0f0;
+
+    --bg-h1: #2788;
+    --fc-h1: #fff;
 }
 
-body{background: var(--bg); color:var(--fc);font-family: arial;}
-h1{color: var(--fc-h1);}
-table{border: 1px dotted;}
-th{background: var(--bg-th); border-bottom: 1px solid;}
+body{background: var(--bg); color:var(--fc);font-family: arial; margin: 2em 10% 4em; font-size: 1em;}
+div#main{background:#fff; width: 60%; padding: 1em; border-radius: 1em; box-shadow: 1em 1em 2em #bbb;}
+h1{background: var(--bg-h1); color: var(--fc-h1); margin: 0 0 1em 0; padding: 1em; border-radius: 0.3em 0.3em 0 0; }
+table{border: 1px dotted; padding: 1em; border-radius: 1em;}
+th{background: var(--bg-th); border-bottom: 1px solid; padding: 0.5em;}
 td{vertical-align: top;}
-pre{background: var(--bg-pre);}
+td strong{color: #467;}
+pre{background: var(--bg-pre); margin: 0;}

@@ -1,6 +1,12 @@
 
 HISTORY
 
+v0.135 2025-03-19
+  - UPDATE: no css def in slack; update html email
+
+v0.134 2024-01-24
+  - UPDATE: strip tags in email subject
+
 v0.133 2024-01-16
   - UPDATE: show curl errors in notification messages too
 

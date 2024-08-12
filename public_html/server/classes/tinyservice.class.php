@@ -17,43 +17,66 @@
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 1.0
+ * @version 1.1
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
  * @license http://www.gnu.org/licenses/gpl-3.0.html GPL 3.0
  * @package IML-Appmonitor
  * 
+ * 2024-07-17  1.1  axel.hahn@unibe.ch  php 8 only: use typed variables
  */
-class tinyservice {
-
-    protected $sTouchfile = false;
-    protected $iSleep = false; // seconds
-    protected $iStart = false;
-    protected $bDebug = false;
+class tinyservice
+{
 
     /**
-     * initialize tiniservice
+     * Filename of a touch file
+     * @var string
+     */
+    protected string $sTouchfile = '';
+
+    /**
+     * Number of seconds to sleep between loops
+     * @var int
+     */
+    protected int $iSleep = 3; // seconds
+
+
+    /**
+     * starting tome of the service
+     * @var float
+     */
+    protected float $iStart = 0;
+
+    /**
+     * Flag to show debug messages
+     * @var boolean
+     */
+    protected bool $bDebug = false;
+
+    /**
+     * Initialize tiniservice
+     * 
      * @param $sAppname       string   app id to prevent starting a script multiuple times
      * @param $iNewSleeptime  integer  idle time between loops
      * @param $sTmpdir        string   custom temp dir
      * @return boolean
      */
-    public function __construct($sAppname, $iNewSleeptime = 10, $sTmpdir=false) {
+    public function __construct(string $sAppname, int $iNewSleeptime = 10, string $sTmpdir = '')
+    {
         $this->iStart = microtime(true);
         $this->setAppname($sAppname, $sTmpdir);
         if ($iNewSleeptime) {
             $this->setSleeptime($iNewSleeptime);
         }
-
-        return true;
     }
 
     /**
-     * check if the run file was set. If not the application dies.
+     * Check if the run file was set. If not the application dies.
      * @return boolean
      */
-    protected function _checkTouchfile() {
+    protected function _checkTouchfile(): bool
+    {
         if (!$this->sTouchfile) {
             echo "ERROR: error in application. setTouchfile([name of application]) first.\n";
             die();
@@ -62,10 +85,11 @@ class tinyservice {
     }
 
     /**
-     * do not allow to run as root (for *NIX systems)
+     * Do not allow to run as root (for *NIX systems)
      * @return boolean
      */
-    public function denyRoot() {
+    public function denyRoot(): bool
+    {
         if (function_exists("posix_getpwuid")) {
             $processUser = posix_getpwuid(posix_geteuid());
             if ($processUser['name'] == "root") {
@@ -75,8 +99,14 @@ class tinyservice {
         return true;
     }
 
-    // signal handler - UNTESTED
-    public function sigHandler($signo) {
+    /**
+     * Signal handler - UNTESTED
+     * 
+     * @param int $signo sent signal
+     * @return void
+     */
+    public function sigHandler(int $signo): void
+    {
         $this->send("signal $signo received ...");
         switch ($signo) {
             case SIGINT:
@@ -89,23 +119,25 @@ class tinyservice {
                 echo "Bye.\n";
                 exit;
                 break;
-              case SIGHUP:
-              // actions SIGHUP handling
-              break;
-              default:
+            case SIGHUP:
+                // actions SIGHUP handling
+                break;
+            default:
                 $this->send("No action for signal $signo ... I will continue ...");
         }
     }
 
     /**
-     * set an application name - to create a run file
+     * Set an application name.
+     * It is used to create a run file.
      *
      * @param string $sAppname  name of the application
      * @param string $sTmpdir   optional: location of temp dir; default: system temp (often /tmp)
      * @return boolean
      */
-    public function setAppname($sAppname, $sTmpdir=false) {
-        $this->sTouchfile = false;
+    public function setAppname(string $sAppname, string $sTmpdir = ''): bool
+    {
+        $this->sTouchfile = '';
         $sFilepart = preg_replace('/[^a-z0-9]/i', '_', $sAppname);
         if (!$sFilepart) {
             return false;
@@ -115,22 +147,25 @@ class tinyservice {
     }
 
     /**
-     * enable/ disable debug
+     * Enable/ disable debug
      *
      * @param boolean $bDebug  flag with true|false
      * @return boolean
      */
-    public function setDebug($bDebug) {
+    public function setDebug(bool $bDebug): bool
+    {
         $this->bDebug = $bDebug ? true : false;
         return true;
     }
 
     /**
-     * set a new sleep time
+     * Set a new sleep time
+     * 
      * @param integer $iNewSleeptime value in seconds
      * @return boolean
      */
-    public function setSleeptime($iNewSleeptime) {
+    public function setSleeptime(int $iNewSleeptime): bool
+    {
         if (!(int) $iNewSleeptime) {
             return false;
         }
@@ -140,12 +175,13 @@ class tinyservice {
     }
 
     /**
-     * check if application can start. It checks the existance of touch file
+     * Check if application can start. It checks the existance of touch file
      * if it was found then an older file will be ignored.
      *
      * @return boolean
      */
-    function canStart() {
+    function canStart(): bool
+    {
         // echo "INFO: Run file is $this->sTouchfile\n";
         if (!file_exists($this->sTouchfile)) {
             echo "STATUS: Not running.\n";
@@ -163,25 +199,27 @@ class tinyservice {
     }
 
     /**
-     * write the message to a touch file ... as a life sign
+     * Write the message to a touch file ... as a life sign
      *
      * @param string $sMessage  message text
      * @return boolean
      */
-    public function touch($sMessage) {
+    public function touch(string $sMessage): bool
+    {
         $this->_checkTouchfile();
         return file_put_contents($this->sTouchfile, $sMessage);
     }
 
     /**
-     * write a message to STDOUT (if actiated or debug is on) and
+     * Write a message to STDOUT (if actiated or debug is on) and
      * touch the run file
      *
      * @param string   $sMessage  message text
      * @param boolean $bShow     flag to write to stdout
      * @return boolean
      */
-    public function send($sMessage, $bShow = false) {
+    public function send(string $sMessage, bool $bShow = false): bool
+    {
         $this->_checkTouchfile();
         $sLine = date("Y-m-d H:i:s") . " [" . number_format(microtime(true) - $this->iStart, 4) . "] " . $sMessage . "\n";
         echo ($bShow || $this->bDebug) ? $sLine : '';
@@ -189,12 +227,13 @@ class tinyservice {
     }
 
     /**
-     * sleep a bit
+     * Sleep a bit
      *
      * @param boolean $bShow     flag to write to stdout
      * @return boolean
      */
-    public function sleep($bShow = false) {
+    public function sleep(bool $bShow = false): bool
+    {
         $this->send("SLEEPING for " . $this->iSleep . " seconds ... ", $bShow);
         sleep($this->iSleep);
         $this->send("Waking up.", $bShow);
