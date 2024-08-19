@@ -20,6 +20,9 @@
 # 2024-07-22  v1.13 <axel.hahn@unibe.ch>      show info if there is no database container; speedup replacements
 # 2024-07-22  v1.14 <axel.hahn@unibe.ch>      show colored boxes with container status
 # 2024-07-24  v1.15 <axel.hahn@unibe.ch>      update menu output
+# 2024-07-26  v1.16 <axel.hahn@unibe.ch>      hide unnecessary menu items (WIP)
+# 2024-07-29  v1.17 <www.axel-hahn.de>        hide unnecessary menu items; reorder functions
+# 2024-08-14  v1.18 <www.axel-hahn.de>        update container view
 # ======================================================================
 
 cd "$( dirname "$0" )" || exit 1
@@ -33,7 +36,7 @@ _self=$( basename "$0" )
 # shellcheck source=/dev/null
 . "${_self}.cfg" || exit 1
 
-_version="1.15"
+_version="1.18"
 
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
@@ -43,12 +46,64 @@ fgRed="\e[31m"
 fgGreen="\e[32m"
 fgBrown="\e[33m"
 fgBlue="\e[34m"
+
+fgInvert="\e[7m"
 fgReset="\e[0m"
 
+# ----- status varsiables
+# running containers
+DC_WEB_UP=0
+DC_DB_UP=0
+
+# repo of docker-php-starterkit is here?
+DC_REPO=1
+
+DC_CONFIG_CHANGED=0
+
+DC_WEB_URL=""
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
 # ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+# STATUS FUNCTIONS
+
+# get container status and set global variable DC_REPO
+# DC_REPO = 0 nothing to do - repo was changed to project
+# DC_REPO = 1 if repo is in selfgitrepo (must be deleted)
+function _getStatus_repo(){
+    DC_REPO=0
+    git config --get remote.origin.url 2>/dev/null | grep -q $selfgitrepo && DC_REPO=1
+}
+
+# check if any of the templates has a change that must be applied
+function _getStatus_template(){
+    _generateFiles "dryrun"
+}
+
+# get container status and set global variables
+# DC_WEB_UP - web container 
+# DC_DB_UP  - database container
+#   0 = down
+#   1 = up
+function _getStatus_docker(){
+    local _out
+    _out=$( docker-compose -p "$APP_NAME" ps)    
+
+    DC_WEB_UP=0
+    DC_DB_UP=0
+    grep -q "${APP_NAME}-server" <<< "$_out" && DC_WEB_UP=1
+    grep -q "${APP_NAME}-db"     <<< "$_out"  && DC_DB_UP=1
+}
+
+function _getWebUrl(){
+    DC_WEB_URL="$frontendurl"
+    grep -q "${APP_NAME}-server" /etc/hosts && DC_WEB_URL="https://${APP_NAME}-server/"
+}
+
+# ----------------------------------------------------------------------
+# OUTPUT
 
 # draw a headline 2
 function h2(){
@@ -62,44 +117,70 @@ function h3(){
     echo -e "$fgBlue----- $*$fgReset"
 }
 
-# show help for param -h
-function showMenu(){
-    cat <<EOM
+# helper for menu: print an inverted key
+function  _key(){
+    echo -en "\e[4;7m ${1} \e[0m"
+}
 
-    $( _key g ) - remove git data of starterkit
-    
-    $( _key i ) - init application: set permissions
-    $( _key t ) - generate files from templates
-    $( _key T ) - remove generated files
- 
-    $( _key u ) - startup containers    docker-compose ... up -d
-    $( _key U ) - startup containers    docker-compose ... up -d --build
-    $( _key s ) - shutdown containers   docker-compose stop
-    $( _key r ) - remove containers     docker-compose rm -f
- 
-    $( _key m ) - more infos
-    $( _key o ) - open app [${APP_NAME}] $frontendurl
-    $( _key c ) - console (bash)
-    $( _key p ) - console check with php linter
- 
-    $( _key q ) - quit
-EOM
+# show menu in interactive mode and list keys in help with param -h
+# param  string  optional: set to "all" to show all menu items
+function showMenu(){
+
+    local _bAll=0
+    test -n "$1" && _bAll=1
+
+    local _spacer="    "
+
+    echo
+    if [ $DC_REPO -eq 1 ] || [ $_bAll -eq 1 ]; then
+        echo "${_spacer}$( _key g ) - remove git data of starterkit"
+        echo
+    fi
+    echo "${_spacer}$( _key i ) - init application: set permissions"
+
+    if [ $DC_CONFIG_CHANGED -eq 1 ] || [ $_bAll -eq 1 ]; then
+        echo "${_spacer}$( _key t ) - generate files from templates"
+    fi
+    if [ $DC_CONFIG_CHANGED -eq 0 ] || [ $_bAll -eq 1 ]; then
+        echo "${_spacer}$( _key T ) - remove generated files"
+    fi
+    echo
+    if [ $DC_WEB_UP -eq 0 ] || [ $_bAll -eq 1 ]; then
+        if [ $DC_CONFIG_CHANGED -eq 0 ] || [ $_bAll -eq 1 ]; then
+            echo "${_spacer}$( _key u ) - startup containers    docker-compose ... up -d"
+            echo "${_spacer}$( _key U ) - startup containers    docker-compose ... up -d --build"
+            echo
+            echo "${_spacer}$( _key r ) - remove containers     docker-compose rm -f"
+        fi
+    fi
+    if [ $DC_WEB_UP -eq 1 ] || [ $_bAll -eq 1 ]; then
+        echo "${_spacer}$( _key s ) - shutdown containers   docker-compose stop"
+        echo
+        echo "${_spacer}$( _key m ) - more infos"
+        echo "${_spacer}$( _key o ) - open app [${APP_NAME}] $DC_WEB_URL"
+        echo "${_spacer}$( _key c ) - console (bash)"
+        echo "${_spacer}$( _key p ) - console check with php linter"
+    fi
+    echo
+    echo "${_spacer}$( _key q ) - quit"
+
 }
 function showHelp(){
     cat <<EOH
+
 INITIALIZER FOR DOCKER APP v$_version
 
 A helper script written in Bash to bring up a PHP+Mysql application in docker.
 
-Source : https://git-repo.iml.unibe.ch/iml-open-source/docker-php-starterkit
-Docs   : https://os-docs.iml.unibe.ch/docker-php-starterkit/
-License: GNU GPL 3.0
+📄 Source : https://git-repo.iml.unibe.ch/iml-open-source/docker-php-starterkit
+📗 Docs   : https://os-docs.iml.unibe.ch/docker-php-starterkit/
+📜 License: GNU GPL 3.0
 (c) Institute for Medical Education; University of Bern
 
 
 SYNTAX:
   $_self [-h|-v]
-  $_self [menu key]
+  $_self [menu key [.. menu key N]]
 
 OPTIONS:
   -h   show this help and exit
@@ -110,7 +191,7 @@ MENU KEYS:
   The same keys can be put as parameter to start this action.
   You can add multiples keys to apply multiple actions.
 
-$( showMenu )
+$( showMenu "all" )
 
 EXAMPLES:
 
@@ -121,6 +202,56 @@ EXAMPLES:
 
 EOH
 }
+
+
+# show urls for app container
+function _showBrowserurl(){
+    echo "In a web browser open:"
+    echo "  $DC_WEB_URL"
+}
+
+# detect + show ports and urls for app container and db container
+function _showInfos(){
+    _showContainers long
+    h2 INFO
+
+    h3 "processes webserver"
+    # docker-compose top
+    docker top "${APP_NAME}-server"
+    if [ ! "$DB_ADD" = "false" ]; then
+        h3 "processes database"
+        docker top "${APP_NAME}-db"
+    fi
+
+    h3 "What to open in browser"
+    if echo >"/dev/tcp/localhost/${APP_PORT}"; then
+        # echo "OK, app port ${APP_PORT} is reachable"
+        # echo
+        _showBrowserurl
+    else
+        echo "ERROR: app port ${APP_PORT} is not available"
+    fi 2>/dev/null
+
+    if [ "$DB_ADD" != "false" ]; then
+        h3 "Check database port"
+        if echo >"/dev/tcp/localhost/${DB_PORT}"; then
+            echo "OK, db port ${DB_PORT} is reachable"
+            echo
+            echo "In a local DB admin tool you can connect it:"
+            echo "  host    : localhost"
+            echo "  port    : ${DB_PORT}"
+            echo "  user    : root"
+            echo "  password: ${MYSQL_ROOT_PASS}"
+        else
+            echo "NO, db port ${DB_PORT} is not available"
+        fi 2>/dev/null
+
+    fi
+    echo
+}
+
+# ----------------------------------------------------------------------
+# ACTIONS
 
 # set acl on local directory
 function _setWritepermissions(){
@@ -156,7 +287,7 @@ function _removeGitdata(){
     h2 "Remove git data of starterkit"
     echo -n "Current git remote url: "
     git config --get remote.origin.url
-    if git config --get remote.origin.url 2>/dev/null | grep $selfgitrepo >/dev/null; then
+    if git config --get remote.origin.url 2>/dev/null | grep -q $selfgitrepo; then
         echo
         echo -n "Delete local .git and .gitignore? [y/N] > "
         read -r answer
@@ -180,7 +311,7 @@ function _fix_no-db(){
     fi
 }
 
-# helper functiion to generate replacements using sed
+# helper function to generate replacements using sed
 # it loops over all vars in the config file
 # used in _generateFiles
 function _getreplaces(){
@@ -202,7 +333,12 @@ function _getreplaces(){
 # It skips if 
 #   - 1st line is not starting with "# TARGET: filename"
 #   - target file has no updated lines
+# If the 1st parameter is set to "dryrun" it will not generate files.
+# param string dryrun optional: set to "dryrun" to not generate files
 function _generateFiles(){
+
+    local _dryrun="$1"
+    DC_CONFIG_CHANGED=0
 
     # shellcheck source=/dev/null
     . "${_self}.cfg" || exit 1    
@@ -210,7 +346,8 @@ function _generateFiles(){
     params=$( _getreplaces | while read -r line; do echo -n "-e '$line' ";  done )
 
     local _tmpfile=/tmp/newfilecontent$$.tmp
-    h2 "generate files from templates..."
+    
+    test "$_dryrun" = "dryrun" || h2 "generate files from templates..."
     for mytpl in templates/*
     do
         # h3 $mytpl
@@ -220,7 +357,9 @@ function _generateFiles(){
         target=$( head -1 "$mytpl" | grep "^# TARGET:" | cut -f 2- -d ":" | awk '{ print $1 }' )
 
         if [ -z "$target" ]; then
-            echo "SKIP: $mytpl - target was not found in 1st line"
+            if [ "$_dryrun" != "dryrun" ]; then
+                echo "SKIP: $mytpl - target was not found in 1st line"
+            fi
             _doReplace=0
         fi
 
@@ -235,20 +374,28 @@ function _generateFiles(){
             local _md5; _md5=$( md5sum $_tmpfile | awk '{ print $1 }' )
             sed -i "s#{{generator}}#GENERATED BY $_self - template: $mytpl - $_md5#g" $_tmpfile
 
+            # apply all replacements to the tmp file
             eval sed -i "$params" "$_tmpfile" || exit
 
             _fix_no-db $_tmpfile
 
             # echo "changes for $target:"
-            if diff --color=always "../$target"  "$_tmpfile" | grep -v "$_md5" | grep -v "^---" | grep . || [ ! -f "../$target" ]; then
-                echo -n "$mytpl - changes detected - writing [$target] ... "
-                mkdir -p "$( dirname  ../"$target" )" || exit 2
-                mv "$_tmpfile" "../$target" || exit 2
-                echo OK
-                echo
+            if diff --color=always "../$target"  "$_tmpfile" 2>/dev/null | grep -v "$_md5" | grep -v "^---" | grep . || [ ! -f "../$target" ]; then
+                if [ "$_dryrun" = "dryrun" ]
+                then
+                    DC_CONFIG_CHANGED=1
+                else
+                    echo -n "$mytpl - changes detected - writing [$target] ... "
+                    mkdir -p "$( dirname  ../"$target" )" || exit 2
+                    mv "$_tmpfile" "../$target" || exit 2
+                    echo OK
+                    echo
+                fi
             else
                 rm -f $_tmpfile
-                echo "SKIP: $mytpl - Nothing to do."
+                if [ "$_dryrun" != "dryrun" ]; then
+                    echo "SKIP: $mytpl - Nothing to do."
+                fi
             fi
         fi
     done
@@ -278,9 +425,11 @@ function _removeGeneratedFiles(){
     done
 }
 
+
 # show running containers
 function _showContainers(){
     local bLong=$1
+
     local _out
 
     local sUp=".. UP"
@@ -288,56 +437,42 @@ function _showContainers(){
 
     local Status=
     local StatusWeb="$sDown"
-    local StatusDb=""
+    local StatusDb="$sDown"
     local colWeb=
     local colDb=
 
     colDb="$fgRed"
     colWeb="$fgRed"
 
-    _out=$( if [ -z "$bLong" ]; then
-        docker-compose -p "$APP_NAME" ps
-    else
-        # docker ps | grep "$APP_NAME"
-        docker-compose -p "$APP_NAME" ps
-    fi)
+    if [ $DC_WEB_UP -eq 1 ]; then
+        colWeb="$fgGreen"
+        StatusWeb="$sUp"
+    fi
+    
+    if [ $DC_DB_UP -eq 1 ]; then
+        colDb="$fgGreen"
+        StatusDb="$sUp"
+    fi
+
+    if [ "$DB_ADD" = "false" ]; then
+        colDb="$fgGray"
+        local StatusDb=".. N/A"
+        Status="This app has no database container."
+    fi
 
     h2 CONTAINERS
-    if [ "$( wc -l <<< "$_out" )"  -eq 1 ]; then
-        if [ "$DB_ADD" = "false" ]; then
-            colDb="$fgGray"
-            Status="The web container is not running. This app has no database container."
-        else
-            StatusDb="down"
-            Status="No container is running for <$APP_NAME>."
-        fi
-    else
-        grep -q "${APP_NAME}-server" <<< "$_out" && colWeb="$fgGreen"
-        grep -q "${APP_NAME}-server" <<< "$_out" && StatusWeb="$sUp"
 
-        grep -q "${APP_NAME}-db" <<< "$_out"  && colDb="$fgGreen"
-        StatusDb="$sDown"
-        grep -q "${APP_NAME}-db" <<< "$_out"  && StatusDb="$sUp"
+    echo
+    printf "  $colWeb$fgInvert  %-32s  $fgReset   $colDb$fgInvert  %-32s  $fgReset\n"      "WEB ${StatusWeb}"  "DB ${StatusDb}"
+    printf "    %-32s  $fgReset     %-32s  $fgReset\n"      "PHP ${APP_PHP_VERSION}"      "${MYSQL_IMAGE}"
+    printf "    %-32s  $fgReset     %-32s  $fgReset\n"      ":${APP_PORT}"                ":${DB_PORT}"
 
-        if [ "$DB_ADD" = "false" ]; then
-            colDb="$fgGray"
-            StatusDb=""
-            Status="INFO: This app has no database container."
-        fi
-    fi
-
-    printf "$colWeb     __________________________  $colDb   __________________________    $fgReset \n"
-    printf "$colWeb    |  %-22s  |  $colDb |  %-22s  | $fgReset \n" ""                             ""
-    printf "$colWeb    |  %-22s  |  $colDb |  %-22s  | $fgReset \n" "${APP_NAME}-web ${StatusWeb}" "${APP_NAME}-db ${StatusDb}"
-    printf "$colWeb    |  %-22s  |  $colDb |  %-22s  | $fgReset \n" "  PHP ${APP_PHP_VERSION}"     "  ${MYSQL_IMAGE}"
-    printf "$colWeb    |  %-22s  |  $colDb |  %-22s  | $fgReset \n" "  :${APP_PORT}"               "  :${DB_PORT}"
-    printf "$colWeb    |__________________________| $colDb  |__________________________|   $fgReset \n"
+    echo
 
     if [ -n "$Status" ]; then
+        echo "  $Status"
         echo
-        echo "$Status"
     fi
-    echo
 
     if [ -n "$bLong" ]; then
         echo "$_out"
@@ -347,61 +482,6 @@ function _showContainers(){
         echo
     fi
 
-}
-
-
-# show urls for app container
-function _showBrowserurl(){
-    echo "In a web browser open:"
-    echo "  $frontendurl"
-    if grep "${APP_NAME}-server" /etc/hosts >/dev/null; then
-        echo "  https://${APP_NAME}-server/"
-    fi
-}
-
-# detect + show ports and urls for app container and db container
-function _showInfos(){
-    _showContainers long
-    h2 INFO
-
-    h3 "processes webserver"
-    # docker-compose top
-    docker top "${APP_NAME}-server"
-    if [ ! "$DB_ADD" = "false" ]; then
-        h3 "processes database"
-        docker top "${APP_NAME}-db"
-    fi
-
-    h3 "Check app port"
-    if echo >"/dev/tcp/localhost/${APP_PORT}"; then
-        echo "OK, app port ${APP_PORT} is reachable"
-        echo
-        _showBrowserurl
-    else
-        echo "NO, app port ${APP_PORT} is not available"
-    fi 2>/dev/null
-
-    if [ "$DB_ADD" != "false" ]; then
-        h3 "Check database port"
-        if echo >"/dev/tcp/localhost/${DB_PORT}"; then
-            echo "OK, db port ${DB_PORT} is reachable"
-            echo
-            echo "In a local DB admin tool you can connect it:"
-            echo "  host    : localhost"
-            echo "  port    : ${DB_PORT}"
-            echo "  user    : root"
-            echo "  password: ${MYSQL_ROOT_PASS}"
-        else
-            echo "NO, db port ${DB_PORT} is not available"
-        fi 2>/dev/null
-
-    fi
-    echo
-}
-
-# helper for menu: print an inverted key
-function  _key(){
-    echo -en "\e[4;7m ${1} \e[0m"
 }
 
 # helper: wait for a return key
@@ -418,13 +498,16 @@ action=$1; shift 1
 
 while true; do
 
+    _getStatus_repo
+    _getStatus_docker
+    _getStatus_template
+    _getWebUrl
+
     if [ -z "$action" ]; then
 
         echo "_______________________________________________________________________________"
         echo
-        echo
-        echo "  ${APP_NAME^^} :: Initializer for docker"
-        echo "                                                                         ______"
+        printf "  %-70s ______\n" "${APP_NAME^^}  ::  Initializer for docker"
         echo "________________________________________________________________________/ $_version"
         echo
 
@@ -524,7 +607,7 @@ while true; do
             ;;
         o) 
             h2 "Open app ..."
-            xdg-open "$frontendurl"
+            xdg-open "$DC_WEB_URL"
             ;;
         q)
             h2 "Bye!"
