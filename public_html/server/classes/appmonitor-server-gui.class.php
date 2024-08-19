@@ -38,6 +38,7 @@ require_once 'render-adminlte.class.php';
  * @package IML-Appmonitor
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-08-19  0.138  axel.hahn@unibe.ch  fixes for fresh instalations
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -64,7 +65,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.137";
+    protected string $_sVersion = "0.138";
 
     /**
      * html code for icons in the web gui
