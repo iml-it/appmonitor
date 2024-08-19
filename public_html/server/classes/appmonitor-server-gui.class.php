@@ -115,6 +115,7 @@ class appmonitorserver_gui extends appmonitorserver
         'plus' => '<i class="fa-solid fa-plus"></i>',
         'close' => '<i class="fa-solid fa-times"></i>',
         'save' => '<i class="fa-solid fa-paper-plane"></i>',
+        'totalstatus' =>  '<i class="fa-regular fa-flag"></i>',
         'totalstatus0' => '<i class="fa-solid fa-umbrella-beach"></i>',
         'totalstatus1' => '<i class="fa-solid fa-ghost"></i>',
         'totalstatus2' => '<i class="fa-regular fa-bell"></i>',
