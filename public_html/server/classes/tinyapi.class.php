@@ -229,7 +229,7 @@ class tinyapi
      *     die();
      * };
      * 
-     * @return string
+     * @return void|string
      */
     public function checkUser(): string
     {
