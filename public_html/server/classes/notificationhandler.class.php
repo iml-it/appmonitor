@@ -540,10 +540,9 @@ class notificationhandler
     public function loadLogdata(): array
     {
         $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
-        $this->_aLog = $oCache->read();
-        if (!$this->_aLog) {
-            $this->_aLog = [];
-        }
+        $this->_aLog = [];
+        $aLog = $oCache->read();
+        $this->_aLog = $aLog && is_array($aLog) ? $aLog : [];
 
         return $this->_aLog;
     }

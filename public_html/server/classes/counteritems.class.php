@@ -103,10 +103,9 @@ class counteritems
         $this->_sAppId = $sAppid;
         $this->_sCacheId = $sAppid;
         $this->_oCache = new AhCache($this->_sCacheIdPrefix, $this->_sCacheId);
-        $this->_aCounters = $this->_oCache->read();
-        if (!$this->_aCounters) {
-            $this->_aCounters = [];
-        }
+        $aCounters = $this->_oCache->read();
+        $this->_aCounters = $aCounters && is_array($aCounters) ? $aCounters : [];
+
         if ($sCounterId) {
             $this->setCounter($sCounterId);
         }

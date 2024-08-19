@@ -91,7 +91,9 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> array $aConfig | `array` | configuration array for a check<br>Array<br>[<br>    [name] => Dummy<br>    [description] => Dummy Test<br>    [check] => [<br>        [function] => [check function] // i.e. Simple<br>        [params] => [array]            // optional; arguments for Check function<br>                                       // its keys depend on the function  <br>    ]<br>]
+| \<required\> array $aConfig | `array` | configuration array for a check, eg.<br>
+
+```txt <br>[<br>    [name] => Dummy<br>    [description] => Dummy Test<br>    [check] => [<br>        [function] => [check function] // i.e. Simple<br>        [params] => [array]            // optional; arguments for Check function<br>                                       // its keys depend on the function  <br>    ]<br>]<br>```
 
 
 ### 🔹 public respond()

@@ -235,6 +235,7 @@
     "Resulttype-1": "Unknown",
     "Resulttype-2": "Warning",
     "Resulttype-3": "Error",
+    "MsgResulttype-":  "Welcome! No app was configured yet.",
     "MsgResulttype-0": "Keep calm. Everything is fine.",
     "MsgResulttype-1": "Unknown status was found.",
     "MsgResulttype-2": "Check the Warning.",

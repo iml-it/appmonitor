@@ -232,6 +232,7 @@
     "Resulttype-1": "Unbekannt",
     "Resulttype-2": "Warnung",
     "Resulttype-3": "Fehler",
+    "MsgResulttype-":  "Willkommen! Es wurde noch keine App kon figuriert.",
     "MsgResulttype-0": "Alles OK. Zeit zum Entspannen.",
     "MsgResulttype-1": "Es gibt einen unbekannten Status.",
     "MsgResulttype-2": "Bitte die Warnungen checken",
