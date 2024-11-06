@@ -39,9 +39,21 @@ require_once 'render-adminlte.class.php';
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-08-19  0.138  axel.hahn@unibe.ch  fixes for fresh instalations
+ * 2024-11-06  0.139  axel.hahn@unibe.ch  
  */
 class appmonitorserver_gui extends appmonitorserver
 {
+    /**
+     * Version
+     * @var string
+     */
+    protected string $_sVersion = "0.139";
+
+    /**
+     * Title/ project name
+     * @var string
+     */
+    protected string $_sTitle = "Appmonitor Server";
 
     /**
      * Url of the project source
@@ -54,18 +66,6 @@ class appmonitorserver_gui extends appmonitorserver
      * @var string
      */
     protected string $_sDocUrl = "https://os-docs.iml.unibe.ch/appmonitor/";
-
-    /**
-     * Title/ project name
-     * @var string
-     */
-    protected string $_sTitle = "Appmonitor Server";
-
-    /**
-     * Version
-     * @var string
-     */
-    protected string $_sVersion = "0.138";
 
     /**
      * html code for icons in the web gui
