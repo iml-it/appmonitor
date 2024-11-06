@@ -1,0 +1,190 @@
+:root{
+
+    --darker-bg: #e0e0e8;
+
+
+    --main-bg: #f8f8f8;
+    --main-color: #333;
+    --a-color: #44c;
+
+    --titlebar-bg: #779;
+    --titlebar-border-bottom: 4px solid rgba(0,0,0,0.2);
+    --titlebar-color: #fff;
+
+    --msg-active-bg: #fff;
+    --msg-hover-bg: #fcfcfc;
+
+    --box-bg: var(--darker-bg);
+    --box-strong-color: var(--titlebar-bg);
+
+    --button-bg: #e8e8f0;
+    --button-color: #667;
+    --button-close-bg: #fff;
+    --button-close-color: #633;
+
+    --footer-bg: #fff;
+
+    --pre-bg: #e8ecec;
+
+    --simglemail-bg: #f8f8f8;
+    --simglemail-head-bg: #fff;
+
+    --table-head-bg: var(--darker-bg);
+    --table-link-color: #447;
+
+}
+
+body{
+    background-color: var(--main-bg);
+    color: var (--main-color);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1.0m;
+    margin: 0;
+}
+
+a{
+    color: var(--a-color);
+}
+a.button{
+    background: var(--button-bg);
+    border: 2px solid rgba(0,0,0,0.05);
+    border-radius: 0.3em;
+    color: var(--button-color);
+    text-decoration: none;
+    padding: 0.4em;
+    transition: all 0.2s linear;
+}
+a.button.close{
+    background: var(--button-close-bg);
+    color: var(--button-close-color);
+}
+a.button:hover{
+    box-shadow: none;
+    border-color: rgba(0,0,80,0.3);
+}
+
+footer{
+    background-color: var(--footer-bg);
+    position: fixed; bottom: 0;
+    text-align: center;
+    width: 100%;
+    padding: 1em;
+    opacity: 0.6;
+}
+
+h1{
+    background: var(--titlebar-bg);
+    margin: 0;
+    padding-left: 0.5em;
+    border-bottom: var(--titlebar-border-bottom);
+}
+h1 a{
+    color: var(--titlebar-color);
+    text-decoration: none;
+}
+
+
+pre{
+    background-color: var(--pre-bg);
+    overflow: scroll;
+    padding: 1em;
+    border-radius: 1em;
+}
+
+th{
+    background-color: var(--table-head-bg);
+    padding: 0.5em;
+}
+th.date{
+    width: 10em;
+}
+td {
+    padding: 0.0;
+}
+td a{
+    color: var(--table-link-color);
+    text-decoration: none;
+}
+td a, td span{
+    display: block;
+    padding: 0.5em;
+}
+
+
+
+#messages{
+    margin: 1em;
+    margin-bottom: 8em;
+}
+#messages a{
+    display: block;
+}
+
+#messages table{
+    border: 0;
+    border-collapse: collapse;    
+    min-width: 47%;
+}
+#messages tr.active{
+    background-color: var(--msg-active-bg);
+    border-radius: 1em;
+}
+#messages tr:hover{
+    background-color: var(--msg-hover-bg);
+}
+
+
+#singlemessage{
+    background: var(--simglemail-bg);
+    border-top-left-radius: 1em;
+    border: 3px solid rgba(0,0,0,0.2);
+    box-shadow: -0.3em 0 3em rgba(0,0,0,0.3);
+    display: block;
+    padding: 0;
+    overflow: scroll;
+    position: absolute;
+    right: 1em;
+    top: 3em;
+    bottom: 4em;
+    width: 50%;
+}
+#singlemessage .header{
+    background: var(--simglemail-head-bg);
+    width: 100%;
+    padding: 0.5em;
+    border-bottom: 4px solid rgba(0,0,0,0.05);
+}
+#singlemessage table{
+    width: 80%;
+}
+#singlemessage table td.small{
+    width: 7em;
+}
+#singlemessage .content{
+    padding: 0.5em;
+}
+#search{
+    border: 2px solid #ddd;
+    border-radius: 0.5em;
+    margin-top: 1em;
+    margin-left: 3em;
+    padding: 0.5em;
+    font-size: 110%;
+}
+
+.box{
+    display: block;
+    float: left;
+    margin: 0 1em 1em 0;
+    padding: 1em;
+    background-color: var(--box-bg);
+    border-radius: 0.5em;
+    text-align: center;
+}
+.box strong{
+    font-size: 160%;
+    color: var(--box-strong-color)
+}
+.right{
+    float: right;
+}

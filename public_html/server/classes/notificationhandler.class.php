@@ -35,6 +35,7 @@ if (!defined('RESULT_OK')) {
  * @author hahn
  * 
  * 2024-07-17  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-11-06  axel.hahn@unibe.ch  update html email output
  */
 class notificationhandler
 {
@@ -659,9 +660,9 @@ class notificationhandler
             }
             foreach ($this->_aAppResult['checks'] as $aCheck) {
                 $iResult = $aCheck['result'];
-                $aSortedChecks[$iResult] .= "<br><br>"
-                    . '----- <strong>' . $aCheck['name'] . '</strong> (' . $aCheck['description'] . ")<br>"
-                    . $aCheck['value'] . "<br>"
+                $aSortedChecks[$iResult] .= "<br>\n<br>\n"
+                    . '----- <strong>' . $aCheck['name'] . '</strong> (' . $aCheck['description'] . ")<br>\n"
+                    . $aCheck['value'] . "<br>\n"
                     . '<span class="result-' . $aCheck['result'] . '">' . $this->_tr('Resulttype-' . $aCheck['result']) . '</span>';
             }
             $aReplace['__CHECKS__'] = implode("", $aSortedChecks);
@@ -733,14 +734,20 @@ class notificationhandler
                     'message' => strip_tags(str_replace('<br>', "\n", $sMessage)),
                     'htmlmessage' => '
                         <style>
-                            body{background: #f8f8f8; font-size: 1.1em; font-family: Arial, Helvetica, sans-serif;}
-                            body>div{background: #fff; margin: 1em 5%; border: #eee 2px solid; padding: 1em; max-width: 1000px;;}
+                            body{background: #f8f8f8; font-size: 1.1em; font-family: Arial, Helvetica, sans-serif; text-align: center;}
+                            body>div{background: #fff; margin: 1em auto; border: #eee 2px solid; padding: 1em; max-width: 1000px; text-align: left;}
+                            h1{background: #eee; border-bottom: 2px solid #800; color: #666; padding: 0.5em; margin: 0 0 1em 0;}
+                            h2{color: #888; padding: 0.5em; margin: 0 0 1em 0;}
+                            footer{background: #f8f8f8; padding: 0.5em; margin-top: 3em; text-align: right;}
                             .result-0{color: green;  background: #dfd; }
                             .result-1{color: purple; background: #fdf; }
                             .result-2{color: #a60; background: #fec; }
                             .result-3, .error{color: #c00; background: #fdd; }
                         </style>
-                        ' . $sMessage,
+                        <h1>IML Appmonitor</h1>
+                        ' . $sMessage
+                        .'<footer><strong>IML Appmonitor</strong> | GNU GPL 3.0 | Source <a href="https://github.com/iml-it/appmonitor">Github</a></footer>'
+                        ,
                 ];
                 // $sSendMethod="send_$sPlugin";
                 // $sSendMethod($aOptions);

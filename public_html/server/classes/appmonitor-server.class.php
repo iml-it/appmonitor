@@ -86,6 +86,12 @@ class appmonitorserver
     protected string $_sConfigfile = "appmonitor-server-config.json";
 
     /**
+     * name of the config file with all urls to monitor
+     * @var string
+     */
+    protected string $_sUrlfile = "appmonitor-server-urls.json";
+
+    /**
      * Array of messages to log
      * @var array
      */
@@ -236,12 +242,22 @@ class appmonitorserver
         // undo unwanted recursive merge behaviour:
         $this->_aCfg['users'] = $aUserdata['users'] ?? $aDefaults['users'];
 
+        // load urls from a separate file
+        $sUrlFile=$this->_getConfigDir() . '/' . $this->_sUrlfile;
+        if(file_exists($sUrlFile)){
+            $this->_urls=json_decode(file_get_contents($this->_getConfigDir() . '/' . $this->_sUrlfile), true);
+        }
+
+        // migration for old way to load urls
         if (isset($this->_aCfg['urls']) && is_array($this->_aCfg['urls'])) {
-            // add urls
             foreach ($this->_aCfg["urls"] as $sUrl) {
                 $this->addUrl($sUrl);
             }
+            $this->saveUrls();
+            unset($this->_aCfg['urls']);
+            $this->saveConfig();
         }
+
         if (isset($this->_aCfg['curl']['timeout'])) {
             $this->curl_opts[CURLOPT_TIMEOUT] = (int) $this->_aCfg['curl']['timeout'];
         }
@@ -267,7 +283,6 @@ class appmonitorserver
 
     /**
      * Save the current or new config data as file.
-     * @param  array  $aNewCfg  new configuration data
      * @return boolean
      */
     public function saveConfig(array $aNewCfg = []): bool
@@ -283,6 +298,24 @@ class appmonitorserver
 
         $iOptions = defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
         $sData = json_encode($this->_aCfg, $iOptions);
+
+        return file_put_contents($sCfgFile, $sData);
+    }
+
+    /**
+     * Save the current or new config data as file.
+     * @return boolean
+     */
+    public function saveUrls(array $aNewCfg = []): bool
+    {
+        if ($this->_bIsDemo) {
+            $this->_addLog($this->_tr('msgErr-demosite'), "error");
+            return false;
+        }
+        $sCfgFile = $this->_getConfigDir() . '/' . $this->_sUrlfile;
+
+        $iOptions = defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0;
+        $sData = json_encode($this->_urls, $iOptions);
 
         return file_put_contents($sCfgFile, $sData);
     }
@@ -313,7 +346,8 @@ class appmonitorserver
     public function actionAddUrl(string $sUrl, bool $bMakeCheck = true): bool
     {
         if ($sUrl) {
-            if (!isset($this->_aCfg["urls"]) || ($key = array_search($sUrl, $this->_aCfg["urls"])) === false) {
+            // if (!isset($this->_aCfg["urls"]) || ($key = array_search($sUrl, $this->_aCfg["urls"])) === false) {
+            if (array_search($sUrl, $this->_urls) === false) {
 
                 $bAdd = true;
                 if ($bMakeCheck) {
@@ -333,8 +367,8 @@ class appmonitorserver
                 }
                 if ($bAdd) {
                     $this->_addLog(sprintf($this->_tr('msgOK-Url-was-added'), $sUrl), "ok");
-                    $this->_aCfg["urls"][] = $sUrl;
-                    $this->saveConfig();
+                    $this->addUrl($sUrl);
+                    $this->saveUrls();
                     // $this->loadConfig();
                     return true;
                 }
@@ -353,18 +387,18 @@ class appmonitorserver
     public function actionDeleteUrl(string $sUrl): bool
     {
         if ($sUrl) {
-            if (($key = array_search($sUrl, $this->_aCfg["urls"])) !== false) {
+            if (($key = array_search($sUrl, $this->_urls)) !== false) {
                 $sAppId = $this->_generateUrlKey($sUrl);
 
                 // $this->oNotification->deleteApp($sAppId);
                 // $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
                 // $oCache->delete();
-                unset($this->_aCfg["urls"][$key]);
-                $this->saveConfig();
+                unset($this->_urls[$key]);
+                $this->saveUrls();
                 $this->loadConfig();
 
                 // delete notification after config was saved
-                if (!isset($this->_aCfg["urls"][$key])) {
+                if (!isset($this->_urls[$key])) {
                     $this->oNotification->deleteApp($sAppId);
                     $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
                     $oCache->delete();
