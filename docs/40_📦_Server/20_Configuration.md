@@ -1,4 +1,4 @@
-## Configuration
+## Configuration files
 
 The config is in json syntax. The files are located in
 _[webroot-appmonitor]/server/config/appmonitor-server-config.json_
@@ -7,6 +7,9 @@ File                                    | Description
 ---                                     |---
 appmonitor-server-config.json           | Custom settings
 appmonitor-server-config-defaults.json  | DO NOT OVERWRITE - Defaultsetup
+appmonitor-server-urls.json             | Urls to monitor (will be created)
+
+## Configuration
 
 On the first start of the web gui the defaults will be used.
 By entering a first client appmonitor url the user config will be written.
@@ -64,8 +67,6 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
             "receiver": true,
             "notification": true
         }
-    },
-    "urls": {
     }
 }
 ```
@@ -87,7 +88,6 @@ _skin_          | \{string\} name of adminLte skin (one of skin-blue\|skin-black
 _theme_         | \{string\} name of css to load (aka "skin") ... do not use anymore
 _users_         | \{array\} define users and roles
 _view_          | \{array\} show/ hide elements on ouput pages
-_urls_          | \{array\} list of urls
 
 The values with arrays are described below.
 
@@ -235,6 +235,7 @@ Example:
     ...
 ```
 
-### urls
+## Urls
 
-The urls key is a flat list of urls to fetch appmonitor checks.
+The list of appmonitor client urls is in appmonitor-server-urls.json.
+This file is not part of the repository. It will be created if you store the first url.

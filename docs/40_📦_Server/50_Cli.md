@@ -58,17 +58,7 @@ To see all variables of the current config you can use no additional filter (or 
 
 To see a single variable (or any subkey of the hash):
 
-`php server/cli.php --show urls`
-
-```txt
-(...)
-Array
-(
-    [1] => http://server-01/appmonitor/client/
-    [2] => http://server-02/appmonitor/client/
-    [3] => http://server-03/appmonitor/client/
-)
-```
+`php server/cli.php --show <key>`
 
 ### Nested subkeys
 
