@@ -738,7 +738,7 @@ class notificationhandler
                             body>div{background: #fff; margin: 1em auto; border: #eee 2px solid; padding: 1em; max-width: 1000px; text-align: left;}
                             h1{background: #eee; border-bottom: 2px solid #800; color: #666; padding: 0.5em; margin: 0 0 1em 0;}
                             h2{color: #888; padding: 0.5em; margin: 0 0 1em 0;}
-                            footer{background: #f8f8f8; padding: 0.5em; margin-top: 3em; text-align: right;}
+                            .footer{background: #f8f8f8; padding: 0.5em; margin-top: 3em; text-align: right;}
                             .result-0{color: green;  background: #dfd; }
                             .result-1{color: purple; background: #fdf; }
                             .result-2{color: #a60; background: #fec; }
@@ -746,7 +746,7 @@ class notificationhandler
                         </style>
                         <h1>IML Appmonitor</h1>
                         ' . $sMessage
-                        .'<footer><strong>IML Appmonitor</strong> | GNU GPL 3.0 | Source <a href="https://github.com/iml-it/appmonitor">Github</a></footer>'
+                        .'<br><br><div class="footer"><strong>IML Appmonitor</strong> | GNU GPL 3.0 | Source <a href="https://github.com/iml-it/appmonitor">Github</a></div>'
                         ,
                 ];
                 // $sSendMethod="send_$sPlugin";
