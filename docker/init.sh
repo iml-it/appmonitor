@@ -23,6 +23,11 @@
 # 2024-07-26  v1.16 <axel.hahn@unibe.ch>      hide unnecessary menu items (WIP)
 # 2024-07-29  v1.17 <www.axel-hahn.de>        hide unnecessary menu items; reorder functions
 # 2024-08-14  v1.18 <www.axel-hahn.de>        update container view
+# 2024-09-20  v1.19 <www.axel-hahn.de>        detect dockerd-rootless (hides menu item to set permissions)
+# 2024-10-16  v1.20 <axel.hahn@unibe.ch>      add db import and export
+# 2024-10-25  v1.21 <axel.hahn@unibe.ch>      create missing subdir dbdumps
+# 2024-10-30  v1.22 <axel.hahn@unibe.ch>      added: Open Mysql client in container
+# 2024-10-30  v1.23 <axel.hahn@unibe.ch>      added: show menu hints why some menu items are visible
 # ======================================================================
 
 cd "$( dirname "$0" )" || exit 1
@@ -36,7 +41,7 @@ _self=$( basename "$0" )
 # shellcheck source=/dev/null
 . "${_self}.cfg" || exit 1
 
-_version="1.18"
+_version="1.23"
 
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
@@ -61,6 +66,12 @@ DC_REPO=1
 DC_CONFIG_CHANGED=0
 
 DC_WEB_URL=""
+
+DC_DUMP_DIR=dbdumps
+DC_SHOW_MENUHINTS=0
+
+isDockerRootless=0
+ps -ef | grep  dockerd-rootless | grep -q $USER && isDockerRootless=1
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -95,8 +106,19 @@ function _getStatus_docker(){
     DC_DB_UP=0
     grep -q "${APP_NAME}-server" <<< "$_out" && DC_WEB_UP=1
     grep -q "${APP_NAME}-db"     <<< "$_out"  && DC_DB_UP=1
+
+    if [ "$DB_ADD" != "false" ] && [ ! -d "${DC_DUMP_DIR}" ]; then
+        echo "INFO: creating subdir ${DC_DUMP_DIR} to import/ export databases ..."
+        mkdir "${DC_DUMP_DIR}" || exit 1
+        return
+    fi
+
 }
 
+# Get web url of the application
+# It is for support of Nginx Docker Proxy
+# https://github.com/axelhahn/nginx-docker-proxy
+# It returns http://localhost:<port> or a https://<appname>
 function _getWebUrl(){
     DC_WEB_URL="$frontendurl"
     grep -q "${APP_NAME}-server" /etc/hosts && DC_WEB_URL="https://${APP_NAME}-server/"
@@ -122,6 +144,15 @@ function  _key(){
     echo -en "\e[4;7m ${1} \e[0m"
 }
 
+# helper for menu: show hint text
+# param  int      FLag _bAll (i true the txt will be hidden)
+# param  string   message to show
+function menuhint(){
+    local _bAll="$1"
+    shift 1
+    test $DC_SHOW_MENUHINTS -ne 0 && test "$_bAll" -eq "0" && ( echo -e "$fgBlue  $*$fgReset" )
+}
+
 # show menu in interactive mode and list keys in help with param -h
 # param  string  optional: set to "all" to show all menu items
 function showMenu(){
@@ -133,35 +164,60 @@ function showMenu(){
 
     echo
     if [ $DC_REPO -eq 1 ] || [ $_bAll -eq 1 ]; then
+        menuhint $_bAll "Git data of starterkit were found"
         echo "${_spacer}$( _key g ) - remove git data of starterkit"
         echo
     fi
-    echo "${_spacer}$( _key i ) - init application: set permissions"
+
+    if [ $isDockerRootless -eq 1 ] || [ $_bAll -eq 1 ]; then
+        menuhint $_bAll "Beause rootless docker was found"
+        echo "${_spacer}$( _key i ) - init application: set permissions"
+        echo
+    fi
 
     if [ $DC_CONFIG_CHANGED -eq 1 ] || [ $_bAll -eq 1 ]; then
+        menuhint $_bAll "Config was changed"
         echo "${_spacer}$( _key t ) - generate files from templates"
+        echo
     fi
     if [ $DC_CONFIG_CHANGED -eq 0 ] || [ $_bAll -eq 1 ]; then
+        menuhint $_bAll "Config is unchanged"
         echo "${_spacer}$( _key T ) - remove generated files"
+        echo
     fi
-    echo
-    if [ $DC_WEB_UP -eq 0 ] || [ $_bAll -eq 1 ]; then
+    if [ $DC_WEB_UP -eq 0 ] || [ $DC_DB_UP -eq 0 ] || [ $_bAll -eq 1 ]; then
         if [ $DC_CONFIG_CHANGED -eq 0 ] || [ $_bAll -eq 1 ]; then
+            menuhint $_bAll "A container is down and config is unchanged"
             echo "${_spacer}$( _key u ) - startup containers    docker-compose ... up -d"
             echo "${_spacer}$( _key U ) - startup containers    docker-compose ... up -d --build"
             echo
             echo "${_spacer}$( _key r ) - remove containers     docker-compose rm -f"
+            echo
         fi
     fi
-    if [ $DC_WEB_UP -eq 1 ] || [ $_bAll -eq 1 ]; then
+    if [ $DC_WEB_UP -eq 1 ] || [ $DC_DB_UP -eq 1 ] || [ $_bAll -eq 1 ]; then
+        menuhint $_bAll "${_spacer}A container is up"
         echo "${_spacer}$( _key s ) - shutdown containers   docker-compose stop"
         echo
         echo "${_spacer}$( _key m ) - more infos"
         echo "${_spacer}$( _key o ) - open app [${APP_NAME}] $DC_WEB_URL"
         echo "${_spacer}$( _key c ) - console (bash)"
-        echo "${_spacer}$( _key p ) - console check with php linter"
+        echo
     fi
-    echo
+    if [ $DC_WEB_UP -eq 1 ] || [ $_bAll -eq 1 ]; then
+        menuhint $_bAll "Web container is up"
+        echo "${_spacer}$( _key p ) - console check with php linter"
+        echo
+    fi
+    if [ $DC_DB_UP -eq 1 ] || [ $_bAll -eq 1 ]; then
+        echo
+        menuhint $_bAll "Database container is up"
+        echo "${_spacer}$( _key d ) - Dump container database"
+        echo "${_spacer}$( _key D ) - Import Dump into container database"
+        echo "${_spacer}$( _key M ) - Open Mysql client in database container"
+        echo
+    fi
+    menuhint $_bAll "Always available"
     echo "${_spacer}$( _key q ) - quit"
 
 }
@@ -488,6 +544,76 @@ function _showContainers(){
 function _wait(){
     local _wait=15
     echo -n "... press RETURN ... or wait $_wait sec > "; read -r -t $_wait
+    echo
+}
+
+# DB TOOL - dump db from container
+function _dbDump(){
+    local _iKeepDumps;
+    typeset -i _iKeepDumps=5
+    local _iStart;
+    typeset -i _iStart=$_iKeepDumps+1;
+
+    if [ $DC_DB_UP -eq 0 ]; then
+        echo "Database container is not running. Aborting."
+        return
+    fi
+    outfile=${DC_DUMP_DIR}/${MYSQL_DB}_$( date +%Y%m%d_%H%M%S ).sql
+    echo -n "dumping ${MYSQL_DB} ... "
+    if docker exec -i "${APP_NAME}-db" mysqldump -uroot -p${MYSQL_ROOT_PASS} ${MYSQL_DB} > "$outfile"; then
+        echo -n "OK ... Gzip ... "
+        if gzip "${outfile}"; then
+            echo "OK"
+            ls -l "$outfile.gz"
+
+            # CLEANUP
+            echo
+            echo "--- Cleanup: keep $_iKeepDumps files."
+            ls -1t ${DC_DUMP_DIR}/* | sed -n "$_iStart,\$p" | while read -r delfile
+            do 
+                echo "CLEANUP: Deleting $delfile ... "
+                rm -f "$delfile"
+            done
+            echo
+            echo -n "Size of dump directory: "
+            du -hs ${DC_DUMP_DIR} | awk '{ print $1 }'
+
+        else
+            echo "ERROR"
+            rm -f "$outfile"
+        fi
+    else
+        echo "ERROR"
+        rm -f "$outfile"
+    fi
+}
+
+# DB TOOL - import local database dump into container
+function _dbImport(){
+    echo "--- Available dumps:"
+    ls -ltr ${DC_DUMP_DIR}/*.gz | sed "s#^#    #g"
+    if [ $DC_DB_UP -eq 0 ]; then
+        echo "Database container is not running. Aborting."
+        return
+    fi
+    echo -n "Dump file to import into ${MYSQL_DB} > "
+    read -r dumpfile
+    if [ -z "$dumpfile" ]; then
+        echo "Abort - no value was given."
+        return
+    fi
+    if [ ! -f "$dumpfile" ]; then
+        echo "Abort - wrong filename."
+        return
+    fi
+
+    echo -n "Importing $dumpfile ... "
+    if zcat "$dumpfile" | docker exec -i "${APP_NAME}-db" mysql -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
+    then
+        echo "OK"
+    else
+        echo "ERROR"
+    fi
 }
 
 # ----------------------------------------------------------------------
@@ -557,7 +683,6 @@ while true; do
             fi
             echo
 
-            _wait
             ;;
         s)
             h2 "Stopping..."
@@ -604,6 +729,18 @@ while true; do
             else
                 echo "Start your docker container first."
             fi
+            ;;
+        d) 
+            h2 "DB tools :: dump"
+            _dbDump
+            ;;
+        D) 
+            h2 "DB tools :: import"
+            _dbImport
+            ;;
+        M)
+            h2 "DB tools :: mysql client"
+            docker exec -it "${APP_NAME}-db" mysql -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
             ;;
         o) 
             h2 "Open app ..."
