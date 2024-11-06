@@ -34,7 +34,7 @@ padding: 1em;}
 #divsetup .divhost{width: auto; height: auto;}
 
 .divhost-outer{padding: 0 0 0 0.5em ; margin-bottom: 0.1em;}
-.divhost-inner{background: rgba(255,255,255,0.7); display: flow-root;}
+.divhost-inner{background: rgba(255,255,255,0.9); display: flow-root;}
 .divhost-inner>div{padding: 0.1em; color: #000; color: rgba(0,0,0,0.7); padding-top: 1.2em;}
 .divhost-inner div.since {text-align: center; }
 .divhost-inner div.appname a{font-size: 120%; padding: 0 0.7em; display: inline-block;}
