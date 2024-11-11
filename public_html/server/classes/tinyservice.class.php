@@ -25,6 +25,7 @@
  * @package IML-Appmonitor
  * 
  * 2024-07-17  1.1  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-11-11  1.2  axel.hahn@unibe.ch  show memory usage in log output
  */
 class tinyservice
 {
@@ -221,7 +222,12 @@ class tinyservice
     public function send(string $sMessage, bool $bShow = false): bool
     {
         $this->_checkTouchfile();
-        $sLine = date("Y-m-d H:i:s") . " [" . number_format(microtime(true) - $this->iStart, 4) . "] " . $sMessage . "\n";
+        $sLine = date("Y-m-d H:i:s") 
+            . " [ " . number_format(microtime(true) - $this->iStart, 4) . "s | "
+            . sprintf("%01.3f", memory_get_usage() / 1024 / 1024). ' MB ] '
+            . $sMessage 
+            . "\n"
+            ;
         echo ($bShow || $this->bDebug) ? $sLine : '';
         return $this->touch($sLine);
     }
