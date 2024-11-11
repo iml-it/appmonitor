@@ -53,7 +53,5 @@
             "receiver": true,
             "notification": true
         }
-    },
-    "urls": {
     }
 }

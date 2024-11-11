@@ -17,7 +17,10 @@
     --box-bg: var(--darker-bg);
     --box-strong-color: var(--titlebar-bg);
 
-    --button-bg: #e8e8f0;
+    --button-bg: #f8f8f8;
+    --button-bg-active: #e8e8f0;
+    --button-border-active: #669;
+    --button-border-hover: rgba(0,0,80,0.3);
     --button-color: #667;
     --button-close-bg: #fff;
     --button-close-color: #633;
@@ -41,7 +44,6 @@ body{
     font-size: 1.0m;
     margin: 0;
 }
-
 a{
     color: var(--a-color);
 }
@@ -52,17 +54,20 @@ a.button{
     color: var(--button-color);
     text-decoration: none;
     padding: 0.4em;
-    transition: all 0.2s linear;
+    transition: all 0.1s linear;
+}
+a.button:hover{
+    border-color: var(--button-border-hover);
+    box-shadow: none;
+}
+a.button.active{
+    background: var(--button-bg-active);
+    border-top: 4px solid var(--button-border-active);
 }
 a.button.close{
     background: var(--button-close-bg);
     color: var(--button-close-color);
 }
-a.button:hover{
-    box-shadow: none;
-    border-color: rgba(0,0,80,0.3);
-}
-
 footer{
     background-color: var(--footer-bg);
     position: fixed; bottom: 0;
@@ -71,26 +76,32 @@ footer{
     padding: 1em;
     opacity: 0.6;
 }
-
 h1{
     background: var(--titlebar-bg);
     margin: 0;
     padding-left: 0.5em;
     border-bottom: var(--titlebar-border-bottom);
 }
+h1 small{
+    opacity: 0.5;
+}
 h1 a{
     color: var(--titlebar-color);
     text-decoration: none;
 }
-
-
+iframe{
+    border: 0;
+    width: 100%;
+    height: 70em;
+    overflow: scroll;
+}
 pre{
     background-color: var(--pre-bg);
     overflow: scroll;
     padding: 1em;
     border-radius: 1em;
+    margin: 0 0 1em;
 }
-
 th{
     background-color: var(--table-head-bg);
     padding: 0.5em;
@@ -109,8 +120,6 @@ td a, td span{
     display: block;
     padding: 0.5em;
 }
-
-
 
 #messages{
     margin: 1em;
@@ -132,7 +141,6 @@ td a, td span{
 #messages tr:hover{
     background-color: var(--msg-hover-bg);
 }
-
 
 #singlemessage{
     background: var(--simglemail-bg);
@@ -187,4 +195,9 @@ td a, td span{
 }
 .right{
     float: right;
+}
+
+.toolbar{
+    padding: 1.5em 1em 1em 0em;
+    width: 97%;
 }
