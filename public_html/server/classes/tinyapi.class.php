@@ -110,6 +110,12 @@ class tinyapi
     }
 
 
+    protected function _addDebug($sMessage){
+        static $i = 0;
+        $i++;
+        // header("DEBUG-".str_pad($i, 2, '0', STR_PAD_LEFT).": $s");
+        header("DEBUG-$i: $sMessage");
+    }
 
     // ----------------------------------------------------------------------
     // STEP 1
@@ -144,13 +150,14 @@ class tinyapi
 
     /**
      * Set allowed users
-     * @param  array  aUsers  array of allowed users; key= username; value = password hash (BASIC AUTH)
-     *                 '*'          =>  false,          - allow anonymous requests
-     *                 'apiuser'    => '[passwordhash]' - an api user that can send an basic auth header
+     * @param  array  aUsers  array of allowed users; key= username ('*' or userid); subkeys: 
+     *                        - 'password'; value = password hash (BASIC AUTH) and/ or 
+     *                        - 'secret'; clear text for hmac
      * @return bool
      */
     public function allowUsers(array $aUsers): bool
     {
+        // echo "DEBUG: " .  __METHOD__ . "(".print_r($aUsers).")";
         $this->_aAllowedUsers = $aUsers;
         return true;
     }
@@ -216,41 +223,84 @@ class tinyapi
     /**
      * Get an authenticated user and return a detected username as string.
      * Checks are done in that sequence
-     * - sent basic auth (user:password); remark it can override the user of a already authenticated user
-     * - already made basic auth from $_SERVER
+     * - sent basic auth (base64 encoded <user>:<password>); remark it can override the user of a already authenticated user
+     * - sent generated hmac hashsum(<user>:<key>)
+     * - already made basic auth from browser
      * - test if anonymous access is allowed
      * Remark: this is a pre check. Your app can make further check like check
      * a role if the found user has access to a function.
      * 
      * @example:
      * $oYourApp->setUser($oTinyApi->checkUser());
-     * if (!$oYourApp->hasRole('api')){
-     *     $oTinyApi->sendError(403, 'ERROR: Your user has no permission to access the api.');
-     *     die();
-     * };
      * 
      * @return void|string
      */
     public function checkUser(): string
     {
+        if (
+            isset($this->_aAllowedUsers['*']) 
+            && isset($this->_aAllowedUsers['*']['password'])
+            && $this->_aAllowedUsers['*']['password']==false
+        ) {
+            return '*';
+        }
 
         // detect a sent basic authentication in request header
         $aHeaders = apache_request_headers();
+
         if (is_array($aHeaders) && isset($aHeaders['Authorization'])) {
-            $sAuthline = preg_replace('/^Basic /', '', $aHeaders['Authorization']);
 
-            $aAuth = explode(':', base64_decode($sAuthline));
+            $sAuthline = $aHeaders['Authorization'];
+            $sAuthtype = false;
+
+            if(strstr($sAuthline, ' ')){
+                list($sAuthtype, $sAuthline) = explode(' ', $sAuthline);
+                $sAuthline = base64_decode($sAuthline);
+            }
+            
+
+            $aAuth = explode(':', $sAuthline);
+
             if (is_array($aAuth) && count($aAuth) == 2) {
-                list($sGivenUser, $sGivenPw) = $aAuth;
+                list($sGivenUser, $sGivenKey) = $aAuth;
+                // $this->_addDebug("auth type -> '$sAuthtype' .. $sGivenUser : $sGivenKey");
+                $sSelUser=isset($this->_aAllowedUsers[$sGivenUser]) ? $sGivenUser : (isset($this->_aAllowedUsers['*']) ? '*' : false);
+                if ($sSelUser){
+                    $aSelUserdata=$this->_aAllowedUsers[$sSelUser];
 
-                foreach ($this->_aAllowedUsers as $sLoopuser => $sPwHash) {
-                    if ($sLoopuser == $sGivenUser) {
-                        if (password_verify($sGivenPw, $sPwHash)) {
-                            return $sLoopuser;
-                        } else {
-                            $this->sendError(403, 'ERROR: Authentication failed.');
-                        }
+                    
+                    switch ($sAuthtype) {
+                        case 'Basic':
+                            if (
+                                isset($aSelUserdata['password']) 
+                                // && $aSelUserdata['password']==$sGivenKey
+                                // php -r "echo password_hash('<password>', PASSWORD_DEFAULT);"
+                                && password_verify($sGivenKey, $aSelUserdata['password'])
+                            ){
+                                return $sSelUser;
+                            } else {
+                                $this->sendError(403, 'ERROR: Basic authentication failed. Wrong password.');
+                            }
+                            ;;
+                        default:
+                            // check hmac hash ... rebuild it with key of found user
+                            if (isset($aSelUserdata['secret'])){
+
+                                $sGotDate= $aHeaders['Date'] ?? '<missing Date>';
+                                $sGotMethod=$_SERVER['REQUEST_METHOD'];
+                                $sGotReq=$_SERVER['REQUEST_URI'];
+
+                                $sMyData="{$sGotMethod}\n{$sGotReq}\n{$sGotDate}\n";
+                                $sMyHash= base64_encode(hash_hmac("sha1", $sMyData, $aSelUserdata['secret']));
+                                if($sMyHash!==$sGivenKey){
+                                    $this->sendError(403, 'ERROR: Authorization failed. Wrong hmac key.');
+                                } else {
+                                    return $sSelUser;
+                                }
+                            }
+
                     }
+
                 }
             }
         }
@@ -260,16 +310,6 @@ class tinyapi
             if (isset($_SERVER[$sUserkey]) && $this->_aAllowBasicAuth) {
                 return $_SERVER[$sUserkey];
             }
-        }
-
-        // if no user is set, then check as anonymous
-        // allow i no user was set ... or user '*' was found
-        if (
-            !$this->_aAllowedUsers
-            || (is_array($this->_aAllowedUsers) && !count($this->_aAllowedUsers))
-            || isset($this->_aAllowedUsers['*'])
-        ) {
-            return '*';
         }
 
         $this->sendError(403, 'ERROR: A valid user is required.');

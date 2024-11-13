@@ -75,12 +75,6 @@ $oApi->checkMethod();
 $oApi->checkIp();
 
 $oMonitor->setUser($oApi->checkUser());
-// $oApi->sendJson($sAuthuser);
-
-if (!$oMonitor->hasRole('api')){
-    $oApi->sendError(403, 'ERROR: Your user ['.$oMonitor->getUserid().'] has no permission to access the api.');
-    die();
-}
 
 
 // ----------------------------------------------------------------------
