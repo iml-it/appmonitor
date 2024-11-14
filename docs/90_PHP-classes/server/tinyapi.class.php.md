@@ -59,7 +59,7 @@ Set allowed users
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> array $aUsers | `array` | array  aUsers  array of allowed users; key= username; value = password hash (BASIC AUTH)                ''          =>  false,          - allow anonymous requests                'apiuser'    => '[passwordhash]' - an api user that can send an basic auth header
+| \<required\> array $aUsers | `array` | array  aUsers  array of allowed users; key= username ('' or userid); subkeys:                        - 'password'; value = password hash (BASIC AUTH) and/ or                        - 'secret'; clear text for hmac
 
 
 ### 🔹 public appendData()
@@ -100,7 +100,7 @@ Check allowed http methods
 
 ### 🔹 public checkUser()
 
-Get an authenticated user and return a detected username as string.Checks are done in that sequence- sent basic auth (user:password); remark it can override the user of a already authenticated user- already made basic auth from $_SERVER- test if anonymous access is allowedRemark: this is a pre check. Your app can make further check like checka role if the found user has access to a function.@example:$oYourApp->setUser($oTinyApi->checkUser());if (!$oYourApp->hasRole('api')){    $oTinyApi->sendError(403, 'ERROR: Your user has no permission to access the api.');    die();};
+Get an authenticated user and return a detected username as string.Checks are done in that sequence- sent basic auth (base64 encoded <user>:<password>); remark it can override the user of a already authenticated user- sent generated hmac hashsum(<user>:<key>)- already made basic auth from browser- test if anonymous access is allowedRemark: this is a pre check. Your app can make further check like checka role if the found user has access to a function.@example:$oYourApp->setUser($oTinyApi->checkUser());
 
 **Return**: `string`
 

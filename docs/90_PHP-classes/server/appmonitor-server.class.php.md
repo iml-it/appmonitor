@@ -251,7 +251,20 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aNewCfg = [] | `array` | new configuration data
+| \<optional\> array $aNewCfg = [] | `array` | 
+
+
+### 🔹 public saveUrls()
+
+Save the current or new config data as file.
+
+**Return**: `bool`
+
+**Parameters**: **1**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> array $aNewCfg = [] | `array` | 
 
 
 ### 🔹 public send()

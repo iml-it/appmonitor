@@ -23,6 +23,7 @@
  * @package -
  * 
  * 2024-07-18  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-11-14  axel.hahn@unibe.ch  API access with basic auth and hmac hash key
  **/
 
 namespace iml;
@@ -260,6 +261,7 @@ class tinyapi
             
 
             $aAuth = explode(':', $sAuthline);
+            // $this->_addDebug("auth line -> $sAuthline");
 
             if (is_array($aAuth) && count($aAuth) == 2) {
                 list($sGivenUser, $sGivenKey) = $aAuth;
@@ -272,11 +274,15 @@ class tinyapi
                     switch ($sAuthtype) {
                         case 'Basic':
                             if (
-                                isset($aSelUserdata['password']) 
-                                // && $aSelUserdata['password']==$sGivenKey
+                                isset($aSelUserdata['passwordhash']) 
                                 // php -r "echo password_hash('<password>', PASSWORD_DEFAULT);"
-                                && password_verify($sGivenKey, $aSelUserdata['password'])
+                                && password_verify($sGivenKey, $aSelUserdata['passwordhash'])
                             ){
+                                // $this->_addDebug("auth type -> '$sAuthtype' .. $sGivenUser : found password hash");
+                                return $sSelUser;
+                            } else if ( isset($aSelUserdata['password'])  && $aSelUserdata['password']==$sGivenKey)                                
+                            {
+                                // $this->_addDebug("auth type -> '$sAuthtype' .. $sGivenUser : found password");
                                 return $sSelUser;
                             } else {
                                 $this->sendError(403, 'ERROR: Basic authentication failed. Wrong password.');
@@ -291,8 +297,11 @@ class tinyapi
                                 $sGotReq=$_SERVER['REQUEST_URI'];
 
                                 $sMyData="{$sGotMethod}\n{$sGotReq}\n{$sGotDate}\n";
-                                $sMyHash= base64_encode(hash_hmac("sha1", $sMyData, $aSelUserdata['secret']));
+                                $sMyHash=base64_encode(hash_hmac("sha1", $sMyData, $aSelUserdata['secret']));
+                                // $this->_addDebug("hash source: {$sGotDate}");
+
                                 if($sMyHash!==$sGivenKey){
+                                    // $this->_addDebug("hash is not $sMyHash");
                                     $this->sendError(403, 'ERROR: Authorization failed. Wrong hmac key.');
                                 } else {
                                     return $sSelUser;

@@ -113,11 +113,11 @@ The api access should be limited to the systems that need access to it.
   </Location>
 ```
 
-But shure it is better to have an additional password based access with api users.
+If request doesn't come from an allowed ip the response is a 401 with html content for your 40x message.
 
-### Limit by app configuration
+### Limit by app ip address
 
-You can limit the ip address in the configuration too.
+You can limit the ip address in the configuration:
 
 ```txt
     ...
@@ -128,25 +128,79 @@ You can limit the ip address in the configuration too.
     ...
 ```
 
-Without basic authentication on subdir /api you can handle authenticated requests too.
-
-* works on disabled basic authentication in the webserver config only
-* add an api user - set a password value and include "api" in the roles
+If request doesn't come from an allowed ip the response is a 401 with this body
 
 ```txt
-    ...
-        "apiuser1": {
-            "password": "$2y$10$5E4ZWyul.VdZjpP1.Ff6Le0z0kxu3ix7jnbYhv0Zg5vhvhjdJTOm6",
-            "comment": "api user for Axels Dashboard",
-            "roles": [ "api" ]
-        },
+{ "http": 401, "error": "ERROR: IP 127.0.0.1 is not allowed.", "_header": "HTTP\/1.1 401 Not autorized" }
 ```
 
-Then you must send a basic authentication header on each api request.
-In javascript you can use the fetch function by adding a custom header field "Authorization"
-that contains Username + ":" + Password as base64 encoded string.
+### Define an api user
 
-Snippet:
+On server side you must define one or more users with the role "api".
+You can use 
+
+* anonymous access or
+* basic authentication or
+* hmac hash key
+
+#### Allow anonymous access
+
+This is maybe for a dev environment only. Or you can restrict the ip access to single ip addresses.
+
+For user `*` define as settings:
+
+* passworrd: false
+* rules: add "api"
+
+```txt
+"*": {
+    "password": false,
+    "roles": [
+        "api"
+    ]
+}
+```
+
+#### Basic authentication
+
+Create a password hash eg on terminal:
+
+```txt
+php -r "echo password_hash('<your_password>', PASSWORD_DEFAULT);"
+$2y$10$4r8V2Ys2euGyJvLALGjsWuZ8BRD7eSEBPOe36UYZApm4cEBpm6BVS
+```
+
+This hash must be set as password.
+
+```txt
+"api-basic": {
+    "passwordhash": "$2y$10$4r8V2Ys2euGyJvLALGjsWuZ8BRD7eSEBPOe36UYZApm4cEBpm6BVS⏎",
+    "roles": [
+        "api"
+    ]
+}
+```
+
+OR
+
+If you rollout servers with Ansible, Chef, Puppet, ... you maybe cannot create such a hash.
+It is possible to configure the password as clear text too:
+
+
+```txt
+"api-basic": {
+    "password": "<your_password>",
+    "roles": [
+        "api"
+    ]
+}
+```
+
+Shell:
+
+In curl you can use the parameter -u: `curl -u "api-basic:<your_password>" <url>`
+
+JS Snippet:
 
 ```js
 var apiuser = "";
@@ -159,3 +213,36 @@ var oHeader = { "headers": {
 
 let response = await fetch(url, oHeader);
 ```
+
+#### HMAC hash key
+
+To use hmac hash key you need to define a shared secret for a user.
+
+```txt
+"api-hamac": {
+    "secret": "Here-is-my-most-secret-secret.",
+    "roles": [
+        "api"
+    ]
+}
+```
+
+The client must sent an Authentication header with your configured username and base64 encoded hash
+
+```txt
+Authorization: api-hamac:<HASH>
+```
+
+The hash is generated with
+
+* Method: "GET"
+* Request: eg "/api/v1/apps/tags/monitoring/meta"
+* Date: eg "Thu, 14 Nov 2024 16:10:06.663974972 CET"
+
+All values must be concatinated with `\n` - including a final `\n`.
+It will be hashed with a hmac function using SHA 1 and the shared secret.
+Finally the string must be base64 encoded.
+
+Sounds complicated? But you don't need to code it yourself. You can find API clients in PHP and bash using curl here: 
+<https://github.com/iml-it/appmonitor-api-client/>. 
+With them all given authentication methods above will work.

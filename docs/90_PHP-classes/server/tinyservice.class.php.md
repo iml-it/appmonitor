@@ -27,6 +27,7 @@
  * @package IML-Appmonitor
  * 
  * 2024-07-17  1.1  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-11-11  1.2  axel.hahn@unibe.ch  show memory usage in log output
  */
 ```
 

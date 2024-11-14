@@ -30,8 +30,7 @@ graph TD;
   Start((Start))
   --> chkMethod{Method enabled?}
   --> |yes|chkIp{IP allowed?}
-  --> |yes|chkUser{user detected?}
-  --> |yes|chkRole{user has the role api?}
+  --> |yes|chkUser{user with role api detected?}
   --> |yes|chkRoute{Find matching route}
   --> |yes|chkList{Is a listing?}
   --> |yes|sendHeader
@@ -140,6 +139,8 @@ Detailed description:
 
 ## Response
 
+### Status codes
+
 A valid api request has the http status code 200.
 
 If you get an 40x statuscode it is an error. You get a json with the keys "http" and a key "error".
@@ -150,3 +151,7 @@ Statuscode | Description
 400        | Bad request. No Route was found. Maybe a route is wrong or a variable did not match the required regex.
 401        | Not authorized. Your ip is not allowed to access the api.
 403        | Access denied. A valid user was not detected or user has no permissions.
+
+### Data
+
+The response is always JSPON. Depending on your configuration it uses pretty print.

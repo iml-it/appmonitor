@@ -37,6 +37,7 @@ require_once 'appmonitor-server.class.php';
  * @package IML-Appmonitor
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-11-14  0.141  axel.hahn@unibe.ch  API access with basic auth and hmac hash key
  */
 class appmonitorserver_api extends appmonitorserver
 {
@@ -95,6 +96,9 @@ class appmonitorserver_api extends appmonitorserver
                 $aReturn[$sLoopuser]['password'] = $aUserdata['password'] ?? false;
             }
             // $aReturn[$sLoopuser] = $aUserdata['password'] ?? false;
+            if(isset($aUserdata['passwordhash']) && $aUserdata['passwordhash']){
+                $aReturn[$sLoopuser]['passwordhash'] = $aUserdata['passwordhash'];
+            }
             if(isset($aUserdata['secret']) && $aUserdata['secret']){
                 $aReturn[$sLoopuser]['secret'] = $aUserdata['secret'];
             }
