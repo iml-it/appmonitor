@@ -230,7 +230,13 @@ To use hmac hash key you need to define a shared secret for a user.
 The client must sent an Authentication header with your configured username and base64 encoded hash
 
 ```txt
-Authorization: api-hamac:<HASH>
+Authorization: HMAC-SHA1 <user>:<HASH>
+```
+
+eg.
+
+```txt
+Authorization: HMAC-SHA1 api-hamac:HMAC-SHA1 api-test:MjUyZWZjMmMzMTU5ZjNjYWViMDY1OTEzMTY4NzAzZDRiNGY3YjQ5Mw==
 ```
 
 The hash is generated with
@@ -239,7 +245,7 @@ The hash is generated with
 * Request: eg "/api/v1/apps/tags/monitoring/meta"
 * Date: eg "Thu, 14 Nov 2024 16:10:06.663974972 CET"
 
-All values must be concatinated with `\n` - including a final `\n`.
+All values must be concatinated with `\n` - but no final `\n`.
 It will be hashed with a hmac function using SHA 1 and the shared secret.
 Finally the string must be base64 encoded.
 

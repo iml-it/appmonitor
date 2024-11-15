@@ -215,7 +215,7 @@ class tinyapi
             }
         }
         if (!$bAllowed) {
-            $this->sendError(401, 'ERROR: IP ' . $sMyIp . ' is not allowed.');
+            $this->sendError(403, 'ERROR: IP ' . $sMyIp . ' is not allowed.');
         }
 
         return true;
