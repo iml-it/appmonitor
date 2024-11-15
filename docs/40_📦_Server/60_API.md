@@ -108,22 +108,22 @@ The health check is done by a request to `/api/health`. It sends
 }
 ```
 
-Seaction "health"
+Section `"health"`
 
-Variable      | Type   | Description
---------------|--------| -------------
-status        | string | "OK" if the application is running or "error"
-statusmessage | string | Messagetext
+Variable        | Type   | Description
+----------------|--------| -------------
+`status`        | string | "OK" if the application is running or "error"
+`statusmessage` | string | Messagetext
 
-Section "monitoring"
+Section `"monitoring"`
 
-Variable      | Type   | Description
---------------|--------| -------------
-status        | int    | Total status over all monitored applications 0=OK ... 4=Error; -1= no data available
-statusmessage | string | Messagetext
-apps          | array  | Array with count of monitored apps by their status 0=OK ... 4=Error and "count" for total
+Variable        | Type   | Description
+----------------|--------| -------------
+`status`        | int    | Total status over all monitored applications 0=OK ... 4=Error; -1= no data available
+`statusmessage` | string | Messagetext
+`apps`          | array  | Array with count of monitored apps by their status 0=OK ... 4=Error and "count" for total
 
-### Application results
+### Explre application results
 
 Detailed description:
 
@@ -163,8 +163,8 @@ Statuscode | Description
 -----------|--------------
 200        | OK.
 400        | Bad request. No Route was found. Maybe a route is wrong or a variable did not match the required regex.
-401        | Not authorized. Your ip is not allowed to access the api.
-403        | Access denied. A valid user was not detected or user has no permissions.
+401        | Not authorized. No user was given or authentication failed.
+403        | Access denied. Your ip is not allowed to access the api.
 
 ### Data
 
@@ -183,10 +183,10 @@ This request has no data and responds the possible next levels.
 }
 ```
 
-Key             | Type   | Description
-----------------|--------|--------------
-allowed_subkeys | string | Description of data
-\<values\>      | string | Possible next level subdirs
+Key               | Type   | Description
+------------------|--------|--------------
+`allowed_subkeys` | string | Description of data
+\<values\>        | string | Possible next level subdirs
 
 #### /api/v1/apps
 
@@ -201,10 +201,10 @@ This request has no data and responds the possible next levels.
 }
 ```
 
-Key             | Type   | Description
-----------------|--------|--------------
-allowed_subkeys | string | Description of data
-\<values\>      | string | Possible next level subdirs
+Key               | Type   | Description
+------------------|--------|--------------
+`allowed_subkeys` | string | Description of data
+\<values\>        | string | Possible next level subdirs
 
 #### /api/v1/apps/id
 
@@ -223,11 +223,11 @@ List all apps in appmonitor.
 }
 ```
 
-Key     | Type   | Description
---------|--------|--------------
-\<key\> | string | The first key is the application id.
-website | string | a label for the web application
-url     | string | the requested url to fetch the application status
+Key       | Type   | Description
+----------|--------|--------------
+\<key\>   | string | The first key is the application id.
+`website` | string | a label for the web application
+`url`     | string | the requested url to fetch the application status
 
 #### /api/v1/apps/id/\<id\>
 
@@ -243,10 +243,10 @@ This request has no data and responds the possible next levels.
 }
 ```
 
-Key             | Type   | Description
-----------------|--------|--------------
-allowed_subkeys | string | Description of data
-\<values\>      | string | Possible next level subdirs
+Key               | Type   | Description
+------------------|--------|--------------
+`allowed_subkeys` | string | Description of data
+\<values\>        | string | Possible next level subdirs
 
 #### /api/v1/apps/id/\<id\>/all
 
@@ -400,64 +400,64 @@ allowed_subkeys | string | Description of data
 }
 ```
 
-Key          | Type   | Description
--------------|--------|--------------
-\<key\>      | string | The first key is the application id.
-meta         | string | Key for metadata
-checks       | string | Key for checks for this app
-result       | string | Key for response infos
+Key            | Type   | Description
+---------------|--------|--------------
+\<key\>        | string | The first key is the application id.
+`meta`         | string | Key for metadata
+`checks`       | string | Key for checks for this app
+`result`       | string | Key for response infos
 
-Subkeys in "meta" section:
+Subkeys in `"meta"` section:
 
 These are the metadata for this application (like described in appmonitor client).
 
-Key           | Type   | Description
---------------|--------|--------------
-host          | string | hostname
-website       | string | Name of the application
-ttl           | int    | TTL in seconds sent from application for caching on the appmonitor server
-result        | int    | total status of the website; 0=OK ... 4=Error
-time          | string | optional: time spent for performing checks on application side, eg "3.868ms"
-version       | string | optional: Used client and version
-tags          | array  | optional: list of tags
+Key             | Type   | Description
+----------------|--------|--------------
+`host`          | string | hostname
+`website`       | string | Name of the application
+`ttl`           | int    | TTL in seconds sent from application for caching on the appmonitor server
+`result`        | int    | total status of the website; 0=OK ... 4=Error
+`time`          | string | optional: time spent for performing checks on application side, eg "3.868ms"
+`version`       | string | optional: Used client and version
+`tags`          | array  | optional: list of tags
 
-Items in "checks" section:
+Items in `"checks"` section:
 
 The section checks contains a list of single checks for this application.
 Each check contains the client data for this check (like described in appmonitor client).
 
-Key           | Type   | Description
---------------|--------|--------------
-name          | string | Name of the check
-description   | string | Description of the check
-group         | string | optional: group
-parent        | string | optional: reference to depending check \<name\>
-result        | int    | status of the check; 0=OK ... 4=Error
-value         | string | Return text of the check with description what was successful or what failed.
-time          | string | optional: time for execution of this single check, eg "0.027ms"
-type          | string | optional: type of tile to render; false or "counter"
-count         | float  | optional: value to render in a tile
-visual        | string | optional: output style for rendering data in a tile, eg "simple", "line"
+Key             | Type   | Description
+----------------|--------|--------------
+`name`          | string | Name of the check
+`description`   | string | Description of the check
+`group`         | string | optional: group
+`parent`        | string | optional: reference to depending check \<name\>
+`result`        | int    | status of the check; 0=OK ... 4=Error
+`value`         | string | Return text of the check with description what was successful or what failed.
+`time`          | string | optional: time for execution of this single check, eg "0.027ms"
+`type`          | string | optional: type of tile to render; false or "counter"
+`count`         | float  | optional: value to render in a tile
+`visual`        | string | optional: output style for rendering data in a tile, eg "simple", "line"
 
-Subkeys in "result" section:
+Subkeys in `"result"` section:
 
 This section contains a total status and http response informations.
 
-Key           | Type   | Description
---------------|--------|--------------
-ts            | int    | Unix timestamp of last fetched check
-result        | int    | total status of the website; 0=OK ... 4=Error
-host          | string | hostname
-website       | string | Name of the application
-summary       | array  | Array with counts of checks for this application by ist status. The subkeys are "total" and the return values 0=OK ... 4=Error
-ttl           | int    | TTL in seconds sent from application for caching on the appmonitor server
-url           | string | Requested url for the appmonitor status of the application
-header        | string | raw response header as string with \r\n as divider
-headerarray   | array  | parsed values from the response header. Keys are the response header names. Generated fields are "_status" (because its line has no variable) and "_statuscode" for the http status code
-httpstatus    | int    | http status code
-error         | bool   | Flag: http request is an http error?
-curlerrorcode | int    | Curl error code
-curlerrormsg  | string | Curl error message; for more details see see <https://curl.se/libcurl/c/libcurl-errors.html>
+Key             | Type   | Description
+----------------|--------|--------------
+`ts`            | int    | Unix timestamp of last fetched check
+`result`        | int    | total status of the website; 0=OK ... 4=Error
+`host`          | string | hostname
+`website`       | string | Name of the application
+`summary`       | array  | Array with counts of checks for this application by ist status. The subkeys are "total" and the return values 0=OK ... 4=Error
+`ttl`           | int    | TTL in seconds sent from application for caching on the appmonitor server
+`url`           | string | Requested url for the appmonitor status of the application
+`header`        | string | raw response header as string with \r\n as divider
+`headerarray`   | array  | parsed values from the response header. Keys are the response header names. Generated fields are "_status" (because its line has no variable) and "_statuscode" for the http status code
+`httpstatus`    | int    | http status code
+`error`         | bool   | Flag: http request is an http error?
+`curlerrorcode` | int    | Curl error code
+`curlerrormsg`  | string | Curl error message; for more details see see <https://curl.se/libcurl/c/libcurl-errors.html>
 
 #### /api/v1/apps/tags
 
@@ -475,7 +475,7 @@ Lists all tags from all applications in alphabetic order.
 Key             | Type   | Description
 ----------------|--------|--------------
 tags            | string | Description of data
-\<values\>      | string | Possible next level subdirs
+\<values\>      | string | Name of a tag; Possible next level subdirs
 
 #### /api/v1/apps/tags/\<tag\>
 
@@ -491,10 +491,10 @@ This request has no data and responds the possible next levels.
 }
 ```
 
-Key             | Type   | Description
-----------------|--------|--------------
-allowed_subkeys | string | Description of data
-\<values\>      | string | Possible next level subdirs
+Key               | Type   | Description
+------------------|--------|--------------
+`allowed_subkeys` | string | Description of data
+\<values\>        | string | Possible next level subdirs
 
 #### /api/v1/apps/tags/\<tag\>/all
 
@@ -533,4 +533,8 @@ List all tags.
 Key             | Type   | Description
 ----------------|--------|--------------
 tags            | string | Description of data
-\<values\>      | string | Possible next level subdirs
+\<values\>      | string | Tag name
+
+!!! info "Remark"
+    To browse by tag you need to continue with
+    `/api/v1/apps/tags/<tag>`
