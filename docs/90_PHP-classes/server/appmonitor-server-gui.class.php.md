@@ -36,6 +36,9 @@
  * @package IML-Appmonitor
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-08-19  0.138  axel.hahn@unibe.ch  fixes for fresh instalations
+ * 2024-11-06  0.139  axel.hahn@unibe.ch  
+ * 2024-11-06  0.139  axel.hahn@unibe.ch  update tinyservice class; fix defaults file
  */
 ```
 
@@ -358,7 +361,20 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aNewCfg = [] | `array` | new configuration data
+| \<optional\> array $aNewCfg = [] | `array` | 
+
+
+### 🔹 public saveUrls()
+
+Save the current or new config data as file.
+
+**Return**: `bool`
+
+**Parameters**: **1**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> array $aNewCfg = [] | `array` | 
 
 
 ### 🔹 public send()

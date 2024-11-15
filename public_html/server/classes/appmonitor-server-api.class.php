@@ -37,6 +37,7 @@ require_once 'appmonitor-server.class.php';
  * @package IML-Appmonitor
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-11-14  0.141  axel.hahn@unibe.ch  API access with basic auth and hmac hash key
  */
 class appmonitorserver_api extends appmonitorserver
 {
@@ -56,15 +57,53 @@ class appmonitorserver_api extends appmonitorserver
 
     /**
      * Get an array with users in the config to apply it on tinyapi init
-     * Syntax: username is the key and password hash as value.
+     * Syntax: username and keys 'password' and/ or 'secret'
+     * Array
+     * (
+     *     [*] => Array
+     *         (
+     *             [password] =>
+     *         )
+     * 
+     *     [api] => Array
+     *         (
+     *             [password] => $2y$10$5E4ZWyul.VdZjpP1.Ff6Le0z0kxu3ix7jnbYhv0Zg5vhvhjdJTOm6
+     *         )
+     * 
+     *     [api-test] => Array
+     *         (
+     *             [password] =>
+     *             [secret] => tryme
+     *         )
+     * 
+     *     [superuser] => Array
+     *         (
+     *             [password] =>
+     *         )
+     * 
+     * )
+     * 
      * @return array
      */
     public function getApiUsers(): array
     {
         $aReturn = [];
         foreach ($this->_aCfg['users'] as $sLoopuser => $aUserdata) {
-            $aReturn[$sLoopuser] = $aUserdata['password'] ?? false;
+            if (
+                array_search('api', $aUserdata['roles']) !== false
+                || array_search('*', $aUserdata['roles']) !== false
+            ) {
+                $aReturn[$sLoopuser]['password'] = $aUserdata['password'] ?? false;
+            }
+            // $aReturn[$sLoopuser] = $aUserdata['password'] ?? false;
+            if(isset($aUserdata['passwordhash']) && $aUserdata['passwordhash']){
+                $aReturn[$sLoopuser]['passwordhash'] = $aUserdata['passwordhash'];
+            }
+            if(isset($aUserdata['secret']) && $aUserdata['secret']){
+                $aReturn[$sLoopuser]['secret'] = $aUserdata['secret'];
+            }
         }
+        // print_r($aReturn);
         return $aReturn;
     }
 

@@ -48,7 +48,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.140";
+    protected string $_sVersion = "0.141";
 
     /**
      * Title/ project name

@@ -156,7 +156,7 @@ default value:
 
 ### 🔹 public getApiUsers()
 
-Get an array with users in the config to apply it on tinyapi initSyntax: username is the key and password hash as value.
+Get an array with users in the config to apply it on tinyapi initSyntax: username and keys 'password' and/ or 'secret'Array(    [] => Array        (            [password] =>        )    [api] => Array        (            [password] => $2y$10$5E4ZWyul.VdZjpP1.Ff6Le0z0kxu3ix7jnbYhv0Zg5vhvhjdJTOm6        )    [api-test] => Array        (            [password] =>            [secret] => tryme        )    [superuser] => Array        (            [password] =>        ))
 
 **Return**: `array`
 
@@ -301,7 +301,20 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aNewCfg = [] | `array` | new configuration data
+| \<optional\> array $aNewCfg = [] | `array` | 
+
+
+### 🔹 public saveUrls()
+
+Save the current or new config data as file.
+
+**Return**: `bool`
+
+**Parameters**: **1**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> array $aNewCfg = [] | `array` | 
 
 
 ### 🔹 public send()

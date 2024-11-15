@@ -21,6 +21,7 @@
  * @author hahn
  * 
  * 2024-07-17  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-11-06  axel.hahn@unibe.ch  update html email output
  */
 ```
 
