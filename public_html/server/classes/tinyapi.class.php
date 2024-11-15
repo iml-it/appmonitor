@@ -24,6 +24,7 @@
  * 
  * 2024-07-18  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-11-14  axel.hahn@unibe.ch  API access with basic auth and hmac hash key
+ * 2024-11-15  axel.hahn@unibe.ch  Update hmac hash key; send 401 on authenttication error (before: 403)
  **/
 
 namespace iml;
@@ -256,9 +257,10 @@ class tinyapi
 
             if(strstr($sAuthline, ' ')){
                 list($sAuthtype, $sAuthline) = explode(' ', $sAuthline);
-                $sAuthline = base64_decode($sAuthline);
+                if($sAuthtype=="Basic"){
+                    $sAuthline = base64_decode($sAuthline);
+                }
             }
-            
 
             $aAuth = explode(':', $sAuthline);
             // $this->_addDebug("auth line -> $sAuthline");
@@ -285,9 +287,10 @@ class tinyapi
                                 // $this->_addDebug("auth type -> '$sAuthtype' .. $sGivenUser : found password");
                                 return $sSelUser;
                             } else {
-                                $this->sendError(403, 'ERROR: Basic authentication failed. Wrong password.');
+                                $this->sendError(401, 'ERROR: Basic authentication failed. Wrong password.');
                             }
                             ;;
+                        case 'HMAC-SHA1':
                         default:
                             // check hmac hash ... rebuild it with key of found user
                             if (isset($aSelUserdata['secret'])){
@@ -296,13 +299,13 @@ class tinyapi
                                 $sGotMethod=$_SERVER['REQUEST_METHOD'];
                                 $sGotReq=$_SERVER['REQUEST_URI'];
 
-                                $sMyData="{$sGotMethod}\n{$sGotReq}\n{$sGotDate}\n";
+                                $sMyData="{$sGotMethod}\n{$sGotReq}\n{$sGotDate}";
                                 $sMyHash=base64_encode(hash_hmac("sha1", $sMyData, $aSelUserdata['secret']));
                                 // $this->_addDebug("hash source: {$sGotDate}");
 
                                 if($sMyHash!==$sGivenKey){
                                     // $this->_addDebug("hash is not $sMyHash");
-                                    $this->sendError(403, 'ERROR: Authorization failed. Wrong hmac key.');
+                                    $this->sendError(401, 'ERROR: Authorization failed. Wrong hmac key.');
                                 } else {
                                     return $sSelUser;
                                 }
@@ -321,7 +324,7 @@ class tinyapi
             }
         }
 
-        $this->sendError(403, 'ERROR: A valid user is required.');
+        $this->sendError(401, 'ERROR: A valid user is required.');
     }
 
     // ----------------------------------------------------------------------
