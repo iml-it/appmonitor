@@ -28,20 +28,24 @@
 # 2024-10-25  v1.21 <axel.hahn@unibe.ch>      create missing subdir dbdumps
 # 2024-10-30  v1.22 <axel.hahn@unibe.ch>      added: Open Mysql client in container
 # 2024-10-30  v1.23 <axel.hahn@unibe.ch>      added: show menu hints why some menu items are visible
+# 2024-11-20  v1.24 <axel.hahn@unibe.ch>      fix menu with started database less app; apply template permissions on target file; add $WEBURL; remove $frontendurl
+# 2024-11-20  v1.25 <axel.hahn@unibe.ch>      fix menu startup containers
+# 2024-11-21  v1.26 <axel.hahn@unibe.ch>      Reset colors in _checkConfig 
 # ======================================================================
 
 cd "$( dirname "$0" )" || exit 1
 
+_version="1.26"
+
 # init used vars
 gittarget=
-frontendurl=
+WEBURL=
 
 _self=$( basename "$0" )
 
 # shellcheck source=/dev/null
 . "${_self}.cfg" || exit 1
 
-_version="1.23"
 
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
@@ -59,12 +63,14 @@ fgReset="\e[0m"
 # running containers
 DC_WEB_UP=0
 DC_DB_UP=0
+DC_ALL_UP=0
 
 # repo of docker-php-starterkit is here?
 DC_REPO=1
 
 DC_CONFIG_CHANGED=0
 
+# absolute urls for web app
 DC_WEB_URL=""
 
 DC_DUMP_DIR=dbdumps
@@ -77,6 +83,19 @@ ps -ef | grep  dockerd-rootless | grep -q $USER && isDockerRootless=1
 # FUNCTIONS
 # ----------------------------------------------------------------------
 
+# check config for changes in newer versions
+function _checkConfig(){
+
+    # --- v1.24
+    if [ -z "$WEBURL" ]; then
+        echo -e "${fgBrown}INFO: add 'WEBURL=\"/\"' in your ${_self}.cfg. It is a new var since v1.24${fgReset}"
+        WEBURL="/"
+    fi
+    if [ -n "$frontendurl" ]; then
+        echo -e "${fgBrown}INFO: Remove frontendurl=$frontendurl in your ${_self}.cfg. It is obsolete since v1.24${fgReset}"
+    fi
+
+}
 # ----------------------------------------------------------------------
 # STATUS FUNCTIONS
 
@@ -104,6 +123,8 @@ function _getStatus_docker(){
 
     DC_WEB_UP=0
     DC_DB_UP=0
+    DC_ALL_UP=0
+
     grep -q "${APP_NAME}-server" <<< "$_out" && DC_WEB_UP=1
     grep -q "${APP_NAME}-db"     <<< "$_out"  && DC_DB_UP=1
 
@@ -113,15 +134,27 @@ function _getStatus_docker(){
         return
     fi
 
+    if [ "${DC_WEB_UP}" = "1" ] && [ "${DC_DB_UP}" = "1" ]; then
+        DC_ALL_UP=1
+    fi
+
+    if [ "$DB_ADD" = "false" ] && [ "${DC_WEB_UP}" = "1" ]; then
+        DC_ALL_UP=1
+    fi
+
 }
 
 # Get web url of the application
 # It is for support of Nginx Docker Proxy
 # https://github.com/axelhahn/nginx-docker-proxy
-# It returns http://localhost:<port> or a https://<appname>
+# It returns http://localhost:<port> or a https://<appname> plus $WEBURL
 function _getWebUrl(){
-    DC_WEB_URL="$frontendurl"
-    grep -q "${APP_NAME}-server" /etc/hosts && DC_WEB_URL="https://${APP_NAME}-server/"
+    if grep -q "^[0-9\.]* ${APP_NAME}-server" /etc/hosts; then
+        DC_WEB_URL="https://${APP_NAME}-server$WEBURL"
+    else
+        DC_WEB_URL=http://localhost:${APP_PORT}$WEBURL
+    fi
+    set +vx
 }
 
 # ----------------------------------------------------------------------
@@ -141,7 +174,7 @@ function h3(){
 
 # helper for menu: print an inverted key
 function  _key(){
-    echo -en "\e[4;7m ${1} \e[0m"
+    echo -en "$fgInvert ${1} $fgReset"
 }
 
 # helper for menu: show hint text
@@ -170,7 +203,7 @@ function showMenu(){
     fi
 
     if [ $isDockerRootless -eq 1 ] || [ $_bAll -eq 1 ]; then
-        menuhint $_bAll "Beause rootless docker was found"
+        menuhint $_bAll "Because rootless docker was found"
         echo "${_spacer}$( _key i ) - init application: set permissions"
         echo
     fi
@@ -185,7 +218,8 @@ function showMenu(){
         echo "${_spacer}$( _key T ) - remove generated files"
         echo
     fi
-    if [ $DC_WEB_UP -eq 0 ] || [ $DC_DB_UP -eq 0 ] || [ $_bAll -eq 1 ]; then
+    if [ $DC_ALL_UP -eq 0 ] || [ $_bAll -eq 1 \
+    ]; then
         if [ $DC_CONFIG_CHANGED -eq 0 ] || [ $_bAll -eq 1 ]; then
             menuhint $_bAll "A container is down and config is unchanged"
             echo "${_spacer}$( _key u ) - startup containers    docker-compose ... up -d"
@@ -196,7 +230,7 @@ function showMenu(){
         fi
     fi
     if [ $DC_WEB_UP -eq 1 ] || [ $DC_DB_UP -eq 1 ] || [ $_bAll -eq 1 ]; then
-        menuhint $_bAll "${_spacer}A container is up"
+        menuhint $_bAll "A container is up"
         echo "${_spacer}$( _key s ) - shutdown containers   docker-compose stop"
         echo
         echo "${_spacer}$( _key m ) - more infos"
@@ -362,7 +396,7 @@ function _fix_no-db(){
         local iStart; typeset -i iStart
         iStart=$( grep -Fn "$CUTTER_NO_DATABASE" "${_file}" | cut -f 1 -d ':' )-1
         if [ $iStart -gt 0 ]; then
-            sed -ni "1,${iStart}p" "${_file}"
+            sed -n "$sed_no_backup" "1,${iStart}p" "${_file}"
         fi
     fi
 }
@@ -424,14 +458,15 @@ function _generateFiles(){
 
             # write file from line 2 to a tmp file
             sed -n '2,$p' "$mytpl" >"$_tmpfile"
+            chmod "$( stat -c %a "$mytpl" )" "$_tmpfile"
 
             # add generator
             # sed -i "s#{{generator}}#generated by $0 - template: $mytpl - $( date )#g" $_tmpfile
             local _md5; _md5=$( md5sum $_tmpfile | awk '{ print $1 }' )
-            sed -i "s#{{generator}}#GENERATED BY $_self - template: $mytpl - $_md5#g" $_tmpfile
+            sed -i "$sed_no_backup" "s#{{generator}}#GENERATED BY $_self - template: $mytpl - $_md5#g" $_tmpfile
 
             # apply all replacements to the tmp file
-            eval sed -i "$params" "$_tmpfile" || exit
+            eval sed "$sed_no_backup" "$params" "$_tmpfile" || exit
 
             _fix_no-db $_tmpfile
 
@@ -444,7 +479,7 @@ function _generateFiles(){
                     echo -n "$mytpl - changes detected - writing [$target] ... "
                     mkdir -p "$( dirname  ../"$target" )" || exit 2
                     mv "$_tmpfile" "../$target" || exit 2
-                    echo OK
+                    echo -e "${fgGreen}OK${fgReset}"
                     echo
                 fi
             else
@@ -473,7 +508,7 @@ function _removeGeneratedFiles(){
             echo -n "REMOVING "
             ls -l "../$target" || exit 2
             rm -f "../$target" || exit 2
-            echo OK
+            echo -e "${fgGreen}OK${fgReset}"
         else
             echo "SKIP: $target"
         fi
@@ -608,7 +643,10 @@ function _dbImport(){
     fi
 
     echo -n "Importing $dumpfile ... "
-    if zcat "$dumpfile" | docker exec -i "${APP_NAME}-db" mysql -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
+
+    # Mac OS compatibility
+    # if zcat "$dumpfile" | docker exec -i "${APP_NAME}-db" mysql -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
+    if cat "$dumpfile" | zcat | docker exec -i "${APP_NAME}-db" mysql -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
     then
         echo "OK"
     else
@@ -619,6 +657,18 @@ function _dbImport(){
 # ----------------------------------------------------------------------
 # MAIN
 # ----------------------------------------------------------------------
+
+_checkConfig
+
+# Mac OS compatibility
+case "$OSTYPE" in
+  darwin*|bsd*)
+    sed_no_backup=" -i '' "
+    ;; 
+  *)
+    sed_no_backup="-i"
+    ;;
+esac
 
 action=$1; shift 1
 
