@@ -20,6 +20,7 @@
  * 2019-05-24  v0.02  detect include or standalone mode
  * 2019-05-24  v0.03  detect include or standalone mode
  * 2024-07-31  v0.04  first version for wordpress check in plugins/apps/ 
+ * 2024-11-21  v0.05  use shared_check_sl 
  */
 
 
@@ -82,17 +83,7 @@ $oMonitor->addCheck(
     ]
 );
 
-if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
-    $oMonitor->addCheck(
-        [
-            "name" => "Certificate check",
-            "description" => "Check if SSL cert is valid and does not expire soon",
-            "check" => [
-                "function" => "Cert",
-            ],
-        ]
-    );
-}
+include 'shared_check_ssl.php';
 
 // ----------------------------------------------------------------------
 
