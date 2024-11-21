@@ -2,31 +2,27 @@
 
 ### Minimal variant
 
-The following steps describe a first (and most simple) approach for a Wordpress monitoring with IML appmonitor.
+You can open .../appmonitor/plugins/apps/**concrete5**.php as url like
 
-If you have installed ...
+<https://www.example.com/appmonitor/plugins/apps/concrete5.php>
 
-* Concrete5 directly into `[webroot]`
-* the appmonitor client in `[webroot]/appmonitor/`.
+You should get a JSON response.
 
-Create a file `[webroot]/appmonitor/minimal.php` with this content:
+### Custom application dir
+
+If your CMS isn't installed directly in the webroot but in a subfolder then We suggest the following:
+
+(1)
+
+Create a file .../appmonitor/**check_c5.php**.
+Define a variable `$sApproot` with the application basedir.
 
 ```php
 <?php
-$sApproot=$_SERVER['DOCUMENT_ROOT'];
+$sApproot = $_SERVER['DOCUMENT_ROOT'].'/c5'; 
 @require 'plugins/apps/concrete5.php';
 ```
 
-If Conrete5 was installed in a subdirectory you need to set its path, eg.
+(2)
 
-```php
-$sApproot = $_SERVER['DOCUMENT_ROOT'].'/c5'; 
-```
-
-Then request this file, eg. <https://example.com/appmonitor/minimal.php>. You should get a JSON response.
-
-If so then add this url in Appmonitor server. Done.
-
-!!! "Note"
-    This is the most simple variant and just a quick winner.
-    You cannot customize the builtin checks or other metadata. 
+Then request this file, eg. <https://www.example.com/appmonitor/check_c5.php>.
