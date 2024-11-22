@@ -19,7 +19,7 @@
  * 
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2024-11-22  <axel.hahn@unibe.ch>      detect installed mysqli function
  */
 class checkMysqlConnect extends appmonitorcheck
 {
@@ -48,6 +48,9 @@ class checkMysqlConnect extends appmonitorcheck
     public function run(array $aParams): array
     {
         $this->_checkArrayKeys($aParams, "server,user,password,db");
+        if (!function_exists("mysqli_init")) {
+            return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform mysqli test. The php-mysqli module is not active."];
+        }
         $mysqli = mysqli_init();
         if (!$mysqli) {
             return [RESULT_ERROR, 'ERROR: mysqli_init failed.'];
