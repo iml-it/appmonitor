@@ -21,6 +21,7 @@
  * 2019-05-24  v0.03  detect include or standalone mode
  * 2024-07-31  v0.04  first version for wordpress check in plugins/apps/ 
  * 2024-11-21  v0.05  use shared_check_sl 
+ * 2024-11-22  v0.07  <axel.hahn@unibe.ch> send 400 instead of 503 on error
  */
 
 
@@ -32,8 +33,8 @@ require 'inc_appcheck_start.php';
 
 $sConfigfile = $sApproot . '/wp-config.php';
 if (!file_exists($sConfigfile)) {
-    header('HTTP/1.0 503 Service Unavailable');
-    die('ERROR: Config file [wp-config.php] was not found. Set a correct $sApproot pointing to wordpress install dir.');
+    header('HTTP/1.0 400 Bad request');
+    die('ERROR: Config file [wp-config.php] was not found. Set a correct app root pointing to wordpress install dir.');
 }
 
 require($sConfigfile);

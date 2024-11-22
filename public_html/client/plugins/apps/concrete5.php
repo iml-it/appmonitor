@@ -18,6 +18,7 @@
  * 2018-06-30  v1.0   ah
  * 2019-05-24  v1.01  ah                   detect include or standalone mode
  * 2024-11-18  v1.02  <axel.hahn@unibe.ch> integrate in appmonitor repository
+ * 2024-11-22  v1.03  <axel.hahn@unibe.ch> send 400 instead of 503 on error
  */
 
 // ----------------------------------------------------------------------
@@ -33,7 +34,7 @@ require 'inc_appcheck_start.php';
 
 $sConfigfile = $sApproot . '/application/config/database.php';
 if (!file_exists($sConfigfile)) {
-    header('HTTP/1.0 503 Service Unavailable');
+    header('HTTP/1.0 400 Bad request');
     die('ERROR: Config file was not found. Set a correct $sApproot pointing to C5 install dir.');
 }
 
@@ -41,7 +42,7 @@ $aConfig = include($sConfigfile);
 $sActive=$aConfig['default-connection'];
 
 if(!isset($aConfig['connections'][$sActive])){
-    header('HTTP/1.0 503 Service Unavailable');
+    header('HTTP/1.0 400 Bad request');
     die('ERROR: Config file application/config/database.php was read - but database connection could not be detected from it in connections -> '.$sActive.'.');
 }
 // print_r($aConfig['connections'][$sActive]); die();
