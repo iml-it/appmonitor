@@ -99,7 +99,6 @@ pre{
     background-color: var(--pre-bg);
     overflow: scroll;
     padding: 1em;
-    border-radius: 1em;
     margin: 0 0 1em;
 }
 th{
@@ -142,15 +141,19 @@ td a, td span{
     background-color: var(--msg-hover-bg);
 }
 
+#msg-header{
+    max-height: 20em;
+    overflow-y: scroll;;
+}
+
 #singlemessage{
     background: var(--simglemail-bg);
     border-top-left-radius: 1em;
-    border: 3px solid rgba(0,0,0,0.2);
     box-shadow: -0.3em 0 3em rgba(0,0,0,0.3);
     display: block;
     padding: 0;
     overflow: scroll;
-    position: absolute;
+    position: fixed;
     right: 1em;
     top: 3em;
     bottom: 4em;

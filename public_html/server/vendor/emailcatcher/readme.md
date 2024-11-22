@@ -2,6 +2,10 @@
 
 A helper for a development environment: This PHP class fetches emails sent by mail() command and offers a viewer to browse sent messages.
 
+* Requires PHP 8.x
+* No dependencies
+* Simple configuration: set a single line in php.ini
+
 Free software and Open Source from University of Bern :: IML - Institute of Medical Education
 
 📜 License: GNU GPL 3.0 \
