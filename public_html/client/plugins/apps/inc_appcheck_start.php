@@ -17,6 +17,13 @@ if($bStandalone){
     
     if (!isset($sApproot) || empty($sApproot)) {
         $sApproot = $_SERVER['DOCUMENT_ROOT'];
+        if(isset($_GET['rel'])){
+            $sApproot.=$_GET['rel'];
+            if(!is_dir($sApproot)){
+                header('HTTP/1.0 400 Bad request');
+                die('ERROR: The given rel dir does not exist below webroot.');
+            }
+        }
 
         $oMonitor->addCheck(
             [

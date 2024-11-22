@@ -87,16 +87,11 @@ class emailcatcher
 
     /**
      * Read all stored emails and return them as an array
-     * @param array $aFilter  optional: filter items; valid keys are 
-     *                         - "id"     {string}  of email to show
-     *                         - "search" {string}  text to find
+     * @param string $sEmail2Show  optional: id of email to show
      * @return array
      */
-    protected function _readEmails(array $aFilter = []): array
+    protected function _readEmails(string $sEmail2Show=''): array
     {
-        $sEmail2Show=$aFilter['id'] ?? '';
-        $sSearch=$aFilter['search'] ?? '';
-
         if(!file_exists($this->sMailData)){
             return [];
         }
@@ -155,10 +150,6 @@ class emailcatcher
     }
 
     // ------------------------------------------------------------------
-    // SEARCH
-    // ------------------------------------------------------------------
-
-    // ------------------------------------------------------------------
     // SINGLE EMAIL
     // ------------------------------------------------------------------
 
@@ -171,7 +162,7 @@ class emailcatcher
      */
     public function setId(string $sId): bool{
         $this->sId=$sId;
-        $this->aSelectedEmail=$this->_readEmails(['id' => $sId]);
+        $this->aSelectedEmail=$this->_readEmails($sId);
 
         if(! isset($this->aSelectedEmail['id'])){
             $this->sId='';

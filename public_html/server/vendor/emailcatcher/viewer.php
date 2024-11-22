@@ -15,11 +15,12 @@
  * 2024-10-09  v0.2  add links
  * 2024-10-21  v0.3  add tiles on top; add email search
  * 2024-11-08  v0.4  view html view in preview already
+ * 2024-11-21  v0.5  update javascript and css
  * =======================================================================
  */
 require_once('classes/emailcatcher.class.php');
 
-$_version = "0.4";
+$_version = "0.5";
 
 $sOpen = $_GET['open'] ?? '';
 $sShowHtml = $_GET['html'] ?? '';

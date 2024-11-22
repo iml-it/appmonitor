@@ -33,7 +33,11 @@ var bViewSource = lsGet(lsVar_source, 0);
  * @returns 
  */
 function lsGet(key, defaultvalue) {
-    return localStorage.getItem(key).replace(/^(null|NaN)$/g, defaultvalue);
+    var val = localStorage.getItem(key);
+    if (val == "null" || val == "NaN") {
+        return defaultvalue;
+    }
+    return val;
 }
 
 // ----------------------------------------------------------------------
