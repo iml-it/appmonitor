@@ -23,6 +23,7 @@ public_html/server/javascript/*.min.js
 public_html/server/themes/**/*.min.css
 public_html/server/tmp/ahcache/
 public_html/server/tmp/running_tinyservice_*.run
+public_html/server/vendor/emailcatcher/data/*.txt
 
 .vscode/launch.json
 static/*
