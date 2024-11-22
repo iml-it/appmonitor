@@ -42,8 +42,9 @@ if (!class_exists('appmonitorcheck')) {
  * 2020-05-03  0.110  axel.hahn@iml.unibe.ch  update renderHtmloutput<br>
  * 2023-07-06  0.128  axel.hahn@unibe.ch      update httpcontent check<br>
  * 2024-07-19  0.137  axel.hahn@unibe.ch      php 8 only: use typed variables
+ * 2024-11-22  0.141  axel.hahn@unibe.ch      Set client version to server version after updating http, mysqli and app checks
  * --------------------------------------------------------------------------------<br>
- * @version 0.137
+ * @version 0.141
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -57,7 +58,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = 'php-client-v0.137';
+    protected string $_sVersion = 'php-client-v0.141';
 
     /**
      * config: default ttl for server before requesting the client check again
