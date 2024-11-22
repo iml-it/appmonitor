@@ -21,7 +21,7 @@
  * 2022-12-21  <axel.hahn@unibe.ch>      add flag sslverify
  * 2023-07-06  <axel.hahn@unibe.ch>      add flag userpwd
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2024-11-22  <axel.hahn@unibe.ch>      Return unknown if curl module is not active
  */
 class checkHttpContent extends appmonitorcheck
 {
@@ -67,8 +67,7 @@ class checkHttpContent extends appmonitorcheck
     {
         $this->_checkArrayKeys($aParams, "url");
         if (!function_exists("curl_init")) {
-            header('HTTP/1.0 503 Service Unavailable');
-            die("ERROR: PHP CURL module is not installed.");
+            return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform mysqli test. The php-curl module is not active."];
         }
         $bShowContent = (isset($aParams["content"]) && $aParams["content"]) ? true : false;
         $ch = curl_init($aParams["url"]);
