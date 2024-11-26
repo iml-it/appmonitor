@@ -15,9 +15,8 @@ Free software and Open Source from University of Bern :: IML - Institute of Medi
 
 Related projects:
 
-* Appmonitor clients<br>Repo: <https://github.com/iml-it/appmonitor-clients><br>Client examples to fetch the API for Bash and PHP.
+* Appmonitor API clients<br>Repo: <https://github.com/iml-it/appmonitor-api-client><br>Client examples for Bash and PHP to fetch the API.
 * POC Dashboard<br>Repo: <https://git-repo.iml.unibe.ch/iml-open-source/appmonitor-dashboard/><br>Html+Javascript Dashboard that can run locally without a webserver. It uses fetch() with Basic authentication for cross origin requests.
-
 
 ## Screenshots ##
 

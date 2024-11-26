@@ -28,7 +28,7 @@
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.137
+ * @version 0.142
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -39,6 +39,7 @@
  * 2024-08-19  0.138  axel.hahn@unibe.ch  fixes for fresh instalations
  * 2024-11-06  0.139  axel.hahn@unibe.ch  
  * 2024-11-06  0.139  axel.hahn@unibe.ch  update tinyservice class; fix defaults file
+ * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
  */
 ```
 
