@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.137
+ * @version 0.142
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -41,6 +41,7 @@ require_once 'render-adminlte.class.php';
  * 2024-08-19  0.138  axel.hahn@unibe.ch  fixes for fresh instalations
  * 2024-11-06  0.139  axel.hahn@unibe.ch  
  * 2024-11-06  0.139  axel.hahn@unibe.ch  update tinyservice class; fix defaults file
+ * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -48,7 +49,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.141";
+    protected string $_sVersion = "0.142";
 
     /**
      * Title/ project name
@@ -419,7 +420,10 @@ class appmonitorserver_gui extends appmonitorserver
             switch ($key) {
                 case 'appstatus':
                     $aLast = $this->oNotification->getAppLastResult();
-                    $sSince = $aLast && (int) $aLast['result']['ts'] ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['result']['ts']) : '';
+                    $sSince = (isset($aLast['result']['ts']) && $aLast['result']['ts'] > 0)
+                        ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['result']['ts']) 
+                        : ''
+                        ;
                     $sReturn .= (isset($aHostdata['result']) && $bVisibility
                         ? $this->_getTile([
                             'result' => $aHostdata['result'],
@@ -1223,7 +1227,7 @@ class appmonitorserver_gui extends appmonitorserver
             if (isset($aItem['data']['value'])) {
                 array_unshift($aChartData['label'], date("Y-m-d H:i:s", $aItem['timestamp']));
                 array_unshift($aChartData['value'], $aItem['data']['value']);
-                array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($aItem['data']['status']));
+                array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($aItem['data']['status'] ?? RESULT_UNKNOWN));
                 // array_unshift($aChartColor, $aColor[rand(0, 3)]);
             }
         }

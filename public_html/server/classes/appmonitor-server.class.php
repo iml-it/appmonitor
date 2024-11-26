@@ -32,7 +32,7 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.137
+ * @version 0.142
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -40,6 +40,7 @@ require_once 'notificationhandler.class.php';
  * @package IML-Appmonitor
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
  */
 class appmonitorserver
 {
@@ -338,6 +339,64 @@ class appmonitorserver
     }
 
     /**
+     * Verify the Response if it is a valid JSON and has all required fields
+     * It returns an array with found errors. An empty array means everything is ok
+     * 
+     * @param string $sBody
+     * @return array
+     */
+    protected function _checkResponse(string $sBody): array
+    {
+        $aErrors=[];
+        $_iNumber=0;
+        if (!is_array(json_decode($sBody, 1))) {
+            $aErrors[] = 'Response is not a valid JSON.';
+        } else {
+            $aResponse = json_decode($sBody, 1);
+            if (!isset($aResponse['meta'])) {
+                $aErrors[] = 'Section "meta" was not found';
+            } else {
+                foreach(['host', 'website', 'result'] as $sField){
+                    if (!isset($aResponse['meta'][$sField])) {
+                        $aErrors[] = "Section 'meta > $sField' was not found";
+                    }
+                }
+                if(isset($aResponse['meta']['result'])){
+                    if(!is_numeric($aResponse['meta']['result'])){
+                        $aErrors[] = "Section 'meta > result' is not a number - $aResponse[meta][result]";
+                    } else if($aResponse['meta']['result']<RESULT_OK || $aResponse['meta']['result']>RESULT_ERROR) {
+                        $aErrors[] = "Section 'meta > result' is not a valid number - $aResponse[meta][result]";
+                    }
+                }
+            }
+            if (!isset($aResponse['checks'])) {
+                $aErrors[] = 'Section "checks" was not found';
+            } else {
+                foreach($aResponse['checks'] as $aCheck){
+                    $_iNumber++;
+                    if(!is_array($aCheck)){
+                        $aErrors[] = "Section 'check #$_iNumber' is not an array - $aCheck";
+                    } else {
+                        foreach(['name', 'description', 'result', 'value'] as $sField){
+                            if (!isset($aCheck[$sField])) {
+                                $aErrors[] = "Section 'check #$_iNumber > $sField' was not found";
+                            }
+                        }
+                        if(isset($aCheck['result'])){
+                            if(!is_numeric($aCheck['result'])){
+                                $aErrors[] = "Section 'check #$_iNumber > result' is not a number - $aCheck[result]";
+                            } else if($aCheck['result']<RESULT_OK || $aCheck['result']>RESULT_ERROR) {
+                                $aErrors[] = "Section 'check #$_iNumber > result' is not a valid number - $aCheck[result]";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $aErrors;
+    }
+
+    /**
      * Setup action: add a new url and save the config
      * @param string $sUrl        url to add
      * @param bool   $bMakeCheck  Flag: check a valid url and response is JSON
@@ -352,14 +411,16 @@ class appmonitorserver
                 $bAdd = true;
                 if ($bMakeCheck) {
                     $aHttpData = $this->_multipleHttpGet([$sUrl]);
-                    $sBody = $aHttpData[0]['response_body'] ?? false;
-                    if (!is_array(json_decode($sBody, 1))) {
+                    
+                    $aErrors=$this->_checkResponse($aHttpData[0]['response_body'] ?? false);
+                    if(count($aErrors)){
                         $bAdd = false;
                         $this->_addLog(
                             sprintf(
                                 $this->_tr('msgErr-Url-not-added-no-appmonitor'),
                                 $sUrl,
                                 (isset($aHttpData[0]['response_header']) ? '<pre>' . $aHttpData[0]['response_header'] . '</pre>' : '-')
+                                ."- ".implode('<br>- ', $aErrors)."<br>"
                             ),
                             'error'
                         );
@@ -718,8 +779,7 @@ class appmonitorserver
     protected function _generateResultArray($aClientData): array
     {
         $aReturn = [];
-        $aReturn["ts"] = date("U");
-        $aReturn["result"] = 1; // set "unknown" as default
+        $aReturn["result"] = RESULT_UNKNOWN; // set "unknown" as default
 
         if (!isset($aClientData["meta"])) {
             return $aReturn;
@@ -812,19 +872,8 @@ class appmonitorserver
         if (count($aUrls)) {
             $aAllHttpdata = $this->_multipleHttpGet($aUrls);
             foreach ($aAllHttpdata as $sKey => $aResult) {
-                $aClientData = json_decode($aResult['response_body'], true);
-                // $iTtl = $this->_iTtl;
-                if (!is_array($aClientData)) {
-                    $iTtl = $this->_iTtlOnError;
-                    $aClientData = [];
-                } else {
-                    if (
-                        isset($aClientData["meta"]["ttl"]) && $aClientData["meta"]["ttl"]
-                    ) {
-                        $iTtl = (int) $aClientData["meta"]["ttl"];
-                    }
-                }
-                // detect error
+
+                // detect http error
                 $iHttpStatus = $this->_getHttpStatus($aResult['response_header']);
                 $sError = !$aResult['response_header']
                     ? $this->_tr('msgErr-Http-request-failed')
@@ -835,24 +884,46 @@ class appmonitorserver
                     : (
                         (!$iHttpStatus || $iHttpStatus > 299)
                         ? $this->_tr('msgErr-Http-error')
-                        : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
+                        # : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
+                        : false
                     );
+            
+                // check syntax of response
+                $aJsonErrors=$this->_checkResponse($aResult['response_body']);
+                if(count($aJsonErrors)){
+                    $aClientData=[];
+                    // $aClientData["result"]=RESULT_ERROR;
+                    $sError.="- ".implode('<br>- ', $aJsonErrors)."<br>";
+                } else {
 
-                // add more metadata
-                $aClientData["result"] = $this->_generateResultArray($aClientData);
+                    $aClientData = json_decode($aResult['response_body'], true);
+
+                    // add more metadata
+                    $aClientData["result"] = $this->_generateResultArray($aClientData);
+                }
+                $aClientData["result"]["ts"]=date('U');
+
+                $iTtl = $sError 
+                    ? $this->_iTtlOnError 
+                    : (int) ($aClientData["meta"]["ttl"] ?? $this->_iTtl);
+                    
 
                 // set application status
                 // 2xx -> check json response
                 // no status = connect failed -> error
                 // 4xx -> no data -> unknown
                 // 5xx -> application error -> error
-                if (!$iHttpStatus || $iHttpStatus >= 400) {
+                if (
+                    !$iHttpStatus 
+                    || $iHttpStatus >= 400
+                    || count($aJsonErrors)
+                ) {
                     $aClientData["result"]["result"] = (!$iHttpStatus || $iHttpStatus >= 500)
                         ? RESULT_ERROR
                         : RESULT_UNKNOWN;
                 }
 
-                $aClientData["result"]["ttl"] = $iTtl;
+                $aClientData["result"]["ttl"] = $iTtl ?? $this->_iTtl;
                 $aClientData["result"]["url"] = $aResult['url'];
                 $aClientData["result"]["header"] = $aResult['response_header'];
                 $aClientData["result"]["headerarray"] = $this->_getHttpStatusArray($aResult['response_header']);
