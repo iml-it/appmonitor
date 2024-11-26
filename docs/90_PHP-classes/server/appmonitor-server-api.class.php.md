@@ -36,6 +36,7 @@
  * @package IML-Appmonitor
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2024-11-14  0.141  axel.hahn@unibe.ch  API access with basic auth and hmac hash key
  */
 ```
 

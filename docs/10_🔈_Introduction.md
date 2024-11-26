@@ -24,3 +24,8 @@ Client data
 - define the user groups to notify if the application status changes
 - define tags that will be visible in the server ui to filter by a group of application types or departments or other logic
 - chaining: with naming a parent you can create a dependency tree of checks
+
+API
+
+- health check for your monitoring tool
+- read all application data per application or multiple applications grouped by tags eg. to build a simplified health status board for your customers.
