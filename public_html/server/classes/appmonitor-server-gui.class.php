@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.142
+ * @version 0.143
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -42,6 +42,7 @@ require_once 'render-adminlte.class.php';
  * 2024-11-06  0.139  axel.hahn@unibe.ch  
  * 2024-11-06  0.139  axel.hahn@unibe.ch  update tinyservice class; fix defaults file
  * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
+ * 2024-11-29  0.143  axel.hahn@unibe.ch  filter by multiple tags
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -49,7 +50,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.142";
+    protected string $_sVersion = "0.143";
 
     /**
      * Title/ project name
@@ -2259,7 +2260,7 @@ class appmonitorserver_gui extends appmonitorserver
             foreach ($aTags as $sSingletag) {
                 $sReturn .= ($sReturn ? ' ' : '')
                     . ' <a href="#" class="tag" title="' . $this->_tr('Tag-filter') . ': ' . $sSingletag . '" '
-                    . 'onclick="setTag(\'' . $sSingletag . '\'); return false;"'
+                    . 'onclick="addTag(\'' . $sSingletag . '\'); return false;"'
                     . '>' . $this->_aIco['tag'] . ' ' . $sSingletag . '</a>';
             }
             return $sReturn;
@@ -2283,8 +2284,7 @@ class appmonitorserver_gui extends appmonitorserver
         if ($sOptions) {
             $sReturn = '<div class="form-group"><label for="selecttag">' . $this->_aIco['filter'] . ' <span>' . $this->_tr('Tag-filter') . '</label>'
                 . ' '
-                . '<select id="selecttag" onchange="setTagClass(this.value)">'
-                . '<option value="">---</option>'
+                . '<select id="selecttag" class="selectpicker" data-live-search="true" multiple>'
                 . $sOptions
                 . '</select></div>';
         }
@@ -2451,6 +2451,7 @@ class appmonitorserver_gui extends appmonitorserver
         ]);
         $oCdn->setLibs([
             "admin-lte/2.4.10",
+            "bootstrap-select/1.13.18",
             "datatables/1.10.21",
             // "font-awesome/5.15.4",
             "font-awesome/6.4.0",
@@ -2573,6 +2574,9 @@ class appmonitorserver_gui extends appmonitorserver
             . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('vis') . '/vis.min.js') . '" type="text/javascript"></script>'
             . '<link href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('vis') . '/vis-network.min.css') . '" rel="stylesheet">'
 
+            // <!-- bootstrap-select -->
+            . '<script src="' . $oCdn->getFullUrl($oCdn->getLibRelpath('bootstrap-select') . "/js/bootstrap-select.min.js") . '" type="text/javascript"></script>' . "\n"
+            . '<link rel="stylesheet" href="' . $oCdn->getFullUrl($oCdn->getLibRelpath('bootstrap-select') . "/css/bootstrap-select.min.css") . '">' . "\n"
 
             . '<script src="javascript/visjs-network.class.js"></script>'
             . '<script src="javascript/functions.js"></script>'
