@@ -129,7 +129,7 @@ function setAdressbar() {
             + (location.port ? ':'+location.port : '')
             + location.pathname
             + '?'
-            + (aViewFilters['tag'] ? '&tag=' + aViewFilters['tag'] : '')
+            + (aViewFilters['tag'] ? '&tag=' + aViewFilters['tag'].join(',') : '')
             + (aViewFilters['divwebs'] ? '&webapp=' + aViewFilters['divwebs'] : '')
             + aViewFilters['tab'];
     
@@ -189,17 +189,35 @@ function applyViewFilter() {
     // show everything
     $('.tags').show();
 
-    // filter by tag
+    $('#selecttag option').each(function () {
+        this.selected = '';
+    });
+
+    var sTaglist = '';
     if (aViewFilters['tag']) {
-        var sTagClass = getClassByClearnameTag(aViewFilters['tag']);
-        $('.tags').each(function () {
-            if (!$(this).hasClass(sTagClass)) {
-                $(this).hide();
-            }
-        });
+        for (var i = 0; i < aViewFilters['tag'].length; i++) {
+            var sTag = aViewFilters['tag'][i];
+            var sTagClass = getClassByClearnameTag(sTag);
+
+            // add to tag list
+            sTaglist+='<a href="#" class="btn btn-default" onclick="removeTag(\'' + sTag + '\'); return false;"><i class="fa-solid fa-tag"></i> ' + sTag + ' <i class="fa-solid fa-xmark"></i></a> ';
+
+            // select tag
+            $('#selecttag option').each(function () {
+                if (this.value === sTagClass) {
+                    this.selected = 'selected';
+                } 
+            });
+        
+            $('.tags').each(function () {
+                if (!$(this).hasClass(sTagClass)) {
+                    $(this).hide();
+                }
+            });
+        }
     }
-    // filter by tag
-    $('.tagfilterinfo').html(aViewFilters['tag'] ? '<i class="fa fa-tag"></i> ' + aViewFilters['tag'] + ' <a href="#" class="btn btn-danger" onclick="setTagClass(\'\'); return false;">x</a>' : '');
+    // show active tag filters
+    $('.tagfilterinfo').html(sTaglist);
 
     // filter hosts
     filterApps('divwebs',  'appname', true);  // app overview
@@ -207,6 +225,9 @@ function applyViewFilter() {
 
     // update url int the browser
     setAdressbar();
+
+    // update top right selectpicker
+    $('.selectpicker').selectpicker('refresh');
 }
 
 /**
@@ -235,20 +256,43 @@ function filterApps(sDiv, sClass, bIsOverview) {
 }
 
 
+/**
+ * set the active tab and show the content
+ * @param {string} sFilter value of the active tab
+ * @returns {undefined}
+ */
 function setTab(sFilter) {
     aViewFilters['tab'] = sFilter;
     showDiv();
 }
-function setTag(sFilter) {
-    aViewFilters['tag'] = sFilter;
+
+// ----------------------------------------------------------------------
+// Tags
+// ----------------------------------------------------------------------
+
+/**
+ * add a single tag to the filter
+ * @param {string} sTagname  tag name to add
+ */
+function addTag(sTagname) {
+    aViewFilters['tag'].push(sTagname);
     applyViewFilter();
 }
-function setTagClass(sClass) {
-    setTag(getTagByClassname(sClass));
+
+function UNUSED_setTagClass(sClass) {
+    addTag(getTagByClassname(sClass));
 }
 
-function setTextfilter(sTarget, sFilter) {
-    aViewFilters[sTarget] = sFilter;
+/**
+ * delete a single tag from the filter
+ * @param {string} sTagname  tag name to delete
+ */
+function removeTag(sTagname){
+    for (var i = 0; i < aViewFilters['tag'].length; i++) {
+        if (aViewFilters['tag'][i] == sTagname) {
+            aViewFilters['tag'].splice(i, 1);
+        }
+    }
     applyViewFilter();
 }
 
@@ -261,11 +305,7 @@ function getClassByClearnameTag(sTagname) {
     var sReturn = '';
     $('#selecttag option').each(function () {
         if (this.text === sTagname) {
-            this.selected = 'selected';
-            sActiveTag = sTagname;
             sReturn = this.value;
-        } else {
-            this.selected = false;
         }
     });
     return sReturn;
@@ -281,13 +321,23 @@ function getTagByClassname(sClassname) {
     var sReturn = '';
     $('#selecttag option').each(function () {
         if (this.value === sClassname) {
-            this.selected = 'selected';
+            // this.selected = 'selected';
             sReturn = this.text.replace(/\-\-\-/, '');
-        } else {
-            this.selected = false;
-        }
+        } 
     });
     return sReturn;
+}
+
+// ----------------------------------------------------------------------
+
+/**
+ * 
+ * @param {string} sTarget  filter key to set
+ * @param {string} sFilter  text to filter by
+ */
+function setTextfilter(sTarget, sFilter) {
+    aViewFilters[sTarget] = sFilter;
+    applyViewFilter();
 }
 
 /**
@@ -492,7 +542,7 @@ function postLoad(bIsFirstload) {
 function initGuiStuff() {
 
     aViewFilters = {
-        'tag': getQueryVariable('tag') ? getQueryVariable('tag') : '',
+        'tag': getQueryVariable('tag') ? getQueryVariable('tag').split(',') : [],
         'tab': window.location.hash ? window.location.hash : '#divwebs',
         'divwebs': getQueryVariable('divwebs'),
         'divsetup': getQueryVariable('divsetup')
@@ -519,4 +569,15 @@ function initGuiStuff() {
     window.addEventListener('hashchange', function(event) {
         setTab(window.location.hash);
     });
+
+    // callback: tag filter
+    $('#selecttag').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+        aViewFilters['tag']= [];
+        var aClasses=$('#selecttag').selectpicker('val');
+        for (var i = 0; i < aClasses.length; i++) {
+            aViewFilters['tag'].push(getTagByClassname(aClasses[i]));
+        }
+        applyViewFilter();
+    
+      });    
 }
