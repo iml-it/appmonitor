@@ -275,6 +275,12 @@ function setTab(sFilter) {
  * @param {string} sTagname  tag name to add
  */
 function addTag(sTagname) {
+    if (!aViewFilters['tag']) {
+        aViewFilters['tag'] = [];
+    }
+    if (aViewFilters['tag'].indexOf(sTagname) > -1) {
+        return false;
+    }
     aViewFilters['tag'].push(sTagname);
     applyViewFilter();
 }
