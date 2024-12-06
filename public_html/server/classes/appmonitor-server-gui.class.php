@@ -43,6 +43,7 @@ require_once 'render-adminlte.class.php';
  * 2024-11-06  0.139  axel.hahn@unibe.ch  update tinyservice class; fix defaults file
  * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
  * 2024-11-29  0.143  axel.hahn@unibe.ch  filter by multiple tags
+ * 2024-12-06  0.144  axel.hahn@unibe.ch  prevent multiple values of same tag (see functions.js)
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -50,7 +51,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.143";
+    protected string $_sVersion = "0.144";
 
     /**
      * Title/ project name
