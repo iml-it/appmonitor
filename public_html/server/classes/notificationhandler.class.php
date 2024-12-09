@@ -735,9 +735,10 @@ class notificationhandler
                     'htmlmessage' => '
                         <style>
                             body{background: #f8f8f8; font-size: 1.1em; font-family: Arial, Helvetica, sans-serif; text-align: center;}
-                            body>div{background: #fff; margin: 1em auto; border: #eee 2px solid; padding: 1em; max-width: 1000px; text-align: left;}
-                            h1{background: #eee; border-bottom: 2px solid #800; color: #666; padding: 0.5em; margin: 0 0 1em 0;}
-                            h2{color: #888; padding: 0.5em; margin: 0 0 1em 0;}
+                            body>div{background: #fff; margin: 1em auto; border: #eee 2px solid; padding: 0; max-width: 1000px; text-align: left;}
+                            body>div>div{padding: 1em; }
+                            h1{background: #eee; border-bottom: 2px solid #800; color: #666; font-size: 130%; padding: 0.5em; margin: 0 0 1em 0;}
+                            h2{color: #888; padding: 0em; margin: 0 0 1em 0;}
                             .footer{background: #f8f8f8; padding: 0.5em; margin-top: 3em; text-align: right;}
                             .result-0{color: green;  background: #dfd; }
                             .result-1{color: purple; background: #fdf; }
@@ -745,8 +746,10 @@ class notificationhandler
                             .result-3, .error{color: #c00; background: #fdd; }
                         </style>
                         <h1>IML Appmonitor</h1>
+                        <div>
                         ' . $sMessage
                         .'<br><br><div class="footer"><strong>IML Appmonitor</strong> | GNU GPL 3.0 | Source <a href="https://github.com/iml-it/appmonitor">Github</a></div>'
+                        .'</div>'
                         ,
                 ];
                 // $sSendMethod="send_$sPlugin";
