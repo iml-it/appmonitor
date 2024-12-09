@@ -255,7 +255,7 @@ The key "view" has 2 subnodes
 
 key                 | description
 --------------------|---------------------------
-validationwarnings  | Show validation warnings in app detail page
+validationwarnings  | Show validation warnings in app overview and app detail page
 
 ### view:overview
 
