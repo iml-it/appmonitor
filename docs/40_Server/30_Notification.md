@@ -1,3 +1,8 @@
+---
+title: Notifications
+keywords: "email, slack, application specific receivers, global receivers"
+---
+
 ## Introduction
 
 Notifications will be triggered if ...

@@ -1,3 +1,8 @@
+---
+title: Server configuration
+keywords: "files, settings, configuration"
+---
+
 ## Configuration files
 
 The config is in json syntax. The files are located in
@@ -64,6 +69,7 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
             "age": true,
             "checks": true,
             "times": true,
+            "tags": true,
             "receiver": true,
             "notification": true
         }
@@ -239,3 +245,36 @@ Example:
 
 The list of appmonitor client urls is in appmonitor-server-urls.json.
 This file is not part of the repository. It will be created if you store the first url.
+
+## View
+
+The key "view" has 2 subnodes
+
+* "overview" - elements to show on application overview page
+* "appdetails" - elements to show on application detail page
+
+### view:overview
+
+Set it true or false to set the visibility.
+
+Key            | Description
+---------------|---------------------------
+"webapps"      | tile: number of web applications
+"hosts"        | tile: number of hosts
+"checks"       | tile: number of checks total for all web apps
+"notification" | tile: show stats if notifications are currently enabled
+
+### view:appdetails
+
+Set it true or false to set the visibility.
+
+Key            | Description
+---------------|---------------------------
+"appstatus"    | tile: number of web applications
+"httpcode"     | tile: http status code of last check
+"age"          | tile: age of the currently visible information and TTL
+"checks"       | tile: number of checks total for current web app
+"times"        | tile: total time to perform all checks of the web app (if available)
+"tags"         | tile: show count of tags and its names
+"receiver"     | tile: show app specific notification recerivers
+"notification" | tile: show stats if notifications are currently enabled
