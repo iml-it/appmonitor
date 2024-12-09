@@ -110,6 +110,9 @@
         "Sleepmode-on": "Zzz ... Meldungen sind AUS",
         "Sleepmode-off": "Meldungen sind AN",
         
+        "Tags": "Tags", 
+        "Tags-none": "Kein Tag gesetzt", 
+
         "Time": "Zeit",
         "Time-for-all-checks": "Zeiten aller Checks",
         
@@ -196,7 +199,8 @@
         "msgWarn-missing-key-meta-ttl":"Es wurde kein TTL gesetzt via meta > ttl. Es wird der Default verwendet.",
         "msgWarn-missing-key-meta-notifications":"Es gibt keine Sektion meta > notifications. Im Fehlerfall gibt es keine Meldung an Entwickler / Product Owner dieser Applikation.",
         "msgWarn-no-notifications":"In der Sektion meta > notification > [target] ist kein Empf&auml;nger. Im Fehlerfall gibt es keine Meldung an Entwickler / Product Owner dieser Applikation.",
-        "msgWarn-missing-key-meta-time":"Es gibt keine Messdaten - es wurde kein Wert gesetzt via meta > time.",
+        "msgWarn-missing-key-meta-time":"Es gibt keine Zeitmessung am Client - es wurde kein Wert gesetzt via meta > time.",
+        "msgWarn-missing-key-meta-tags":"Es wurden keine Tags definiert: meta > tags fehlt.",
     
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },

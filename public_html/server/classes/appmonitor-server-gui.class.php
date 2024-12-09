@@ -419,6 +419,7 @@ class appmonitorserver_gui extends appmonitorserver
         }
 
         foreach ($this->_aCfg['view']['appdetails'] as $key => $bVisibility) {
+            if(!$bVisibility) continue;
             switch ($key) {
                 case 'appstatus':
                     $aLast = $this->oNotification->getAppLastResult();
@@ -437,27 +438,23 @@ class appmonitorserver_gui extends appmonitorserver
                     );
                     break;
                 case 'httpcode':
-                    $sReturn .= $bVisibility
-                        ? $this->_getTile([
+                    $sReturn .= $this->_getTile([
                             'result' => ((int) $aHostdata['httpstatus'] == 0 || $aHostdata['httpstatus'] >= 400)
                                 ? RESULT_ERROR
                                 : false,
                             'label' => $this->_tr('Http-status'),
                             'count' => $aHostdata['httpstatus'] ? $aHostdata['httpstatus'] : '??',
-                        ])
-                        : '';
+                        ]);
                     break;
                 case 'age':
                     $bOutdated = isset($aHostdata["outdated"]) && $aHostdata["outdated"];
-                    $sReturn .= $bVisibility
-                        ? $this->_getTile([
+                    $sReturn .= $this->_getTile([
                             'result' => $bOutdated ? RESULT_ERROR : RESULT_OK,
                             'icon' => $this->_aIco['age'],
                             'label' => $this->_tr('age-of-result'),
                             'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
                             'more' => $this->_tr('TTL') . '=' . $aHostdata['ttl'] . 's',
-                        ])
-                        : '';
+                        ]);
                     break;
                 case 'checks':
                     $sReturn .= $bVisibility && isset($aHostdata['summary']['total'])
@@ -488,26 +485,34 @@ class appmonitorserver_gui extends appmonitorserver
                         // .'<pre>'.print_r($this->oNotification->getAppNotificationdata(), 1).'</pre>'
                         . (count($aSlackChannels) ? '<span title="' . implode("\n", array_keys($aSlackChannels)) . '">' . count($aSlackChannels) . ' x ' . $this->_aIco['notify-slack'] . '</span> ' : '');
                     $iNotifyTargets = count($aEmailNotifiers) + count($aSlackChannels);
-                    $sReturn .= $bVisibility
-                        ? $this->_getTile([
+                    $sReturn .= $this->_getTile([
                             'result' => $iNotifyTargets ? false : RESULT_WARNING,
                             'icon' => $this->_aIco['notifications'],
                             'label' => $this->_tr('Notify-address'),
                             'count' => $iNotifyTargets,
                             'more' => $sMoreNotify
-                        ])
-                        : '';
+                        ]);
                     break;
                 case 'notification':
                     $sSleeping = $this->oNotification->isSleeptime();
-                    $sReturn .= $bVisibility
-                        ? $this->_getTile([
+                    $sReturn .= $this->_getTile([
                             'result' => ($sSleeping ? RESULT_WARNING : false),
                             'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
                             'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
                             'more' => $sSleeping,
-                        ])
-                        : '';
+                        ]);
+                    break;
+                case 'tags':
+                    $aTags = $this->_data[$sAppId]['meta']['tags'] ??  [];
+
+                    $sTaglist = implode(', ', $aTags);
+                    $sReturn .= $this->_getTile([
+                            'result' => $sTaglist ? RESULT_OK : RESULT_WARNING,
+                            'icon' => $this->_aIco['tag'],
+                            'count' => count($aTags),
+                            'label' => $this->_tr('Tags'),
+                            'more' => $sTaglist ?: $this->_tr('Tags-none'),
+                        ]);
                     break;
 
                 default:
@@ -666,7 +671,8 @@ class appmonitorserver_gui extends appmonitorserver
                     $aErrors[] = $this->_tr('msgErr-missing-key-meta-' . $sMetakey);
                 }
             }
-            foreach (['ttl', 'time', 'notifications'] as $sMetakey) {
+            unset($aData['meta']['tags']);
+            foreach (['ttl', 'time', 'notifications', 'tags'] as $sMetakey) {
                 if (!isset($aData['meta'][$sMetakey])) {
                     $aWarnings[] = $this->_tr('msgWarn-missing-key-meta-' . $sMetakey);
                 }

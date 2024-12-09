@@ -50,6 +50,7 @@
             "age": true,
             "checks": true,
             "times": true,
+            "tags": true,
             "receiver": true,
             "notification": true
         }
