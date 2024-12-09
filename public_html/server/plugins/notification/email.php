@@ -112,7 +112,7 @@ class emailNotification
         if($bIsHtml){
             $sMessage=strstr($sMsg, '<html>')
                 ? $sMsg
-                : "<!doctype html><html><body><div>$sMsg</div></body></html>"
+                : "<!doctype html><html><body><br><div>$sMsg</div><br></body></html>"
             ;
             // if(!strstr($sMsg, '<html>')){
             //     $sTpl=file_exists(self::$_template)

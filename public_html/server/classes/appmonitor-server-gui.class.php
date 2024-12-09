@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.143
+ * @version 0.145
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -44,6 +44,7 @@ require_once 'render-adminlte.class.php';
  * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
  * 2024-11-29  0.143  axel.hahn@unibe.ch  filter by multiple tags
  * 2024-12-06  0.144  axel.hahn@unibe.ch  prevent multiple values of same tag (see functions.js)
+ * 2024-12-09  0.145  axel.hahn@unibe.ch  shwo tags in appdetails; config flag: show validation warnings
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -51,7 +52,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.144";
+    protected string $_sVersion = "0.145";
 
     /**
      * Title/ project name
@@ -419,6 +420,7 @@ class appmonitorserver_gui extends appmonitorserver
         }
 
         foreach ($this->_aCfg['view']['appdetails'] as $key => $bVisibility) {
+            if(!$bVisibility) continue;
             switch ($key) {
                 case 'appstatus':
                     $aLast = $this->oNotification->getAppLastResult();
@@ -437,27 +439,23 @@ class appmonitorserver_gui extends appmonitorserver
                     );
                     break;
                 case 'httpcode':
-                    $sReturn .= $bVisibility
-                        ? $this->_getTile([
+                    $sReturn .= $this->_getTile([
                             'result' => ((int) $aHostdata['httpstatus'] == 0 || $aHostdata['httpstatus'] >= 400)
                                 ? RESULT_ERROR
                                 : false,
                             'label' => $this->_tr('Http-status'),
                             'count' => $aHostdata['httpstatus'] ? $aHostdata['httpstatus'] : '??',
-                        ])
-                        : '';
+                        ]);
                     break;
                 case 'age':
                     $bOutdated = isset($aHostdata["outdated"]) && $aHostdata["outdated"];
-                    $sReturn .= $bVisibility
-                        ? $this->_getTile([
+                    $sReturn .= $this->_getTile([
                             'result' => $bOutdated ? RESULT_ERROR : RESULT_OK,
                             'icon' => $this->_aIco['age'],
                             'label' => $this->_tr('age-of-result'),
                             'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
                             'more' => $this->_tr('TTL') . '=' . $aHostdata['ttl'] . 's',
-                        ])
-                        : '';
+                        ]);
                     break;
                 case 'checks':
                     $sReturn .= $bVisibility && isset($aHostdata['summary']['total'])
@@ -488,26 +486,34 @@ class appmonitorserver_gui extends appmonitorserver
                         // .'<pre>'.print_r($this->oNotification->getAppNotificationdata(), 1).'</pre>'
                         . (count($aSlackChannels) ? '<span title="' . implode("\n", array_keys($aSlackChannels)) . '">' . count($aSlackChannels) . ' x ' . $this->_aIco['notify-slack'] . '</span> ' : '');
                     $iNotifyTargets = count($aEmailNotifiers) + count($aSlackChannels);
-                    $sReturn .= $bVisibility
-                        ? $this->_getTile([
+                    $sReturn .= $this->_getTile([
                             'result' => $iNotifyTargets ? false : RESULT_WARNING,
                             'icon' => $this->_aIco['notifications'],
                             'label' => $this->_tr('Notify-address'),
                             'count' => $iNotifyTargets,
                             'more' => $sMoreNotify
-                        ])
-                        : '';
+                        ]);
                     break;
                 case 'notification':
                     $sSleeping = $this->oNotification->isSleeptime();
-                    $sReturn .= $bVisibility
-                        ? $this->_getTile([
+                    $sReturn .= $this->_getTile([
                             'result' => ($sSleeping ? RESULT_WARNING : false),
                             'icon' => ($sSleeping ? $this->_aIco['sleepmode-on'] : $this->_aIco['sleepmode-off']),
                             'label' => ($sSleeping ? $this->_tr('Sleepmode-on') : $this->_tr('Sleepmode-off')),
                             'more' => $sSleeping,
-                        ])
-                        : '';
+                        ]);
+                    break;
+                case 'tags':
+                    $aTags = $this->_data[$sAppId]['meta']['tags'] ??  [];
+
+                    $sTaglist = implode(', ', $aTags);
+                    $sReturn .= $this->_getTile([
+                            'result' => $sTaglist ? RESULT_OK : RESULT_WARNING,
+                            'icon' => $this->_aIco['tag'],
+                            'count' => count($aTags),
+                            'label' => $this->_tr('Tags'),
+                            'more' => $sTaglist ?: $this->_tr('Tags-none'),
+                        ]);
                     break;
 
                 default:
@@ -666,7 +672,8 @@ class appmonitorserver_gui extends appmonitorserver
                     $aErrors[] = $this->_tr('msgErr-missing-key-meta-' . $sMetakey);
                 }
             }
-            foreach (['ttl', 'time', 'notifications'] as $sMetakey) {
+            unset($aData['meta']['tags']);
+            foreach (['ttl', 'time', 'notifications', 'tags'] as $sMetakey) {
                 if (!isset($aData['meta'][$sMetakey])) {
                     $aWarnings[] = $this->_tr('msgWarn-missing-key-meta-' . $sMetakey);
                 }
@@ -1375,7 +1382,7 @@ class appmonitorserver_gui extends appmonitorserver
             (isset($aEntries["result"]) && isset($aEntries["result"]["result"]) && isset($aEntries["result"]["website"]) && isset($aEntries["result"]["host"]))
         ) {
 
-            // --- 
+            // --- top breadcrumb
             $sTopHeadline = $oA->getSectionHead(
                 ''
                 . '<a href="#divwebs"'
@@ -1404,9 +1411,12 @@ class appmonitorserver_gui extends appmonitorserver
                 ]);
             }
 
-            if (!$sValidationContent && $aValidatorResult) {
+            $bShowWarnings=!!$this->_aCfg['view']['validationwarnings'] ?? true;
+            if (!$sValidationContent && $aValidatorResult ) {
                 foreach ($aValidatorResult as $sSection => $aMessageItems) {
-                    if (count($aMessageItems)) {
+                    if (count($aMessageItems)
+                        && ( $sSection == 'error' || $sSection == 'warning' && $bShowWarnings )
+                    ) {
                         $sDivContent = '';
                         foreach ($aMessageItems as $sSingleMessage) {
                             $sDivContent .= '- ' . $sSingleMessage . '<br>';
@@ -2018,11 +2028,14 @@ class appmonitorserver_gui extends appmonitorserver
                 : $this->_getIconClass($this->_aIco['host']);
             $sAppLabel = str_replace('.', '.&shy;', $this->_getAppLabel($sAppId));
 
+            $bShowWarnings=!!$this->_aCfg['view']['validationwarnings'] ?? true;
             $aValidaion = $this->_checkClientResponse($sAppId);
             $sValidatorinfo = '';
             if ($aValidaion) {
                 foreach ($aValidaion as $sSection => $aMessages) {
-                    if (count($aValidaion[$sSection])) {
+                    if (count($aValidaion[$sSection])
+                        && ( $sSection == 'error' || ($sSection == 'warning' && $bShowWarnings) )
+                    ) {
                         $sValidatorinfo .= '<span class="ico' . $sSection . '" title="' . sprintf($this->_tr('Validator-' . $sSection . '-title'), count($aMessages)) . '">' . $this->_aIco[$sSection] . '</span> ' . count($aMessages);
                     }
                 }
