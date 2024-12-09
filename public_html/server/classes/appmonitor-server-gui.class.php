@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.143
+ * @version 0.145
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -44,6 +44,7 @@ require_once 'render-adminlte.class.php';
  * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
  * 2024-11-29  0.143  axel.hahn@unibe.ch  filter by multiple tags
  * 2024-12-06  0.144  axel.hahn@unibe.ch  prevent multiple values of same tag (see functions.js)
+ * 2024-12-09  0.145  axel.hahn@unibe.ch  shwo tags in appdetails; config flag: show validation warnings
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -51,7 +52,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.144";
+    protected string $_sVersion = "0.145";
 
     /**
      * Title/ project name
