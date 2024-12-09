@@ -53,6 +53,7 @@
             "tags": true,
             "receiver": true,
             "notification": true
-        }
+        },
+        "validationwarnings": true
     }
 }
