@@ -1381,7 +1381,7 @@ class appmonitorserver_gui extends appmonitorserver
             (isset($aEntries["result"]) && isset($aEntries["result"]["result"]) && isset($aEntries["result"]["website"]) && isset($aEntries["result"]["host"]))
         ) {
 
-            // --- 
+            // --- top breadcrumb
             $sTopHeadline = $oA->getSectionHead(
                 ''
                 . '<a href="#divwebs"'
@@ -1410,9 +1410,12 @@ class appmonitorserver_gui extends appmonitorserver
                 ]);
             }
 
-            if (!$sValidationContent && $aValidatorResult) {
+            $bShowWarnings=!!$this->_aCfg['view']['validationwarnings'] ?? true;
+            if (!$sValidationContent && $aValidatorResult ) {
                 foreach ($aValidatorResult as $sSection => $aMessageItems) {
-                    if (count($aMessageItems)) {
+                    if (count($aMessageItems)
+                        && ( $sSection == 'error' || $sSection == 'warning' && $bShowWarnings )
+                    ) {
                         $sDivContent = '';
                         foreach ($aMessageItems as $sSingleMessage) {
                             $sDivContent .= '- ' . $sSingleMessage . '<br>';
@@ -2024,11 +2027,14 @@ class appmonitorserver_gui extends appmonitorserver
                 : $this->_getIconClass($this->_aIco['host']);
             $sAppLabel = str_replace('.', '.&shy;', $this->_getAppLabel($sAppId));
 
+            $bShowWarnings=!!$this->_aCfg['view']['validationwarnings'] ?? true;
             $aValidaion = $this->_checkClientResponse($sAppId);
             $sValidatorinfo = '';
             if ($aValidaion) {
                 foreach ($aValidaion as $sSection => $aMessages) {
-                    if (count($aValidaion[$sSection])) {
+                    if (count($aValidaion[$sSection])
+                        && ( $sSection == 'error' || ($sSection == 'warning' && $bShowWarnings) )
+                    ) {
                         $sValidatorinfo .= '<span class="ico' . $sSection . '" title="' . sprintf($this->_tr('Validator-' . $sSection . '-title'), count($aMessages)) . '">' . $this->_aIco[$sSection] . '</span> ' . count($aMessages);
                     }
                 }

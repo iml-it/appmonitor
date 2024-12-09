@@ -324,7 +324,7 @@ class notificationhandler
             return false;
         }
         $iChangetype = $this->_detectChangetype();
-        $iResult = $this->_aAppResult['result']['result'];
+        $iResult = $this->_aAppResult['result']['result'] ?? RESULT_ERROR;
 
         // get the highest value for a delay
         $iMaxDelay = max(array_values($this->_aDelayNotification));

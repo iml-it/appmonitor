@@ -1,0 +1,85 @@
+#!/bin/bash
+# ======================================================================
+#
+# pmu - process memory usage
+#
+# ----------------------------------------------------------------------
+# 2013-07-31  v1.0  Axel Hahn
+# 2023-01-10  v1.1  Axel Hahn  shell fixes; add total status
+# 2023-12-22  v1.2  Axel Hahn  speedup factor 5..10
+# ======================================================================
+
+typeset -i lines=0
+_version=1.2
+
+# ----------------------------------------------------------------------
+# MAIN
+# ----------------------------------------------------------------------
+
+echo "_______________________________________________________________________________
+
+>>>> Memory usage by each process in MB                                   v$_version
+"
+
+# ----- show help
+if [ "$1" = "-?" -o "$1" = "-h" -o "$1" = "--help" ]; then
+    self=$( basename $0 )
+cat <<EOF
+HELP
+
+$self groups all processes and shows their memory usage in MB.
+The output is ordered by largest consumers.
+Coloumns:
+  process     process name
+  total MB    aggregated memory by all processes
+  count       count of processes
+  average MB  average memory usage (total divided by count)
+You can limit the output by intger parameter for count of lines to show.
+
+SYNTAX:
+
+  $self                  shows all processes
+  $self [integer]        limit output to top n consumers
+  $self [-? -h --help]   show this help
+
+EXAMPLE:
+
+  $self 10               shows top 10 consumers
+
+EOF
+    exit 0
+fi
+
+
+# ----- output of total status
+top -n 1 -E M -b | head | grep -E "^(Tasks|MiB Mem|MiB Spch)"
+echo "_______________________________________________________________________________
+"
+
+# ----- aggregate data
+
+pslist=$( ps -yle )
+pslist2=$(
+    for processname in $( echo "$pslist" | awk {'print $13'} | sort -u | grep -Fv "/")
+    do
+        grep " ${processname}$" <<< "$pslist"| awk '
+        {x += $8;y += 1; process=$13}
+        END {printf "%-15s %10.0f %5s %10.3f\n", process, x/1024, y, x/(y*1024)}' 2>/dev/null
+    done | sort -k 2 -n -r
+)
+
+# ----- output for processes
+lines=$1
+echo "process           total MB count average MB"
+echo "--------------- ---------- ----- ----------"
+
+if [ $lines -gt 0 ]; then
+    echo "$pslist2" | head -$lines
+else
+    echo "$pslist2"
+fi
+echo
+
+exit
+
+# ----------------------------------------------------------------------
