@@ -672,7 +672,6 @@ class appmonitorserver_gui extends appmonitorserver
                     $aErrors[] = $this->_tr('msgErr-missing-key-meta-' . $sMetakey);
                 }
             }
-            unset($aData['meta']['tags']);
             foreach (['ttl', 'time', 'notifications', 'tags'] as $sMetakey) {
                 if (!isset($aData['meta'][$sMetakey])) {
                     $aWarnings[] = $this->_tr('msgWarn-missing-key-meta-' . $sMetakey);
