@@ -44,7 +44,8 @@ require_once 'render-adminlte.class.php';
  * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
  * 2024-11-29  0.143  axel.hahn@unibe.ch  filter by multiple tags
  * 2024-12-06  0.144  axel.hahn@unibe.ch  prevent multiple values of same tag (see functions.js)
- * 2024-12-09  0.145  axel.hahn@unibe.ch  shwo tags in appdetails; config flag: show validation warnings
+ * 2024-12-09  0.145  axel.hahn@unibe.ch  show tags in appdetails; config flag: show validation warnings
+ * 2024-12-10  0.146  axel.hahn@unibe.ch  add bootstrap-select link in about page; remove test line for tag validation
  */
 class appmonitorserver_gui extends appmonitorserver
 {
