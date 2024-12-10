@@ -1327,6 +1327,7 @@ class appmonitorserver_gui extends appmonitorserver
             . $this->_tr('About-vendor') .
             '<ul>
                 <li><a href="https://adminlte.io/">AdminLTE</a></li>
+                <li><a href="https://developer.snapappointments.com/bootstrap-select/">Bootstrap-Select</a></li>
                 <li><a href="https://datatables.net/">datatables.net</a></li>
                 <li><a href="https://fontawesome.com/">FontAwesome</a></li>
                 <li><a href="https://jquery.com/">jQuery</a></li>
@@ -1334,7 +1335,7 @@ class appmonitorserver_gui extends appmonitorserver
                 <li><a href="https://www.chartjs.org/">ChartJs</a></li>
                 <li><a href="https://visjs.org/">Vis.js</a></li>
                 <li><a href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
-                <li><a href="">AhCache</a></li>
+                <li><a href="https://github.com/axelhahn/ahcache/">AhCache</a></li>
             </ul>';
         // return $sHtml;
         return $oA->getSectionHead($this->_aIco["about"] . ' ' . $this->_tr('About'))
