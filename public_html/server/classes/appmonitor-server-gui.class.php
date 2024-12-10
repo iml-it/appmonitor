@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.145
+ * @version 0.146
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -44,7 +44,8 @@ require_once 'render-adminlte.class.php';
  * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
  * 2024-11-29  0.143  axel.hahn@unibe.ch  filter by multiple tags
  * 2024-12-06  0.144  axel.hahn@unibe.ch  prevent multiple values of same tag (see functions.js)
- * 2024-12-09  0.145  axel.hahn@unibe.ch  shwo tags in appdetails; config flag: show validation warnings
+ * 2024-12-09  0.145  axel.hahn@unibe.ch  show tags in appdetails; config flag: show validation warnings
+ * 2024-12-10  0.146  axel.hahn@unibe.ch  add bootstrap-select link in about page; remove test line for tag validation
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -52,7 +53,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.145";
+    protected string $_sVersion = "0.146";
 
     /**
      * Title/ project name
@@ -672,7 +673,6 @@ class appmonitorserver_gui extends appmonitorserver
                     $aErrors[] = $this->_tr('msgErr-missing-key-meta-' . $sMetakey);
                 }
             }
-            unset($aData['meta']['tags']);
             foreach (['ttl', 'time', 'notifications', 'tags'] as $sMetakey) {
                 if (!isset($aData['meta'][$sMetakey])) {
                     $aWarnings[] = $this->_tr('msgWarn-missing-key-meta-' . $sMetakey);
@@ -1328,6 +1328,7 @@ class appmonitorserver_gui extends appmonitorserver
             . $this->_tr('About-vendor') .
             '<ul>
                 <li><a href="https://adminlte.io/">AdminLTE</a></li>
+                <li><a href="https://developer.snapappointments.com/bootstrap-select/">Bootstrap-Select</a></li>
                 <li><a href="https://datatables.net/">datatables.net</a></li>
                 <li><a href="https://fontawesome.com/">FontAwesome</a></li>
                 <li><a href="https://jquery.com/">jQuery</a></li>
@@ -1335,7 +1336,7 @@ class appmonitorserver_gui extends appmonitorserver
                 <li><a href="https://www.chartjs.org/">ChartJs</a></li>
                 <li><a href="https://visjs.org/">Vis.js</a></li>
                 <li><a href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
-                <li><a href="">AhCache</a></li>
+                <li><a href="https://github.com/axelhahn/ahcache/">AhCache</a></li>
             </ul>';
         // return $sHtml;
         return $oA->getSectionHead($this->_aIco["about"] . ' ' . $this->_tr('About'))
