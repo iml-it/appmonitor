@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.146
+ * @version 0.147
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -46,6 +46,7 @@ require_once 'render-adminlte.class.php';
  * 2024-12-06  0.144  axel.hahn@unibe.ch  prevent multiple values of same tag (see functions.js)
  * 2024-12-09  0.145  axel.hahn@unibe.ch  show tags in appdetails; config flag: show validation warnings
  * 2024-12-10  0.146  axel.hahn@unibe.ch  add bootstrap-select link in about page; remove test line for tag validation
+ * 2024-12-19  0.147  axel.hahn@unibe.ch  PHP 8.4 compatibility
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -53,7 +54,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.146";
+    protected string $_sVersion = "0.147";
 
     /**
      * Title/ project name

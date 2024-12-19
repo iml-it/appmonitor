@@ -6,21 +6,21 @@ To monitor an application we need a file that can send metadata (infos about app
 2) Step by step add more checks to verify that all needed requirements and services that your application can run smoothly. To write your own checks ... these are some ideas you can pick from:
    - file check:
      - is a (config) file readable AND writable
+     - check database connections (remark: read your config for credentials) ... to master and slaves
+   - http checks
      - is a upload directory writeable?
      - if the maintenance page is triggered by a file: does the maintenance file NOT exist
      - verify security: is a sensitive (config) file or a temp a temp directory writeable but not accessible by http? (requires 2 checks: file and http)
    - database checks (PDO)
-     - check database connections (remark: read your config for credentials) ... to master and slaves
-   - http checks
      - check if a remote page (or web api) answers ... and optionally contains given text/ regex
      - check if page sends the correct redirect location
      - check if a request contains the wanted non-OK-status code, i.e. redirect with 307 or a config is NOT accessible and sends a 403 response
    - tcp checks
      - do very basic network checks if you don't make a authenticated connect, i.e. to LDAP, SSH, ...
    - certificate
-     - use the snippet for the certificate check: this check is active if https is used only.
+     - use the snippet for the certificate check: this check is active if https is used only (`include '../apps/shared_check_ssl.php';`).
 
-3) Add tags and notifications.
+3) Add tags and notifications. Add groups and dependencies between your check items (eg. a database check depends on reading the config file). Then you get a nicer tree view in the web frontend.
 4) Finetuning: check some edge cases and security checks.
 
 If you don't know how to continue after the first simple check and  and what else to check ...
