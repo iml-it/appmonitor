@@ -405,6 +405,7 @@ function initRelNav(){
 function showDiv() {
 
     var oOut = $('#content');
+    var oError = $('#errorajax');
     var url = './get.php?';
 
     var aCfgViews = {
@@ -437,7 +438,7 @@ function showDiv() {
     }
     url += 'item=' + item + (appid ? '&appid=' + appid : '')+ (count ? '&count=' + count : '');
 
-    // var sInfo='new content<br>DIV: '+sDiv+'<br>appid: '+appid+'<br>URL: '+url+'<br><hr>';
+    var sInfo='new content<br>DIV: '+sDiv+'<br>appid: '+appid+'<br>URL: '+url+'<br><hr>';
     var sInfo = '';
     // oOut.html(sInfo);
 
@@ -453,17 +454,17 @@ function showDiv() {
         success: function (data) {
             oOut.css('opacity', 1);
             oOut.html(sInfo + data);
+            oError.hide();
             postLoad(false);
         },
         error: function (data) {
             oOut.css('opacity', 1);
-            oOut.html(sInfo + 'Failed :-/' + data);
+            oOut.html(sInfo + '<br>' 
+                + '<h2>'+data.status + ' - ' + data.statusText + '</h2>' 
+                + data.responseText.replace(/<[^>]*>/g, "")+'<br><br>'
+            );
+            oError.show();
             postLoad(false);
-            /*
-             $('#errorlog').html(
-             $('#errorlog').html('AJAX error: <a href="' + url + '?' + queryparams + '">' + url + '?' + queryparams + '</a>')
-             );
-             */
         }
     });
 }

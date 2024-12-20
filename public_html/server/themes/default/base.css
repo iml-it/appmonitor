@@ -28,6 +28,7 @@ padding: 1em;}
 
 
 #content{transition: opacity 0.4s linear; }
+#errorajax{display: none;}
 
 .divhost{ border-radius:0.5em;}
 .divhost b{color:#fff;}
