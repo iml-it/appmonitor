@@ -85,6 +85,7 @@
         "Url": "Url", 
 
         "Error-message": "Fehlermeldung",
+        "Error-ajax-request": "Die Seite konnte nicht geladen/ aktualisiert werden.<br>Der Appmonitor Server ist derzeit nicht erreichbar.<br>Bitte versuchen Sie es sp&auml;ter noch einmal.",
         "Http-details": "Http Details der letzten Appmonitor Anfrage",
         "Http-status": "Http-Status",
         "Http-header": "Http-Antwort-Header",

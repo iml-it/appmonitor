@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.147
+ * @version 0.148
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -47,6 +47,7 @@ require_once 'render-adminlte.class.php';
  * 2024-12-09  0.145  axel.hahn@unibe.ch  show tags in appdetails; config flag: show validation warnings
  * 2024-12-10  0.146  axel.hahn@unibe.ch  add bootstrap-select link in about page; remove test line for tag validation
  * 2024-12-19  0.147  axel.hahn@unibe.ch  PHP 8.4 compatibility
+ * 2024-12-20  0.148  axel.hahn@unibe.ch  Beautify ajax error output
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -54,7 +55,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.147";
+    protected string $_sVersion = "0.148";
 
     /**
      * Title/ project name
@@ -2480,7 +2481,7 @@ class appmonitorserver_gui extends appmonitorserver
         $oA = new renderadminlte();
 
         $this->loadClientData(); // required to show tags
-        $sHtml = '. . .';
+        $sHtml = '';
         $sNavi = '';
         $sTitle = $this->_sTitle . ' v' . $this->_sVersion;
 
@@ -2538,10 +2539,19 @@ class appmonitorserver_gui extends appmonitorserver
         $aReplace['{{NAVI_TOP_RIGHT}}'] = '<li><span class="tagfilter">' . $this->_renderTagfilter() . '</span></li>';
         $aReplace['{{NAVI_LEFT}}'] = $sNavi;
         $aReplace['{{PAGE_BODY}}'] = ''
-            . '<div class="outsegment" id="content">'
+            . '<div class="outsegment" id="errorajax" style="display: none">'. "\n"
+                . $oA->getAlert([
+                    'type' => 'danger',
+                    'dismissible' => false,
+                    'title' => $this->_tr('Error-message'),
+                    'text'=> $this->_tr('Error-ajax-request'),
+                ]). "\n"
+            . '</div>'. "\n"
+            . '<div class="outsegment" id="content">'. "\n"
             . '' . $sHtml . "\n"
-            . '</div>'
-            . '<div class="divlog">' . $this->_renderLogs() . '</div>';
+            . '</div>'. "\n"
+            . '<div class="divlog">' . $this->_renderLogs() . '</div>'. "\n"
+            ;
 
         $aReplace['{{PAGE_FOOTER_LEFT}}'] = '<a href="' . $this->_sProjectUrl . '" target="_blank">' . $this->_sProjectUrl . '</a>';
         $aReplace['{{PAGE_FOOTER_RIGHT}}'] = ''
