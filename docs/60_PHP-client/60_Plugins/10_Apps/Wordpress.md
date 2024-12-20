@@ -1,5 +1,7 @@
 ## Wordpress
 
+Website: <https://wordpress.com/>
+
 ### Minimal variant
 
 You can open .../appmonitor/plugins/apps/**wordpress**.php as url like
