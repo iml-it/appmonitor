@@ -59,12 +59,12 @@ $oMonitor->addCheck(
             "function" => "Phpmodules",
             "params" => [
                 "required" => [
-                    "PDO", 
-                    "curl", 
-                    "gd", 
-                    "mbstring", 
-                    "pdo_mysql", 
-                    "xml", 
+                    "PDO",
+                    "curl",
+                    "gd",
+                    "mbstring",
+                    "pdo_mysql",
+                    "xml",
                 ],
                 "optional" => [],
             ],

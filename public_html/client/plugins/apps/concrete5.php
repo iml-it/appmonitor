@@ -45,14 +45,14 @@ if (!file_exists($sConfigfile)) {
 }
 
 $aConfig = include($sConfigfile);
-$sActive=$aConfig['default-connection'];
+$sActive = $aConfig['default-connection'];
 
-if(!isset($aConfig['connections'][$sActive])){
+if (!isset($aConfig['connections'][$sActive])) {
     header('HTTP/1.0 400 Bad request');
-    die('ERROR: Config file application/config/database.php was read - but database connection could not be detected from it in connections -> '.$sActive.'.');
+    die('ERROR: Config file application/config/database.php was read - but database connection could not be detected from it in connections -> ' . $sActive . '.');
 }
 // print_r($aConfig['connections'][$sActive]); die();
-$aDb=$aConfig['connections'][$sActive];
+$aDb = $aConfig['connections'][$sActive];
 
 // ----------------------------------------------------------------------
 // checks
@@ -69,15 +69,15 @@ $oMonitor->addCheck(
             "function" => "Phpmodules",
             "params" => [
                 "required" => [
-                    "PDO", 
-                    "curl", 
-                    "dom", 
-                    "fileinfo", 
-                    "gd", 
-                    "iconv", 
-                    "mbstring", 
-                    "pdo_mysql", 
-                    "xml", 
+                    "PDO",
+                    "curl",
+                    "dom",
+                    "fileinfo",
+                    "gd",
+                    "iconv",
+                    "mbstring",
+                    "pdo_mysql",
+                    "xml",
                     "zip"
                 ],
                 "optional" => [],
@@ -108,7 +108,7 @@ $oMonitor->addCheck(
         "check" => [
             "function" => "File",
             "params" => [
-                "filename" => $sApproot .'/application/files',
+                "filename" => $sApproot . '/application/files',
                 "dir" => true,
                 "writable" => true,
             ],
@@ -116,7 +116,7 @@ $oMonitor->addCheck(
     ]
 );
 
-$sPdoConnectString="mysql:host=$aDb[server];port=3306;dbname=$aDb[database];";
+$sPdoConnectString = "mysql:host=$aDb[server];port=3306;dbname=$aDb[database];";
 
 $oMonitor->addCheck(
     [
@@ -126,8 +126,8 @@ $oMonitor->addCheck(
         "check" => [
             "function" => "PdoConnect",
             "params" => [
-                "connect"  => $sPdoConnectString,
-                "user"     => $aDb['username'],
+                "connect" => $sPdoConnectString,
+                "user" => $aDb['username'],
                 "password" => $aDb['password'],
             ],
         ],

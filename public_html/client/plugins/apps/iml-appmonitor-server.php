@@ -86,11 +86,11 @@ $oMonitor->addCheck(
 // specialty: if the test results in an error, the total result switches
 // to WARNING -> see worstresult value
 // ----------------------------------------------------------------------
-$sBaseUrl = 'http'.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] ? 's' : '')
-        .'://'.$_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT']
-        .dirname(dirname($_SERVER['REQUEST_URI']));
+$sBaseUrl = 'http' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] ? 's' : '')
+    . '://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT']
+    . dirname(dirname($_SERVER['REQUEST_URI']));
 
-foreach(['server/config', 'server/tmp'] as $sMyDir){
+foreach (['server/config', 'server/tmp'] as $sMyDir) {
     $oMonitor->addCheck(
         [
             "name" => "http to $sMyDir",
@@ -111,9 +111,9 @@ foreach(['server/config', 'server/tmp'] as $sMyDir){
 // ----------------------------------------------------------------------
 // count of current projects
 // ----------------------------------------------------------------------
-require_once($sApproot.'/server/classes/appmonitor-server.class.php');
-$oServer=new appmonitorserver();
-$iCount=count($oServer->getAppIds());
+require_once($sApproot . '/server/classes/appmonitor-server.class.php');
+$oServer = new appmonitorserver();
+$iCount = count($oServer->getAppIds());
 $oMonitor->addCheck(
     [
         "name" => "appcounter",
@@ -134,11 +134,11 @@ $oMonitor->addCheck(
 // ----------------------------------------------------------------------
 // check running service
 // ----------------------------------------------------------------------
-require_once($sApproot.'/server/classes/tinyservice.class.php');
+require_once($sApproot . '/server/classes/tinyservice.class.php');
 ob_start();
 $oService = new tinyservice("$sApproot/server/service.php", 15, "$sApproot/server/tmp");
-$sIsStopped=$oService->canStart();
-$out=ob_get_contents();
+$sIsStopped = $oService->canStart();
+$out = ob_get_contents();
 ob_clean();
 $oMonitor->addCheck(
     [
@@ -149,13 +149,13 @@ $oMonitor->addCheck(
             "function" => "Simple",
             "params" => [
                 "result" => ($sIsStopped ? RESULT_WARNING : RESULT_OK),
-                "value" => ($sIsStopped 
-                    ? "Info: Service is NOT running. Apps are checked interactively only (if the appmonitor web ui is running). | Output: $out" 
+                "value" => ($sIsStopped
+                    ? "Info: Service is NOT running. Apps are checked interactively only (if the appmonitor web ui is running). | Output: $out"
                     : "OK, service is running. | Output: $out"
                 )
             ],
         ],
-        "worstresult" => RESULT_OK        
+        "worstresult" => RESULT_OK
     ]
 );
 // ----------------------------------------------------------------------

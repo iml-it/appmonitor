@@ -18,7 +18,7 @@
 // ----------------------------------------------------------------------
 // check certificate - only if https is used
 // ----------------------------------------------------------------------
-if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']){
+if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']) {
     $oMonitor->addCheck(
         [
             "name" => "Certificate check",
