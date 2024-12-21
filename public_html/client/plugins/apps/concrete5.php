@@ -22,8 +22,13 @@
  */
 
 // ----------------------------------------------------------------------
-// CONFIG
+// Init
 // ----------------------------------------------------------------------
+
+$aAppDefaults = [
+    "name" => "Concrete5 CMS",
+    "tags" => ["concrete5", "cms"],
+];
 
 require 'inc_appcheck_start.php';
 
@@ -35,7 +40,7 @@ require 'inc_appcheck_start.php';
 $sConfigfile = $sApproot . '/application/config/database.php';
 if (!file_exists($sConfigfile)) {
     header('HTTP/1.0 400 Bad request');
-    die('ERROR: Config file was not found. Set a correct $sApproot pointing to C5 install dir.');
+    die('ERROR: Config file was not found. Use ?rel=[subdir] to set the correct subdir to find /application/config/database.php.');
 }
 
 $aConfig = include($sConfigfile);

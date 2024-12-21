@@ -24,6 +24,14 @@
  * 2024-11-22  v0.07  <axel.hahn@unibe.ch> send 400 instead of 503 on error
  */
 
+// ----------------------------------------------------------------------
+// Init
+// ----------------------------------------------------------------------
+
+ $aAppDefaults = [
+    "name" => "Wordpress",
+    "tags" => ["wordpress", "blog"],
+];
 
 require 'inc_appcheck_start.php';
 

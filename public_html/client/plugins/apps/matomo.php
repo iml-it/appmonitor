@@ -20,9 +20,14 @@
  * 2024-12-20  v1.03  <axel.hahn@unibe.ch> integrate in appmonitor repository
  */
 
- // ----------------------------------------------------------------------
-// CONFIG
 // ----------------------------------------------------------------------
+// Init
+// ----------------------------------------------------------------------
+
+$aAppDefaults = [
+    "name" => "Matomo web statistics",
+    "tags" => ["matomo", "statistics"],
+];
 
 require 'inc_appcheck_start.php';
 

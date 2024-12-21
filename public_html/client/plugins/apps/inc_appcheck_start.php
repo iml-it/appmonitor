@@ -40,6 +40,25 @@ if($bStandalone){
         );
     }
 
+    // --- set values coming from app plugins defaults & GET params "name" and "tags"
+    $aAppDefaults['name'] = (isset($_GET['name']) && $_GET['name']) ? $_GET['name'] : $aAppDefaults['name'];
+    $aAppDefaults['host'] = $_GET['host'] 
+        ? explode(',', $_GET['host']) 
+        : ($_SERVER['HTTP_HOST'] ?? '');
+    $aAppDefaults['tags'] = $_GET['tags'] ? explode(',', $_GET['tags']) : $aAppDefaults['tags'];
+
+    if($aAppDefaults['name']){
+        $oMonitor->setWebsite($aAppDefaults['name']);
+    }
+    if ($aAppDefaults['host']) {
+        $oMonitor->setHost($aAppDefaults['host']);
+    };
+    if(isset($aAppDefaults['tags']) && is_array($aAppDefaults['tags']) && count($aAppDefaults['tags'])>0){
+        foreach($aAppDefaults['tags'] as $sTag){
+            $oMonitor->addTag($sTag);
+        }
+    }
+            
     @include __DIR__.'/../../general_include.php';
 }
 
