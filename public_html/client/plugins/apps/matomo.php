@@ -49,34 +49,34 @@ $aConfig = parse_ini_file($sConfigfile, true);
 
 
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "config file",
         "description" => "The config file must be writable",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
+            "params" => [
                 "filename" => $sConfigfile,
                 "file" => true,
                 "writable" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "Mysql Connect",
         "description" => "Connect mysql server " . $aConfig['database']['host'] . " as user " . $aConfig['database']['username'] . " to scheme " . $aConfig['database']['dbname'],
-        "check" => array(
+        "check" => [
             "function" => "MysqlConnect",
-            "params" => array(
+            "params" => [
                 "server" => $aConfig['database']['host'],
                 "user" => $aConfig['database']['username'],
                 "password" => $aConfig['database']['password'],
                 "db" => $aConfig['database']['dbname'],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 
 // ----------------------------------------------------------------------

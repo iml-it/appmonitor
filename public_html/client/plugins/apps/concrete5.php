@@ -58,33 +58,33 @@ $aDb=$aConfig['connections'][$sActive];
 // ----------------------------------------------------------------------
 
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "check config file",
         "description" => "The config file must be writable",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
+            "params" => [
                 "filename" => $sConfigfile,
                 "file" => true,
                 "readable" => true,
                 "writable" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 $oMonitor->addCheck(
-    array(
+    [
         "name" => "check file storage",
         "description" => "The file storage must be writable",
-        "check" => array(
+        "check" => [
             "function" => "File",
-            "params" => array(
+            "params" => [
                 "filename" => $sApproot .'/application/files',
                 "dir" => true,
                 "writable" => true,
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
 
 $sPdoConnectString="mysql:host=$aDb[server];port=3306;dbname=$aDb[database];";
