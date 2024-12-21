@@ -19,6 +19,7 @@
  * 2019-05-24  v1.01  ah                   detect include or standalone mode
  * 2024-11-18  v1.02  <axel.hahn@unibe.ch> integrate in appmonitor repository
  * 2024-11-22  v1.03  <axel.hahn@unibe.ch> send 400 instead of 503 on error
+ * 2024-12-21  v1.04  ah                   short array syntax; add php-modules and parent
  */
 
 // ----------------------------------------------------------------------
@@ -57,10 +58,38 @@ $aDb=$aConfig['connections'][$sActive];
 // checks
 // ----------------------------------------------------------------------
 
+// required php modules
+// see https://documentation.concretecms.org/developers/introduction/system-requirements
 $oMonitor->addCheck(
     [
-        "name" => "check config file",
-        "description" => "The config file must be writable",
+        "name" => "PHP modules",
+        "description" => "Check needed PHP modules",
+        // "group" => "folder",
+        "check" => [
+            "function" => "Phpmodules",
+            "params" => [
+                "required" => [
+                    "PDO", 
+                    "curl", 
+                    "dom", 
+                    "fileinfo", 
+                    "gd", 
+                    "iconv", 
+                    "mbstring", 
+                    "pdo_mysql", 
+                    "xml", 
+                    "zip"
+                ],
+                "optional" => [],
+            ],
+        ],
+    ]
+);
+
+$oMonitor->addCheck(
+    [
+        "name" => "config file",
+        "description" => "The config file must be readable and writable",
         "check" => [
             "function" => "File",
             "params" => [
@@ -93,6 +122,7 @@ $oMonitor->addCheck(
     [
         "name" => "Mysql Master",
         "description" => "Connect mysql server " . $aDb['server'] . " as user " . $aDb['username'] . " to scheme " . $aDb['database'],
+        "parent" => "config file",
         "check" => [
             "function" => "PdoConnect",
             "params" => [
@@ -103,8 +133,6 @@ $oMonitor->addCheck(
         ],
     ]
 );
-
-include 'shared_check_ssl.php';
 
 // ----------------------------------------------------------------------
 

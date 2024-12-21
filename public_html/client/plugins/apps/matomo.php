@@ -18,6 +18,7 @@
  * 2019-05-24  v1.01  detect include or standalone mode
  * 2019-05-24  v1.02  detect include or standalone mode
  * 2024-12-20  v1.03  <axel.hahn@unibe.ch> integrate in appmonitor repository
+ * 2024-12-21  v1.04  ah                   add php-modules and parent
  */
 
 // ----------------------------------------------------------------------
@@ -47,11 +48,34 @@ $aConfig = parse_ini_file($sConfigfile, true);
 // checks
 // ----------------------------------------------------------------------
 
+// required php modules
+// see https://matomo.org/faq/on-premise/matomo-requirements/
+$oMonitor->addCheck(
+    [
+        "name" => "PHP modules",
+        "description" => "Check needed PHP modules",
+        // "group" => "folder",
+        "check" => [
+            "function" => "Phpmodules",
+            "params" => [
+                "required" => [
+                    "PDO", 
+                    "curl", 
+                    "gd", 
+                    "mbstring", 
+                    "pdo_mysql", 
+                    "xml", 
+                ],
+                "optional" => [],
+            ],
+        ],
+    ]
+);
 
 $oMonitor->addCheck(
     [
         "name" => "config file",
-        "description" => "The config file must be writable",
+        "description" => "The config file must be readable and writable",
         "check" => [
             "function" => "File",
             "params" => [
@@ -67,6 +91,7 @@ $oMonitor->addCheck(
     [
         "name" => "Mysql Connect",
         "description" => "Connect mysql server " . $aConfig['database']['host'] . " as user " . $aConfig['database']['username'] . " to scheme " . $aConfig['database']['dbname'],
+        "parent" => "config file",
         "check" => [
             "function" => "MysqlConnect",
             "params" => [
@@ -78,10 +103,6 @@ $oMonitor->addCheck(
         ],
     ]
 );
-
-// ----------------------------------------------------------------------
-
-include 'shared_check_ssl.php';
 
 // ----------------------------------------------------------------------
 
