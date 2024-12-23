@@ -1,0 +1,126 @@
+<?php
+/* ______________________________________________________________________
+ * 
+ * A P P M O N I T O R  ::  CLIENT - CHECK
+ * ______________________________________________________________________
+ * 
+ * Check for a Dokuwiki instance.
+ * https://www.dokuwiki.org/
+ * 
+ * @author: Axel Hahn - https://www.axel-hahn.de/
+ * ----------------------------------------------------------------------
+ * 2024-12-23  v1.00  ah                   initial version
+ */
+
+// ----------------------------------------------------------------------
+// Init
+// ----------------------------------------------------------------------
+
+$aAppDefaults = [
+    "name" => "Dokuwiki",
+    "tags" => ["dokuwiki", "wiki"],
+];
+
+require 'inc_appcheck_start.php';
+
+// ----------------------------------------------------------------------
+// Read Concrete5 specific config items
+// ----------------------------------------------------------------------
+
+$sConfigfile = $sApproot . '/conf/local.php';
+if (!file_exists($sConfigfile)) {
+    header('HTTP/1.0 400 Bad request');
+    die('ERROR: Config file was not found. Use ?rel=[subdir] to set the correct subdir to find /conf/local.php.');
+}
+
+// ----------------------------------------------------------------------
+// checks
+// ----------------------------------------------------------------------
+
+// required php modules
+// see https://www.dokuwiki.org/install:php
+$oMonitor->addCheck(
+    [
+        "name" => "PHP modules",
+        "description" => "Check needed PHP modules",
+        // "group" => "folder",
+        "check" => [
+            "function" => "Phpmodules",
+            "params" => [
+                "required" => [
+                    "json",
+                    "pcre",
+                    "session",
+                ],
+                "optional" => [
+                    "bz2",
+                    "gd",
+                    "intl",
+                    "mbstring",
+                    "openssl",
+                    "zlib"
+                ],
+            ],
+        ],
+    ]
+);
+
+$oMonitor->addCheck(
+    [
+        "name" => "config file",
+        "description" => "The config file must be readable and writable",
+        "check" => [
+            "function" => "File",
+            "params" => [
+                "filename" => $sConfigfile,
+                "file" => true,
+                "readable" => true,
+                "writable" => true,
+            ],
+        ],
+    ]
+);
+
+foreach (['lib/tpl/', 'lib/plugins/',] as $sDir) {
+    $oMonitor->addCheck(
+        [
+            "name" => "check read dir $sDir",
+            "description" => "The directory $sDir must be readable",
+            "group" => "folder",
+            "check" => [
+                    "function" => "File",
+                    "params" => [
+                        "filename" => $sApproot . '/application/files',
+                        "dir" => true,
+                        "readable" => true,
+                    ],
+                ],
+        ]
+    );
+}
+
+
+foreach (['data/attic', 'data/cache', 'data/index', 'data/locks', 'data/log', 'data/media', 'data/meta', 'data/pages', 'data/tmp',] as $sDir) {
+    $oMonitor->addCheck(
+        [
+            "name" => "check read dir $sDir",
+            "description" => "The directory $sDir must be readable",
+            "group" => "folder",
+            "check" => [
+                "function" => "File",
+                "params" => [
+                    "filename" => $sApproot . '/application/files',
+                    "dir" => true,
+                    "readable" => true,
+                ],
+            ],
+        ]
+    );
+}
+
+
+// ----------------------------------------------------------------------
+
+require 'inc_appcheck_end.php';
+
+// ----------------------------------------------------------------------
