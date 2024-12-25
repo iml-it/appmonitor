@@ -1,6 +1,6 @@
 ## Global picture
 
-This is an overview about needed installations.
+This is an overview about needed installations or actions.
 
 ``` mermaid
 flowchart TD
@@ -10,15 +10,11 @@ flowchart TD
     style START fill:#eee,stroke:#888,stroke-width:2px
     style END fill:#eee,stroke:#888,stroke-width:2px
 
+    classDef ok fill:#8e8,stroke:#4a3,stroke-width:2px
+    classDef work fill:#fb4,stroke:#da3,stroke-width:2px
+
     style LOOPSTART fill:#eee,stroke:#888,stroke-width:2px
     style LOOPEND fill:#eee,stroke:#888,stroke-width:2px
-
-    style SRV fill:#8e8,stroke:#4a3,stroke-width:2px
-    style InstallClient fill:#8e8,stroke:#4a3,stroke-width:2px
-    
-    style UseAppCheck fill:#8e8,stroke:#4a3,stroke-width:2px
-    style SeeDescription fill:#fb4,stroke:#da3,stroke-width:2px
-    style CreateChecks fill:#fb4,stroke:#da3,stroke-width:2px
 
     %% ----- NODES
 
@@ -27,8 +23,9 @@ flowchart TD
     LOOPSTART(( ))
     
     SRV[First:<br>Install Appmonitor server]
+    AddAppminitorCheck[Add delivered checks for<br>Appmonitor server]
     WannaMonitor[I want to monitor<br>a webapp<br>on a server]
-    IsPHP{Is it a<br>PHP<br>webapp?}
+    IsPHP{Is it a<br>PHP <br>webapp?}
 
     SeeDescription[See description<br>of JSON syntax for<br> client response]
     InstallClient[Install Appmonitor client]
@@ -42,15 +39,15 @@ flowchart TD
 
     %% ----- NODES
 
-    START --> SRV --> LOOPSTART
+    START --> SRV:::ok --> AddAppminitorCheck --> LOOPSTART
     LOOPSTART --> WannaMonitor
     WannaMonitor --> IsPHP
-    IsPHP -->|No| SeeDescription
+    IsPHP -->|No| SeeDescription:::work
     
-    IsPHP -->|Yes| InstallClient
+    IsPHP -->|Yes| InstallClient:::ok
     InstallClient --> SupportedApp
-    SupportedApp --> |Yes| UseAppCheck
-    SupportedApp --> |No| CreateChecks
+    SupportedApp --> |Yes| UseAppCheck:::ok
+    SupportedApp --> |No| CreateChecks:::work
 
     SeeDescription --> LOOPEND
     UseAppCheck --> LOOPEND
