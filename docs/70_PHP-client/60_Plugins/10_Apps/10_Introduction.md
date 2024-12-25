@@ -2,7 +2,6 @@
 
 The following steps describe a first (and most simple) approach for an application monitoring with IML appmonitor. There are a few pre defined checks for some common applications below plugins/apps/ folder.
 
-
 `https://www.example.com/appmonitor/plugins/apps/` + `[NAME]`+ `.php`
 
 !!! info "Note"
@@ -30,7 +29,7 @@ All application checks support the following url (GET) parameters for customizat
 | Parameter | Description | Example
 |--         |--           |--
 | `rel`     | The relative path to the application root. Use this if your application is not installed directly in the webroot.| <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp>
-| `host`    | Set a custom name for the serving hostname. Use this override if the default hostname is unwanted.| <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp&host=web01.exampe.com>
+| `host`    | Set a custom name for the serving hostname. Use this override if the default hostname is unwanted.| <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp&host=web01.example.com>
 | `name`    | The name of the website or web application.| <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp&name=Company%20CMS>
 | `tags`    | A list of tags to add to the application. Multiple tags are separated with comma `,`| <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp&tags=tag1.tag2>
 
