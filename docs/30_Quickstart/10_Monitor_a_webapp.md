@@ -6,6 +6,7 @@ This is an overview about needed installations.
 flowchart TD
 
     %% ----- STYLING
+
     style START fill:#eee,stroke:#888,stroke-width:2px
     style END fill:#eee,stroke:#888,stroke-width:2px
 
@@ -13,34 +14,47 @@ flowchart TD
     style LOOPEND fill:#eee,stroke:#888,stroke-width:2px
 
     style SRV fill:#8e8,stroke:#4a3,stroke-width:2px
-    style Client fill:#8e8,stroke:#4a3,stroke-width:2px
+    style InstallClient fill:#8e8,stroke:#4a3,stroke-width:2px
     
-    style D fill:#8e8,stroke:#4a3,stroke-width:2px
-    style G fill:#8e8,stroke:#4a3,stroke-width:2px
-    style H fill:#8e8,stroke:#4a3,stroke-width:2px
+    style UseAppCheck fill:#8e8,stroke:#4a3,stroke-width:2px
+    style SeeDescription fill:#fb4,stroke:#da3,stroke-width:2px
+    style CreateChecks fill:#fb4,stroke:#da3,stroke-width:2px
+
+    %% ----- NODES
 
     START((Start))
     END((End))
     LOOPSTART(( ))
-    LOOPEND(( ))
-
-    MOREAPPS{On more<br>webapp?}
-
+    
     SRV[First:<br>Install Appmonitor server]
+    WannaMonitor[I want to monitor<br>a webapp<br>on a server]
+    IsPHP{Is it a<br>PHP<br>webapp?}
+
+    SeeDescription[See description<br>of JSON syntax for<br> client response]
+    InstallClient[Install Appmonitor client]
+    SupportedApp{Is this PHP webapp<br>supported already?}
+    UseAppCheck[Start with a<br>pre defined check]
+    CreateChecks[Create a custom check<br>using existing checks]
+
+    LOOPEND(( ))
+    MOREAPPS{One more<br>webapp?}
+
+
+    %% ----- NODES
 
     START --> SRV --> LOOPSTART
-    LOOPSTART --> B[I want to monitor<br>a webapp on<br>another server]
-    B --> C{Is it a<br>PHP<br>webapp?}
-    C -->|No| D[See description<br>of JSON syntax for<br> client response]
+    LOOPSTART --> WannaMonitor
+    WannaMonitor --> IsPHP
+    IsPHP -->|No| SeeDescription
     
-    C -->|Yes| Client[Install Appmonitor client]
-    Client --> F{Is this PHP webapp<br>supported already?}
-    F --> |Yes| G[Start with a<br>pre defined check]
-    F --> |No| H[Create a custom check<br>using existing checks]
+    IsPHP -->|Yes| InstallClient
+    InstallClient --> SupportedApp
+    SupportedApp --> |Yes| UseAppCheck
+    SupportedApp --> |No| CreateChecks
 
-    D --> LOOPEND
-    G --> LOOPEND
-    H --> LOOPEND
+    SeeDescription --> LOOPEND
+    UseAppCheck --> LOOPEND
+    CreateChecks --> LOOPEND
 
     LOOPEND --> MOREAPPS
 

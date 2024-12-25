@@ -1,26 +1,31 @@
 ## Introduction
 
-The following steps describe a first (and most simple) approach for an application monitoring with IML appmonitor.
+The following steps describe a first (and most simple) approach for an application monitoring with IML appmonitor. There are a few pre defined checks for some common applications below plugins/apps/ folder.
 
-If you have installed ...
 
-* the app directly into `[webroot]` (if not: you need `rel` to point to the correct subdir - see below)
-* the appmonitor client in `[webroot]/appmonitor/`.
+`https://www.example.com/appmonitor/plugins/apps/` + `[NAME]`+ `.php`
 
 !!! info "Note"
     This is just a quick winner with most basic checks.<br>
-    You cannot customize the builtin checks and influence a few metadata.<br>
-    Create a custom check and add all checks you need to test tha ability to run the application.
+    You cannot customize the builtin checks and influence a few metadata.
 
 ### Minimal variant
 
-https://www.example.com/appmonitor/plugins/apps/[NAME].php
+`curl -s https://www.example.com/appmonitor/plugins/apps/[NAME].php`
 
-You should get a JSON response. For NAME insert an existing filename for a product. If it was installed directly in the webroot.
+For NAME insert an existing filename for a product.
 
-### Default parameters
+You can add the url parameter "?rel=[subdir]" to define another directory for the application. This is needed if your application isn't installed directly in the webroot but in a subfolder.
 
-All application checks support the following url (GET) parameters:
+You got a JSON response? Then you can open the settings in Appmonitor server and add this url.
+
+![Add url with pre defined check](../../../images/appcheck_add_url.png)
+
+For finetuning check the following section for supported parameters.
+
+### Url parameters
+
+All application checks support the following url (GET) parameters for customization:
 
 | Parameter | Description | Example
 |--         |--           |--

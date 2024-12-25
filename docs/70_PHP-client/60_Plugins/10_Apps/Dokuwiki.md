@@ -1,6 +1,9 @@
 ## Dokuwiki
 
-Website: <https://www.dokuwiki.org/>
+* Website: <https://www.dokuwiki.org/>
+* Author:  splitbrain Andreas Gohr
+* Source: <https://github.com/dokuwiki/dokuwiki>
+* License: GNU General Public License 2
 
 ### Minimal variant
 
@@ -8,15 +11,13 @@ You can open .../appmonitor/plugins/apps/**dokuwiki**.php as url like
 
 <https://www.example.com/appmonitor/plugins/apps/dokuwiki.php>
 
-You should get a JSON response.
-
-### Custom application dir
-
-If your wiki isn't installed directly in the webroot but in a subfolder then you can add the url parameter "?rel=[subdir]".
+... or for a subfolder add the url parameter "?rel=[subdir]".
 
 Example:
 
 <https://www.example.com/appmonitor/plugins/apps/dokuwiki.php?rel=/wiki>
+
+You should get a JSON response.
 
 ## Errors
 
