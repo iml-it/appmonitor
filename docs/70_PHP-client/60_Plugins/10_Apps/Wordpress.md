@@ -5,7 +5,7 @@
 * Source: <https://github.com/WordPress/WordPress>
 * License: GNU General Public License 2
 
-### Minimal variant
+## Minimal variant
 
 You can open .../appmonitor/plugins/apps/**wordpress**.php as url like
 

@@ -7,6 +7,8 @@ flowchart TD
 
     %% ----- STYLING
 
+    linkStyle default stroke: #ccc,stroke-width:3px
+
     style START fill:#eee,stroke:#888,stroke-width:2px
     style END fill:#eee,stroke:#888,stroke-width:2px
 

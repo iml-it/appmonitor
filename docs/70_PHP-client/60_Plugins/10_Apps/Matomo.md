@@ -5,7 +5,14 @@
 * Source: <https://github.com/matomo-org/matomo/>
 * License: GNU General Public License 3
 
-### Minimal variant
+
+## Screenshot
+
+Tree view of application default check with **5** items in the server web ui:
+
+![Matomo](../../../images/apps_matomo.png)
+
+## Minimal variant
 
 You can open .../appmonitor/plugins/apps/**matomo**.php as url like
 
