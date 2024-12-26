@@ -11,7 +11,7 @@ Tree view of application default check with **6** items in the server web ui:
 
 ![Concrete5](../../../images/apps_concrete5.png)
 
-### Minimal variant
+## Minimal variant
 
 You can open .../appmonitor/plugins/apps/**concrete5**.php as url like
 
