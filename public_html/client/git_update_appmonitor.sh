@@ -173,7 +173,7 @@ esac
 # which rsync >/dev/null || exit 1
 # which git >/dev/null || exit 1
 
-rsync -V >/dev/null || exit 1
+rsync --version >/dev/null || exit 1
 git -v >/dev/null || exit 1
 
 test -f general_include.php && isUpdate=1
