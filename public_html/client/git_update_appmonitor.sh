@@ -30,6 +30,7 @@
 # 2024-07-25  0.4  <axel.hahn@iml.unibe.ch>  update quoting and comments
 # 2024-07-31  0.5  <axel.hahn@iml.unibe.ch>  Show more helpful information; wait on 1st install; added param -n
 # 2024-12-23  0.6  <axel.hahn@iml.unibe.ch>  remove which command. Maybe it is not installed on a shared hoster.
+# 2024-12-26  0.7  <axel.hahn@iml.unibe.ch>  rsync test with --version instead of -V (for compatibility with older versions)
 # ======================================================================
 
 # ----------------------------------------------------------------------
@@ -39,7 +40,7 @@
 readonly git_repo_url="https://github.com/iml-it/appmonitor.git"
 readonly docs_url="https://os-docs.iml.unibe.ch/appmonitor/PHP_client/index.html"
 readonly line="______________________________________________________________________________"
-readonly version="0.6"
+readonly version="0.7"
 
 git_target=/tmp/git_data__appmonitor
 client_from="${git_target}/public_html/client"
