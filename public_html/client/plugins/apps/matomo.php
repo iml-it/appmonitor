@@ -18,11 +18,17 @@
  * 2019-05-24  v1.01  detect include or standalone mode
  * 2019-05-24  v1.02  detect include or standalone mode
  * 2024-12-20  v1.03  <axel.hahn@unibe.ch> integrate in appmonitor repository
+ * 2024-12-21  v1.04  ah                   add php-modules and parent
  */
 
- // ----------------------------------------------------------------------
-// CONFIG
 // ----------------------------------------------------------------------
+// Init
+// ----------------------------------------------------------------------
+
+$aAppDefaults = [
+    "name" => "Matomo web statistics",
+    "tags" => ["matomo", "statistics"],
+];
 
 require 'inc_appcheck_start.php';
 
@@ -42,41 +48,61 @@ $aConfig = parse_ini_file($sConfigfile, true);
 // checks
 // ----------------------------------------------------------------------
 
-
+// required php modules
+// see https://matomo.org/faq/on-premise/matomo-requirements/
 $oMonitor->addCheck(
-    array(
-        "name" => "config file",
-        "description" => "The config file must be writable",
-        "check" => array(
-            "function" => "File",
-            "params" => array(
-                "filename" => $sConfigfile,
-                "file" => true,
-                "writable" => true,
-            ),
-        ),
-    )
+    [
+        "name" => "PHP modules",
+        "description" => "Check needed PHP modules",
+        // "group" => "folder",
+        "check" => [
+            "function" => "Phpmodules",
+            "params" => [
+                "required" => [
+                    "PDO",
+                    "curl",
+                    "gd",
+                    "mbstring",
+                    "pdo_mysql",
+                    "xml",
+                ],
+                "optional" => [],
+            ],
+        ],
+    ]
 );
 
 $oMonitor->addCheck(
-    array(
+    [
+        "name" => "config file",
+        "description" => "The config file must be readable and writable",
+        "check" => [
+            "function" => "File",
+            "params" => [
+                "filename" => $sConfigfile,
+                "file" => true,
+                "writable" => true,
+            ],
+        ],
+    ]
+);
+
+$oMonitor->addCheck(
+    [
         "name" => "Mysql Connect",
         "description" => "Connect mysql server " . $aConfig['database']['host'] . " as user " . $aConfig['database']['username'] . " to scheme " . $aConfig['database']['dbname'],
-        "check" => array(
+        "parent" => "config file",
+        "check" => [
             "function" => "MysqlConnect",
-            "params" => array(
+            "params" => [
                 "server" => $aConfig['database']['host'],
                 "user" => $aConfig['database']['username'],
                 "password" => $aConfig['database']['password'],
                 "db" => $aConfig['database']['dbname'],
-            ),
-        ),
-    )
+            ],
+        ],
+    ]
 );
-
-// ----------------------------------------------------------------------
-
-include 'shared_check_ssl.php';
 
 // ----------------------------------------------------------------------
 

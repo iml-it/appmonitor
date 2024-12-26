@@ -1,6 +1,9 @@
 ## Matomo
 
-Website: <https://matomo.org/>
+* Website: <https://matomo.org/>
+* Author: Matomo Team
+* Source: <https://github.com/matomo-org/matomo/>
+* License: GNU General Public License 3
 
 ### Minimal variant
 
@@ -8,15 +11,13 @@ You can open .../appmonitor/plugins/apps/**matomo**.php as url like
 
 <https://www.example.com/appmonitor/plugins/apps/matomo.php>
 
-You should get a JSON response.
-
-### Custom application dir
-
-If your Webapp isn't installed directly in the webroot but in a subfolder then you can add the url parameter "?rel=[subdir]".
+... or for a subfolder add the url parameter "?rel=[subdir]".
 
 Example:
 
 <https://www.example.com/appmonitor/plugins/apps/matomo.php?rel=/matomo>
+
+You should get a JSON response.
 
 ## Errors
 

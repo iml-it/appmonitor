@@ -22,8 +22,17 @@
  * 2024-07-31  v0.04  first version for wordpress check in plugins/apps/ 
  * 2024-11-21  v0.05  use shared_check_sl 
  * 2024-11-22  v0.07  <axel.hahn@unibe.ch> send 400 instead of 503 on error
+ * 2024-12-21  v0.08  ah                   add php-modules and parent
  */
 
+// ----------------------------------------------------------------------
+// Init
+// ----------------------------------------------------------------------
+
+$aAppDefaults = [
+    "name" => "Wordpress",
+    "tags" => ["wordpress", "blog"],
+];
 
 require 'inc_appcheck_start.php';
 
@@ -38,17 +47,56 @@ if (!file_exists($sConfigfile)) {
 }
 
 require($sConfigfile);
-$aDb=[
-  'server'   => DB_HOST,
-  'username' => DB_USER,
-  'password' => DB_PASSWORD,
-  'database' => DB_NAME,
-  // 'port'     => ??,
-]; 
+$aDb = [
+    'server' => DB_HOST,
+    'username' => DB_USER,
+    'password' => DB_PASSWORD,
+    'database' => DB_NAME,
+    // 'port'     => ??,
+];
 
 // ----------------------------------------------------------------------
 // checks
 // ----------------------------------------------------------------------
+
+// required php modules
+// see https://ertano.com/required-php-modules-for-wordpress/
+$oMonitor->addCheck(
+    [
+        "name" => "PHP modules",
+        "description" => "Check needed PHP modules",
+        // "group" => "folder",
+        "check" => [
+            "function" => "Phpmodules",
+            "params" => [
+                "required" => [
+                    // "cmath",
+                    "cli",
+                    "curl",
+                    "date",
+                    "dom",
+                    "fileinfo",
+                    "filter",
+                    "gd",
+                    "gettext",
+                    "hash",
+                    "iconv",
+                    "imagick",
+                    "json",
+                    // "libsodium",
+                    "mysql",
+                    "openssl",
+                    "pcre",
+                    // "opcache",
+                    // "readline",
+                    "xml",
+                    "zip"
+                ],
+                "optional" => [],
+            ],
+        ],
+    ]
+);
 
 $oMonitor->addCheck(
     [
@@ -74,19 +122,15 @@ $oMonitor->addCheck(
         "check" => [
             "function" => "MysqlConnect",
             "params" => [
-                "server"   => $aDb['server'],
-                "user"     => $aDb['username'],
+                "server" => $aDb['server'],
+                "user" => $aDb['username'],
                 "password" => $aDb['password'],
-                "db"       => $aDb['database'],
+                "db" => $aDb['database'],
                 // "port"     => $aDb['port'],
             ],
         ],
     ]
 );
-
-include 'shared_check_ssl.php';
-
-// ----------------------------------------------------------------------
 
 require 'inc_appcheck_end.php';
 

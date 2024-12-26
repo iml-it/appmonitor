@@ -1,6 +1,9 @@
 ## Concrete 5 CMS
 
-Website: <https://www.concretecms.com/>
+* Website: <https://www.concretecms.org/>
+* Author: PortlandLabs 
+* Source: <https://github.com/concretecms/concretecms>
+* License: The MIT License
 
 ### Minimal variant
 
@@ -8,15 +11,13 @@ You can open .../appmonitor/plugins/apps/**concrete5**.php as url like
 
 <https://www.example.com/appmonitor/plugins/apps/concrete5.php>
 
-You should get a JSON response.
-
-### Custom application dir
-
-If your CMS isn't installed directly in the webroot but in a subfolder then you can add the url parameter "?rel=[subdir]".
+... or for a subfolder add the url parameter "?rel=[subdir]".
 
 Example:
 
 <https://www.example.com/appmonitor/plugins/apps/concrete5.php?rel=/c5>
+
+You should get a JSON response.
 
 ## Errors
 

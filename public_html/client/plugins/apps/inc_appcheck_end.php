@@ -5,9 +5,11 @@
  * ______________________________________________________________________
  */
 
+include 'shared_check_ssl.php';
+
 // $bStandalone was set in inc_appcheck_start.php
 // send response if client was not initialized there
-if($bStandalone){
+if ($bStandalone) {
     $oMonitor->setResult();
     $oMonitor->render();
 }

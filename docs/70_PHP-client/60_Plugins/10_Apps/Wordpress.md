@@ -1,6 +1,9 @@
 ## Wordpress
 
-Website: <https://wordpress.com/>
+* Website: <https://wordpress.org/>
+* Author: 
+* Source: <https://github.com/WordPress/WordPress>
+* License: GNU General Public License 2
 
 ### Minimal variant
 
@@ -8,15 +11,13 @@ You can open .../appmonitor/plugins/apps/**wordpress**.php as url like
 
 <https://www.example.com/appmonitor/plugins/apps/wordpress.php>
 
-You should get a JSON response.
-
-### Custom application dir
-
-If your Wordpress isn't installed directly in the webroot but in a subfolder then you can add the url parameter "?rel=[subdir]".
+... or for a subfolder add the url parameter "?rel=[subdir]".
 
 Example:
 
 <https://www.example.com/appmonitor/plugins/apps/wordpress.php?rel=/blog>
+
+You should get a JSON response.
 
 ## Errors
 

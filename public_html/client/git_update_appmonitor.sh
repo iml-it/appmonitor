@@ -29,6 +29,7 @@
 # 2022-05-03  0.3  <axel.hahn@iml.unibe.ch>  create general_include.php
 # 2024-07-25  0.4  <axel.hahn@iml.unibe.ch>  update quoting and comments
 # 2024-07-31  0.5  <axel.hahn@iml.unibe.ch>  Show more helpful information; wait on 1st install; added param -n
+# 2024-12-23  0.6  <axel.hahn@iml.unibe.ch>  remove which command. Maybe it is not installed on a shared hoster.
 # ======================================================================
 
 # ----------------------------------------------------------------------
@@ -38,7 +39,7 @@
 readonly git_repo_url="https://github.com/iml-it/appmonitor.git"
 readonly docs_url="https://os-docs.iml.unibe.ch/appmonitor/PHP_client/index.html"
 readonly line="______________________________________________________________________________"
-readonly version="0.5"
+readonly version="0.6"
 
 git_target=/tmp/git_data__appmonitor
 client_from="${git_target}/public_html/client"
@@ -168,8 +169,11 @@ ENDOFHELP
         fi
 esac
 
-which rsync >/dev/null || exit 1
-which git >/dev/null || exit 1
+# which rsync >/dev/null || exit 1
+# which git >/dev/null || exit 1
+
+rsync -V >/dev/null || exit 1
+git -v >/dev/null || exit 1
 
 test -f general_include.php && isUpdate=1
 
@@ -221,6 +225,7 @@ rsync -rav \
     --exclude "example.json" \
     --exclude "check-appmonitor-server.php" \
     --exclude "local.php" \
+    --exclude "git_update_appmonitor.sh" \
     $client_from/* "$client_to"
 echo
 
@@ -260,5 +265,6 @@ echo "Documentation: $docs_url"
 echo
 echo $line
 echo done.
+cp -rp "$client_from/git_update_appmonitor.sh" "$client_to"
 
 # ----------------------------------------------------------------------
