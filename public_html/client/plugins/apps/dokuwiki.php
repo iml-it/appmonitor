@@ -10,6 +10,7 @@
  * @author: Axel Hahn - https://www.axel-hahn.de/
  * ----------------------------------------------------------------------
  * 2024-12-23  v1.00  ah                   initial version
+ * 2024-12-26  v1.01  ah                   fix directory checks
  */
 
 // ----------------------------------------------------------------------
@@ -27,7 +28,7 @@ require 'inc_appcheck_start.php';
 // Read Concrete5 specific config items
 // ----------------------------------------------------------------------
 
-$sConfigfile = $sApproot . '/conf/local.php';
+$sConfigfile = "$sApproot/conf/local.php";
 if (!file_exists($sConfigfile)) {
     header('HTTP/1.0 400 Bad request');
     die('ERROR: Config file was not found. Use ?rel=[subdir] to set the correct subdir to find /conf/local.php.');
@@ -88,13 +89,13 @@ foreach (['lib/tpl/', 'lib/plugins/',] as $sDir) {
             "description" => "The directory $sDir must be readable",
             "group" => "folder",
             "check" => [
-                    "function" => "File",
-                    "params" => [
-                        "filename" => $sApproot . '/application/files',
-                        "dir" => true,
-                        "readable" => true,
-                    ],
+                "function" => "File",
+                "params" => [
+                    "filename" => "$sApproot/$sDir",
+                    "dir" => true,
+                    "readable" => true,
                 ],
+            ],
         ]
     );
 }
@@ -109,7 +110,7 @@ foreach (['data/attic', 'data/cache', 'data/index', 'data/locks', 'data/log', 'd
             "check" => [
                 "function" => "File",
                 "params" => [
-                    "filename" => $sApproot . '/application/files',
+                    "filename" => "$sApproot/$sDir",
                     "dir" => true,
                     "readable" => true,
                 ],
