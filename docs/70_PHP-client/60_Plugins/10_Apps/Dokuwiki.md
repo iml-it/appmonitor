@@ -5,7 +5,13 @@
 * Source: <https://github.com/dokuwiki/dokuwiki>
 * License: GNU General Public License 2
 
-### Minimal variant
+## Screenshot
+
+Tree view of application default check with **15** items in the server web ui:
+
+![Dokuwiki](../../../images/apps_dokuwiki.png)
+
+## Minimal variant
 
 You can open .../appmonitor/plugins/apps/**dokuwiki**.php as url like
 
