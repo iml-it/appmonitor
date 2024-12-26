@@ -104,8 +104,8 @@ foreach (['lib/tpl/', 'lib/plugins/',] as $sDir) {
 foreach (['data/attic', 'data/cache', 'data/index', 'data/locks', 'data/log', 'data/media', 'data/meta', 'data/pages', 'data/tmp',] as $sDir) {
     $oMonitor->addCheck(
         [
-            "name" => "check read dir $sDir",
-            "description" => "The directory $sDir must be readable",
+            "name" => "check writable dir $sDir",
+            "description" => "The directory $sDir must be readable and writable",
             "group" => "folder",
             "check" => [
                 "function" => "File",
@@ -113,6 +113,7 @@ foreach (['data/attic', 'data/cache', 'data/index', 'data/locks', 'data/log', 'd
                     "filename" => "$sApproot/$sDir",
                     "dir" => true,
                     "readable" => true,
+                    "writable" => true,
                 ],
             ],
         ]
