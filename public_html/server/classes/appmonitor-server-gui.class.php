@@ -129,6 +129,10 @@ class appmonitorserver_gui extends appmonitorserver
         'totalstatus1' => '<i class="fa-solid fa-ghost"></i>',
         'totalstatus2' => '<i class="fa-regular fa-bell"></i>',
         'totalstatus3' => '<i class="fa-solid fa-triangle-exclamation"></i>',
+
+        'viewswitch' => '<i class="fa-solid fa-repeat"></i>',
+        'viewreset' => '<i class="fa-solid fa-compress"></i>',
+        'viewfullscreen' => '<i class="fa-solid fa-up-right-and-down-left-from-center"></i>',
     ];
 
     // ----------------------------------------------------------------------
@@ -968,11 +972,9 @@ class appmonitorserver_gui extends appmonitorserver
         <div id="networkContainer">
             <div id="network-toolbar">
                 <span id="selView"></span>
-                <button class="btn btn-default" onclick="oMap.switchViewMode(); return false;">switch View</button>
-                <!--
-                <button class="btn btn-default" onclick="oMap.switchViewSize(); return false;">switch Size</button>
-                -->
-                <button class="btn btn-default" onclick="oMap.toggleFullscreen(\'networkContainer\'); return false;">Fullscreen</button>
+                <button class="btn btn-default" title="'.$this->_tr('btn-view-switch').'"     onclick="oMap.switchViewMode(); this.blur(); return false;">'.($this->_aIco['viewswitch']).'</button>
+                <button class="btn btn-default" title="'.$this->_tr('btn-view-reset').'"      onclick="oMap.switchViewSize(); this.blur(); return false;">'.($this->_aIco['viewreset']).'</button>
+                <button class="btn btn-default" title="'.$this->_tr('btn-view-fullscreen').'" onclick="oMap.toggleFullscreen(\'networkContainer\'); this.blur(); return false;">'.($this->_aIco['viewfullscreen']).'</button>
 
             </div>
             <div id="mynetwork"></div>

@@ -387,11 +387,11 @@ function initRelNav(){
     var sButtons='';
     $('div.row').each(function() {
         if (this.id){
-            sButtons+='<button class="btn btn-default" onclick="$(\'.row\').hide(); $(\'#'+this.id+'\').show();">'+this.dataset.title+'</button> ';
+            sButtons+='<button class="btn btn-default" onclick="$(\'.row\').hide(); $(\'#'+this.id+'\').show(); return false;">'+this.dataset.title+'</button> ';
         }
     });
     if(sButtons){
-        sButtons+='<button class="btn btn-default" onclick="$(\'.row\').show();">X</button> ';
+        sButtons+='<button class="btn btn-default" onclick="$(\'.row\').show(); this.blur(); return false;">X</button> ';
         $('#relnavbuttons').html(sButtons);
     }
     return true;

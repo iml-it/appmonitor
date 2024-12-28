@@ -163,6 +163,10 @@
         "btn-deleteUrl-confirm": "Are you sure that you want to delete the url\\n\\n%s\\n\\n?",
         "btn-save": "Save",
 
+        "btn-view-switch": "Switch view: top down vs left right",
+        "btn-view-reset": "Reset zoom",
+        "btn-view-fullscreen": "Toggle fullscreen",
+
         "msgErr-access-denied": "Access denied.",
         "msgErr-access-denied-role-not-found": "Your user [%s] does not have the needed role (%s).",
 
