@@ -165,7 +165,7 @@
         "msgErr-access-denied": "Zugriff verweigert.",
         "msgErr-access-denied-role-not-found": "Dein Benutzer [%s] hat nicht die ben&ouml;tigte Rolle (%s).",
 
-        "msgErr-nocheck-welcome": "<h3>Willkommen bei der Appmonitor Server Webgui!</h3><p>Im Moment sieht es hier noch nackt und leer aus, weil noch ein Check eingerichtet wurde.<br>Um eine URL hinzuzuf&uuml;gen, gehen Sie zu den Einstellungen.</p>",
+        "msgErr-nocheck-welcome": "<h3>Willkommen bei der Appmonitor Server Webgui!</h3><p>Im Moment sieht es hier noch nackt und leer aus, weil noch ein Check eingerichtet wurde.<br>Um eine URL hinzuzuf&uuml;gen, gehen Sie zu den Einstellungen.</p><hr><p>Um den Monitoring-Client für den Appmonitor Server hinzuzuf&uuml;gen, versuchen wir einmal dies hier:</p>",
         "msgErr-nocheck": "Es wurde noch kein Check eingerichtet.",
         "msgErr-demosite": "Dies ist eine Demo-Webseite. Das &auml;ndern der Konfiguration ist hier nicht m&ouml;glich.",
         "msgErr-missing-meta-website": "Fehlende Daten &quot;meta&quot; - &quot;website&quot;",

@@ -725,8 +725,29 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _showWelcomeMessage(): string
     {
+        $sSurl = $_SERVER['REQUEST_SCHEME'].'://'
+                    . $_SERVER['SERVER_NAME']
+                    // . ':'.$_SERVER['SERVER_PORT']
+                    . dirname(dirname($_SERVER['SCRIPT_NAME']) ) . 'client/check-appmonitor-server.php';
+                    ;
         return $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
-            . '<br>'
+            . '<form action="?" method="post">'
+            . '<div class="input-group">'
+                . '<div class="input-group-addon">'
+                    . $this->_aIco['url']
+                . '</div>'
+                . '<input type="hidden" name="action" value="addurl">'
+                . '<input type="text" class="form-control" name="url" size="100" value="'.$sSurl.'" '
+                . 'placeholder="https://[domain]/appmonitor/client/" '
+                . 'pattern="http.*://..*" '
+                . 'required="required" '
+                . '>'
+                . '<span class="input-group-btn">'
+                . '<button class="btn btn-success">' . $this->_aIco['add'] . ' ' . $this->_tr('btn-addUrl') . '</button>'
+                . '</span>'
+            . '</div>'
+            . '</form><br><br><hr>'
+
             . '<a class="btn btn-primary" href="#divsetup" >' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>';
     }
 
