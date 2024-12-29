@@ -48,6 +48,7 @@ require_once 'render-adminlte.class.php';
  * 2024-12-10  0.146  axel.hahn@unibe.ch  add bootstrap-select link in about page; remove test line for tag validation
  * 2024-12-19  0.147  axel.hahn@unibe.ch  PHP 8.4 compatibility
  * 2024-12-20  0.148  axel.hahn@unibe.ch  Beautify ajax error output
+ * 2024-12-29  0.149  axel.hahn@unibe.ch  Update welcome page with offerng a 1st monitoring url
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -99,7 +100,7 @@ class appmonitorserver_gui extends appmonitorserver
         */
 
         'title' => '<i class="fa-solid fa-th"></i>',
-        'welcome' => '<i class="fa-regular fa-flag" style="font-size: 500%;float: left; margin: 0 1em 10em 0;"></i>',
+        'welcome' => '<i class="fa-regular fa-flag" style="font-size: 500%;float: left; margin: 0 1em 6em 0;"></i>',
         'reload' => '<i class="fa-solid fa-sync"></i>',
         'webapp' => '<i class="fa-solid fa-box-open"></i>',
         'host' => '<i class="fa-regular fa-hdd"></i>',
