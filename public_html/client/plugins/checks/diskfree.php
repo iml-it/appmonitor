@@ -19,7 +19,7 @@
  * 
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2025-01-02  <www.axel-hahn.de>        update output
  */
 class checkDiskfree extends appmonitorcheck
 {
@@ -58,7 +58,7 @@ class checkDiskfree extends appmonitorcheck
         $iCritical = $this->_getSize($aParams["critical"]);
         $iSpaceLeft = disk_free_space($sDirectory);
 
-        $sMessage = '[' . $sDirectory . '] has ' . $this->_getHrSize($iSpaceLeft) . ' left.';
+        $sMessage = $this->_getHrSize($iSpaceLeft) . ' left in [' . $sDirectory . '].';
 
         if ($iWarn) {
             if ($iWarn <= $iCritical) {
@@ -68,7 +68,7 @@ class checkDiskfree extends appmonitorcheck
             if ($iWarn < $iSpaceLeft) {
                 return [
                     RESULT_OK,
-                    "$sMessage Warning level is not reached yet (still " . $this->_getHrSize($iSpaceLeft - $iWarn) . "over warning limit)."
+                    "$sMessage Warning level is not reached yet (still " . $this->_getHrSize($iSpaceLeft - $iWarn) . " over warning limit)."
                 ];
             }
             if ($iWarn > $iSpaceLeft && $iCritical < $iSpaceLeft) {

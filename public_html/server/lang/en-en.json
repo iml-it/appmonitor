@@ -163,10 +163,14 @@
         "btn-deleteUrl-confirm": "Are you sure that you want to delete the url\\n\\n%s\\n\\n?",
         "btn-save": "Save",
 
+        "btn-view-switch": "Switch view: top down vs left right",
+        "btn-view-reset": "Reset zoom",
+        "btn-view-fullscreen": "Toggle fullscreen",
+
         "msgErr-access-denied": "Access denied.",
         "msgErr-access-denied-role-not-found": "Your user [%s] does not have the needed role (%s).",
 
-        "msgErr-nocheck-welcome": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>To add an url to check go to the Setup.</p>",
+        "msgErr-nocheck-welcome": "<h3>Welcome to the Appmonitor Server Webgui!</h3><p>At the moment it looks very naked because no check was defined yet.<br>Whenever you want to add an url to check go to the Setup.</p><hr><p>To dive in ... let's try to add the monitoring client url for the AppMonitor server:</p>",
         "msgErr-nocheck": "No check was defined yet.",
         "msgErr-demosite": "This is a demo website. Changing the config is not possible here.",
         "msgErr-missing-meta-website": "Missing &quot;meta&quot; - &quot;website&quot;",

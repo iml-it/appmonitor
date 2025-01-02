@@ -32,6 +32,8 @@ All application checks support the following url (GET) parameters for customizat
 | `host`    | Set a custom name for the serving hostname. Use this override if the default hostname is unwanted.| <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp&host=web01.example.com>
 | `name`    | The name of the website or web application.| <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp&name=Company%20CMS>
 | `tags`    | A list of tags to add to the application. Multiple tags are separated with comma `,`| <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp&tags=tag1.tag2>
+| `dfc`    | Disk free critical level (see plugin diskfree) | <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp&dfw=1000GB&dfc=600GB>
+| `dfw`    | Disk free warning level (see plugin diskfree) | <https://www.example.com/appmonitor/plugins/apps/[NAME].php?rel=/myapp&dfw=1000GB&dfc=600GB>
 
 ## Errors
 

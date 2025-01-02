@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.148
+ * @version 0.149
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -48,6 +48,7 @@ require_once 'render-adminlte.class.php';
  * 2024-12-10  0.146  axel.hahn@unibe.ch  add bootstrap-select link in about page; remove test line for tag validation
  * 2024-12-19  0.147  axel.hahn@unibe.ch  PHP 8.4 compatibility
  * 2024-12-20  0.148  axel.hahn@unibe.ch  Beautify ajax error output
+ * 2025-01-02  0.149  www.axel-hahn.de    Update welcome page with offerng a 1st monitoring url
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -55,7 +56,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.148";
+    protected string $_sVersion = "0.149";
 
     /**
      * Title/ project name
@@ -99,7 +100,7 @@ class appmonitorserver_gui extends appmonitorserver
         */
 
         'title' => '<i class="fa-solid fa-th"></i>',
-        'welcome' => '<i class="fa-regular fa-flag" style="font-size: 500%;float: left; margin: 0 1em 10em 0;"></i>',
+        'welcome' => '<i class="fa-regular fa-flag" style="font-size: 500%;float: left; margin: 0 1em 6em 0;"></i>',
         'reload' => '<i class="fa-solid fa-sync"></i>',
         'webapp' => '<i class="fa-solid fa-box-open"></i>',
         'host' => '<i class="fa-regular fa-hdd"></i>',
@@ -129,6 +130,10 @@ class appmonitorserver_gui extends appmonitorserver
         'totalstatus1' => '<i class="fa-solid fa-ghost"></i>',
         'totalstatus2' => '<i class="fa-regular fa-bell"></i>',
         'totalstatus3' => '<i class="fa-solid fa-triangle-exclamation"></i>',
+
+        'viewswitch' => '<i class="fa-solid fa-repeat"></i>',
+        'viewreset' => '<i class="fa-solid fa-compress"></i>',
+        'viewfullscreen' => '<i class="fa-solid fa-up-right-and-down-left-from-center"></i>',
     ];
 
     // ----------------------------------------------------------------------
@@ -725,8 +730,29 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _showWelcomeMessage(): string
     {
+        $sSurl = $_SERVER['REQUEST_SCHEME'].'://'
+                    . $_SERVER['SERVER_NAME']
+                    // . ':'.$_SERVER['SERVER_PORT']
+                    . dirname(dirname($_SERVER['SCRIPT_NAME']) ) . 'client/check-appmonitor-server.php';
+                    ;
         return $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
-            . '<br>'
+            . '<form action="?" method="post">'
+            . '<div class="input-group">'
+                . '<div class="input-group-addon">'
+                    . $this->_aIco['url']
+                . '</div>'
+                . '<input type="hidden" name="action" value="addurl">'
+                . '<input type="text" class="form-control" name="url" size="100" value="'.$sSurl.'" '
+                . 'placeholder="https://[domain]/appmonitor/client/" '
+                . 'pattern="http.*://..*" '
+                . 'required="required" '
+                . '>'
+                . '<span class="input-group-btn">'
+                . '<button class="btn btn-success">' . $this->_aIco['add'] . ' ' . $this->_tr('btn-addUrl') . '</button>'
+                . '</span>'
+            . '</div>'
+            . '</form><br><br><hr>'
+
             . '<a class="btn btn-primary" href="#divsetup" >' . $this->_aIco['setup'] . ' ' . $this->_tr('Setup') . '</a>';
     }
 
@@ -947,11 +973,9 @@ class appmonitorserver_gui extends appmonitorserver
         <div id="networkContainer">
             <div id="network-toolbar">
                 <span id="selView"></span>
-                <button class="btn btn-default" onclick="oMap.switchViewMode(); return false;">switch View</button>
-                <!--
-                <button class="btn btn-default" onclick="oMap.switchViewSize(); return false;">switch Size</button>
-                -->
-                <button class="btn btn-default" onclick="oMap.toggleFullscreen(\'networkContainer\'); return false;">Fullscreen</button>
+                <button class="btn btn-default" title="'.$this->_tr('btn-view-switch').'"     onclick="oMap.switchViewMode(); this.blur(); return false;">'.($this->_aIco['viewswitch']).'</button>
+                <button class="btn btn-default" title="'.$this->_tr('btn-view-reset').'"      onclick="oMap.switchViewSize(); this.blur(); return false;">'.($this->_aIco['viewreset']).'</button>
+                <button class="btn btn-default" title="'.$this->_tr('btn-view-fullscreen').'" onclick="oMap.toggleFullscreen(\'networkContainer\'); this.blur(); return false;">'.($this->_aIco['viewfullscreen']).'</button>
 
             </div>
             <div id="mynetwork"></div>
@@ -1048,7 +1072,7 @@ class appmonitorserver_gui extends appmonitorserver
                         $sReturn .= '' // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
                             . '<td>'
                             . (isset($aCheck["group"]) && $aCheck["group"] && isset($aCheckGroups[$aCheck["group"]])
-                                ? '<img src="' . $aCheckGroups[$aCheck["group"]]['image'] . '" width="16">&nbsp;' . $aCheckGroups[$aCheck["group"]]['label']
+                                ? '<nobr><img src="' . $aCheckGroups[$aCheck["group"]]['image'] . '" width="16"> ' . $aCheckGroups[$aCheck["group"]]['label'].'</nobr>'
                                 : '-'
                             )
                             . '<td>' . $aCheck["name"] . '</td>'

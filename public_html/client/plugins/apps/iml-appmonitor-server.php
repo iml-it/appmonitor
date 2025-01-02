@@ -13,11 +13,27 @@
  * 2021-11-nn  removed all checks ... created as single files
  * 2022-03-28  move checks into plugins/apps/
  * 2024-07-23  php 8: short array syntax
+ * 2024-12-28  added check for custom config and url file (if they exist)
  */
 
 // ----------------------------------------------------------------------
 // files and dirs
 // ----------------------------------------------------------------------
+
+$oMonitor->addCheck(
+    [
+        "name" => "PHP modules",
+        "description" => "Check needed PHP modules",
+        // "group" => "folder",
+        "check" => [
+            "function" => "Phpmodules",
+            "params" => [
+                "required" => ["curl"],
+                "optional" => [],
+            ],
+        ],
+    ]
+);
 
 $oMonitor->addCheck(
     [
@@ -49,37 +65,63 @@ $oMonitor->addCheck(
         ],
     ]
 );
+
 $oMonitor->addCheck(
     [
         "name" => "check config file",
-        "description" => "The config file must be writable",
+        "description" => "The default config file must be readable",
         "parent" => "write to ./config/",
         // "group" => "file",
         "check" => [
             "function" => "File",
             "params" => [
-                "filename" => "$sApproot/server/config/appmonitor-server-config.json",
+                "filename" => "$sApproot/server/config/appmonitor-server-config-defaults.json",
                 "file" => true,
-                "writable" => true,
+                "readable" => true,
             ],
         ],
     ]
 );
 
-$oMonitor->addCheck(
-    [
-        "name" => "PHP modules",
-        "description" => "Check needed PHP modules",
-        // "group" => "folder",
-        "check" => [
-            "function" => "Phpmodules",
-            "params" => [
-                "required" => ["curl"],
-                "optional" => [],
+if (is_file("$sApproot/server/config/appmonitor-server-config.json")) {
+    $oMonitor->addCheck(
+        [
+            "name" => "check custom config file",
+            "description" => "The custom config file must be readable and writable",
+            "parent" => "write to ./config/",
+            // "group" => "file",
+            "check" => [
+                "function" => "File",
+                "params" => [
+                    "filename" => "$sApproot/server/config/appmonitor-server-config.json",
+                    "file" => true,
+                    "readable" => true,
+                    "writable" => true,
+                ],
             ],
-        ],
-    ]
-);
+        ]
+    );        
+}
+
+if (is_file("$sApproot/server/config/appmonitor-server-urls.json")) {
+    $oMonitor->addCheck(
+        [
+            "name" => "check url file",
+            "description" => "The url config file must be readable and writable",
+            "parent" => "write to ./config/",
+            // "group" => "file",
+            "check" => [
+                "function" => "File",
+                "params" => [
+                    "filename" => "$sApproot/server/config/appmonitor-server-urls.json",
+                    "file" => true,
+                    "readable" => true,
+                    "writable" => true,
+                ],
+            ],
+        ]
+    );        
+}
 
 // ----------------------------------------------------------------------
 // protect dirs against web access
@@ -119,7 +161,7 @@ $oMonitor->addCheck(
         "name" => "appcounter",
         "description" => "Monitored apps",
         "group" => "monitor",
-        "parent" => "check config file",
+        "parent" => false,
         "check" => [
             "function" => "Simple",
             "params" => [
