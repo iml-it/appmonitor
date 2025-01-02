@@ -30,7 +30,7 @@ require_once 'render-adminlte.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.148
+ * @version 0.149
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -48,7 +48,7 @@ require_once 'render-adminlte.class.php';
  * 2024-12-10  0.146  axel.hahn@unibe.ch  add bootstrap-select link in about page; remove test line for tag validation
  * 2024-12-19  0.147  axel.hahn@unibe.ch  PHP 8.4 compatibility
  * 2024-12-20  0.148  axel.hahn@unibe.ch  Beautify ajax error output
- * 2024-12-29  0.149  axel.hahn@unibe.ch  Update welcome page with offerng a 1st monitoring url
+ * 2025-01-02  0.149  www.axel-hahn.de    Update welcome page with offerng a 1st monitoring url
  */
 class appmonitorserver_gui extends appmonitorserver
 {
@@ -56,7 +56,7 @@ class appmonitorserver_gui extends appmonitorserver
      * Version
      * @var string
      */
-    protected string $_sVersion = "0.148";
+    protected string $_sVersion = "0.149";
 
     /**
      * Title/ project name
@@ -1072,7 +1072,7 @@ class appmonitorserver_gui extends appmonitorserver
                         $sReturn .= '' // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
                             . '<td>'
                             . (isset($aCheck["group"]) && $aCheck["group"] && isset($aCheckGroups[$aCheck["group"]])
-                                ? '<img src="' . $aCheckGroups[$aCheck["group"]]['image'] . '" width="16">&nbsp;' . $aCheckGroups[$aCheck["group"]]['label']
+                                ? '<nobr><img src="' . $aCheckGroups[$aCheck["group"]]['image'] . '" width="16"> ' . $aCheckGroups[$aCheck["group"]]['label'].'</nobr>'
                                 : '-'
                             )
                             . '<td>' . $aCheck["name"] . '</td>'
