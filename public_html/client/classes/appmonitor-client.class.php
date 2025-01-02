@@ -43,8 +43,9 @@ if (!class_exists('appmonitorcheck')) {
  * 2023-07-06  0.128  axel.hahn@unibe.ch      update httpcontent check<br>
  * 2024-07-19  0.137  axel.hahn@unibe.ch      php 8 only: use typed variables
  * 2024-11-22  0.141  axel.hahn@unibe.ch      Set client version to server version after updating http, mysqli and app checks
+ * 2025-01-02  0.149  axel.hahn@unibe.ch      add getChecks method
  * --------------------------------------------------------------------------------<br>
- * @version 0.141
+ * @version 0.149
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -58,7 +59,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = 'php-client-v0.141';
+    protected string $_sVersion = 'php-client-v0.149';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -401,6 +402,15 @@ class appmonitor
     {
         header('HTTP/1.0 503 Service Unavailable');
         die('<h1>503 Service Unavailable</h1>' . $sMessage);
+    }
+
+    /**
+     * Get array with executed checks
+     * @return array
+     */
+    public function getChecks(): array
+    {
+        return $this->_aChecks;
     }
 
     /**
