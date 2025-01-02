@@ -12,13 +12,13 @@
 // initialize client and set very basic metadata ... if needed
 $bStandalone = !(class_exists('appmonitor') && isset($oMonitor));
 if ($bStandalone) {
-    require_once(__DIR__ . '/../../classes/appmonitor-client.class.php');
+    require_once __DIR__ . '/../../classes/appmonitor-client.class.php';
     $oMonitor = new appmonitor();
 
     if (!isset($sApproot) || empty($sApproot)) {
         $sApproot = $_SERVER['DOCUMENT_ROOT'];
         if (isset($_GET['rel'])) {
-            $sApproot .= $_GET['rel'];
+            $sApproot .= str_replace('..', '__', $_GET['rel']);
             if (!is_dir($sApproot)) {
                 header('HTTP/1.0 400 Bad request');
                 die('ERROR: The given rel dir does not exist below webroot.');
@@ -30,6 +30,7 @@ if ($bStandalone) {
     // "name"
     // "host"
     // "tags"    
+    // "dfw", "dfc"    
     $aAppDefaults['name'] = (isset($_GET['name']) && $_GET['name']) ? $_GET['name'] : $aAppDefaults['name'];
     $aAppDefaults['host'] = $_GET['host']
         ? explode(',', $_GET['host'])
@@ -57,10 +58,5 @@ if ($bStandalone) {
 
     @include __DIR__ . '/../../general_include.php';
 }
-
-// ----------------------------------------------------------------------
-// FUNCTIONS
-// ----------------------------------------------------------------------
-
 
 // ----------------------------------------------------------------------
