@@ -34,13 +34,13 @@ $aAppDefaults = [
 require 'inc_appcheck_start.php';
 
 // ----------------------------------------------------------------------
-// Read Matomo specific config items
+// Read Nextcloud specific config items
 // ----------------------------------------------------------------------
 
 $sConfigfile = "$sApproot/config/config.php";
 if (!file_exists($sConfigfile)) {
     header('HTTP/1.0 400 Bad request');
-    die('ERROR: Config file was not found. Set a correct $sApproot pointing to Matomo install dir.');
+    die('ERROR: Config file was not found. Use ?rel=/NAME or similiar to set a relative install dir.');
 }
 
 if (!include "$sConfigfile") {
