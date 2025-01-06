@@ -19,6 +19,7 @@
  * 2019-05-24  v1.02  detect include or standalone mode
  * 2024-12-20  v1.03  <axel.hahn@unibe.ch> integrate in appmonitor repository
  * 2024-12-21  v1.04  ah                   add php-modules and parent
+ * 2025-01-06  v1.05  ah                   add checks for writable dirs; add df
  */
 
 // ----------------------------------------------------------------------
@@ -28,6 +29,10 @@
 $aAppDefaults = [
     "name" => "Matomo web statistics",
     "tags" => ["matomo", "statistics"],
+    "df" => [
+        "warning" => "100MB",
+        "critical" => "10MB"
+    ]
 ];
 
 require 'inc_appcheck_start.php';
@@ -103,6 +108,47 @@ $oMonitor->addCheck(
         ],
     ]
 );
+
+
+// directory list from system check
+foreach (['/tmp', '/tmp/assets', '/tmp/cache', '/tmp/climulti', '/tmp/latest', '/tmp/logs', '/tmp/sessions', '/tmp/tcpdf', '/tmp/templates_c'] as $sDir) {
+    $oMonitor->addCheck(
+        [
+            "name" => "check writable dir $sDir",
+            "description" => "The directory $sDir must be readable and writable",
+            "group" => "folder",
+            "check" => [
+                "function" => "File",
+                "params" => [
+                    "filename" => "$sApproot/$sDir",
+                    "dir" => true,
+                    "readable" => true,
+                    "writable" => true,
+                ],
+            ],
+        ]
+    );
+}
+
+
+if (isset($aAppDefaults['df'])) {
+    
+    $oMonitor->addCheck(
+        [
+            "name" => "check disk space",
+            "description" => "The file storage must have some space left - warn: " . $aAppDefaults["df"]['warning'] . "/ critical: " . $aAppDefaults["df"]['critical'],
+            "parent" => "data dir",
+            "check" => [
+                "function" => "Diskfree",
+                "params" => [
+                    "directory" => $sApproot,
+                    "warning"   => $aAppDefaults["df"]['warning'],
+                    "critical"  => $aAppDefaults["df"]['critical'],
+                ],
+            ],
+        ]
+    );
+}
 
 // ----------------------------------------------------------------------
 

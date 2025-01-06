@@ -11,6 +11,7 @@
  * ----------------------------------------------------------------------
  * 2024-12-23  v1.00  ah                   initial version
  * 2024-12-26  v1.01  ah                   fix directory checks
+ * 2025-01-06  v1.02  ah                   add df
  */
 
 // ----------------------------------------------------------------------
@@ -20,6 +21,10 @@
 $aAppDefaults = [
     "name" => "Dokuwiki",
     "tags" => ["dokuwiki", "wiki"],
+    "df" => [
+        "warning" => "100MB",
+        "critical" => "10MB"
+    ]
 ];
 
 require 'inc_appcheck_start.php';
@@ -120,6 +125,24 @@ foreach (['data/attic', 'data/cache', 'data/index', 'data/locks', 'data/log', 'd
     );
 }
 
+if (isset($aAppDefaults['df'])) {
+    
+    $oMonitor->addCheck(
+        [
+            "name" => "check disk space",
+            "description" => "The file storage must have some space left - warn: " . $aAppDefaults["df"]['warning'] . "/ critical: " . $aAppDefaults["df"]['critical'],
+            "parent" => "data dir",
+            "check" => [
+                "function" => "Diskfree",
+                "params" => [
+                    "directory" => "$sApproot/data",
+                    "warning"   => $aAppDefaults["df"]['warning'],
+                    "critical"  => $aAppDefaults["df"]['critical'],
+                ],
+            ],
+        ]
+    );
+}
 
 // ----------------------------------------------------------------------
 
