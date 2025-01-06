@@ -57,7 +57,7 @@ Array
     [secret] => kFdQXw2w...
     [trusted_domains] => Array
         (
-            [0] => familie-hahn.aus-bern.ch
+            [0] => https://www.example.com
         )
 
     [datadirectory] => /home/httpd/cloud/data

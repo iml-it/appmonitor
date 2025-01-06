@@ -20,6 +20,7 @@
  * 2024-11-18  v1.02  <axel.hahn@unibe.ch> integrate in appmonitor repository
  * 2024-11-22  v1.03  <axel.hahn@unibe.ch> send 400 instead of 503 on error
  * 2024-12-21  v1.04  ah                   short array syntax; add php-modules and parent
+ * 2025-01-06  v1.05  ah                   add df
  */
 
 // ----------------------------------------------------------------------
@@ -29,6 +30,10 @@
 $aAppDefaults = [
     "name" => "Concrete5 CMS",
     "tags" => ["concrete5", "cms"],
+    "df" => [
+        "warning" => "100MB",
+        "critical" => "10MB"
+    ]
 ];
 
 require 'inc_appcheck_start.php';
@@ -108,7 +113,7 @@ $oMonitor->addCheck(
         "check" => [
             "function" => "File",
             "params" => [
-                "filename" => $sApproot . '/application/files',
+                "filename" => "$sApproot/application/files",
                 "dir" => true,
                 "writable" => true,
             ],
@@ -133,6 +138,25 @@ $oMonitor->addCheck(
         ],
     ]
 );
+
+if (isset($aAppDefaults['df'])) {
+    
+    $oMonitor->addCheck(
+        [
+            "name" => "check disk space",
+            "description" => "The file storage must have some space left - warn: " . $aAppDefaults["df"]['warning'] . "/ critical: " . $aAppDefaults["df"]['critical'],
+            "parent" => "data dir",
+            "check" => [
+                "function" => "Diskfree",
+                "params" => [
+                    "directory" => "$sApproot/application",
+                    "warning"   => $aAppDefaults["df"]['warning'],
+                    "critical"  => $aAppDefaults["df"]['critical'],
+                ],
+            ],
+        ]
+    );
+}
 
 // ----------------------------------------------------------------------
 
