@@ -137,7 +137,6 @@ if (isset($aAppDefaults['df'])) {
         [
             "name" => "check disk space",
             "description" => "The file storage must have some space left - warn: " . $aAppDefaults["df"]['warning'] . "/ critical: " . $aAppDefaults["df"]['critical'],
-            "parent" => "data dir",
             "check" => [
                 "function" => "Diskfree",
                 "params" => [
