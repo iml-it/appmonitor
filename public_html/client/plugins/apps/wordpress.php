@@ -23,6 +23,7 @@
  * 2024-11-21  v0.05  use shared_check_sl 
  * 2024-11-22  v0.07  <axel.hahn@unibe.ch> send 400 instead of 503 on error
  * 2024-12-21  v0.08  ah                   add php-modules and parent
+ * 2025-01-06  v1.05  ah                   add df
  */
 
 // ----------------------------------------------------------------------
@@ -32,6 +33,10 @@
 $aAppDefaults = [
     "name" => "Wordpress",
     "tags" => ["wordpress", "blog"],
+    "df" => [
+        "warning" => "100MB",
+        "critical" => "10MB"
+    ]
 ];
 
 require 'inc_appcheck_start.php';
@@ -131,6 +136,24 @@ $oMonitor->addCheck(
         ],
     ]
 );
+
+if (isset($aAppDefaults['df'])) {
+    
+    $oMonitor->addCheck(
+        [
+            "name" => "check disk space",
+            "description" => "The file storage must have some space left - warn: " . $aAppDefaults["df"]['warning'] . "/ critical: " . $aAppDefaults["df"]['critical'],
+            "check" => [
+                "function" => "Diskfree",
+                "params" => [
+                    "directory" => "$sApproot",
+                    "warning"   => $aAppDefaults["df"]['warning'],
+                    "critical"  => $aAppDefaults["df"]['critical'],
+                ],
+            ],
+        ]
+    );
+}
 
 require 'inc_appcheck_end.php';
 
