@@ -2,6 +2,7 @@
 
 require_once 'appmonitor-server.class.php';
 require_once 'render-adminlte.class.php';
+require_once 'cdnorlocal.class.php';
 
 /**
  * ____________________________________________________________________________
@@ -52,12 +53,6 @@ require_once 'render-adminlte.class.php';
  */
 class appmonitorserver_gui extends appmonitorserver
 {
-    /**
-     * Version
-     * @var string
-     */
-    protected string $_sVersion = "0.149";
-
     /**
      * Title/ project name
      * @var string
@@ -1094,7 +1089,7 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * Get html code for notification log page
+     * Get html code for notification log page and in application details
      * 
      * @param array   $aLogs          array with logs; if false then all logs will be fetched
      * @param string  $sTableClass    custom classname for the datatable; for custom datatable settings (see functions.js)
@@ -1191,6 +1186,85 @@ class appmonitorserver_gui extends appmonitorserver
             $sMoreResults .= (isset($aResults[$i]) ? '<span class="result' . $i . '">' . $aResults[$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' : '');
         }
         return $sTable;
+    }
+
+
+    /**
+     * Get html code for notification timeline
+     * 
+     * @param array   $aLogs          array with logs; if false then all logs will be fetched
+     * @return string
+     */
+    protected function _generateNotificationTimeline(array $aLogs = [], string $sSplitBy="day"): string
+    {
+        if (!count($aLogs)) {
+            $aLogs = $this->oNotification->getLogdata();
+        }
+        if (!count($aLogs)) {
+            return $this->_tr('Notifications-none');
+        }
+
+        $aTH = [
+            $this->_tr('Result'),
+            $this->_tr('Timestamp'),
+            $this->_tr('Change'),
+            $this->_tr('Webapp'),
+            $this->_tr('Message')
+        ];
+        $sTable = $this->_generateTableHead($aTH) . "\n";
+        $sTable .= '<tbody>';
+
+        $sOut='';
+        $sSplitHeadLast="";
+
+        foreach ($aLogs as $aLogentry) {
+            switch ($sSplitBy) {
+                case "hour": $sSplitHead=date("Y-m-d H:00", $aLogentry['timestamp']); break;
+                default: $sSplitHead=date("Y-m-d", $aLogentry['timestamp']); break;
+            }
+
+            if($sSplitHead !== $sSplitHeadLast){
+                $sOut.=($sOut ? '</ul>' : '')
+                    . "<h3>$sSplitHead</h3>\n<ul>\n";
+                $sSplitHeadLast=$sSplitHead;
+            }
+
+            // TODO maybe use $this->_getAdminLteColorByResult()
+            $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '-';
+
+            $sCheckResults = '';
+            if ($aLogentry['status'] > 0) {
+                if (isset($aLogentry['result']['checks'])) {
+                    foreach ($aLogentry['result']['checks'] as $aCheckitem) {
+                        if ($aCheckitem['result'] > 0) {
+                            $sCheckResults .= '<li class="result' . $aCheckitem['result'] . '">'
+                                . '<strong>' . htmlentities($aCheckitem['name']) . '</strong> - '
+                                . htmlentities($aCheckitem['value']) . '<br>'
+                                . '</li>';
+                        }
+                    }
+                }
+            }
+
+            $sOut .= '<li>'
+                . '<span class="result' . $aLogentry['status'] . '">' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</span> '
+                . date("H:i:s", $aLogentry['timestamp']) . ' - '
+                . $this->_tr('changetype-' . $aLogentry['changetype']) . ' '
+                . ($sAppName
+                        ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
+                        : '-'
+                    )
+                . ' ' 
+                . $aLogentry['message']
+                . ($sCheckResults ? "<ul>$sCheckResults</ul>" : '')
+            . '</li>'
+            ;                
+        }
+
+        $sOut.=$sOut ? '</ul>' : '';
+
+        return $sOut;
+
     }
 
     /**
@@ -1350,20 +1424,7 @@ class appmonitorserver_gui extends appmonitorserver
             . '<br>'
             . sprintf($this->_tr('About-projecturl'), $this->_sProjectUrl, $this->_sProjectUrl) . '<br>'
             . sprintf($this->_tr('About-docs'), $this->_sDocUrl) . '<br>'
-            . '<br>'
-            . $this->_tr('About-vendor') .
-            '<ul>
-                <li><a href="https://adminlte.io/">AdminLTE</a></li>
-                <li><a href="https://developer.snapappointments.com/bootstrap-select/">Bootstrap-Select</a></li>
-                <li><a href="https://datatables.net/">datatables.net</a></li>
-                <li><a href="https://fontawesome.com/">FontAwesome</a></li>
-                <li><a href="https://jquery.com/">jQuery</a></li>
-                <li><a href="https://getbootstrap.com/">Bootstrap</a></li>
-                <li><a href="https://www.chartjs.org/">ChartJs</a></li>
-                <li><a href="https://visjs.org/">Vis.js</a></li>
-                <li><a href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
-                <li><a href="https://github.com/axelhahn/ahcache/">AhCache</a></li>
-            </ul>';
+            ;
         // return $sHtml;
         return $oA->getSectionHead($this->_aIco["about"] . ' ' . $this->_tr('About'))
             . '<section class="content">'
@@ -1373,10 +1434,30 @@ class appmonitorserver_gui extends appmonitorserver
                         'title' => $this->_tr('About'),
                         'text' => $sHtml
                     ]),
-                    12
+                    6
+                )
+                .$oA->getSectionColumn(
+                    $oA->getBox([
+                        // 'title' => '', 
+                        'text' => $this->_tr('About-vendor') . '<ul>
+                            <li><a href="https://adminlte.io/">AdminLTE</a></li>                
+                            <li><a href="https://developer.snapappointments.com/bootstrap-select/">Bootstrap-Select</a></li>
+                            <li><a href="https://datatables.net/">datatables.net</a></li>
+                            <li><a href="https://fontawesome.com/">FontAwesome</a></li>
+                            <li><a href="https://jquery.com/">jQuery</a></li>
+                            <li><a href="https://getbootstrap.com/">Bootstrap</a></li>
+                            <li><a href="https://www.chartjs.org/">ChartJs</a></li>
+                            <li><a href="https://visjs.org/">Vis.js</a></li>
+                            <li><a href="https://github.com/axelhahn/ahcache/">AhCache</a></li>
+                            <li><a href="https://github.com/axelhahn/php-abstract-dbo">Axels PDO-DB class</a></li>
+                            <li><a href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
+                        </ul>'
+                    ]),
+                    6
                 )
             )
-            . '</section>';
+            . '</section>'
+            ;
     }
 
     /**
@@ -1762,29 +1843,111 @@ class appmonitorserver_gui extends appmonitorserver
     }
     /**
      * Get html code for notification page
-     * @param int  $iMaxcount  max number of entries; default=0 (all)
+     * @param array $aNotifyOptions  options to show; default: last 500 entries; subkeys
+     *                               - mode   {string} one of last
+     *                               - count  {integer} number of entries to fetch
+     *                               - page   {integer} page number to display
      * @return string
      */
-    public function generateViewNotifications($iMaxcount = 0): string
+    public function generateViewNotifications(array $aNotifyOptions = []): string
     {
         $oA = new renderadminlte();
-        $iNotifications = count($this->oNotification->loadLogdata());
-        $aLogs = $this->oNotification->getLogdata([], $iMaxcount);
-        $sButtons = '';
+        $aPossibleLengths=[25, 50, 100, 500, 1000];
+        $aPossibleViews=['table', 'timeline'];
 
-        $iMin = 100; // see functions.js - function showDiv() - var count = must have the same value
-        if ($iNotifications > $iMin) {
-            foreach ([/* '10'=>10, '50'=>50, */ $iMin => '', 1000 => 1000, 2000 => 2000, 'all' => 'all'] as $sLabel => $sParam) {
-                if ($iNotifications > $sLabel || $sLabel == 'all') {
-                    $sButtons .= '<button onclick="setTab(\'#divnotifications' . ($sParam ? '-' . $sParam : '') . '\')" '
-                        . 'class="btn' . ($iMaxcount == (int) $sLabel ? ' btn-primary' : '') . '"'
-                        . '>' . $sLabel . '</button> ';
+        $aNotifyOptions['view']??='table';
+        $aNotifyOptions['page']=(int)( $aNotifyOptions['page'] ?? 1);
+        $aNotifyOptions['count']=(int) ($aNotifyOptions['count'] ?? $aPossibleLengths[0]);
+        $iCurrentPage = $aNotifyOptions['page'];
+        $iPerPage = $aNotifyOptions['count'];
+
+        $iNotifications = $this->oNotification->countLogitems();
+
+        $aLogs = $this->oNotification->getLogdata($aNotifyOptions);
+        $sButtons = '';
+        $iMaxcount=floor($iNotifications/$iPerPage) + 1;
+
+        $sBtnSpacer=' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ';
+
+        // ------------------------------------------------------------------
+        // generate filter buttons
+
+        // --- number of visible entries
+        if($iNotifications > $aPossibleLengths[0]) {
+            $sButtons.=$this->_tr("filter-count") . ' &nbsp; ';
+            foreach($aPossibleLengths as $iLength) {
+                $sButtons .= '<button '
+                    . 'class="btn' . ($iPerPage == $iLength ? ' btn-primary' : '') . '" '
+                    . 'onclick="setTab(\'#divnotifications\', {\'page\': 1, \'count\': \''.$iLength.'\', \'view\': \''.$aNotifyOptions['view'].'\'})" '
+                    . '>'.$iLength.'</button> '
+                ;    
+                if($iNotifications < $iLength) {
+                    break;
+                }
+            }
+            $sButtons.=$sBtnSpacer;
+        }
+
+        // --- view mode
+        $sButtons.=$this->_tr("filter-view") . ' &nbsp; ';
+        foreach($aPossibleViews as $sView){
+            $sButtons .= '<button '
+                . 'class="btn' . ($aNotifyOptions['view'] == $sView ? ' btn-primary' : '') . '" '
+                . 'onclick="setTab(\'#divnotifications\', {\'page\': '.$iCurrentPage.', \'count\': \''.$aNotifyOptions['count'].'\', \'view\': \''.$sView.'\'})" '
+                . '>'.$this->_tr("filter-view-".$sView).'</button> '
+            ;    
+    
+        }
+        $sButtons.=$sBtnSpacer;
+
+        // --- pager
+        if ($iMaxcount > 1) {
+            $sButtons.=$this->_tr("filter-pagenumber") . ' &nbsp; ';
+            $iFrom=max($iCurrentPage-2,1);
+            $iFrom=min($iCurrentPage,$iFrom);
+            
+            $iTo=min($iCurrentPage+2, $iMaxcount);
+            $iTo=max($iFrom+3, $iTo);
+
+            $iFrom=min($iTo-4,$iTo);
+
+            for($i=1; $i<=$iMaxcount; $i++) {
+                if ($i==1 
+                    || $i >= $iFrom && $i <= $iTo 
+                    || $iMaxcount == $i
+                ) {
+                    $sButtons .= '<button '
+                    . 'class="btn' . ($iCurrentPage == $i ? ' btn-primary' : '') . '" '
+                    . 'onclick="setTab(\'#divnotifications\', {\'page\': \''.$i.'\', \'count\': \''.$aNotifyOptions['count'].'\', \'view\': \''.$aNotifyOptions['view'].'\'})" '
+                    . '>'.$i.'</button> '
+                    ;
+                        
+                }
+                if($i==2 && $iFrom>2 || $i==$iMaxcount-1 && $iTo<$iMaxcount-1) {
+                    $sButtons .= ' ... ';
                 }
             }
         }
-        $sButtons .= $sButtons ? '<br><br>' : '';
 
-        return $oA->getSectionHead($this->_aIco["notifications"] . ' ' . $this->_tr('Notifications-header'))
+        // ------------------------------------------------------------------
+        // generate content
+
+        $sDataview='';
+        switch ($aNotifyOptions['view']){
+            case 'table':
+                $sDataview.=$this->_generateNotificationlog($aLogs);
+                break;
+            case 'timeline':
+                $sDataview.=$this->_generateNotificationTimeline($aLogs);
+                break;
+            default:
+                $sDataview.=__METHOD__ . ' - Cannot render data - UNKNOWN view "'.htmlentities($aNotifyOptions['view'].'"');
+        }
+
+        // ------------------------------------------------------------------
+        // return
+
+        return $oA->getSectionHead($this->_aIco["notifications"] . ' "'.$this->_tr('Notifications-header').'"')
             . '<section class="content">'
             . $oA->getSectionRow($this->_generateWebTiles())
             . '<br>'
@@ -1792,7 +1955,7 @@ class appmonitorserver_gui extends appmonitorserver
                 $oA->getSectionColumn(
                     $oA->getBox([
                         'title' => $this->_tr('Notifications-header') . ' (' . $iNotifications . ')',
-                        'text' => $sButtons . $this->_generateNotificationlog($aLogs)
+                        'text' => "$sButtons<br><br>$sDataview"
                     ]),
                     12
                 )
@@ -2482,9 +2645,6 @@ class appmonitorserver_gui extends appmonitorserver
      */
     public function renderHtml(): string
     {
-        require_once 'cdnorlocal.class.php';
-        $oCdn = new axelhahn\cdnorlocal();
-
         $oCdn = new axelhahn\cdnorlocal([
             'vendordir' => __DIR__ . '/../vendor',
             'vendorurl' => './vendor/',

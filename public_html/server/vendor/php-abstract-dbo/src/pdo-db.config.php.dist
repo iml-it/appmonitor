@@ -1,0 +1,13 @@
+<?php
+/*
+https://www.php.net/manual/de/pdo.construct.php
+
+*/
+
+return [
+    // see https://www.php.net/manual/de/pdo.construct.php
+    'dsn' => 'sqlite:'.__DIR__.'/../protected/data/my-example-app.sqlite3',
+    'user' =>'',
+    'password'=>'',
+    'options' => []
+];
