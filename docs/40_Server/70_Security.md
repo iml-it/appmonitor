@@ -85,12 +85,17 @@ Add a section for each known `[username]` to define its roles on account level.
 These files _may_ contain sensitive data and could be interesting for hackers. Deny the web access for
 
 * [approot]/server/config/
+* [approot]/server/data/
 * [approot]/server/tmp/
 
 In both directories is a .htaccess - if you set _AllowOverride Limit_ these .htaccess will be used. Otherwise create a directory or Location section to deny the web access.
 
 ```txt
   <Location "/appmonitor/server/config">
+    Require all denied
+  </Location>
+
+  <Location "/appmonitor/server/data">
     Require all denied
   </Location>
 

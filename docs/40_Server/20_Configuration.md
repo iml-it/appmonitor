@@ -25,12 +25,16 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
 
 ``` json
 {
+    "version": "<version number>",
     "theme": "default",
     "lang": "en-en",
     "debug": false,
     "serverurl": "https:\/\/monitorserver\/appmonitor\/server\/",
     "pagereload": 60,
     "servicecache": false,
+    "db": {
+        "dsn": "sqlite: ../../data/appmonitor_import.sqlite3"
+    },
     "curl":{
         "timeout": 15
     },
@@ -84,6 +88,7 @@ Key             | Description
 _api_           | \{array\} access of api
 _curl_          | \{array\} curl settings for fetching client results
 _debug_         | \{bool\} show debug tab with internal values
+_db_            | \{array\} databse connection
 _lang_          | \{string\} language (en-en\|de-de)
 _layout_        | \{string\} name of adminLte layout (one of fixed\|layout-boxed\|layout-top-nav\|sidebar-mini(=default)\|sidebar-collapse)
 _notifications_ | \{array\} notification setup
@@ -93,6 +98,7 @@ _servicecache_  | \{bool\} flag for caching; if using service then web gui uses 
 _skin_          | \{string\} name of adminLte skin (one of skin-blue\|skin-black\|skin-purple(=default)\|skin-yellow\|skin-red\|skin-green ... and *-light)
 _theme_         | \{string\} name of css to load (aka "skin") ... do not use anymore
 _users_         | \{array\} define users and roles
+_version_       | \{string\} version number of installation. The version numberwill be written to custom settings file after an update to a newer version.
 _view_          | \{array\} show/ hide elements on ouput pages
 
 The values with arrays are described below.
@@ -129,6 +135,20 @@ Curl settings.
 Here can be the subkeys
 
 - `timeout`: integer value in seconds; default is 15. If you use a service then you can tweak: set servicecache to true and a higher timeout in curl -> timeout
+
+### db
+
+Database settings. Here can be the subkeys
+
+- `dsn`: string - database connection
+- 'user': string - database username to connect with
+- 'password': string - password
+- 'options': array - array of options
+
+see <https://www.php.net/manual/en/pdo.connect.php>.
+The default configuration handles a sqlite file in data directory. In custom settings you can define another filename eg. to put the database file outside webroot.
+
+Using a mysql database and switching between mysql and sqlite will be possible too (needs to be tested and documented).
 
 ### notifications
 
