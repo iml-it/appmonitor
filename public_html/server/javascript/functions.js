@@ -258,12 +258,13 @@ function filterApps(sDiv, sClass, bIsOverview) {
 
 /**
  * set the active tab and show the content
- * @param {string} sFilter value of the active tab
+ * @param {string} sFilter   value of the active tab
+ * @param {string} postdata  data for POST request; if empty a GET will be created
  * @returns {undefined}
  */
-function setTab(sFilter) {
+function setTab(sFilter, postdata) {
     aViewFilters['tab'] = sFilter;
-    showDiv();
+    showDiv(postdata);
 }
 
 // ----------------------------------------------------------------------
@@ -347,7 +348,7 @@ function setTextfilter(sTarget, sFilter) {
 }
 
 /**
- * show a timer ad a
+ * show a timer ad a progress bar
  * @returns {undefined}
  */
 function refreshTimer() {
@@ -358,11 +359,15 @@ function refreshTimer() {
         );
     }
     if (
-        location.hash == '#divsetup'
+        location.hash == '#divnotifications'
+        || location.hash == '#divsetup'
         || location.hash == '#divabout'
+        || location.hash == '#divdebug'
     ) {
+        $('a.reload').hide();
         return false;
     }
+    $('a.reload').show();
     $('#counter span').html(iReload - iRefreshCounter + 's');
     $('#counter div').css('width', (100 - (iRefreshCounter / iReload * 100)) + '%');
     iRefreshCounter++;
@@ -402,7 +407,7 @@ function initRelNav(){
  * load content and update top navi item
  * @returns {undefined}
  */
-function showDiv() {
+function showDiv(postdata) {
 
     var oOut = $('#content');
     var oError = $('#errorajax');
@@ -424,13 +429,13 @@ function showDiv() {
     if (sDiv && sDiv.indexOf('divweb-') > 0) {
         item = 'viewweb';
         appid = sDiv.replace(/\#.*\-/, '');
-    } else if (sDiv && sDiv.indexOf('notifications-') > 0) {
+    } /* else if (sDiv && sDiv.indexOf('notifications-') > 0) {
         item = 'viewnotifications';
         count = sDiv.replace(/\#.*\-/, '');
         if(count=="all"){
             count=false;
         }
-    } else {
+    } */ else {
         if (aCfgViews[sDiv]) {
             item = aCfgViews[sDiv];
         }
@@ -449,8 +454,8 @@ function showDiv() {
     $('a.reload i').addClass('fa-spin');
     jQuery.ajax({
         url: url,
-        // data: queryparams,
-        type: 'GET',
+        data: postdata,
+        type: postdata ? 'POST' : 'GET',
         success: function (data) {
             oOut.css('opacity', 1);
             oOut.html(sInfo + data);
@@ -525,7 +530,8 @@ function postLoad(bIsFirstload) {
     $('.datatable-checks').dataTable({"order": [[0, "desc"]]});
     $('.datatable-hosts').dataTable({"order": [[0, "desc"]], "aLengthMenu":[[50,-1],[50,"---"]]});
     $('.datatable-notifications-webapp').dataTable({'order': [[1, 'desc']]});
-    $('.datatable-notifications').dataTable({'order': [[1, 'desc']], "aLengthMenu":[[25,100,-1],[25,100,"---"]]});
+    // $('.datatable-notifications').dataTable({'order': [[1, 'desc']], "aLengthMenu":[[25,100,-1],[25,100,"---"]]});
+    $('.datatable-notifications').dataTable({'order': [[1, 'desc']], "aLengthMenu":[[-1],["---"]]});
 
     // copy problem badges from tile to menu
     if ($('#badgetile_allapps')){
