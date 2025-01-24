@@ -4,6 +4,7 @@ require_once 'cache.class.php';
 require_once 'lang.class.php';
 require_once 'counteritems.class.php';
 require_once 'notificationhandler.class.php';
+require __DIR__.'/../vendor/php-abstract-dbo/src/pdo-db.class.php';
 
 /**
  * ____________________________________________________________________________
@@ -44,6 +45,11 @@ require_once 'notificationhandler.class.php';
  */
 class appmonitorserver
 {
+    /**
+     * Version (will be read from defaults file)
+     * @var string
+     */
+    protected string $_sVersion = "";
 
     /**
      * Key value hash with all clients to fetch appmon client status from
@@ -222,6 +228,7 @@ class appmonitorserver
      */
     public function loadConfig(): void
     {
+        global $oDB;
         $aUserdata = [];
         $aDefaults = [];
         $this->_urls = [];
@@ -249,16 +256,18 @@ class appmonitorserver
             $this->_urls=json_decode(file_get_contents($this->_getConfigDir() . '/' . $this->_sUrlfile), true);
         }
 
-        // migration for old way to load urls
-        if (isset($this->_aCfg['urls']) && is_array($this->_aCfg['urls'])) {
-            foreach ($this->_aCfg["urls"] as $sUrl) {
-                $this->addUrl($sUrl);
-            }
-            $this->saveUrls();
-            unset($this->_aCfg['urls']);
-            $this->saveConfig();
+        // initialize database
+        // echo $this->_aCfg['dsn'];
+        $oDB=new axelhahn\pdo_db([
+            'db'=>$this->_aCfg['db'],
+            // 'showdebug'=>true,
+            'showerrors'=>true,
+        ]);
+        if (!$oDB->db){
+            // echo $oDB->error().'<br>';
+            die("SORRY, unable to connect the database.");
         }
-
+        
         if (isset($this->_aCfg['curl']['timeout'])) {
             $this->curl_opts[CURLOPT_TIMEOUT] = (int) $this->_aCfg['curl']['timeout'];
         }
@@ -268,6 +277,19 @@ class appmonitorserver
             'serverurl' => $this->_aCfg['serverurl'],
             'notifications' => $this->_aCfg['notifications']
         ]);
+
+        // Upgrade if needed
+        $this->_sVersion = $aDefaults['version'];
+        $sLastVersion=$aUserdata['version']??false;
+        if(
+            $sLastVersion!==$this->_sVersion
+        ){
+            require "appmonitor-server-upgrade.php";
+            // file_put_contents($sVersionFile, $this->_sVersion);
+            $aUserdata['version']=$this->_sVersion;
+            file_put_contents($sCfgFile, json_encode($aUserdata, JSON_PRETTY_PRINT));
+        }
+
     }
     /**
      * load monitoring data ... if not done yet; used in gui and api

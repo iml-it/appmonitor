@@ -2,6 +2,7 @@
 
 require_once 'cache.class.php';
 require_once 'lang.class.php';
+require_once 'dbobjects/notifications.php';
 
 define("CHANGETYPE_NOCHANGE", 0);
 define("CHANGETYPE_NEW", 1);
@@ -71,6 +72,9 @@ class notificationhandler
      * @var string
      */
     protected string $_sServerurl = '';
+
+
+    protected object $_oNotifications;
 
     // ------------------------------------------------------------------
     // data of the current app 
@@ -143,6 +147,7 @@ class notificationhandler
      */
     public function __construct(array $aOptions = [])
     {
+        global $oDB;
         if (isset($aOptions['lang'])) {
             $this->_loadLangTexts($aOptions['lang']);
         }
@@ -154,6 +159,9 @@ class notificationhandler
 
         $this->_sCache_lastResult = $this->_sCacheIdPrefix . "-app";
         $this->_sCache_notificationsLog = $this->_sCacheIdPrefix . "-notify";
+
+        $this->_oNotifications=new objnotifications($oDB);
+
     }
 
     // ----------------------------------------------------------------------
@@ -437,6 +445,7 @@ class notificationhandler
     protected function addLogitem(int $iChangetype, string $sNewstatus, string $sAppId, string $sMessage, array $aResult): bool
     {
         // reread because service and webgui could change it
+        /*
         $aData = $this->loadLogdata();
         $this->_aLog[] = [
             'timestamp' => time(),
@@ -449,13 +458,32 @@ class notificationhandler
 
         $this->cutLogitems();
         return $this->saveLogdata();
+        */
+        $this->_oNotifications->new();
+        $this->_oNotifications->setItem([
+            'timestamp' => time(),
+            'changetype' => $iChangetype,
+            'status' => $sNewstatus,
+            'appid' => $sAppId,
+            'message' => $sMessage,
+            'result' => json_encode($aResult),
+        ]);
+        return $this->_oNotifications->create();
+    }
+
+    /**
+     * Get count of notification log entries
+     * @return int
+     */
+    public function countLogitems():int{
+        return $this->_oNotifications->count() ?? 0;
     }
 
     /**
      * Helper function - limit log to N entries
      * @return boolean
      */
-    protected function cutLogitems(): bool
+    protected function OBSOLETE_cutLogitems(): bool
     {
         if (count($this->_aLog) > $this->_iMaxLogentries) {
             while (count($this->_aLog) > $this->_iMaxLogentries) {
@@ -501,58 +529,63 @@ class notificationhandler
     /**
      * Get current log data and filter them
      * @param array   $aFilter  filter with possible keys timestamp|changetype|status|appid|message (see addLogitem())
+     *                          - mode  {string} "last" = newest entries first
+     *                          - count {integer} number of entries to return
+     *                          - page  {integer}
      * @param integer $iLimit   set a maximum of log entries
      * @param boolean $bRsort   flag to reverse sort logs; default is true (=newest entry first)
      * @return array
      */
     public function getLogdata(array $aFilter = [], int $iLimit = 0, bool $bRsort = true): array
     {
-        $aReturn = [];
-        $aData = $this->loadLogdata();
-        if ($bRsort) {
-            rsort($aData);
-        }
-        // filter
-        foreach ($aData as $aLogentry) {
-            if ($iLimit && count($aReturn) >= $iLimit) {
-                break;
-            }
-            $bAdd = true;
-            if (count($aFilter) > 0) {
-                $bAdd = false;
-                foreach ($aFilter as $sKey => $sValue) {
-                    if ($aLogentry[$sKey] === $sValue) {
-                        $bAdd = true;
-                    }
-                }
-            }
-            if ($bAdd) {
-                $aReturn[] = $aLogentry;
-            }
+
+        $aFilter['mode']??='last';
+        $aFilter['count']??=25;
+        $aFilter['page']??=1;
+        $aFilter['where']??='';
+
+        $aSearchParams=[];
+        if ($aFilter['appid'] ?? false) {
+            $aFilter['where']='`appid` = :appid';
+            $aSearchParams=['appid'=>$aFilter['appid']];
         }
 
-        return $aReturn;
+        $aData=$this->_oNotifications->search(
+            [
+            'columns'=>'*',
+            'where' => $aFilter['where'],
+            'order' => ['timestamp DESC'],
+            'limit' => (($aFilter['page']-1)*$aFilter['count']) . ", " . $aFilter['count'] ,
+            ], 
+            $aSearchParams
+        );
+
+        return is_array($aData) ? $aData : [];
+
     }
 
     /**
-     * Read all sored logdata
+     * Read all stored logdata
      * @return array
      */
     public function loadLogdata(): array
     {
-        $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
-        $this->_aLog = [];
-        $aLog = $oCache->read();
-        $this->_aLog = $aLog && is_array($aLog) ? $aLog : [];
+        // $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
+        // $this->_aLog = [];
+        // $aLog = $oCache->read();
 
-        return $this->_aLog;
+        // $this->_aLog = $aLog && is_array($aLog) ? $aLog : [];
+        // return $this->_aLog;
+
+        $aLog=$this->_oNotifications->search();
+        return $aLog && is_array($aLog) ? $aLog : [];
     }
 
     /**
      * Save log data of $this->_aLog
      * @return bool
      */
-    protected function saveLogdata(): bool
+    protected function OBSOLETE_saveLogdata(): bool
     {
         if ($this->_aLog && is_array($this->_aLog) && count($this->_aLog)) {
             $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
