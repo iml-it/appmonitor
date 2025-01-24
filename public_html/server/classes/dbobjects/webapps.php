@@ -11,6 +11,7 @@ class objwebapps extends axelhahn\pdo_db_base
      */
     protected array $_aProperties = [
         'appid'       => ['create' => 'varchar(32)',],
+        'expires'     => ['create' => 'datetime',],
         'result'      => ['create' => 'text',],
         'lastresult'  => ['create' => 'text',],
         'lastok'      => ['create' => 'text',],

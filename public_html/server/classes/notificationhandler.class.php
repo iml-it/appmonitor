@@ -73,7 +73,10 @@ class notificationhandler
      */
     protected string $_sServerurl = '';
 
-
+    /**
+     * database object for sent notifications
+     * @var objnotifications
+     */
     protected object $_oNotifications;
 
     // ------------------------------------------------------------------
@@ -143,7 +146,7 @@ class notificationhandler
      *                          - {string} lang       language of the GUI
      *                          - {string} serverurl  base url of the web app to build an url to an app specific page
      *                          - {string} notifications  appmionitor config settings in notification settings (for sleeptime and messages)
-     * @return boolean
+     * @global object $oDB      database connection
      */
     public function __construct(array $aOptions = [])
     {

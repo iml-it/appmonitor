@@ -19,7 +19,7 @@ if(!isset($this->_aCfg)){
 function title($sTitle){
     $bHtml=$_SERVER['HTTP_HOST']??false;
     echo $bHtml 
-        ? "<strong>---------- $sTitle</strong><br>"
+        ? "<strong>---------- $sTitle</strong>\n"
         : "---------- $sTitle\n";
 }
 
@@ -144,11 +144,44 @@ if ($iCachefiles){
 }
 */
 
+// ----------------------------------------------------------------------
 
+title("Import response data to database");
+if (!$_oWebapp=new objwebapps($oDB)){
+    fail("Failed to initilize webapps object.");
+};
+echo "Webapps object was initialized.\n";
+
+if($_oWebapp->count()>0){
+    skip("Already imported responses: ".$_oWebapp->count().". Nothing to do.");
+} else {
+
+    echo "Initializing cache...\n";
+    $oCache = new AhCache("appmonitor-server");
+    $aResults=$oCache->getCachedItems();
+
+    echo "Starting import...\n";
+    // print_r($aResults);
+    // loop over cache entries and import
+    foreach(array_values($aResults) as $aCacheitem){
+        $oCache->setCacheId($aCacheitem['cacheid']);
+        $aData=$oCache->read();
+        // print_r($aData);
+        $_oWebapp->new();
+        $_oWebapp->set("appid", $aCacheitem['cacheid']);
+        $_oWebapp->set("result", json_encode($aData));
+
+        // todo
+        // $_oWebapp->set("lastresult", json_encode($aData));
+        // $_oWebapp->set("lastok", "");
+
+        // print_r($_oWebapp->getItem());
+    }
+}
 // ----------------------------------------------------------------------
 
 title("UPGRADER is finished");
 if (isset($_SERVER['HTTP_HOST'])) {
-    echo "\n\nRefresh the page in the webbroeser!\n\n";
     echo "</pre>";
+    echo "<h2>👉 Refresh the page in the webbrowser.</h2>";
 }

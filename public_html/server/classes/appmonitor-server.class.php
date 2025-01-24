@@ -5,6 +5,7 @@ require_once 'lang.class.php';
 require_once 'counteritems.class.php';
 require_once 'notificationhandler.class.php';
 require __DIR__.'/../vendor/php-abstract-dbo/src/pdo-db.class.php';
+require_once 'dbobjects/webapps.php';
 
 /**
  * ____________________________________________________________________________
@@ -157,21 +158,34 @@ class appmonitorserver
      */
     protected string $_user = '*';
 
+    /**
+     * database object for web application response data
+     * @var objwebapps
+     */
+    protected object $_oWebapps;
+
     // ----------------------------------------------------------------------
     // Constructor
     // ----------------------------------------------------------------------
 
     /**
      * constructor
+     * @global object $oDB      database connection
      */
     public function __construct()
     {
+        global $oDB;
         $this->loadConfig();
+
+        // remark: $oDB is initialized in loadConfig()
+        $this->_oWebapps=new objwebapps($oDB);
+
         $this->_loadLangTexts();
         $this->_handleParams();
 
         $_sUser = $this->getAlreadyAuthenticatedUser();
         $this->setUser($_sUser ? $_sUser : '*');
+
     }
 
     // ----------------------------------------------------------------------
@@ -224,6 +238,7 @@ class appmonitorserver
      * - fills $this->_aCfg
      * - newly initializes $this->oNotification
      * 
+     * @global object $oDB      database connection
      * @return void
      */
     public function loadConfig(): void
@@ -258,6 +273,10 @@ class appmonitorserver
 
         // initialize database
         // echo $this->_aCfg['dsn'];
+        if($this->_aCfg['db']['dsn']??false){
+            $this->_aCfg['db']['dsn']=str_replace('{{APPDIR}}', dirname(__DIR__), $this->_aCfg['db']['dsn']);
+        }
+        
         $oDB=new axelhahn\pdo_db([
             'db'=>$this->_aCfg['db'],
             // 'showdebug'=>true,
@@ -283,11 +302,11 @@ class appmonitorserver
         $sLastVersion=$aUserdata['version']??false;
         if(
             $sLastVersion!==$this->_sVersion
+            || true
         ){
             require "appmonitor-server-upgrade.php";
-            // file_put_contents($sVersionFile, $this->_sVersion);
             $aUserdata['version']=$this->_sVersion;
-            file_put_contents($sCfgFile, json_encode($aUserdata, JSON_PRETTY_PRINT));
+            $this->saveConfig($aUserdata);
         }
 
     }
@@ -863,6 +882,39 @@ class appmonitorserver
         }
     }
 
+
+    /**
+     * get resault data from database
+     * 
+     * @param string  $aAppId        application id (hash or url)
+     * @param string  $$sWhatResult  one of "result" or "lastresult" or "lastok"
+     * @return array
+     */
+
+    /**
+     * Get application result data from database as hash
+     * key is the application id - value a hash of the wanted resultset
+     * 
+     * @param string $sAppId
+     * @param mixed $sWhatResult
+     * @return array
+     */
+    protected function _getWebdataFromDb(string $sAppId='', $sWhatResult='result'):array
+    {
+
+        $aSearchWeb=$sAppId 
+            ? $this->_oWebapps->search([ 'columns'=>['appid', $sWhatResult], 'filter' => ['appid' => $sAppId]])
+            : $this->_oWebapps->search([ 'columns'=>['appid', $sWhatResult]])
+            ;
+        $aReturn=[];
+        if(!$aSearchWeb){
+            foreach($aSearchWeb as $aRow){
+                $aReturn[$aRow['appid']]=$aRow[$sWhatResult];
+            }
+        }
+        return $aReturn;
+    }
+
     /**
      * Get all client data; it fetches all given urls
      * 
@@ -876,12 +928,16 @@ class appmonitorserver
             $ForceCache = isset($_SERVER['REQUEST_METHOD']) && isset($this->_aCfg['servicecache']) && $this->_aCfg['servicecache'];
         }
         $this->_data = [];
-        $aUrls = [];
-        foreach ($this->_urls as $sKey => $sUrl) {
+        $aUrls2Refresh = [];
+
+        // TODO
+        // $aDbData=$this->_getWebdataFromDb();
+
+        foreach ($this->_urls as $sKey => $sUrl) {            
             $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
             if ($oCache->isExpired() && !$ForceCache) {
                 // Cache does not exist or is expired
-                $aUrls[$sKey] = $sUrl;
+                $aUrls2Refresh[$sKey] = $sUrl;
             } else {
                 // age is bel['result']['error']ow ttl ... read from Cache 
                 $aCached = $oCache->read();
@@ -891,8 +947,8 @@ class appmonitorserver
             }
         }
         // fetch all non cached items
-        if (count($aUrls)) {
-            $aAllHttpdata = $this->_multipleHttpGet($aUrls);
+        if (count($aUrls2Refresh)) {
+            $aAllHttpdata = $this->_multipleHttpGet($aUrls2Refresh);
             foreach ($aAllHttpdata as $sKey => $aResult) {
 
                 // detect http error
@@ -1014,6 +1070,7 @@ class appmonitorserver
                 $iTtl = $iTtl + rand(2, min(5 + round($iTtl / 3), 30));
 
                 $oCache->write($aClientData, $iTtl);
+                // $this->_oWebapps->set('result', json_encode($aClientData));
 
                 $aClientData["result"]["fromcache"] = false;
                 $this->_data[$sKey] = $aClientData;
@@ -1064,7 +1121,7 @@ class appmonitorserver
     }
 
     /**
-     * remove appmonitor url from current object
+     * remove appmonitor url from current wect
      * @param string $sUrl url to remove
      * @return boolean
      */

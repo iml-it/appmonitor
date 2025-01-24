@@ -33,7 +33,7 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
     "pagereload": 60,
     "servicecache": false,
     "db": {
-        "dsn": "sqlite: ../../data/appmonitor_import.sqlite3"
+        "dsn": "sqlite:{{APPDIR}}/data/appmonitor_import.sqlite3"
     },
     "curl":{
         "timeout": 15
