@@ -153,7 +153,7 @@ class counteritems
      */
     public function deleteCounter(string $sCounterId = ''): bool
     {
-        if (!$sCounterId) {
+        if ($sCounterId) {
             $this->setCounter($sCounterId);
         }
         if (isset($this->_aCounters[$sCounterId])) {

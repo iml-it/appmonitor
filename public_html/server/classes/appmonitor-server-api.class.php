@@ -52,7 +52,7 @@ class appmonitorserver_api extends appmonitorserver
      */
     public function getApiConfig(): array
     {
-        return isset($this->_aCfg['api']) ? $this->_aCfg['api'] : [];
+        return $this->_aCfg['api'] ?? [];
     }
 
     /**
@@ -274,6 +274,6 @@ class appmonitorserver_api extends appmonitorserver
      */
     public function apiGetTags(): array
     {
-        return ['tags' => $this->_getClientTags()];
+        return ['tags' => $this->_getAllClientTags()];
     }
 }

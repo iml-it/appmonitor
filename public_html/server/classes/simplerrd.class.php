@@ -1,4 +1,5 @@
 <?php
+require_once 'dbobjects/simplerrd.php';
 
 /**
  * simple storages to keep last N items of an object
@@ -6,15 +7,10 @@
  * @author hahn
  * 
  * 2024-07-23  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2025-02-21  axel.hahn@unibe.ch  use sqlite as storage
  */
 class simpleRrd
 {
-
-    /**
-     * Prefix for cached items of this class
-     * @var string
-     */
-    protected string $_sCacheIdPrefix = "rrd";
 
     /**
      * Maximum number of kept data items
@@ -29,16 +25,17 @@ class simpleRrd
     protected array $_aLog = [];
 
     /**
-     * Id of the cache item
-     * @var string
+     * pdo object for rrd data
+     * @var object
      */
-    protected string $_sCacheId = '';
+    protected objsimplerrd $_oSimplerrd;
 
     /**
-     * Instance of ahcache class
-     * @var AhCache
+     * Row id of a set of rrd data identified by app id and counter name
+     * @var int
      */
-    protected AhCache $_oCache;
+    protected int $_iRowid;
+
 
     // ----------------------------------------------------------------------
     // __construct
@@ -50,6 +47,8 @@ class simpleRrd
      */
     public function __construct(string $sId = '')
     {
+        global $oDB;
+        $this->_oSimplerrd=new objsimplerrd($oDB);
         if ($sId) {
             $this->setId($sId);
         }
@@ -83,8 +82,14 @@ class simpleRrd
      */
     protected function _getLogs(): bool
     {
-        $cachedata = $this->_oCache->read();
-        $this->_aLog = (is_array($cachedata)) ? $cachedata : [];
+        if($this->_iRowid) {
+            $this->_oSimplerrd->read($this->_iRowid);
+            $cachedata= json_decode($this->_oSimplerrd->get('data'), 1);
+            $this->_aLog = (is_array($cachedata)) ? $cachedata : [];
+        } else {
+            $this->_aLog=[];
+        }
+        // echo "RRD id $this->_iRowid - ".count($this->_aLog)."<br>\n";
         return true;
     }
 
@@ -94,7 +99,10 @@ class simpleRrd
      */
     protected function _saveLogs(): bool
     {
-        return $this->_oCache->write($this->_aLog);
+        if( $this->_oSimplerrd->set('data', json_encode($this->_aLog)) ){
+            return $this->_oSimplerrd->save();
+        }
+        return false;
     }
 
     // ----------------------------------------------------------------------
@@ -123,10 +131,10 @@ class simpleRrd
      */
     public function delete(): bool
     {
-        if (!$this->_sCacheId) {
+        if (!$this->_iRowid) {
             return false;
         }
-        return $this->_oCache->delete();
+        return $this->_oSimplerrd->delete();
     }
 
     /**
@@ -147,7 +155,6 @@ class simpleRrd
         $iMax = min($iMax, count($aTmp));
         for ($i = 0; $i < $iMax; $i++) {
             $aReturn[] = array_pop($aTmp);
-            // $aReturn[]=$aTmp;
         }
         return $aReturn;
     }
@@ -160,8 +167,37 @@ class simpleRrd
      */
     public function setId(string $sId): bool
     {
-        $this->_sCacheId = $sId;
-        $this->_oCache = new AhCache($this->_sCacheIdPrefix, $this->_sCacheId);
+        
+        $sAppid=substr($sId, 0, 32);
+        $sCountername=substr($sId, 33, 200);
+
+        /*
+        $aSearchresult=$this->_oSimplerrd->search([
+                "columns"=>["id"],
+                "where"=>"appid = :appid and countername = :countername",
+            ],
+            [
+                "appid" => $sAppid,
+                "countername" => $sCountername,
+            ]
+            );
+        $this->_iRowid=$aSearchresult[0]['id']??0;
+        */
+
+        if ($this->_oSimplerrd->readByFields([
+            "appid" => $sAppid,
+            "countername" => $sCountername
+        ])) {
+            $this->_iRowid=$this->_oSimplerrd->get('id');
+        } else {
+            $this->_iRowid=0;
+            $this->_oSimplerrd->new();
+            $this->_oSimplerrd->getitem();
+            $this->_oSimplerrd->set('appid', $sAppid);
+            $this->_oSimplerrd->set('countername', $sCountername);
+    
+        }
+        
         $this->_getLogs();
         return true;
     }

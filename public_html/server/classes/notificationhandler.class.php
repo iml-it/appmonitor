@@ -3,6 +3,7 @@
 require_once 'cache.class.php';
 require_once 'lang.class.php';
 require_once 'dbobjects/notifications.php';
+require_once 'dbobjects/webapps.php';
 
 define("CHANGETYPE_NOCHANGE", 0);
 define("CHANGETYPE_NEW", 1);
@@ -37,12 +38,10 @@ if (!defined('RESULT_OK')) {
  * 
  * 2024-07-17  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-11-06  axel.hahn@unibe.ch  update html email output
+ * 2025-02-21  axel.hahn@unibe.ch  use sqlite as storage
  */
 class notificationhandler
 {
-
-    protected string $_sCacheIdPrefix = "notificationhandler";
-
     /**
      * Number of maximum of log entries for application notifications
      * @var int
@@ -77,7 +76,13 @@ class notificationhandler
      * database object for sent notifications
      * @var objnotifications
      */
-    protected object $_oNotifications;
+    protected objnotifications $_oNotifications;
+
+    /**
+     * database object for webapps (last status, last OK)
+     * @var objwebapps
+     */
+    protected objwebapps $_oWebapps;
 
     // ------------------------------------------------------------------
     // data of the current app 
@@ -119,18 +124,6 @@ class notificationhandler
     ];
 
     /**
-     * Caching id for last results of a check
-     * @var string
-     */
-    protected string $_sCache_lastResult = '';
-
-    /**
-     * Caching id for notification log
-     * @var string
-     */
-    protected string $_sCache_notificationsLog = '';
-
-    /**
      * plugin directory for notification types
      * @var string
      */
@@ -160,10 +153,8 @@ class notificationhandler
 
         $this->_aNotificationOptions = isset($aOptions['notifications']) ? $aOptions['notifications'] : false;
 
-        $this->_sCache_lastResult = $this->_sCacheIdPrefix . "-app";
-        $this->_sCache_notificationsLog = $this->_sCacheIdPrefix . "-notify";
-
         $this->_oNotifications=new objnotifications($oDB);
+        $this->_oWebapps=new objwebapps($oDB);
 
     }
 
@@ -208,19 +199,6 @@ class notificationhandler
     // ----------------------------------------------------------------------
 
     /**
-     * Delete app based caches; method is triggered on deletion of an app
-     * @return boolean
-     */
-    protected function _deleteAppLastResult(): bool
-    {
-        $oCache = new AhCache($this->_sCache_lastResult, $this->_sAppId);
-        $oCache->delete();
-        $oCache = new AhCache($this->_sCache_notificationsLog, $this->_sAppId);
-        $oCache->delete();
-        return true;
-    }
-
-    /**
      * Get current or last stored client notification receivers
      * this method also stores current notification data on change.
      * This information is cached if client status has no data (i.e. timeout)
@@ -230,14 +208,7 @@ class notificationhandler
      */
     protected function _getAppNotifications(): array
     {
-        $oCache = new AhCache($this->_sCache_notificationsLog, $this->_sAppId);
-        $aCached = $oCache->read();
-        if (isset($this->_aAppResult['meta']['notifications']) && $aCached !== $this->_aAppResult['meta']['notifications']) {
-            $oCache->write($this->_aAppResult['meta']['notifications']);
-            return $this->_aAppResult['meta']['notifications'];
-        } else {
-            return is_array($aCached) ? $aCached : [];
-        }
+        return $this->_aAppResult['meta']['notifications']??[];
     }
 
     /**
@@ -265,8 +236,13 @@ class notificationhandler
      */
     protected function _saveAppResult()
     {
-        $oCache = new AhCache($this->_sCache_lastResult, $this->_sAppId);
-        return $oCache->write($this->_aAppResult);
+        $this->_oWebapps->set("lastresult", json_encode($this->_aAppResult));
+        
+        if(($this->_aAppResult['meta']['result']??RESULT_ERROR) == RESULT_OK){
+            $this->_oWebapps->set("lastok", json_encode($this->_aAppResult));
+        }
+
+        return $this->_oWebapps->save();
     }
 
 
@@ -313,6 +289,8 @@ class notificationhandler
     public function setApp(string $sAppId): bool
     {
         $this->_sAppId = $sAppId;
+        $this->_oWebapps->readByFields(['appid'=>$this->_sAppId]);
+
         $this->_aAppResult = $this->getAppResult();
         $this->_iAppResultChange = -1;
         $this->_aAppLastResult = $this->getAppLastResult();
@@ -375,7 +353,6 @@ class notificationhandler
         // actions as long counter is lower max delay only
         if ($iCounter <= $iMaxDelay) {
 
-            // store cache (_saveAppResult()) with result data and current counter
             $this->_aAppResult['result']['counter'] = $iCounter;
             $this->_saveAppResult();
 
@@ -416,7 +393,8 @@ class notificationhandler
 
     /**
      * Delete application: this method triggers deletion of its notification 
-     * data and last result cache.
+     * data and last result
+     * Triggered by apmonitor-server class - actionDeleteUrl(string $sUrl)
      * 
      * @param string  $sAppId  app id
      * @return boolean
@@ -428,7 +406,9 @@ class notificationhandler
 
         // trigger notification
         $this->sendAllNotifications();
-        $this->_deleteAppLastResult();
+
+        // finally: delete webapp data in db
+        $this->_oWebapps->delete();
         return true;
     }
 
@@ -437,7 +417,9 @@ class notificationhandler
     // ----------------------------------------------------------------------
 
     /**
-     * Add a new item in notification log. It returns the result of the write action of the log data.
+     * Add a new item in notification log. It returns the result of the write
+     * action of the log data.
+     * 
      * @param integer  $iChangetype  type of change; see CHANGETYPE_ constants
      * @param integer  $sNewstatus   resultcode; see RESULT_ constants
      * @param string   $sAppId       application id
@@ -445,23 +427,8 @@ class notificationhandler
      * @param array    $aResult      response ($this->_aAppResult)
      * @return bool
      */
-    protected function addLogitem(int $iChangetype, string $sNewstatus, string $sAppId, string $sMessage, array $aResult): bool
+    protected function addLogitem(int $iChangetype, string $sNewstatus, string $sAppId, string $sMessage, array $aResult): bool|int
     {
-        // reread because service and webgui could change it
-        /*
-        $aData = $this->loadLogdata();
-        $this->_aLog[] = [
-            'timestamp' => time(),
-            'changetype' => $iChangetype,
-            'status' => $sNewstatus,
-            'appid' => $sAppId,
-            'message' => $sMessage,
-            'result' => $aResult,
-        ];
-
-        $this->cutLogitems();
-        return $this->saveLogdata();
-        */
         $this->_oNotifications->new();
         $this->_oNotifications->setItem([
             'timestamp' => time(),
@@ -504,7 +471,7 @@ class notificationhandler
 
     /**
      * Get current result from cache using a shared cache object 
-     * with appmonitor-server class
+     * that was written by appmonitor-server class
      * @return array
      */
     public function getAppResult(): array
@@ -522,10 +489,11 @@ class notificationhandler
      */
     public function getAppLastResult()
     {
-        $oCache = new AhCache($this->_sCache_lastResult, $this->_sAppId);
-
-        // in the cache is an array - but cache->read() is general and can return any data type
-        $aData=$oCache->read();
+        if(! $sJson=$this->_oWebapps->get("lastresult"))
+        {
+            return [];
+        }
+        $aData=json_decode($sJson, 1);        
         return is_array($aData) ? $aData : [];
     }
 
@@ -565,36 +533,6 @@ class notificationhandler
 
         return is_array($aData) ? $aData : [];
 
-    }
-
-    /**
-     * Read all stored logdata
-     * @return array
-     */
-    public function loadLogdata(): array
-    {
-        // $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
-        // $this->_aLog = [];
-        // $aLog = $oCache->read();
-
-        // $this->_aLog = $aLog && is_array($aLog) ? $aLog : [];
-        // return $this->_aLog;
-
-        $aLog=$this->_oNotifications->search();
-        return $aLog && is_array($aLog) ? $aLog : [];
-    }
-
-    /**
-     * Save log data of $this->_aLog
-     * @return bool
-     */
-    protected function OBSOLETE_saveLogdata(): bool
-    {
-        if ($this->_aLog && is_array($this->_aLog) && count($this->_aLog)) {
-            $oCache = new AhCache($this->_sCacheIdPrefix . "-log", "log");
-            return $oCache->write($this->_aLog);
-        }
-        return false;
     }
 
     // ----------------------------------------------------------------------
