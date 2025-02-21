@@ -366,9 +366,7 @@ class renderadminlte
             }
             $this->_checkValue($sKey, $aOptions[$sKey]);
         }
-        if (!$aOptions['url']) {
-            $aOptions['url'] = '#';
-        }
+        $aOptions['url']??='#';
         return '<div class="small-box' . ($aOptions['bgcolor'] ? ' bg-' . $aOptions['bgcolor'] : '') . '">
             <div class="inner">
                 ' . ($aOptions['title'] ? '<h3>' . $aOptions['title'] . '</h3>' : '') . '

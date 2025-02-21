@@ -2655,7 +2655,7 @@ class appmonitorserver_gui extends appmonitorserver
         if (!$this->hasRole('ui-debug')) {
             return '';
         }
-        ;
+        $oA = new renderadminlte();
 
         $iCount = 0;
         $iMaxTime = "";
@@ -2664,6 +2664,8 @@ class appmonitorserver_gui extends appmonitorserver
 
         $sQerytable='';
         $sLogtable='';
+
+        // -- queries
         foreach ($oDB->queries() as $aQuery) {
             $iCount++;
             $sError = $aQuery['error'] ?? '';
@@ -2695,8 +2697,9 @@ class appmonitorserver_gui extends appmonitorserver
             </tr>";
         }
         $sQerytable=$sQerytable
-            ? "<h3>Queries: <strong>$iCount</strong></h3>"
-                ."errors: <i>$iErrors</i> ... longest: <i>$iMaxTime</i> ms, max. count of records: <i>$iMaxRecords</i><br><br>"
+            ? $oA->getBox([
+                'title' => "Queries: <strong>$iCount</strong>",
+                'text' => "errors: <i>$iErrors</i> ... longest: <i>$iMaxTime</i> ms, max. count of records: <i>$iMaxRecords</i><br><br>"
                 . "<table class=\"datatable\"><thead><tr>
                     <th>#</th>
                     <th>Time</th>
@@ -2704,9 +2707,11 @@ class appmonitorserver_gui extends appmonitorserver
                     <th>Query</th>
                     <th>Data</th>
                 </tr></thead><tbody>$sQerytable</tbody></table>"
+            ])
             : ''
             ;
 
+        // -- queries
         foreach($oDB->logs() as $aItem) {
             $sClass = $aItem['loglevel'] == 'error' 
                 ? 'result3' 
@@ -2720,18 +2725,30 @@ class appmonitorserver_gui extends appmonitorserver
             </tr>";
         }
         $sLogtable=$sLogtable
-            ? "<h3>Logs: <strong>".count($oDB->logs())."</strong></h3>"
-            ."<table class=\"datatable\"><thead><tr>
+            ? $oA->getBox([
+                'title' => "Logs: <strong>".count($oDB->logs())."</strong>",
+                'text' => "<table class=\"datatable\"><thead><tr>
                     <th>Level</th>
                     <th>Table</th>
                     <th>Method</th>
                     <th>Message</th>
                 </tr></thead><tbody>$sLogtable</tbody></table>"
-            : '-- No logs --<br><br>'
-            ;
-        return ''
-            .$sQerytable
-            .$sLogtable
+            ])
+            : ''
+        ;
+
+
+        // --queries
+        return  $sQerytable.$sLogtable 
+            ? '<section class="content">'
+            . $oA->getSectionRow(
+            $oA->getSectionColumn(
+                    $sQerytable.$sLogtable
+                    ),
+                12
+            )
+            .'</section>'
+            : ''
             ;
     }
 
