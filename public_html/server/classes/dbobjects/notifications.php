@@ -10,8 +10,8 @@ class objnotifications extends axelhahn\pdo_db_base
      * @var array 
      */
     protected array $_aProperties = [
-        'timestamp'   => ['create' => 'int',],
-        'appid'       => ['create' => 'varchar(32)',],
+        'timestamp'   => ['create' => 'int',         'index' => true,],
+        'appid'       => ['create' => 'varchar(32)', 'index' => true,],
         'changetype'  => ['create' => 'int',],
         'status'      => ['create' => 'int',],
         'message'     => ['create' => 'text',],
