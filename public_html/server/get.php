@@ -47,4 +47,5 @@ switch ($sItem) {
         header('HTTP/1.0 400 Bad request');
         die('<h1>400 Bad request</h1>unknown item [' . $sItem . '] ... or it is not implemented yet.');
 }
-echo $sHtml;
+
+echo $sHtml . $oMonitor->renderDbDebug();
