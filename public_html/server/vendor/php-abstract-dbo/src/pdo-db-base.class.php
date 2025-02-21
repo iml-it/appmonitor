@@ -1,5 +1,4 @@
 <?php
-
 /**
  * ======================================================================
  * 
@@ -19,9 +18,9 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
+ * 2025-02-20  ___  ah  last changes: create indexes
  * ======================================================================
  */
-
 
 namespace axelhahn;
 
@@ -63,7 +62,6 @@ class pdo_db_base
      */
     protected bool $_bChanged = false;
 
-
     /**
      * hash for a single announcement item with related data to
      * create database column, draw edit form
@@ -89,6 +87,7 @@ class pdo_db_base
     protected array $_aDefaultColumns = [
         'id' => [
             'create' => 'INTEGER primary key autoincrement',
+            'index' => true,
             // 'extra' =>  'primary key autoincrement',
             // 'label' => 'ID',                    'descr' => '', 'type' => 'hidden',         'edit' => false,
             'dummyvalue' => 'automatic'
@@ -202,21 +201,28 @@ class pdo_db_base
 
 
     /**
-     * Create database table
+     * Create database table if it does not exist yet
      * @return bool
      */
     private function _createDbTable(): bool
     {
         if ($this->_pdo->tableExists($this->_table)) {
-            $this->_log(PB_LOGLEVEL_INFO, __METHOD__ . '()', '{' . $this->_table . '} Table already exists');
+            $this->_log(
+                PB_LOGLEVEL_INFO,
+                __METHOD__ . '()',
+                "Table [$this->_table] already exists"
+            );
             return true;
         }
 
         $sSql = '';
-        $sSqlIndex = '';
         $aDB = $this->_pdo->getSpecialties();
         if (!$aDB) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '()', 'Unable to get database specifics. Database type not supported: ' . $this->_pdo->driver());
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__ . '()',
+                'Unable to get database specifics. Database type not supported: ' . $this->_pdo->driver()
+            );
             return false;
         }
 
@@ -231,15 +237,44 @@ class pdo_db_base
                 //     . (isset($aData['extra']) ? ' ' . $aData['extra'] : '');
             }
         }
-        $sSql = "CREATE TABLE " . $this->_table . " ($sSql)\n;";
+        $sSql = "CREATE TABLE $this->_table ($sSql);";
         $this->makeQuery($sSql);
         if (!$this->_pdo->tableExists($this->_table)) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '()', 'Unable to create {' . $this->_table . '}.');
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__ . '()',
+                "Unable to create table [' . $this->_table . ']."
+            );
             return false;
         }
+        $this->_createDbTableIndex();
         // echo __METHOD__ . ' created table ' . $this->_table . '<br>';
         return true;
 
+    }
+
+    /**
+     * Create database indexes for wanted columns
+     * (property 'index' must be set to true)
+     * 
+     * @return bool
+     */
+    protected function _createDbTableIndex():bool
+    {
+        foreach (array_merge($this->_aDefaultColumns, $this->_aProperties) as $sCol => $aData) {
+            if (($aData['index']??false) || ($aData['overview']??false) ) {
+                $sIndexType='';
+                $sIndexId = "IDX_{$this->_table}_$sCol";
+
+                $sqlIndex = "
+                    CREATE {$sIndexType}INDEX IF NOT EXISTS `$sIndexId`
+                    ON `{$this->_table}`
+                    ( `$sCol` )
+                ";
+                $this->makeQuery($sqlIndex);
+            }
+        }
+        return true;
     }
 
     /**
@@ -258,7 +293,6 @@ class pdo_db_base
             'mysql' => ['sql' => 'DESCRIBE `' . $this->_table . '`;', 'key4column' => 'Field', 'key4type' => 'Type',],
         ];
 
-
         $type = $this->_pdo->driver();
         if (!isset($aDbSpecifics[$type])) {
             die("Ooops: " . __CLASS__ . " does not support db type [" . $type . "] yet :-/");
@@ -267,12 +301,20 @@ class pdo_db_base
         $result = $this->makeQuery($aDbSpecifics[$type]['sql']);
         // echo '<pre>'; print_r($result); echo '</pre>';
         if (!$result || !count($result)) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, '{' . $this->_table . '} Unable to get table infos by sql query: ' . $aDbSpecifics[$type]['sql'] . '');
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__,
+                "[$this->_table] Unable to get table infos by sql query: $aDbSpecifics[$type][sql]."
+            );
             return false;
         }
         $aDB = $this->_pdo->getSpecialties();
         if (!$aDB) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '()', 'Unable to get database specifics. Database type not supported: ' . $this->_pdo->driver());
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__ . '()',
+                'Unable to get database specifics. Database type not supported: ' . $this->_pdo->driver()
+            );
             return false;
         }
         $aReturn = ['_result' => ['errors' => 0, 'ok' => 0, 'messages' => []], 'tables' => []];
@@ -416,46 +458,103 @@ class pdo_db_base
                 if (isset($aCol['lookup']) && $this->_aItem[$sCol]) {
                     $sTargetTable = $aCol['lookup']['table'];
                     if (!$this->relCreate($sTargetTable, $this->_aItem[$sCol], $sCol)) {
-                        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, 'Creation of relation from table {' . $this->_table . '.' . $sCol . '} to table ' . $sTargetTable . ' failed.');
+                        $this->_log(
+                            PB_LOGLEVEL_ERROR,
+                            __METHOD__,
+                            "Creation of relation from table [$this->_table\.$sCol] to table $sTargetTable failed."
+                        );
                         return false;
                     }
                 }
             }
-
             return $this->id();
         }
-        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, 'Creation of new database entry {' . $this->_table . '} failed.');
+        $this->_log(
+            PB_LOGLEVEL_ERROR,
+            __METHOD__,
+            "Creation of new database entry [$this->_table] failed."
+        );
         return false;
     }
 
     /**
-     * Read an entry from database by given id
-     * @param  int    $iId             id to read
-     * @param  bool   $bReadRelations  read relation too? default: false
+     * Read an entry from database by known row id
+     * @param int   $iId           row id to read
+     * @param bool $bReadRelations read relation too? default: false
      * @return bool|int
      */
     public function read(int $iId, bool $bReadRelations = false): bool
     {
         $this->_wd(__METHOD__);
+        return $this->readByFields(
+            ['id' => $iId],
+            $bReadRelations
+        );
+    }
+
+    /**
+     * Read item from row by given fields with AND condition
+     * Useful for reading item by known uniq single or multiple column values
+     *
+     * @param array $aColumns
+     * @param bool $bReadRelations
+     * @return bool
+     */
+    public function readByFields(array $aColumns, bool $bReadRelations = false): bool
+    {
+        $this->_wd(__METHOD__);
+
+        $aData = [];
+        $Where = [];
+        $Where[] = "1=1";
+
         $this->new();
 
+        foreach ($aColumns as $skey => $value) {
+
+            $Where[] = "AND `$skey` = :$skey";
+            $aData[$skey] = $value;
+            if (isset($this->_aProperties[$skey])) {
+                $this->set($skey, $value); // pre defined fields on new object
+            }
+        }
         $this->_bChanged = false;
-        $sSql = 'SELECT * FROM `' . $this->_table . '` WHERE `id`=:id AND deleted=0';
-        $aData = [
-            'id' => (int) $iId,
-        ];
-        $result = $this->makeQuery($sSql, $aData);
+
+        // search fetches 2 items.
+        // 1 is needed to apply value and a 2nd for detection of multiple values
+        $result = $this->search(
+            [
+                'columns' => '*',
+                'where' => $Where,
+                'limit' => '2'
+            ],
+            $aData
+        );
+
+        if (isset($result[1])) {
+            $this->_log(
+                PB_LOGLEVEL_WARN,
+                __METHOD__,
+                "Table [$this->_table] returned multiple items with [" . print_r($aColumns, 1) . "]."
+            );
+        }
+
         if (isset($result[0])) {
             $this->_aItem = $result[0];
 
-            // read relation while loading object? 
+            // read relation while loading object?
             if ($bReadRelations) {
                 $this->_relRead();
             }
-
             return true;
         }
-        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, 'Unable to read {' . $this->_table . '} item with id [' . $iId . '].');
+
+        $this->_log(
+            PB_LOGLEVEL_ERROR,
+            __METHOD__,
+            "Unable to read [$this->_table] item with [" . print_r($aColumns, 1) . "]."
+        );
+
         return false;
     }
 
@@ -468,7 +567,11 @@ class pdo_db_base
         $this->_wd(__METHOD__);
 
         if (!$this->_bChanged) {
-            $this->_log(PB_LOGLEVEL_INFO, __METHOD__, 'Skip database update: dataset was not changed.');
+            $this->_log(
+                PB_LOGLEVEL_INFO,
+                __METHOD__,
+                'Skip database update: dataset was not changed.'
+            );
             return false;
         } else {
             // prepare default columns
@@ -500,17 +603,11 @@ class pdo_db_base
                     if ($iItemvalue) {
 
                         $iTargetId = $this->_aRelations['_targets'][$aRel['relkey']]['id'] ?? false;
-                        // print_r($this->_aRelations['_targets'][$aRel['relkey']]);
-                        // echo "iItemvalue = $iItemvalue | iTargetId = $iTargetId<br>";
-                        // die(__FILE__.':'.__LINE__);
-
-
                         if (!$iTargetId) {
                             // create new relation
                             $this->_wd(__METHOD__ . ' create new relation for ' . $sCol);
                             $this->relCreate($this->_aProperties[$sCol]['lookup']['table'], $iItemvalue, $sCol);
                         } else {
-
                             // if current value is not equal to target id:
                             // update relation
                             if ((int) $iItemvalue !== (int) $iTargetId) {
@@ -554,10 +651,24 @@ class pdo_db_base
      */
     public function delete(int $iId = 0): bool
     {
-        $iId = $iId ? $iId : $this->id();
+        $iId = $iId ?: $this->id();
         if ($iId) {
             if ($this->relDeleteAll($iId)) {
 
+                if(method_exists($this, 'hookDelete')){
+                    if($iId){
+                        $this->read($iId);
+                    }
+                    if(!$this->{'hookDelete'}()) {
+                        $this->_log(
+                            PB_LOGLEVEL_ERROR,
+                            __METHOD__,
+                            "[$this->_table]->hookDelete() failed."
+                        );
+                        return false;
+                    };
+                }
+    
                 $sSql = 'DELETE from `' . $this->_table . '` WHERE `id`=:id';
                 $aData = [
                     'id' => $iId,
@@ -570,12 +681,20 @@ class pdo_db_base
                     $this->_bChanged = false;
                     return true;
                 } else {
-                    $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, '{' . $this->_table . '} Deletion if item with id [' . $iId . '] failed.');
+                    $this->_log(
+                        PB_LOGLEVEL_ERROR,
+                        __METHOD__,
+                        "[$this->_table] Deletion if item with id [$iId] failed."
+                    );
                     return false;
                 }
                 ;
             } else {
-                $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, '{' . $this->_table . '} Deletion if relations for id [' . $iId . '] failed. Item was not deleted.');
+                $this->_log(
+                    PB_LOGLEVEL_ERROR,
+                    __METHOD__,
+                    "[$this->_table] Deletion if relations for id [$iId] failed. Item was not deleted."
+                );
             }
         }
         return false;
@@ -596,12 +715,20 @@ class pdo_db_base
     {
         // - delete relations from_table and to_table
         if (!$this->relFlush()) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, 'Unable to delete all relations.');
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__,
+                "Unable to delete all relations."
+            );
             return false;
         }
-        $sSql = 'DROP TABLE IF EXISTS `' . $this->_table . '`';
+        $sSql = "DROP TABLE IF EXISTS `$this->_table`";
         if (!is_array($this->makeQuery($sSql))) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, 'Unable to drop table [' . $this->_table . '].');
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__,
+                "Unable to drop table [$this->_table]."
+            );
             return false;
         }
         return true;
@@ -649,6 +776,7 @@ class pdo_db_base
     /**
      * Generate a key for a relation to another table and its id
      * The tables here are sorted already (see _getRelationSortorder)
+     * 
      * @param  string   $sFromTable  table name
      * @param  integer  $iFromId     table id
      * @param  string   $sFromCol    column name
@@ -669,6 +797,7 @@ class pdo_db_base
     /**
      * Generate a relation item in the wanted sort order of given tables including uuid
      * The tables here are unsorted
+     * 
      * @param  string   $sTable1  first table name
      * @param  integer  $iId1     first table id
      * @param  string   $sTable2  second table
@@ -708,11 +837,19 @@ class pdo_db_base
     {
         $this->_wd(__METHOD__ . '()');
         if (!isset($this->_aRelations)) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, "Releations are not allowed for " . $this->_table);
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__,
+                "Relations are not allowed for [$this->_table]"
+            );
             return false;
         }
         if (!isset($aRelitem['uuid'])) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, "Target item is no array or has no key [uuid]");
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__,
+                "Target item is no array or has no key [uuid]"
+            );
             return false;
         }
         $aTarget = $aRelitem['from_table'] == $this->_table
@@ -734,6 +871,7 @@ class pdo_db_base
         ];
         return true;
     }
+
     /**
      * Create a relation from the current item to an id of a target object
      * @param  string  $sToTable     target object
@@ -745,24 +883,44 @@ class pdo_db_base
     {
         $this->_wd(__METHOD__ . "($sToTable, $iToId, $sFromColumn)");
         if (!$this->id()) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId, $sFromColumn)", '{' . $this->_table . '} The current item was not saved yet. We need an id in a table to create a relation with it.');
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__ . "($sToTable, $iToId, $sFromColumn)",
+                "[$this->_table] The current item was not saved yet. We need an id in a table to create a relation with it."
+            );
             return false;
         }
         if (!isset($this->_aRelations)) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId, $sFromColumn)", "{'.$this->_table.'} The relation is disabled.");
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__ . "($sToTable, $iToId, $sFromColumn)",
+                "[$this->_table] The relation is disabled."
+            );
             return false;
         }
 
         if (!preg_match('/^[a-z_]*$/', $sToTable)) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The target table was not set.");
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__ . "($sToTable, $iToId)",
+                "[$this->_table] The target table was not set."
+            );
             return false;
         }
         if (!$this->_pdo->tableExists($sToTable)) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", "The target table {'.$sToTable.'} does not exist.");
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__ . "($sToTable, $iToId)",
+                "The target table [$sToTable] does not exist."
+            );
             return false;
         }
         if (!(int) $iToId) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The target id is not set or not valid.");
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__ . "($sToTable, $iToId)",
+                "[$this->_table] The target id is not set or not valid."
+            );
             return false;
         }
 
@@ -771,7 +929,11 @@ class pdo_db_base
 
         $sKey = $this->_getRelationKey($sToTable, $iToId, $sFromColumn);
         if (isset($this->_aRelations[$sKey])) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} The relation already exists. It has the key [' . $sKey . '].');
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                __METHOD__ . "($sToTable, $iToId)",
+                "[$this->_table] The relation already exists. It has the key [$sKey]."
+            );
             return false;
         }
 
@@ -784,7 +946,11 @@ class pdo_db_base
             return true;
         }
         // print_r($this->error());
-        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} Unable to save relation.');
+        $this->_log(
+            PB_LOGLEVEL_ERROR,
+            __METHOD__ . "($sToTable, $iToId)",
+            "[$this->_table] Unable to save relation."
+        );
         return false;
     }
 
@@ -838,7 +1004,11 @@ class pdo_db_base
                 $aData = ['id' => $aEntry[$sTableKey . '_id']];
                 $aTargetResult = $this->makeQuery($sSql, $aData);
                 if (!isset($aTargetResult[0])) {
-                    $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "()", '{' . $this->_table . '} The target id ' . $aData['id'] . ' was not found in table ' . $aEntry[$sTableKey . '_table']);
+                    $this->_log(
+                        PB_LOGLEVEL_ERROR, 
+                        __METHOD__ . "()", 
+                        "[$this->_table] The target id $aData[id] was not found in table " . $aEntry[$sTableKey . '_table']
+                    );
                     continue;
                 }
 
@@ -928,28 +1098,41 @@ class pdo_db_base
     {
         $this->_wd(__METHOD__ . "($sRelKey, $iItemvalue)");
         if (!isset($this->_aRelations['_targets'][$sRelKey])) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The given key does not exist.');
+            $this->_log(
+                PB_LOGLEVEL_ERROR, 
+                __METHOD__ . "($sRelKey)", 
+                "[$this->_table] The given key does not exist."
+            );
             return false;
         }
         if (!isset($this->_aRelations['_targets'][$sRelKey]['_relid'])) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The key [_relid] was not found.');
+            $this->_log(
+                PB_LOGLEVEL_ERROR, 
+                __METHOD__ . "($sRelKey)", 
+                "[$this->_table] The key [_relid] was not found."
+            );
             return false;
         }
 
         if (
-            is_array($this->makeQuery(
-                'UPDATE `pdo_db_relations` SET to_id = :to_id WHERE id = :id',
-                [
-                    'id' => $this->_aRelations['_targets'][$sRelKey]['_relid'],
-                    'to_id' => $iItemvalue,
-                ]
-            )
+            is_array(
+                $this->makeQuery(
+                    'UPDATE `pdo_db_relations` SET to_id = :to_id WHERE id = :id',
+                    [
+                        'id' => $this->_aRelations['_targets'][$sRelKey]['_relid'],
+                        'to_id' => $iItemvalue,
+                    ]
+                )
             )
         ) {
             return true;
         }
         ;
-        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey, $iItemvalue)", 'Unable to update relation.');
+        $this->_log(
+            PB_LOGLEVEL_ERROR, 
+            __METHOD__ . "($sRelKey, $iItemvalue)", 
+            "Unable to update relation."
+        );
         return false;
     }
 
@@ -961,11 +1144,19 @@ class pdo_db_base
     public function relDelete(string $sRelKey): bool
     {
         if (!isset($this->_aRelations['_targets'][$sRelKey])) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The given key does not exist.');
+            $this->_log(
+                PB_LOGLEVEL_ERROR, 
+                __METHOD__ . "($sRelKey)", 
+                "[$this->_table] The given key does not exist."
+            );
             return false;
         }
         if (!isset($this->_aRelations['_targets'][$sRelKey]['_relid'])) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The key [_relid] was not found.');
+            $this->_log(
+                PB_LOGLEVEL_ERROR, 
+                __METHOD__ . "($sRelKey)", 
+                "[$this->_table] The key [_relid] was not found."
+            );
             return false;
         }
         $oRelation = new pdo_db_relations($this->_pdo);
@@ -989,10 +1180,15 @@ class pdo_db_base
             $this->read($iId, true);
         }
 
+        // echo 'Relations: <pre>'.print_r($this->_aRelations, 1).'</pre>'; 
         $bOK = true;
         if (isset($this->_aRelations['_targets'])) {
             foreach (array_keys($this->_aRelations['_targets']) as $sRelKey) {
-                $this->_log(PB_LOGLEVEL_INFO, __METHOD__ . "()", 'start this->relDelete("' . $sRelKey . '").');
+                $this->_log(
+                    PB_LOGLEVEL_INFO, 
+                    __METHOD__ . "()", 
+                    "Start this->relDelete('$sRelKey')."
+                );
                 if (!$this->relDelete($sRelKey)) {
                     $bOK = false;
                     break;
@@ -1076,7 +1272,11 @@ class pdo_db_base
         }
         $aReturn[] = 'id';
         if (count($aReturn) == 1) {
-            $this->_log(PB_LOGLEVEL_WARN, __METHOD__, 'The object has no defined overview flag on any attribute');
+            $this->_log(
+                PB_LOGLEVEL_WARN, 
+                __METHOD__, 
+                "The object has no defined overview flag on any attribute"
+            );
         }
         return $aReturn;
     }
@@ -1206,10 +1406,18 @@ class pdo_db_base
      * - varchar with more than 1024 byte -> textarea
      * 
      * If attribute starts with 
+     *   - "color"    -> input with type color
      *   - "date"     -> input with type date
      *   - "datetime" -> input with type datetime-local
+     *   - "email"    -> input with type "email"
      *   - "html"     -> textarea with type "html"
-     *   - "number"   -> textarea with type "number"
+     *   - "month"    -> input with type "number"
+     *   - "number"   -> input with type "number"
+     *   - "password" -> input with type "password" !! DO NOT USE YET
+     *   - "tel"      -> input with type "tel"
+     *   - "time"     -> input with type "time"
+     *   - "url"      -> input with type "url"
+     *   - "week"     -> input with type "week"
      * 
      * @param  string  $sAttr  name of the property
      * @return array|bool
@@ -1217,15 +1425,30 @@ class pdo_db_base
     public function getFormtype(string $sAttr): array|bool
     {
         if (!isset($this->_aProperties[$sAttr])) {
-            $this->_log(PB_LOGLEVEL_WARN, __METHOD__ . '(' . $sAttr . ')', 'Attribute does not exist');
+            $this->_log(
+                PB_LOGLEVEL_WARN, 
+                __METHOD__ . '(' . $sAttr . ')', 
+                "Attribute [$sAttr] does not exist"
+            );
             return false;
         }
 
+        // guess html form type by attribute name
+        // https://www.w3schools.com/html/html_form_input_types.asp
         $aColumnMatcher = [
-            ['regex' => '/^date/', 'tag' => 'input', 'type' => 'date'],
-            ['regex' => '/^datetime/', 'tag' => 'input', 'type' => 'datetime-local'],
-            ['regex' => '/^html/', 'tag' => 'textarea', 'type' => 'html'],
-            ['regex' => '/^number/', 'tag' => 'input', 'type' => 'number'],
+            ['regex' => '/^color/',    'tag' => 'input',    'type' => 'color'],
+            ['regex' => '/^date/',     'tag' => 'input',    'type' => 'date'],
+            ['regex' => '/^datetime/', 'tag' => 'input',    'type' => 'datetime-local'],
+            ['regex' => '/^email/',    'tag' => 'input',    'type' => 'email'],
+            ['regex' => '/^html/',     'tag' => 'textarea', 'type' => 'html'],
+            ['regex' => '/^month/',    'tag' => 'input',    'type' => 'month'],
+            ['regex' => '/^number/',   'tag' => 'input',    'type' => 'number'],
+            ['regex' => '/^password/', 'tag' => 'input',    'type' => 'password'], // TODO: add dummy password in value
+            ['regex' => '/^tel/',      'tag' => 'input',    'type' => 'tel'],
+            ['regex' => '/^time/',     'tag' => 'input',    'type' => 'time'],
+            ['regex' => '/^url/',      'tag' => 'input',    'type' => 'url'],
+            ['regex' => '/^week/',     'tag' => 'input',    'type' => 'week'],
+
         ];
 
         $aReturn = [];
@@ -1249,11 +1472,15 @@ class pdo_db_base
                 $aLookup = $this->_aProperties[$sAttr]['lookup'];
 
                 // verify lookup data
-                if(!isset($aLookup['columns'])) {
-                    $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '(' . $sAttr . ')', 'No key [columns] in lookup for object key '.$sAttr.' to define labels for dropdown.<br>Suggestion: add<br>"columns" => "label"');
-                    return false;                            
+                if (!isset($aLookup['columns'])) {
+                    $this->_log(
+                        PB_LOGLEVEL_ERROR, 
+                        __METHOD__ . '(' . $sAttr . ')', 
+                        "No key [columns] in lookup for object key [$sAttr] to define labels for dropdown.<br>Suggestion: add<br>\"columns\" => \"label\""
+                    );
+                    return false;
                 }
-                if(!isset($aLookup['value'])) {
+                if (!isset($aLookup['value'])) {
                     $aLookup['value'] = 'id';
                     // $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '(' . $sAttr . ')', 'No key [value] in lookup for object key '.$sAttr.' to define values for dropdown.<br>Suggestion: add<br>"value" => "id"<br>in<pre>'.print_r($aLookup, 1).'</pre>');
                     // return false;                            
@@ -1270,10 +1497,10 @@ class pdo_db_base
                 ]
                 */
 
-                $sSql = 'SELECT ' . implode(',', $aLookup['columns']).', '.$aLookup['value']
+                $sSql = 'SELECT ' . implode(',', $aLookup['columns']) . ', ' . $aLookup['value']
                     . ' FROM ' . $aLookup['table']
                     . (isset($aLookup['where']) && $aLookup['where'] ? ' WHERE ' . $aLookup['where'] : '')
-                    .' ORDER BY ' . implode(' ASC ,', $aLookup['columns']).' ASC'
+                    . ' ORDER BY ' . implode(' ASC ,', $aLookup['columns']) . ' ASC'
                     . ''
                 ;
                 // echo "DEBUG: sSql = $sSql<br>";
@@ -1495,70 +1722,157 @@ class pdo_db_base
     // ----------------------------------------------------------------------
 
     /**
+     * When using a form any not filled input value is an empty string.
+     * This helper fixes non string values.
+     * 
+     * @param  string  $sKey2Set  key of your object to set
+     * @param  mixed   $value     new value to set
+     * @return mixed
+     */
+    protected function _fixEmptyPostData(string $sKey2Set, mixed $value): mixed
+    {
+        if (!isset($_POST[$sKey2Set]) || $value !== "") {
+            return $value;
+        }
+        // empty values coming from forms -> set it to NULL
+        $_sCreate = strtolower($this->_aProperties[$sKey2Set]['create']);
+        switch ($_sCreate) {
+            case 'date':
+            case 'datetime':
+            case 'int':
+            case 'integer':
+            case 'num':
+            case 'real':
+            case 'timestamp':
+                $value = NULL;
+                break;
+                ;
+        }
+        return $value;
+    }
+
+    /**
+     * Validate a new value to be set on a property and return bool for success
+     * - The general fields (id, timecreated, timeupdated, delete) cannot be set.
+     * - validate a field if validate_is set a type or auto detected by "create" key in property
+     * - validate a field if validate_regex set regex
+     * This method is called in set() but can be executed on its own
+     * 
+     * @see set()
+     * @throws \Exception
+     *
+     * @param  string  $sKey2Set  key of your object to set
+     * @param  mixed   $value     new value to set
+     * @return bool
+     */
+    public function validate(string $sKey2Set, mixed $value): bool
+    {
+
+        if (isset($this->_aProperties[$sKey2Set])) {
+            $value = $this->_fixEmptyPostData($sKey2Set, $value);
+
+            $_bValError = false;
+            $_bValOK = true;
+
+            $_bRequired = $this->_aProperties[$sKey2Set]['required'] ?? false;
+            $_sValidate = $this->_aProperties[$sKey2Set]['validate_is'] ?? false;
+
+            // echo "-- validation for attribute '$sKey2Set' => '$value'<br>";
+            if ($_bRequired && is_null($value)) {
+                $this->_log(
+                    PB_LOGLEVEL_ERROR, 
+                    __METHOD__, 
+                    "[$this->_table] value for [$sKey2Set] is reqired."
+                );
+                return false;
+            }
+            if ($_bRequired || !is_null($value)) {
+
+                if ($_sValidate) {
+                    // echo "Check $sFunc($value) ... ";
+                    switch ($_sValidate) {
+                        case 'string':
+                            $_bValOK = $_bValOK && is_string($value);
+                            $_bValError = $_bValError || !is_string($value);
+                            break;
+                        case 'integer':
+                            $_bValOK = $_bValOK && ctype_digit(strval($value));
+                            $_bValError = $_bValError || !ctype_digit(strval($value));
+                            break;
+                        case 'date':
+                            $_bValOK = $_bValOK && strtotime($value);
+                            $_bValError = $_bValError || !strtotime($value);
+                            break;
+                        case 'datetime':
+                            $_bValOK = $_bValOK && strtotime($value);
+                            $_bValError = $_bValError || !strtotime($value);
+                            break;
+                        default:
+                            throw new Exception(__METHOD__ . " - ERROR: The key [$sKey2Set] cannot be validated with [$_sValidate] - this type is not supported yet.");
+                    }
+                } else {
+                    // echo "Skip 'validate_is'<br>";
+                }
+
+                if (isset($this->_aProperties[$sKey2Set]['validate_regex'])) {
+                    // echo "Check Regex ".$this->_aProperties[$sKey2Set]['validate_regex']."<br>";
+                    $_bValOK = $_bValOK && preg_match($this->_aProperties[$sKey2Set]['validate_regex'], $value);
+                    $_bValError = $_bValError || !preg_match($this->_aProperties[$sKey2Set]['validate_regex'], $value);
+                } else {
+                    // echo "Skip 'validate_regex'<br>";
+                }
+            }
+
+            // echo "--> OK: " .($_bValOK ? 'true':'false')." | Error: ".($_bValError ? 'true':'false')."<br>";
+            if ($_bValOK && !$_bValError) {
+                return true;
+            } else {
+                $this->_log(
+                    PB_LOGLEVEL_ERROR, 
+                    __METHOD__, 
+                    "[$this->_table]  validation for new value '$sKey2Set' failed."
+                );
+            }
+        } else {
+            throw new Exception(__METHOD__ . " - ERROR: The unknown key [$sKey2Set] cannot be set for [$this->_table].");
+        }
+        return false;
+    }
+
+    /**
      * Set a single property of an item.
      * - The general fields (id, timecreated, timeupdated, delete) cannot be set.
      * - validate a field if validate_is set a tyoe
      * - validate a field if validate_regex set regex
      * Opposite function of get()
+     * 
      * @param  string  $sKey2Set  key of your object to set
      * @param  mixed   $value     new value to set
      * @return bool
      */
     public function set(string $sKey2Set, mixed $value): bool
     {
-        if (isset($this->_aProperties[$sKey2Set])) {
+        $value = $this->_fixEmptyPostData($sKey2Set, $value);
 
-            $_bValError = false;
-            $_bValOK = true;
-
-            // echo "-- validation for attribute '$sKey2Set' => '$value'<br>";
-
-            if (isset($this->_aProperties[$sKey2Set]['validate_is'])) {
-                $sFunc = $this->_aProperties[$sKey2Set]['validate_is'];
-                // echo "Check $sFunc($value) ... ";
-                switch ($sFunc) {
-                    case 'string':
-                        // echo "found<br>";
-                        $_bValOK = $_bValOK && is_string($value);
-                        $_bValError = $_bValError || !is_string($value);
-                        break;
-                    case 'integer':
-                        $_bValOK = $_bValOK && ctype_digit(strval($value));
-                        $_bValError = $_bValError || !ctype_digit(strval($value));
-                        break;
-                    default:
-                        echo "ERROR: [$sFunc] is not supported yet.<br>";
-                }
+        if ($this->validate($sKey2Set, $value)) {
+            if ($this->_aItem[$sKey2Set] !== $value) {
+                $this->_bChanged = true;
+                $this->_aItem[$sKey2Set] = $value;
             } else {
-                // echo "Skip 'validate_is'<br>";
+                // no new value
+                $this->_log(
+                    PB_LOGLEVEL_INFO, 
+                    __METHOD__, 
+                    "[$this->_table] value for '$sKey2Set' is unchanged."
+                );
             }
-
-            if (isset($this->_aProperties[$sKey2Set]['validate_regex'])) {
-                // echo "Check Regex ".$this->_aProperties[$sKey2Set]['validate_regex']."<br>";
-                $_bValOK = $_bValOK && preg_match($this->_aProperties[$sKey2Set]['validate_regex'], $value);
-                $_bValError = $_bValError || !preg_match($this->_aProperties[$sKey2Set]['validate_regex'], $value);
-            } else {
-                // echo "Skip 'validate_regex'<br>";
-            }
-
-            // echo "--> OK: " .($_bValOK ? 'true':'false')." | Error: ".($_bValError ? 'true':'false')."<br>";
-            if ($_bValOK && !$_bValError) {
-                // echo "SET<br>";
-                if ($this->_aItem[$sKey2Set] !== $value) {
-                    // echo "SET<br>";
-                    $this->_bChanged = true;
-                    $this->_aItem[$sKey2Set] = $value;
-                } else {
-                    // echo "SKIP: new value fo $sKey2Set is existing value<br>";
-                }
-
-                return true;
-            } else {
-                echo "SKIP '$sKey2Set' => '$value' -- validation failed<br>";
-                $this->_log(PB_LOGLEVEL_WARN, __METHOD__, '{' . $this->_table . '} value for ' . $sKey2Set . ' was not set because validaten failed');
-            }
+            return true;
         } else {
-            throw new Exception(__METHOD__ . " - ERROR: The key [$sKey2Set] cannot be set for [" . $this->_table . "].");
+            $this->_log(
+                PB_LOGLEVEL_ERROR, 
+                __METHOD__, 
+                "[$this->_table] value for '$sKey2Set' was not set because validaten failed"
+            );
         }
         return false;
     }
@@ -1576,13 +1890,13 @@ class pdo_db_base
         foreach (array_keys($aNewValues) as $sKey) {
             if (!isset($this->_aDefaultColumns[$sKey])) {
 
-                $bDoSet=true;
-                if($aNewValues[$sKey]===false){
-                    if (!preg_match('/(text|char)/i', $this->_aProperties[$sKey]['create'])){
-                        $bDoSet=false;
+                $bDoSet = true;
+                if ($aNewValues[$sKey] === false) {
+                    if (!preg_match('/(text|char)/i', $this->_aProperties[$sKey]['create'])) {
+                        $bDoSet = false;
                     }
                 }
-                if($bDoSet){
+                if ($bDoSet) {
                     $bReturn = $bReturn && $this->set($sKey, $aNewValues[$sKey]);
                 }
             }

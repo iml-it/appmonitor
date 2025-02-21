@@ -1,5 +1,4 @@
 <?php
-
 /**
  * ======================================================================
  * 
@@ -10,6 +9,7 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
+ * 2025-02-02  ___  ah  last changes
  * ======================================================================
  */
 
@@ -33,7 +33,6 @@ class pdo_db
      * @var object
      */
     public object|null $db;
-
 
     /**
      * collected array of log messages
@@ -61,6 +60,8 @@ class pdo_db
      * @var array
      */
     public array $_aQueries = [];
+
+    protected bool $_bHtml = false;
 
     // ----------------------------------------------------------------------
 
@@ -155,6 +156,7 @@ class pdo_db
             $aDefaults = $aOptions['db'];
         }
 
+        $this->_bHtml = !!($_SERVER['HTTP_HOST'] ?? false);
         $this->setDatabase($aDefaults);
     }
 
@@ -171,7 +173,11 @@ class pdo_db
     public function _wd(string $s, string $sTable = ''): bool
     {
         if ($this->_bDebug) {
-            echo '<div style="color: #888; background: #f8f8f8;">DEBUG: ' . ($sTable ? '{' . $sTable . '}' : '') . '  - ' . $s . "</div>" . PHP_EOL;
+            $sMsg = "DEBUG: ".  ($sTable ? "{ $sTable } - " : '') . " $s";
+            echo $this->_bHtml
+                ? "<div style=\"color: #888; background: #f8f8f8;\">$sMsg</div>"
+                : "$sMsg\n"
+            ;
         }
         return true;
     }
@@ -195,7 +201,11 @@ class pdo_db
         if ($sLevel == 'error') {
             $this->_iLastError = count($this->_aLogmessages) - 1;
             if ($this->_bShowErrors) {
-                echo '<div style="color: #a00; background: #fc2;">ERROR: [' . $sMethod . '] ' . $sMessage . "</div>" . PHP_EOL;
+                $sMsg = "ERROR: [$sMethod] $sMessage";
+                echo $this->_bHtml
+                    ? "<div style=\"color: #faa; background: #a00;\">$sMsg</div>"
+                    : "$sMsg\n"
+                ;
             }
         }
         return true;
@@ -312,7 +322,7 @@ class pdo_db
      */
     public function error(): string
     {
-        if ($this->_iLastError !== false) {
+        if ($this->_iLastError >=0 ) {
             return $this->_aLogmessages[$this->_iLastError]['message'];
         }
         return '';
@@ -443,14 +453,19 @@ class pdo_db
             $aLastQuery['time'] = number_format((float) (microtime(true) - $_timestart) / 1000, 3);
         } catch (PDOException $e) {
             $aLastQuery['error'] = 'PDO ERROR: ' . $e->getMessage();
-            $this->_log(PB_LOGLEVEL_ERROR, $_table, __METHOD__, "{'.$_table.'} Query [$sSql] failed: " . $aLastQuery['error'] . ' See $DB->queries().');
+            $this->_log(
+                PB_LOGLEVEL_ERROR,
+                $_table,
+                __METHOD__,
+                "{$_table} Query [$sSql] failed:" . $aLastQuery['error'] . ' See $DB->queries().'
+            );
             $this->_aQueries[] = $aLastQuery;
             $this->_iLastDBError = (count($this->_aQueries) - 1);
 
             return false;
         }
         $_aData = $result->fetchAll(PDO::FETCH_ASSOC);
-        $aLastQuery['records'] = count($_aData) ? count($_aData) : $result->rowCount();
+        $aLastQuery['records'] = count($_aData) ?: $result->rowCount();
 
         $this->_aQueries[] = $aLastQuery;
         return $_aData;
