@@ -22,6 +22,7 @@
  * 
  * 2024-07-17  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-11-06  axel.hahn@unibe.ch  update html email output
+ * 2025-02-21  axel.hahn@unibe.ch  use sqlite as storage
  */
 ```
 
@@ -35,7 +36,7 @@
 
 init
 
-**Return**: `boolean *`
+**Return**: ``
 
 **Parameters**: **1**
 
@@ -44,9 +45,18 @@
 | \<optional\> array $aOptions = [] | `array` | options array with the keys<br>                         - {string} lang       language of the GUI<br>                         - {string} serverurl  base url of the web app to build an url to an app specific page<br>                         - {string} notifications  appmionitor config settings in notification settings (for sleeptime and messages)
 
 
+### 🔹 public countLogitems()
+
+Get count of notification log entries
+
+**Return**: `int`
+
+**Parameters**: **0**
+
+
 ### 🔹 public deleteApp()
 
-Delete application: this method triggers deletion of its notification data and last result cache.
+Delete application: this method triggers deletion of its notification data and last resultTriggered by apmonitor-server class - actionDeleteUrl(string $sUrl)
 
 **Return**: `bool`
 
@@ -81,7 +91,7 @@
 
 ### 🔹 public getAppResult()
 
-Get current result from cache using a shared cache object with appmonitor-server class
+Get current result from cache using a shared cache object that was written by appmonitor-server class
 
 **Return**: `array`
 
@@ -98,7 +108,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aFilter = [] | `array` | filter with possible keys timestamp|changetype|status|appid|message (see addLogitem())
+| \<optional\> array $aFilter = [] | `array` | filter with possible keys timestamp|changetype|status|appid|message (see addLogitem())<br>                         - mode  {string} "last" = newest entries first<br>                         - count {integer} number of entries to return<br>                         - page  {integer}
 | \<optional\> int $iLimit = 0 | `int` | set a maximum of log entries
 | \<optional\> bool $bRsort = true | `bool` | flag to reverse sort logs; default is true (=newest entry first)
 
@@ -139,15 +149,6 @@
 Check if a defined sleep time was reached.It returns false if no sleep time is defined.It returns the 1st matching regex if a match was found.
 
 **Return**: `string|bool`
-
-**Parameters**: **0**
-
-
-### 🔹 public loadLogdata()
-
-Read all sored logdata
-
-**Return**: `array`
 
 **Parameters**: **0**
 

@@ -28,7 +28,7 @@
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.146
+ * @version 0.149
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -44,6 +44,9 @@
  * 2024-12-06  0.144  axel.hahn@unibe.ch  prevent multiple values of same tag (see functions.js)
  * 2024-12-09  0.145  axel.hahn@unibe.ch  show tags in appdetails; config flag: show validation warnings
  * 2024-12-10  0.146  axel.hahn@unibe.ch  add bootstrap-select link in about page; remove test line for tag validation
+ * 2024-12-19  0.147  axel.hahn@unibe.ch  PHP 8.4 compatibility
+ * 2024-12-20  0.148  axel.hahn@unibe.ch  Beautify ajax error output
+ * 2025-01-02  0.149  www.axel-hahn.de    Update welcome page with offerng a 1st monitoring url
  */
 ```
 
@@ -64,7 +67,7 @@ default value:
 
 ### 🔹 public __construct()
 
-constructor
+constructor@global object $oDB      database connection
 
 
 **Return**: ``
@@ -180,7 +183,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> $iMaxcount = 0 | `max *` | max number of entries; default=0 (all)
+| \<optional\> array $aNotifyOptions = [] | `array` | options to show; default: last 500 entries; subkeys<br>                              - mode   {string} one of last<br>                              - count  {integer} number of entries to fetch<br>                              - page   {integer} page number to display
 
 
 ### 🔹 public generateViewProblems()
@@ -239,7 +242,7 @@ default value:
 
 ### 🔹 public getMonitoringData()
 
-Get all client data and final result as array
+Get all client data and final result as arrayIt returns the keys- return {integer}  total status of all apps; 0 = ok ... 3 = error- messages {array}  array of messages- results  {array}  array of status code as key and occurcances as value
 
 **Return**: `array`
 
@@ -303,6 +306,15 @@ default value:
 **Parameters**: **0**
 
 
+### 🔹 public getWebappLabel()
+
+
+
+**Return**: `string`
+
+**Parameters**: **0**
+
+
 ### 🔹 public hasRole()
 
 Return if a user has a given role
@@ -327,24 +339,20 @@ default value:
 
 ### 🔹 public loadConfig()
 
-(re) load config and get all urls to fetch (and all other config items)This method - fills $this->_aCfg- newly initializes $this->oNotification
+(re) load config and get all urls to fetch (and all other config items)This method - fills $this->_aCfg- newly initializes $this->oNotification@global object $oDB      database connection
 
 **Return**: `void`
 
 **Parameters**: **0**
 
 
-### 🔹 public removeUrl()
+### 🔹 public renderDBDebug()
 
-remove appmonitor url from current object
+Show debug information for database actionsThis is shown if a user has the role ui-debug
 
-**Return**: `bool`
+**Return**: `string`
 
-**Parameters**: **1**
-
-| Parameter | Type | Description
-|--         |--    |--
-| \<required\> string $sUrl | `string` | url to remove
+**Parameters**: **0**
 
 
 ### 🔹 public renderHtml()

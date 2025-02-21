@@ -7,6 +7,7 @@
  * @author hahn
  * 
  * 2024-07-23  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2025-02-21  axel.hahn@unibe.ch  use sqlite as storage
  */
 ```
 
