@@ -14,6 +14,7 @@
  * 2022-03-28  move checks into plugins/apps/
  * 2024-07-23  php 8: short array syntax
  * 2024-12-28  added check for custom config and url file (if they exist)
+ * 2025-02-24  add checks for sqlite and data dir
  */
 
 // ----------------------------------------------------------------------
@@ -28,7 +29,7 @@ $oMonitor->addCheck(
         "check" => [
             "function" => "Phpmodules",
             "params" => [
-                "required" => ["curl"],
+                "required" => ["curl", "json", "pdo_sqlite"],
                 "optional" => [],
             ],
         ],
@@ -123,6 +124,22 @@ if (is_file("$sApproot/server/config/appmonitor-server-urls.json")) {
     );        
 }
 
+$oMonitor->addCheck(
+    [
+        "name" => "write to ./data/",
+        "description" => "Check sqlite data directory",
+        // "group" => "folder",
+        "check" => [
+            "function" => "File",
+            "params" => [
+                "filename" => "$sApproot/server/data",
+                "dir" => true,
+                "writable" => true,
+            ],
+        ],
+    ]
+);
+
 // ----------------------------------------------------------------------
 // protect dirs against web access
 // specialty: if the test results in an error, the total result switches
@@ -132,7 +149,7 @@ $sBaseUrl = 'http' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] ? 's' : '')
     . '://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT']
     . dirname(dirname($_SERVER['REQUEST_URI']));
 
-foreach (['server/config', 'server/tmp'] as $sMyDir) {
+foreach (['server/config', 'server/data', 'server/tmp'] as $sMyDir) {
     $oMonitor->addCheck(
         [
             "name" => "http to $sMyDir",
@@ -154,7 +171,51 @@ foreach (['server/config', 'server/tmp'] as $sMyDir) {
 // count of current projects
 // ----------------------------------------------------------------------
 require_once($sApproot . '/server/classes/appmonitor-server.class.php');
-$oServer = new appmonitorserver();
+$oServer = new appmonitorserver(false);
+
+$aCfg=$oServer->getConfigVars();
+
+$oMonitor->addCheck(
+    [
+        "name" => "db-config",
+        "description" => "Check if the service is running",
+        // "group" => "service",
+        "parent" => "check custom config file",
+        "check" => [
+            "function" => "Simple",
+            "params" => [
+                "result" => ($aCfg['db']['dsn'] ? RESULT_OK : RESULT_ERROR),
+                "value" => ($aCfg['db']['dsn']
+                    ? "OK: dsn was set"
+                    :"Error: database dsn was not found in config."
+                )
+            ],
+        ]
+    ]
+);
+
+if($aCfg['db']['dsn']){
+
+    $aDB=[
+        'connect'=>$aCfg['db']['dsn'] ?? '',
+        'user'=>$aCfg['db']['user'] ?? '',
+        'password'=> $aCfg['db']['password'] ?? ''
+    ];
+    // print_r($aDB);
+    $oMonitor->addCheck(
+        [
+            "name" => "connect db",
+            "description" => "Connnect PDO database",
+            "group" => "database",
+            "parent" => "db-config",
+            "check" => [
+                "function" => "PdoConnect",
+                "params" => $aDB
+            ],
+        ]
+    );
+} 
+
 $iCount = count($oServer->getAppIds());
 $oMonitor->addCheck(
     [
@@ -173,6 +234,7 @@ $oMonitor->addCheck(
         ],
     ]
 );
+
 // ----------------------------------------------------------------------
 // check running service
 // ----------------------------------------------------------------------
