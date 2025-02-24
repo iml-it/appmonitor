@@ -11,15 +11,8 @@ class objwebapps extends axelhahn\pdo_db_base
      */
     protected array $_aProperties = [
         'appid'       => ['create' => 'varchar(32)', 'index' => true],
-        // 'expires'     => ['create' => 'datetime',],     // weg, wenn ich weiterhin ahcache benutze
-        // 'result'      => ['create' => 'text',],         // auch weg
         'lastresult'  => ['create' => 'text',],
         'lastok'      => ['create' => 'text',],
-
-        // store information to access on failure
-        // 'checks'       => ['create' => 'text',],
-        // 'notification' => ['create' => 'text',],
-        'tags'         => ['create' => 'text',],
     ];
 
 

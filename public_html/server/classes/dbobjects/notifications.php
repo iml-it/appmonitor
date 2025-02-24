@@ -15,7 +15,7 @@ class objnotifications extends axelhahn\pdo_db_base
         'changetype'  => ['create' => 'int',],
         'status'      => ['create' => 'int',],
         'message'     => ['create' => 'text',],
-        'result'      => ['create' => 'text',], // appresult array ... not used yet - maybe we remove it.
+        // 'result'      => ['create' => 'text',], // appresult array ... not used yet - maybe we remove it.
     ];
 
 
