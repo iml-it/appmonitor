@@ -173,19 +173,23 @@ class appmonitorserver
      * constructor
      * @global object $oDB      database connection
      */
-    public function __construct()
+    public function __construct(bool $bReadonly=false)
     {
         global $oDB;
-        $this->loadConfig();
 
-        // remark: $oDB is initialized in loadConfig()
-        $this->_oWebapps=new objwebapps($oDB);
+        $this->loadConfig($bReadonly);
 
-        $this->_loadLangTexts();
-        $this->_handleParams();
+        if(!$bReadonly){
+            // remark: $oDB is initialized in loadConfig()
+            $this->_oWebapps=new objwebapps($oDB);
 
-        $_sUser = $this->getAlreadyAuthenticatedUser();
-        $this->setUser($_sUser ? $_sUser : '*');
+            $this->_loadLangTexts();
+            $this->_handleParams();
+
+            $_sUser = $this->getAlreadyAuthenticatedUser();
+            $this->setUser($_sUser ? $_sUser : '*');
+
+        }
 
     }
 
@@ -242,7 +246,7 @@ class appmonitorserver
      * @global object $oDB      database connection
      * @return void
      */
-    public function loadConfig(): void
+    public function loadConfig(bool $bReadonly): void
     {
         global $oDB;
         $aUserdata = [];
@@ -272,44 +276,50 @@ class appmonitorserver
             $this->_urls=json_decode(file_get_contents($this->_getConfigDir() . '/' . $this->_sUrlfile), true);
         }
 
-        // initialize database
-        // echo $this->_aCfg['dsn'];
-        if($this->_aCfg['db']['dsn']??false){
-            $this->_aCfg['db']['dsn']=str_replace('{{APPDIR}}', dirname(__DIR__), $this->_aCfg['db']['dsn']);
-        }
-        
-        $oDB=new axelhahn\pdo_db([
-            'db'=>$this->_aCfg['db'],
-            // 'showdebug'=>true,
-            // 'showerrors'=>true,
-        ]);
-        if (!$oDB->db){
-            // echo $oDB->error().'<br>';
-            die("SORRY, unable to connect the database.");
-        }
-        if($this->hasRole('ui-debug')){
-            $oDB->showErrors(true);
-        }
-        
-        if (isset($this->_aCfg['curl']['timeout'])) {
-            $this->curl_opts[CURLOPT_TIMEOUT] = (int) $this->_aCfg['curl']['timeout'];
-        }
 
-        $this->oNotification = new notificationhandler([
-            'lang' => $this->_aCfg['lang'],
-            'serverurl' => $this->_aCfg['serverurl'],
-            'notifications' => $this->_aCfg['notifications']
-        ]);
+        if(!$bReadonly){
 
-        // Upgrade if needed
-        $this->_sVersion = $aDefaults['version'];
-        $sLastVersion=$aUserdata['version']??false;
-        if(
-            $sLastVersion!==$this->_sVersion
-        ){
-            require "appmonitor-server-upgrade.php";
-            $aUserdata['version']=$this->_sVersion;
-            $this->saveConfig($aUserdata);
+            if (isset($this->_aCfg['curl']['timeout'])) {
+                $this->curl_opts[CURLOPT_TIMEOUT] = (int) $this->_aCfg['curl']['timeout'];
+            }
+
+            // initialize database
+            // echo $this->_aCfg['dsn'];
+            if($this->_aCfg['db']['dsn']??false){
+                $this->_aCfg['db']['dsn']=str_replace('{{APPDIR}}', dirname(__DIR__), $this->_aCfg['db']['dsn']);
+            }
+            
+            $oDB=new axelhahn\pdo_db([
+                'db'=>$this->_aCfg['db'],
+                // 'showdebug'=>true,
+                // 'showerrors'=>true,
+            ]);
+            if (!$oDB->db){
+                // echo $oDB->error().'<br>';
+                die("SORRY, unable to connect the database.");
+            }
+            /*
+            if($this->hasRole('ui-debug')){
+                $oDB->showErrors(true);
+            }
+            */
+
+            $this->oNotification = new notificationhandler([
+                'lang' => $this->_aCfg['lang'],
+                'serverurl' => $this->_aCfg['serverurl'],
+                'notifications' => $this->_aCfg['notifications']
+            ]);
+
+            // Upgrade if needed
+            $this->_sVersion = $aDefaults['version'];
+            $sLastVersion=$aUserdata['version']??false;
+            if(
+                $sLastVersion!==$this->_sVersion
+            ){
+                require "appmonitor-server-upgrade.php";
+                $aUserdata['version']=$this->_sVersion;
+                $this->saveConfig($aUserdata);
+            }
         }
 
     }
