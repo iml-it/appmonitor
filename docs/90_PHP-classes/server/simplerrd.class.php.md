@@ -23,11 +23,12 @@
 
 **Return**: ``
 
-**Parameters**: **1**
+**Parameters**: **2**
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $sId = '' | `string` | optional id to set
+| \<optional\> string $sAppId = '' | `string` | optional id to set
+| \<optional\> string $sCounterId = '' | `string` | 
 
 
 ### 🔹 public add()
@@ -52,6 +53,19 @@
 **Parameters**: **0**
 
 
+### 🔹 public deleteApp()
+
+Delete current application
+
+**Return**: `bool`
+
+**Parameters**: **1**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> string $sAppid = '' | `string` | 
+
+
 ### 🔹 public get()
 
 Get array with stored items
@@ -65,6 +79,28 @@
 | \<optional\> int $iMax = 0 | `int` | optional: limit
 
 
+### 🔹 public getCountersOfApp()
+
+Get array of ids of counters of current application
+
+**Return**: `array`
+
+**Parameters**: **0**
+
+
+### 🔹 public setApp()
+
+Set an application by its id to set counters for
+
+**Return**: `string *`
+
+**Parameters**: **1**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> string $sAppId | `string` | 
+
+
 ### 🔹 public setId()
 
 Set id for this rrd value store
@@ -75,7 +111,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sId | `string` | 
+| \<required\> $sCountername | ` *` | 
 
 
 
