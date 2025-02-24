@@ -2,7 +2,7 @@
 
 require_once 'cache.class.php';
 require_once 'lang.class.php';
-require_once 'counteritems.class.php';
+require_once 'simplerrd.class.php';
 require_once 'notificationhandler.class.php';
 require __DIR__.'/../vendor/php-abstract-dbo/src/pdo-db.class.php';
 require_once 'dbobjects/webapps.php';
@@ -86,7 +86,7 @@ class appmonitorserver
      * 
      * @var integer
      */
-    protected int $_iTtlOnError = 3; // TODO SET TO 60
+    protected int $_iTtlOnError = 60;
 
     /**
      * name of the config file to load
@@ -502,11 +502,12 @@ class appmonitorserver
                 $this->saveUrls();
                 $this->loadConfig();
 
+                
                 // delete notification after config was saved
                 if (!isset($this->_urls[$key])) {
                     $this->oNotification->deleteApp($sAppId);
-                    $oCounters = new counteritems($sAppId);
-                    $oCounters->delete();
+                    $rrd = new simpleRrd($key);
+                    $rrd->deleteApp();
                     $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
                     $oCache->delete();
 
@@ -994,43 +995,46 @@ class appmonitorserver
 
                 // $aClientData["result"]["curlinfo"] = $aResult['curlinfo'];
 
-                $oCounters = new counteritems($sKey);
-                $oCounters->setCounter('_responsetime', [
+                $aCounters=[];
+                $aCounters['_responsetime']=[
                     'title' => $this->_tr('Chart-responsetime'),
                     'visual' => 'bar',
-                ]);
-                $oCounters->add([
                     'status' => $aClientData["result"]["result"],
-                    'value' => floor($aResult['curlinfo']['total_time'] * 1000)
-                ]);
+                    'value' => floor($aResult['curlinfo']['total_time'] * 1000),
+                ];
+
                 // find counters in a check result
                 if (isset($aClientData['checks']) && count($aClientData['checks'])) {
                     // echo '<pre>'.print_r($aClientData['checks'], 1).'</pre>';
                     foreach ($aClientData['checks'] as $aCheck) {
                         $sIdSuffix = preg_replace('/[^a-zA-Z0-9]/', '', $aCheck['name']) . '-' . md5($aCheck['name']);
                         $sTimerId = 'time-' . $sIdSuffix;
-                        $oCounters->setCounter($sTimerId, [
+                        $aCounters[$sTimerId]=[
                             'title' => 'timer for[' . $aCheck['description'] . '] in [ms]',
-                            'visual' => 'bar'
-                        ]);
-                        $oCounters->add([
+                            'visual' => 'bar',
                             'status' => $aCheck['result'],
                             'value' => str_replace('ms', '', isset($aCheck['time']) ? $aCheck['time'] : '')
-                        ]);
-                        if (isset($aCheck['count']) || (isset($aCheck['type']) && $aCheck['type'] === 'counter')) {
+                        ];
+                            if (isset($aCheck['count']) || (isset($aCheck['type']) && $aCheck['type'] === 'counter')) {
                             $sCounterId = 'check-' . $sIdSuffix;
-                            // $oCounters->setCounter($sCounterId);
-                            $oCounters->setCounter($sCounterId, [
+                            $aCounters[$sCounterId]=[
                                 'title' => $aCheck['description'],
                                 'visual' => $aCheck['visual'] ?? false,
-                            ]);
-                            $oCounters->add([
                                 'status' => $aCheck['result'],
                                 'value' => $aCheck['count'] ?? $aCheck['value']
-                            ]);
+                            ];
                         }
                     }
                 }
+                $rrd=new simpleRrd($sKey);
+                foreach($aCounters as $sCounterKey => $aCounter){
+                    $rrd->setId($sCounterKey);
+                    $rrd->add([
+                        'status' => $aCounter['status'],
+                        'value' => $aCounter['value'],
+                    ]);
+                }
+                $aClientData['counters']=$aCounters;
                 $this->send(
                     ""
                     . $aResult['url']
@@ -1044,15 +1048,14 @@ class appmonitorserver
                 // write cache
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($aResult['url']));
 
+                // hm, not needed - we run multicurl.
                 // randomize cachetime of appmonitor client response: ttl + 2..30 sec
-                $iTtl = $iTtl + rand(2, min(5 + round($iTtl / 3), 30));
+                // $iTtl = $iTtl + rand(2, min(5 + round($iTtl / 3), 30));
 
                 $oCache->write($aClientData, $iTtl);
-                // $this->_oWebapps->set('result', json_encode($aClientData));
 
                 $aClientData["result"]["fromcache"] = false;
                 $this->_data[$sKey] = $aClientData;
-
 
                 $this->oNotification->setApp($sKey);
                 $this->oNotification->notify();

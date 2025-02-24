@@ -424,10 +424,10 @@ class notificationhandler
      * @param integer  $sNewstatus   resultcode; see RESULT_ constants
      * @param string   $sAppId       application id
      * @param string   $sMessage     message text
-     * @param array    $aResult      response ($this->_aAppResult)
+     * @param array    $aResult      response ($this->_aAppResult) REMOVED
      * @return bool
      */
-    protected function addLogitem(int $iChangetype, string $sNewstatus, string $sAppId, string $sMessage, array $aResult): bool|int
+    protected function addLogitem(int $iChangetype, string $sNewstatus, string $sAppId, string $sMessage/*, array $aResult*/): bool|int
     {
         $this->_oNotifications->new();
         $this->_oNotifications->setItem([
@@ -436,7 +436,7 @@ class notificationhandler
             'status' => $sNewstatus,
             'appid' => $sAppId,
             'message' => $sMessage,
-            'result' => json_encode($aResult),
+            // 'result' => json_encode($aResult),
         ]);
         return $this->_oNotifications->create();
     }
@@ -447,26 +447,6 @@ class notificationhandler
      */
     public function countLogitems():int{
         return $this->_oNotifications->count() ?? 0;
-    }
-
-    /**
-     * Helper function - limit log to N entries
-     * @return boolean
-     */
-    protected function OBSOLETE_cutLogitems(): bool
-    {
-        if (count($this->_aLog) > $this->_iMaxLogentries) {
-            while (count($this->_aLog) > $this->_iMaxLogentries) {
-                array_shift($this->_aLog);
-            }
-        }
-        // FIX recusrsive data in $this->notify()
-        for ($i = 0; $i < count($this->_aLog); $i++) {
-            if (isset($this->_aLog[$i]['result']['laststatus'])) {
-                unset($this->_aLog[$i]['result']['laststatus']);
-            }
-        }
-        return true;
     }
 
     /**

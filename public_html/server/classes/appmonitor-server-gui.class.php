@@ -1326,7 +1326,7 @@ class appmonitorserver_gui extends appmonitorserver
     protected function _renderCounter(string $sAppId, string $sCounterId, array $aOptions = []): string
     {
         $oA = new renderadminlte();
-        $oCounters = new counteritems($sAppId, $sCounterId);
+        $rrd = new simpleRrd($sAppId, $sCounterId);
 
         $aOptions['type'] = $aOptions['type'] ? $aOptions['type'] : 'bar';
         $aOptions['label'] = $aOptions['label'] ?? '';
@@ -1334,7 +1334,8 @@ class appmonitorserver_gui extends appmonitorserver
         $aOptions['items'] = isset($aOptions['items']) && (int) $aOptions['items'] ? (int) $aOptions['items'] : $aOptions['size'] * 10;
         $aOptions['graphonly'] = isset($aOptions['graphonly']) ? !!$aOptions['graphonly'] : false;
 
-        $aResponseTimeData = $oCounters->get($aOptions['items']);
+        $aResponseTimeData = $rrd->get($aOptions['items']);
+        
         $aChartData = [
             'label' => [],
             'value' => [],
@@ -1548,16 +1549,13 @@ class appmonitorserver_gui extends appmonitorserver
             if (isset($aEntries["result"]["host"])) {
 
                 // --- Counter and graphs
-                $oCounters = new counteritems($sAppId);
-                /** 
-                 * @var array
-                 */
-                $aCounters = $oCounters->getCounters();
+
+                $aCounters=$this->_data[$sAppId]["counters"]??[];
+
                 $sCounters = '';
                 if (count($aCounters)) {
                     foreach ($aCounters as $sCounterId => $aMeta) {
-                        if (strpos($sCounterId, 'time') !== 0) {
-                            // echo '<pre>'.print_r($oCounters->get(1), 1).'</pre>';
+                        if (strpos($sCounterId, needle: 'time') !== 0) {
 
                             $aMeta['visual'] = $aMeta['visual'] ?? 'bar';
                             $aTmp = explode(',', $aMeta['visual']);

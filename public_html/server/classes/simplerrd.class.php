@@ -36,6 +36,12 @@ class simpleRrd
      */
     protected int $_iRowid;
 
+    /**
+     * application id
+     * @var string
+     */
+    protected string $_sAppid='';
+
 
     // ----------------------------------------------------------------------
     // __construct
@@ -45,12 +51,13 @@ class simpleRrd
      * Constructor
      * @param string $sId  optional id to set
      */
-    public function __construct(string $sId = '')
+    public function __construct(string $sAppId = '', string $sCounterId='')
     {
         global $oDB;
         $this->_oSimplerrd=new objsimplerrd($oDB);
-        if ($sId) {
-            $this->setId($sId);
+        if ($sAppId) {
+            $this->setApp($sAppId);
+            if($sCounterId) $this->setId($sCounterId);
         }
     }
 
@@ -136,6 +143,21 @@ class simpleRrd
         }
         return $this->_oSimplerrd->delete();
     }
+    /**
+     * Delete current application
+     * @return boolean
+     */
+    public function deleteApp(string $sAppid = ''): bool
+    {
+        $bReturn = true;
+        foreach ($this->getCountersOfApp() as $sCounterid) {
+            $this->_oSimplerrd->read($sCounterid);
+            if(!$this->_oSimplerrd->delete()){
+                $bReturn = false;
+            }
+        }
+        return $bReturn;
+    }
 
     /**
      * Get array with stored items
@@ -160,42 +182,59 @@ class simpleRrd
     }
 
     /**
+     * Get array of ids of counters of current application
+     * @return array
+     */
+    public function getCountersOfApp(): array
+    {
+        if(!$this->_sAppid) {
+            echo "WARNING: ".__METHOD__." was called without setting an appId first.".PHP_EOL;
+            return [];
+        }
+        $aSearchresult=$this->_oSimplerrd->search([
+            "columns"=>["id"],
+            "where"=>"appid = :appid",
+        ],
+        [
+            "appid" => $this->_sAppid,
+
+        ]
+        );
+        $aReturn=[];
+        foreach($aSearchresult as $aRow) {
+            $aReturn[]=$aRow['id'];
+        }
+        return $aReturn;
+    }
+
+    /**
+     * Set an application by its id to set counters for
+     * @param string $sAppId
+     * @return string
+     */
+    public function setApp(string $sAppId){
+        return $this->_sAppid=$sAppId;
+    }
+
+    /**
      * Set id for this rrd value store
      * 
      * @param string $sId
      * @return boolean
      */
-    public function setId(string $sId): bool
+    public function setId($sCountername): bool
     {
         
-        $sAppid=substr($sId, 0, 32);
-        $sCountername=substr($sId, 33, 200);
-
-        /*
-        $aSearchresult=$this->_oSimplerrd->search([
-                "columns"=>["id"],
-                "where"=>"appid = :appid and countername = :countername",
-            ],
-            [
-                "appid" => $sAppid,
-                "countername" => $sCountername,
-            ]
-            );
-        $this->_iRowid=$aSearchresult[0]['id']??0;
-        */
-
         if ($this->_oSimplerrd->readByFields([
-            "appid" => $sAppid,
+            "appid" => $this->_sAppid,
             "countername" => $sCountername
         ])) {
             $this->_iRowid=$this->_oSimplerrd->get('id');
         } else {
             $this->_iRowid=0;
             $this->_oSimplerrd->new();
-            $this->_oSimplerrd->getitem();
-            $this->_oSimplerrd->set('appid', $sAppid);
+            $this->_oSimplerrd->set('appid', $this->_sAppid);
             $this->_oSimplerrd->set('countername', $sCountername);
-    
         }
         
         $this->_getLogs();
