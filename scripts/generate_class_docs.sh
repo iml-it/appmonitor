@@ -29,7 +29,6 @@ serverClassfiles="
     public_html/server/classes/appmonitor-server-api.class.php
     public_html/server/classes/appmonitor-server-gui.class.php
     public_html/server/classes/appmonitor-server.class.php
-    public_html/server/classes/counteritems.class.php
     public_html/server/classes/lang.class.php
     public_html/server/classes/notificationhandler.class.php
     public_html/server/classes/simplerrd.class.php
