@@ -178,12 +178,12 @@ class appmonitorserver
         global $oDB;
 
         $this->loadConfig($bReadonly);
+        $this->_loadLangTexts();
 
         if (!$bReadonly) {
             // remark: $oDB is initialized in loadConfig()
             $this->_oWebapps = new objwebapps($oDB);
 
-            $this->_loadLangTexts();
             $this->_handleParams();
 
             $_sUser = $this->getAlreadyAuthenticatedUser();
@@ -255,16 +255,24 @@ class appmonitorserver
 
         $this->_aCfg = []; // reset current config array
 
-        $sCfgFile = $this->_getConfigDir() . '/' . $this->_sConfigfile;
-        $sCfgDefaultsFile = str_replace('.json', '-defaults.json', $sCfgFile);
+        $sCfgUserFile = $this->_getConfigDir() . '/' . $this->_sConfigfile;
+        $sCfgDefaultsFile = str_replace('.json', '-defaults.json', $sCfgUserFile);
+
+
         if (!file_exists($sCfgDefaultsFile)) {
             die("ERROR: default config file is not readable: [$sCfgDefaultsFile].");
         }
-
         $aDefaults = json_decode(file_get_contents($sCfgDefaultsFile), true);
-        if (file_exists($sCfgFile)) {
-            $aUserdata = json_decode(file_get_contents($sCfgFile), true);
+
+
+        if (file_exists($sCfgUserFile)) {
+            $aUserdata = json_decode(file_get_contents($sCfgUserFile), true);
+        } else {
+            $this->_aCfg=['version' => $aDefaults['version']??'?'];
+            $this->saveConfig(); // create $sCfgFile
+            $aUserdata = $this->_aCfg;
         }
+
         $this->_aCfg = array_replace_recursive($aDefaults, $aUserdata);
 
         // undo unwanted recursive merge behaviour:
@@ -317,9 +325,9 @@ class appmonitorserver
                 $sLastVersion !== $this->_sVersion
             ) {
                 require "appmonitor-server-upgrade.php";
-                $aUserdata['version'] = $this->_sVersion;
-                $this->saveConfig($aUserdata);
-            }
+                $this->_aCfg['version'] = $this->_sVersion;
+                $this->saveConfig(); // update $sCfgUserFile
+            } 
         }
 
     }
