@@ -62,7 +62,11 @@ default value:
 
 **Return**: ``
 
-**Parameters**: **0**
+**Parameters**: **1**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> bool $bReadonly = false | `bool` | 
 
 
 ### 🔹 public actionAddUrl()
@@ -285,7 +289,11 @@ default value:
 
 **Return**: `void`
 
-**Parameters**: **0**
+**Parameters**: **1**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> bool $bReadonly = false | `bool` | 
 
 
 ### 🔹 public saveConfig()
