@@ -68,6 +68,7 @@
         "row-appcounters": "Counter",
         "row-visual": "Graph",
         "row-checks": "Checks",
+        "row-httpresponse": "Http-Antwort",
         "row-history": "Meldungen",
 
         "Appstatus": "Status der Webapplikation",

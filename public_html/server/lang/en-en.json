@@ -69,6 +69,7 @@
         "row-appcounters": "Counters",
         "row-visual": "Graph",
         "row-checks": "Checks",
+        "row-httpresponse": "Http-Response",
         "row-history": "History",
 
         "Appstatus": "Status of application",
