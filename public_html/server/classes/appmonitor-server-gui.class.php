@@ -1766,13 +1766,14 @@ class appmonitorserver_gui extends appmonitorserver
         return
 
             ''
-            . '<div id="relnavbuttons" style="position: absolute; right: 1em; z-index: 10000;"></div>'
             . $sTopHeadline
             . '<section class="content">
                 ' . $oA->getSectionRow($this->_generateWebappTiles($sAppId)) . '<br>'
             . $sValidationContent
             . $sHtml . '
-            </section>';
+            </section>'
+            . '<div id="relnavbuttons" style="position: absolute; right: 1em; top: 4em; "></div>'
+            ;
     }
     /**
      * Get html code for debug page
