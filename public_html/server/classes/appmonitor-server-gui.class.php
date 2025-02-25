@@ -1184,8 +1184,8 @@ class appmonitorserver_gui extends appmonitorserver
 
         $sMoreResults = '';
         for ($i = 0; $i <= 4; $i++) {
-            $sMoreResults .= (isset($aResults[$i]) 
-                ? '<span class="result' . $i . '">' . $aResults[$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' ' 
+            $sMoreResults .= (isset($aResults[$i])
+                ? '<span class="result' . $i . '">' . $aResults[$i] . '</span> x ' . $this->_tr('Resulttype-' . $i) . ' '
                 : ''
             );
         }
@@ -1335,7 +1335,7 @@ class appmonitorserver_gui extends appmonitorserver
         $aOptions['graphonly'] = isset($aOptions['graphonly']) ? !!$aOptions['graphonly'] : false;
 
         $aResponseTimeData = $rrd->get($aOptions['items']);
-        
+
         $aChartData = [
             'label' => [],
             'value' => [],
@@ -1550,7 +1550,7 @@ class appmonitorserver_gui extends appmonitorserver
 
                 // --- Counter and graphs
 
-                $aCounters=$this->_data[$sAppId]["counters"]??[];
+                $aCounters = $this->_data[$sAppId]["counters"] ?? [];
 
                 $sCounters = '';
                 if (count($aCounters)) {
@@ -2660,8 +2660,8 @@ class appmonitorserver_gui extends appmonitorserver
         $iErrors = 0;
         $iMaxRecords = "";
 
-        $sQerytable='';
-        $sLogtable='';
+        $sQerytable = '';
+        $sLogtable = '';
 
         // -- queries
         foreach ($oDB->queries() as $aQuery) {
@@ -2678,9 +2678,9 @@ class appmonitorserver_gui extends appmonitorserver
             $iMaxTime = max($iMaxTime, $aQuery["time"]);
             $iMaxRecords = max($iMaxRecords, $aQuery["records"]);
 
-            $sData=print_r(($aQuery["data"] ?? false), 1);
-            if(strlen($sData)>2000){
-                $sData=substr($sData,0,2000).'...';
+            $sData = print_r(($aQuery["data"] ?? false), 1);
+            if (strlen($sData) > 2000) {
+                $sData = substr($sData, 0, 2000) . '...';
             }
 
             $sQerytable .= "<tr class=\"$sClass\">
@@ -2694,11 +2694,11 @@ class appmonitorserver_gui extends appmonitorserver
                 <td>" . htmlentities($sData) . "</td>
             </tr>";
         }
-        $sQerytable=$sQerytable
+        $sQerytable = $sQerytable
             ? $oA->getBox([
                 'title' => "Queries: <strong>$iCount</strong>",
                 'text' => "errors: <i>$iErrors</i> ... longest: <i>$iMaxTime</i> ms, max. count of records: <i>$iMaxRecords</i><br><br>"
-                . "<table class=\"datatable\"><thead><tr>
+                    . "<table class=\"datatable\"><thead><tr>
                     <th>#</th>
                     <th>Time</th>
                     <th>Records</th>
@@ -2707,24 +2707,24 @@ class appmonitorserver_gui extends appmonitorserver
                 </tr></thead><tbody>$sQerytable</tbody></table>"
             ])
             : ''
-            ;
+        ;
 
         // -- queries
-        foreach($oDB->logs() as $aItem) {
-            $sClass = $aItem['loglevel'] == 'error' 
-                ? 'result3' 
+        foreach ($oDB->logs() as $aItem) {
+            $sClass = $aItem['loglevel'] == 'error'
+                ? 'result3'
                 : ''
-                ;
-            $sLogtable.="<tr class=\"$sClass\">
+            ;
+            $sLogtable .= "<tr class=\"$sClass\">
                 <td>$aItem[loglevel]</td>
                 <td>$aItem[table]</td>
                 <td>" . htmlentities(print_r(($aItem["method"] ?? '-'), 1)) . "</td>
                 <td>" . htmlentities(print_r(($aItem["message"] ?? '-'), 1)) . "</td>
             </tr>";
         }
-        $sLogtable=$sLogtable
+        $sLogtable = $sLogtable
             ? $oA->getBox([
-                'title' => "Logs: <strong>".count($oDB->logs())."</strong>",
+                'title' => "Logs: <strong>" . count($oDB->logs()) . "</strong>",
                 'text' => "<table class=\"datatable\"><thead><tr>
                     <th>Level</th>
                     <th>Table</th>
@@ -2737,17 +2737,17 @@ class appmonitorserver_gui extends appmonitorserver
 
 
         // --queries
-        return  $sQerytable.$sLogtable 
+        return $sQerytable . $sLogtable
             ? '<section class="content">'
             . $oA->getSectionRow(
-            $oA->getSectionColumn(
-                    $sQerytable.$sLogtable
-                    ),
+                $oA->getSectionColumn(
+                    $sQerytable . $sLogtable
+                ),
                 12
             )
-            .'</section>'
+            . '</section>'
             : ''
-            ;
+        ;
     }
 
     /**

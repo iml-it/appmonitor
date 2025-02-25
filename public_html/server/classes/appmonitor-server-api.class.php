@@ -96,10 +96,10 @@ class appmonitorserver_api extends appmonitorserver
                 $aReturn[$sLoopuser]['password'] = $aUserdata['password'] ?? false;
             }
             // $aReturn[$sLoopuser] = $aUserdata['password'] ?? false;
-            if(isset($aUserdata['passwordhash']) && $aUserdata['passwordhash']){
+            if (isset($aUserdata['passwordhash']) && $aUserdata['passwordhash']) {
                 $aReturn[$sLoopuser]['passwordhash'] = $aUserdata['passwordhash'];
             }
-            if(isset($aUserdata['secret']) && $aUserdata['secret']){
+            if (isset($aUserdata['secret']) && $aUserdata['secret']) {
                 $aReturn[$sLoopuser]['secret'] = $aUserdata['secret'];
             }
         }

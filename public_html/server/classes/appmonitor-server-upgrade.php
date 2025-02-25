@@ -8,7 +8,7 @@
 
 */
 
-if(!isset($this->_aCfg)){
+if (!isset($this->_aCfg)) {
     die("ERROR: This file cannot be called directly.");
 }
 
@@ -18,33 +18,38 @@ require_once 'dbobjects/simplerrd.php';
 // FUNCTIONS
 // ----------------------------------------------------------------------
 
-function title($sTitle){
-    $bHtml=$_SERVER['HTTP_HOST']??false;
-    echo $bHtml 
+function title($sTitle)
+{
+    $bHtml = $_SERVER['HTTP_HOST'] ?? false;
+    echo $bHtml
         ? "<strong>---------- $sTitle</strong>\n"
         : "---------- $sTitle\n";
 }
 
-function fail($sMessage=''){
+function fail($sMessage = '')
+{
     echo "\n❌ ERROR: $sMessage<br>Aborting here.\n";
     die();
 }
 
-function ok($sMessage=''){
+function ok($sMessage = '')
+{
     echo "✅ OK $sMessage\n\n";
 }
 
-function skip($sMessage=''){
+function skip($sMessage = '')
+{
     echo "🔹 SKIP $sMessage\n\n";
 }
 
-function delFiles(array $aFilelist){
+function delFiles(array $aFilelist)
+{
     title("Delete obsolete files...");
-    $sApproot=realpath(__DIR__."/../../..");
-    foreach($aFilelist as $sFile){
-        $sFullPath="$sApproot/$sFile";
-        if (file_exists($sFullPath)){
-            if(unlink($sFullPath)){
+    $sApproot = realpath(__DIR__ . "/../../..");
+    foreach ($aFilelist as $sFile) {
+        $sFullPath = "$sApproot/$sFile";
+        if (file_exists($sFullPath)) {
+            if (unlink($sFullPath)) {
                 ok($sFile);
             } else {
                 fail("Deletion of file $sFile failed.");
@@ -59,24 +64,24 @@ function delFiles(array $aFilelist){
 // MAIN
 // ----------------------------------------------------------------------
 
-if (isset($_SERVER['HTTP_HOST'])) { 
-    echo "<pre><h1>UPGRADE to $this->_sVersion</h1>"; 
+if (isset($_SERVER['HTTP_HOST'])) {
+    echo "<pre><h1>UPGRADE to $this->_sVersion</h1>";
 } else {
     echo "\n\n>>>>>>>>>> UPGRADE to $this->_sVersion\n\n\n";
 }
 
 // echo "from [$sLastVersion] --> [$this->_sVersion]\n";
 
-$aUpdaters=glob(__DIR__."/upgrades/*.php");
+$aUpdaters = glob(__DIR__ . "/upgrades/*.php");
 sort($aUpdaters);
 
-foreach($aUpdaters as $sUpgradefile){
-    $sUpgradeVersion=str_replace('.php', '', basename($sUpgradefile));
-    if($sUpgradeVersion>$sLastVersion && $sUpgradeVersion<=$this->_sVersion){
-        echo "<h2>Apply ".$sUpgradeVersion."</h2>";
-        include $sUpgradefile;        
+foreach ($aUpdaters as $sUpgradefile) {
+    $sUpgradeVersion = str_replace('.php', '', basename($sUpgradefile));
+    if ($sUpgradeVersion > $sLastVersion && $sUpgradeVersion <= $this->_sVersion) {
+        echo "<h2>Apply " . $sUpgradeVersion . "</h2>";
+        include $sUpgradefile;
     } else {
-        echo "SKIP ".$sUpgradeVersion."\n";
+        echo "SKIP " . $sUpgradeVersion . "\n";
     }
 }
 

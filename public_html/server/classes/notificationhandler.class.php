@@ -153,8 +153,8 @@ class notificationhandler
 
         $this->_aNotificationOptions = isset($aOptions['notifications']) ? $aOptions['notifications'] : false;
 
-        $this->_oNotifications=new objnotifications($oDB);
-        $this->_oWebapps=new objwebapps($oDB);
+        $this->_oNotifications = new objnotifications($oDB);
+        $this->_oWebapps = new objwebapps($oDB);
 
     }
 
@@ -208,7 +208,7 @@ class notificationhandler
      */
     protected function _getAppNotifications(): array
     {
-        return $this->_aAppResult['meta']['notifications']??[];
+        return $this->_aAppResult['meta']['notifications'] ?? [];
     }
 
     /**
@@ -237,8 +237,8 @@ class notificationhandler
     protected function _saveAppResult()
     {
         $this->_oWebapps->set("lastresult", json_encode($this->_aAppResult));
-        
-        if(($this->_aAppResult['meta']['result']??RESULT_ERROR) == RESULT_OK){
+
+        if (($this->_aAppResult['meta']['result'] ?? RESULT_ERROR) == RESULT_OK) {
             $this->_oWebapps->set("lastok", json_encode($this->_aAppResult));
         }
 
@@ -289,7 +289,7 @@ class notificationhandler
     public function setApp(string $sAppId): bool
     {
         $this->_sAppId = $sAppId;
-        $this->_oWebapps->readByFields(['appid'=>$this->_sAppId]);
+        $this->_oWebapps->readByFields(['appid' => $this->_sAppId]);
 
         $this->_aAppResult = $this->getAppResult();
         $this->_iAppResultChange = -1;
@@ -445,7 +445,8 @@ class notificationhandler
      * Get count of notification log entries
      * @return int
      */
-    public function countLogitems():int{
+    public function countLogitems(): int
+    {
         return $this->_oNotifications->count() ?? 0;
     }
 
@@ -459,7 +460,7 @@ class notificationhandler
         $oCache = new AhCache("appmonitor-server", $this->_sAppId);
 
         // in the cache is an array - but cache->read() is general and can return any data type
-        $aData=$oCache->read();
+        $aData = $oCache->read();
         return is_array($aData) ? $aData : [];
     }
 
@@ -469,11 +470,10 @@ class notificationhandler
      */
     public function getAppLastResult()
     {
-        if(! $sJson=$this->_oWebapps->get("lastresult"))
-        {
+        if (!$sJson = $this->_oWebapps->get("lastresult")) {
             return [];
         }
-        $aData=json_decode($sJson, 1);        
+        $aData = json_decode($sJson, 1);
         return is_array($aData) ? $aData : [];
     }
 
@@ -490,24 +490,24 @@ class notificationhandler
     public function getLogdata(array $aFilter = [], int $iLimit = 0, bool $bRsort = true): array
     {
 
-        $aFilter['mode']??='last';
-        $aFilter['count']??=25;
-        $aFilter['page']??=1;
-        $aFilter['where']??='';
+        $aFilter['mode'] ??= 'last';
+        $aFilter['count'] ??= 25;
+        $aFilter['page'] ??= 1;
+        $aFilter['where'] ??= '';
 
-        $aSearchParams=[];
+        $aSearchParams = [];
         if ($aFilter['appid'] ?? false) {
-            $aFilter['where']='`appid` = :appid';
-            $aSearchParams=['appid'=>$aFilter['appid']];
+            $aFilter['where'] = '`appid` = :appid';
+            $aSearchParams = ['appid' => $aFilter['appid']];
         }
 
-        $aData=$this->_oNotifications->search(
+        $aData = $this->_oNotifications->search(
             [
-            'columns'=>'*',
-            'where' => $aFilter['where'],
-            'order' => ['timestamp DESC'],
-            'limit' => (($aFilter['page']-1)*$aFilter['count']) . ", " . $aFilter['count'] ,
-            ], 
+                'columns' => '*',
+                'where' => $aFilter['where'],
+                'order' => ['timestamp DESC'],
+                'limit' => (($aFilter['page'] - 1) * $aFilter['count']) . ", " . $aFilter['count'],
+            ],
             $aSearchParams
         );
 
@@ -554,7 +554,7 @@ class notificationhandler
                 )
 
          */
-        if ($this->_iAppResultChange === -1 ) {
+        if ($this->_iAppResultChange === -1) {
             $this->_detectChangetype();
         }
         $sMiss = '-';
@@ -649,7 +649,7 @@ class notificationhandler
      */
     protected function sendAllNotifications(): bool
     {
-        if ($this->_iAppResultChange === -1) {  
+        if ($this->_iAppResultChange === -1) {
             die("ERROR: " . __METHOD__ . " failed to detect change type - or app was not initialized.");
             // return false;
         }
@@ -702,9 +702,9 @@ class notificationhandler
                         <h1>IML Appmonitor</h1>
                         <div>
                         ' . $sMessage
-                        .'<br><br><div class="footer"><strong>IML Appmonitor</strong> | GNU GPL 3.0 | Source <a href="https://github.com/iml-it/appmonitor">Github</a></div>'
-                        .'</div>'
-                        ,
+                        . '<br><br><div class="footer"><strong>IML Appmonitor</strong> | GNU GPL 3.0 | Source <a href="https://github.com/iml-it/appmonitor">Github</a></div>'
+                        . '</div>'
+                    ,
                 ];
                 // $sSendMethod="send_$sPlugin";
                 // $sSendMethod($aOptions);
@@ -729,7 +729,7 @@ class notificationhandler
         $aReturn = [];
         foreach (glob($this->_sPluginDir . '/*.php') as $sPlugin) {
             $aReturn[] = str_replace('.php', '', basename($sPlugin));
-            include_once ($sPlugin);
+            include_once($sPlugin);
         }
         return $aReturn;
     }

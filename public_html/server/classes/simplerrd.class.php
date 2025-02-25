@@ -40,7 +40,7 @@ class simpleRrd
      * application id
      * @var string
      */
-    protected string $_sAppid='';
+    protected string $_sAppid = '';
 
 
     // ----------------------------------------------------------------------
@@ -51,13 +51,14 @@ class simpleRrd
      * Constructor
      * @param string $sId  optional id to set
      */
-    public function __construct(string $sAppId = '', string $sCounterId='')
+    public function __construct(string $sAppId = '', string $sCounterId = '')
     {
         global $oDB;
-        $this->_oSimplerrd=new objsimplerrd($oDB);
+        $this->_oSimplerrd = new objsimplerrd($oDB);
         if ($sAppId) {
             $this->setApp($sAppId);
-            if($sCounterId) $this->setId($sCounterId);
+            if ($sCounterId)
+                $this->setId($sCounterId);
         }
     }
 
@@ -71,11 +72,11 @@ class simpleRrd
      */
     protected function _cutLogitems(): bool
     {
-        $bHasChange=false;
+        $bHasChange = false;
         if (count($this->_aLog) > $this->_iMaxLogentries) {
             while (count($this->_aLog) > $this->_iMaxLogentries) {
                 array_shift($this->_aLog);
-                $bHasChange=true;
+                $bHasChange = true;
             }
         }
         return $bHasChange;
@@ -89,12 +90,12 @@ class simpleRrd
      */
     protected function _getLogs(): bool
     {
-        if($this->_iRowid) {
+        if ($this->_iRowid) {
             $this->_oSimplerrd->read($this->_iRowid);
-            $cachedata= json_decode($this->_oSimplerrd->get('data'), 1);
+            $cachedata = json_decode($this->_oSimplerrd->get('data'), 1);
             $this->_aLog = (is_array($cachedata)) ? $cachedata : [];
         } else {
-            $this->_aLog=[];
+            $this->_aLog = [];
         }
         // echo "RRD id $this->_iRowid - ".count($this->_aLog)."<br>\n";
         return true;
@@ -106,7 +107,7 @@ class simpleRrd
      */
     protected function _saveLogs(): bool
     {
-        if( $this->_oSimplerrd->set('data', json_encode($this->_aLog)) ){
+        if ($this->_oSimplerrd->set('data', json_encode($this->_aLog))) {
             return $this->_oSimplerrd->save();
         }
         return false;
@@ -152,7 +153,7 @@ class simpleRrd
         $bReturn = true;
         foreach ($this->getCountersOfApp() as $sCounterid) {
             $this->_oSimplerrd->read($sCounterid);
-            if(!$this->_oSimplerrd->delete()){
+            if (!$this->_oSimplerrd->delete()) {
                 $bReturn = false;
             }
         }
@@ -187,22 +188,23 @@ class simpleRrd
      */
     public function getCountersOfApp(): array
     {
-        if(!$this->_sAppid) {
-            echo "WARNING: ".__METHOD__." was called without setting an appId first.".PHP_EOL;
+        if (!$this->_sAppid) {
+            echo "WARNING: " . __METHOD__ . " was called without setting an appId first." . PHP_EOL;
             return [];
         }
-        $aSearchresult=$this->_oSimplerrd->search([
-            "columns"=>["id"],
-            "where"=>"appid = :appid",
-        ],
-        [
-            "appid" => $this->_sAppid,
+        $aSearchresult = $this->_oSimplerrd->search(
+            [
+                "columns" => ["id"],
+                "where" => "appid = :appid",
+            ],
+            [
+                "appid" => $this->_sAppid,
 
-        ]
+            ]
         );
-        $aReturn=[];
-        foreach($aSearchresult as $aRow) {
-            $aReturn[]=$aRow['id'];
+        $aReturn = [];
+        foreach ($aSearchresult as $aRow) {
+            $aReturn[] = $aRow['id'];
         }
         return $aReturn;
     }
@@ -212,8 +214,9 @@ class simpleRrd
      * @param string $sAppId
      * @return string
      */
-    public function setApp(string $sAppId){
-        return $this->_sAppid=$sAppId;
+    public function setApp(string $sAppId)
+    {
+        return $this->_sAppid = $sAppId;
     }
 
     /**
@@ -224,19 +227,21 @@ class simpleRrd
      */
     public function setId($sCountername): bool
     {
-        
-        if ($this->_oSimplerrd->readByFields([
-            "appid" => $this->_sAppid,
-            "countername" => $sCountername
-        ])) {
-            $this->_iRowid=$this->_oSimplerrd->get('id');
+
+        if (
+            $this->_oSimplerrd->readByFields([
+                "appid" => $this->_sAppid,
+                "countername" => $sCountername
+            ])
+        ) {
+            $this->_iRowid = $this->_oSimplerrd->get('id');
         } else {
-            $this->_iRowid=0;
+            $this->_iRowid = 0;
             $this->_oSimplerrd->new();
             $this->_oSimplerrd->set('appid', $this->_sAppid);
             $this->_oSimplerrd->set('countername', $sCountername);
         }
-        
+
         $this->_getLogs();
         return true;
     }
