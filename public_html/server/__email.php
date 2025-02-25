@@ -3,12 +3,12 @@
 $sTO="axel.hahn@unibe.ch";
 $sSUBJECT="AppMonitor - ".date("Y-m-d H:i:s");
 $sBody="
-Hallihallo
-
-Hier ist meine Test-Nachricht.
-
-Viele Grusse
-Axel
+Hallihallo<br>
+<br>
+Hier ist meine Test-Nachricht.<br>
+<br>
+Viele Grusse<br>
+<em>Axel</em>
 ";
 
 echo "$sTO - $sSUBJECT<br>";
