@@ -89,8 +89,13 @@ foreach ($aUpdaters as $sUpgradefile) {
 
 title("UPGRADER is finished");
 if (isset($_SERVER['HTTP_HOST'])) {
-    echo "</pre>";
-    echo "<h2>👉 Refresh the page in the webbrowser.</h2>";
+    echo "</pre>
+    <h2>👉 Refresh the page in the webbrowser.</h2>
+    ... or wait for 10 sec to reload automatically.<br>
+    <script>
+        window.setTimeout('document.location.reload()', 10000);
+    </script>
+    ";
     // die();
 }
 
