@@ -106,16 +106,18 @@ If you are happy with the first clicks around then continue the next chaprters.
 
 I use several libraries to save time and to use stable components. I just wanna say thank you to all of them.
 
-- [ahCache] (<https://www.axel-hahn.de/docs/ahcache/index.htm>) class to store
-   serialized data as file (included)
-- [cdnorlocal] (<https://www.axel-hahn.de/docs/cdnorlocal/index.htm>)
+- [AdminLTE](https://adminlte.io)
+- [Bootstrap-Select](https://developer.snapappointments.com/bootstrap-select/)
+- [datatables.net](https://datatables.net/)
+- [FontAwesome](https://fontawesome.com/
+- [jQuery](https://jquery.com/)
+- [Bootstrap](https://getbootstrap.com/
+- [ChartJs](https://www.chartjs.org/
 - [Icons small-n-flat] (<http://paomedia.github.io/small-n-flat/>)
+- [Vis.Js](https://visjs.org/
 
-The web ui loads from CDNJS (but could be stored locally too):
+Components from Axel Hahn:
 
-- [AdminLTE] (<https://adminlte.io/>)
-- [chartJs] (<https://www.chartjs.org/>)
-- [jQuery] (<https://jquery.com/>)
-- [Datatables plugin] (<https://datatables.net/>)
-- [Font Awesome] (<https://fontawesome.com/>)
-- [Vis.js] (<https://visjs.org/>)
+- [AhCache](https://github.com/axelhahn/ahcache/)
+- [Axels PDO-DB class](https://github.com/axelhahn/php-abstract-dbo
+- [CdnorLocal](https://github.com/axelhahn/cdnorlocal
