@@ -383,6 +383,36 @@ function refreshTimer() {
 // ----------------------------------------------------------------------
 
 /**
+ * activate rel navigation and show a single row of given id
+ * @param {object} o        link object in naigation to highlight
+ * @param {string} id2show  dom id of the row
+ * @returns false
+ */
+function showRelNav(o, id2show){
+    $('.btnrelnav').removeClass('btn-info'); 
+    $(o).addClass('btn-info');
+
+    if(!$('.closebtnrelnav').hasClass('btn-danger')){
+        $('.closebtnrelnav').addClass('btn-danger');
+    }
+
+    $('.row').hide(); $('#'+id2show).show(); 
+    return false;
+}
+
+/**
+ * Reset active rel naviation: remove highlight of buttons and show all rows
+ * @returns false
+ */
+function closeRelNav(){
+    $('.btnrelnav').removeClass('btn-info'); 
+    $('.closebtnrelnav').removeClass('btn-danger');
+
+    $('.row').show(); 
+    return false;
+}
+
+/**
  * init relative navigation
  * - used on app detail page
  * - this function is called in postLoad()
@@ -392,11 +422,11 @@ function initRelNav(){
     var sButtons='';
     $('div.row').each(function() {
         if (this.id){
-            sButtons+='<button class="btn btn-default" onclick="$(\'.row\').hide(); $(\'#'+this.id+'\').show(); return false;">'+this.dataset.title+'</button> ';
+            sButtons+='<button class="btn btn-default btnrelnav" onclick="showRelNav(this, \''+this.id+'\'); return false;">'+this.dataset.title+'</button> ';
         }
     });
     if(sButtons){
-        sButtons+='<button class="btn btn-default" onclick="$(\'.row\').show(); this.blur(); return false;">X</button> ';
+        sButtons+='<button class="btn btn-default closebtnrelnav" onclick="closeRelNav(); this.blur(); return false;">X</button> ';
         $('#relnavbuttons').html(sButtons);
     }
     return true;
