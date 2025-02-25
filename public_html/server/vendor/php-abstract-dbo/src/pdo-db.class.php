@@ -9,7 +9,7 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
- * 2025-02-02  ___  ah  last changes
+ * 2025-02-25  ___  ah  last changes
  * ======================================================================
  */
 
@@ -71,9 +71,9 @@ class pdo_db
      */
     protected array $_aSql = [
         'sqlite' => [
-            "gettables" => 'SELECT name FROM sqlite_schema WHERE type = "table" AND name NOT LIKE "sqlite_%";',
+            "gettables" => 'SELECT name FROM sqlite_master WHERE type = "table" AND name NOT LIKE "sqlite_%";',
             "getcreate" => 'SELECT sql FROM sqlite_master WHERE name = "%s" ',
-            'tableexists' => "SELECT name FROM sqlite_schema WHERE type ='table' AND name = '%s';",
+            'tableexists' => "SELECT name FROM sqlite_master WHERE type ='table' AND name = '%s';",
 
             'optimize' => [
                 'db' => [
