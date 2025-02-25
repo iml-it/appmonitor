@@ -1,7 +1,7 @@
 ## Requirements
 
 - PHP8 (up to 8.4)
-- php-curl
+- php-curl, pdo_sqlite
 
 ## Installation
 
