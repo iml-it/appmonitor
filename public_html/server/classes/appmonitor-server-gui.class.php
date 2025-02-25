@@ -1043,43 +1043,38 @@ class appmonitorserver_gui extends appmonitorserver
                 !$sUrl
                 || (isset($aEntries["result"]["url"]) && $sUrl == $aEntries["result"]["url"])
             ) {
-                if (
-                    $aEntries["result"]["error"]
-                ) {
-                    // NOP
-                } else {
 
-                    foreach ($aEntries["checks"] as $aCheck) {
-                        $aTags = $aEntries["meta"]["tags"] ?? false;
-                        if ($bHideOk && $aCheck["result"] == RESULT_OK) {
-                            continue;
-                        }
-                        $sReturn .= '<tr class="result' . $aCheck["result"] . ' tags ' . $this->_getCssclassForTag($aTags) . '">';
-                        if (!$sUrl) {
-                            $sReturn .=
-                                '<td class="result result' . $aCheck["result"] . '"><span style="display: none;">' . $aCheck['result'] . '</span>' . $this->_tr('Resulttype-' . $aCheck["result"]) . '</td>'
-                                . '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (<span class="timer-age-in-sec">' . (date("U") - $aEntries["result"]["ts"]) . '</span>&nbsp;s)</td>'
-                                . '<td>' . $aEntries["result"]["host"] . '</td>'
-                                . '<td><a href="' . $this->_getDivIdForApp($sAppId) . '">' . $aEntries["result"]["website"] . '</a></td>'
-                                . '<td>' . $aEntries["result"]["ttl"] . '</td>';
-                        } else {
-                            $sReturn .= '<td class="result result' . $aCheck["result"] . '"><span style="display: none;">' . $aCheck['result'] . '</span>' . $this->_tr('Resulttype-' . $aCheck["result"]) . '</td>';
-                        }
-                        $sReturn .= '' // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
-                            . '<td>'
-                            . (isset($aCheck["group"]) && $aCheck["group"] && isset($aCheckGroups[$aCheck["group"]])
-                                ? '<nobr><img src="' . $aCheckGroups[$aCheck["group"]]['image'] . '" width="16"> ' . $aCheckGroups[$aCheck["group"]]['label'] . '</nobr>'
-                                : '-'
-                            )
-                            . '<td>' . $aCheck["name"] . '</td>'
-
-                            . '<td>' . $aCheck["description"] . '</td>'
-                            . '<td>' . $aCheck["value"] . '</td>'
-                            . '<td>' . ($aCheck["count"] ?? '-') . '</td>'
-                            . '<td>' . ($aCheck["time"] ?? '-') . '</td>'
-                            . '</tr>';
+                foreach ($aEntries["checks"] ?? [] as $aCheck) {
+                    $aTags = $aEntries["meta"]["tags"] ?? false;
+                    if ($bHideOk && $aCheck["result"] == RESULT_OK) {
+                        continue;
                     }
+                    $sReturn .= '<tr class="result' . $aCheck["result"] . ' tags ' . $this->_getCssclassForTag($aTags) . '">';
+                    if (!$sUrl) {
+                        $sReturn .=
+                            '<td class="result result' . $aCheck["result"] . '"><span style="display: none;">' . $aCheck['result'] . '</span>' . $this->_tr('Resulttype-' . $aCheck["result"]) . '</td>'
+                            . '<td>' . date("Y-m-d H:i:s", $aEntries["result"]["ts"]) . ' (<span class="timer-age-in-sec">' . (date("U") - $aEntries["result"]["ts"]) . '</span>&nbsp;s)</td>'
+                            . '<td>' . $aEntries["result"]["host"] . '</td>'
+                            . '<td><a href="' . $this->_getDivIdForApp($sAppId) . '">' . $aEntries["result"]["website"] . '</a></td>'
+                            . '<td>' . $aEntries["result"]["ttl"] . '</td>';
+                    } else {
+                        $sReturn .= '<td class="result result' . $aCheck["result"] . '"><span style="display: none;">' . $aCheck['result'] . '</span>' . $this->_tr('Resulttype-' . $aCheck["result"]) . '</td>';
+                    }
+                    $sReturn .= '' // . '<td>' . date("H:i:s", $aEntries["meta"]["ts"]) . ' ' . $this->_hrTime(date("U") - $aEntries["meta"]["ts"]) . '</td>'
+                        . '<td>'
+                        . (isset($aCheck["group"]) && $aCheck["group"] && isset($aCheckGroups[$aCheck["group"]])
+                            ? '<nobr><img src="' . $aCheckGroups[$aCheck["group"]]['image'] . '" width="16"> ' . $aCheckGroups[$aCheck["group"]]['label'] . '</nobr>'
+                            : '-'
+                        )
+                        . '<td>' . $aCheck["name"] . '</td>'
+
+                        . '<td>' . $aCheck["description"] . '</td>'
+                        . '<td>' . $aCheck["value"] . '</td>'
+                        . '<td>' . ($aCheck["count"] ?? '-') . '</td>'
+                        . '<td>' . ($aCheck["time"] ?? '-') . '</td>'
+                        . '</tr>';
                 }
+
             }
         }
         return $sReturn
@@ -1574,36 +1569,6 @@ class appmonitorserver_gui extends appmonitorserver
                     }
                 }
 
-                // --- http status code
-                /*
-                $sStatusIcon = ($aEntries['result']['httpstatus']
-                    ? ($aEntries['result']['httpstatus'] >= 400
-                        ? $this->_aIco['error']
-                        : ($aEntries['result']['httpstatus'] >= 300
-                            ? $this->_aIco['warning']
-                            : $this->_aIco['ok']
-                        )
-                    )
-                    : $this->_aIco['error']
-                );
-                $sBoxHttpResponse=$oA->getSectionColumn(
-                    $oA->getBox([
-                        'title' => $this->_tr('Http-details'),
-                        'text' => ($aEntries['result']['error']
-                            ? $oA->getAlert([
-                                'type' => 'danger',
-                                'dismissible' => false,
-                                'text' => $aEntries['result']['error']
-                            ])
-                            : ''
-                        )
-                            . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
-                            . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $sStatusIcon . ' ' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
-                            . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
-                        ]),
-                    2
-                );
-                */
 
                 $sHtml .= $oA->getSectionRow($sCounters, $this->_tr('row-appcounters'));
 
@@ -1638,6 +1603,39 @@ class appmonitorserver_gui extends appmonitorserver
                         $this->_tr('row-checks')
                     );
             }
+
+            // --- http status code
+            $sStatusIcon = ($aEntries['result']['httpstatus']
+                ? ($aEntries['result']['httpstatus'] >= 400
+                    ? $this->_aIco['error']
+                    : ($aEntries['result']['httpstatus'] >= 300
+                        ? $this->_aIco['warning']
+                        : $this->_aIco['ok']
+                    )
+                )
+                : $this->_aIco['error']
+            );
+            $sHtml .=
+                $oA->getSectionRow(
+                    $oA->getSectionColumn(
+                        $oA->getBox([
+                            'title' => $this->_tr('Http-details'),
+                            'text' => ($aEntries['result']['error']
+                                ? $oA->getAlert([
+                                    'type' => 'danger',
+                                    'dismissible' => false,
+                                    'text' => $aEntries['result']['error']
+                                ])
+                                : ''
+                            )
+                                . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
+                                . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $sStatusIcon . ' ' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
+                                . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
+                        ]),
+                        12
+                    ),
+                    $this->_tr('row-httpresponse')
+                );
 
 
             // --- notifications & uptime for this webapp
@@ -2742,8 +2740,7 @@ class appmonitorserver_gui extends appmonitorserver
             . $oA->getSectionRow(
                 $oA->getSectionColumn(
                     $sQerytable . $sLogtable
-                ),
-                12
+                )
             )
             . '</section>'
             : ''
