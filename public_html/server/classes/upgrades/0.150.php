@@ -38,7 +38,7 @@ if($this->oNotification->countLogitems() > 0){
                 'changetype'  => $aLogitem['changetype'],
                 'status'      => 0,
                 'message'     => $aLogitem['message'],
-                'result'      => json_encode($aLogitem['result'], 1),
+                // 'result'      => json_encode($aLogitem['result'], 1),
             ]);
     
             if(!$_oNotifications->create()) {
