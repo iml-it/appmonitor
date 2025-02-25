@@ -68,6 +68,7 @@
         "row-appcounters": "Counter",
         "row-visual": "Graph",
         "row-checks": "Checks",
+        "row-httpresponse": "Http-Antwort",
         "row-history": "Meldungen",
 
         "Appstatus": "Status der Webapplikation",
@@ -231,6 +232,12 @@
         
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },
+
+    "filter-count": "Anzahl",
+    "filter-view": "Aussehen",
+    "filter-pagenumber": "Seite",
+    "filter-view-table": "Tabelle",
+    "filter-view-timeline": "Timeline",
 
     "changetype-0": "Keine Änderung",
     "changetype-1": "Neu",

@@ -1,10 +1,14 @@
 {
+    "version": "0.150",
     "theme": "default",
     "lang": "en-en",
     "debug": false,
     "serverurl": "https:\/\/monitorserver\/appmonitor\/server\/",
     "pagereload": 60,
     "servicecache": false,
+    "db": {
+        "dsn": "sqlite:{{APPDIR}}/data/appmonitor.sqlite3"
+    },
     "curl":{
         "timeout": 15
     },

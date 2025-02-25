@@ -208,7 +208,7 @@ class tinyrouter
      */
     public function getCallback(): array|string|bool
     {
-        return $this->aMatch['callback'] ?? false; 
+        return $this->aMatch['callback'] ?? false;
     }
 
     /**

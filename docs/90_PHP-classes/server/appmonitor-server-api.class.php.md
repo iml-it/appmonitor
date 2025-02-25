@@ -57,12 +57,16 @@ default value:
 
 ### 🔹 public __construct()
 
-constructor
+constructor@global object $oDB      database connection
 
 
 **Return**: ``
 
-**Parameters**: **0**
+**Parameters**: **1**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> bool $bReadonly = false | `bool` | 
 
 
 ### 🔹 public actionAddUrl()
@@ -184,7 +188,7 @@ default value:
 
 ### 🔹 public getMonitoringData()
 
-Get all client data and final result as array
+Get all client data and final result as arrayIt returns the keys- return {integer}  total status of all apps; 0 = ok ... 3 = error- messages {array}  array of messages- results  {array}  array of status code as key and occurcances as value
 
 **Return**: `array`
 
@@ -248,6 +252,15 @@ default value:
 **Parameters**: **0**
 
 
+### 🔹 public getWebappLabel()
+
+
+
+**Return**: `string`
+
+**Parameters**: **0**
+
+
 ### 🔹 public hasRole()
 
 Return if a user has a given role
@@ -272,24 +285,15 @@ default value:
 
 ### 🔹 public loadConfig()
 
-(re) load config and get all urls to fetch (and all other config items)This method - fills $this->_aCfg- newly initializes $this->oNotification
+(re) load config and get all urls to fetch (and all other config items)This method - fills $this->_aCfg- newly initializes $this->oNotification@global object $oDB      database connection
 
 **Return**: `void`
-
-**Parameters**: **0**
-
-
-### 🔹 public removeUrl()
-
-remove appmonitor url from current object
-
-**Return**: `bool`
 
 **Parameters**: **1**
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sUrl | `string` | url to remove
+| \<optional\> bool $bReadonly = false | `bool` | 
 
 
 ### 🔹 public saveConfig()

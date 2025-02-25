@@ -12,10 +12,6 @@ require_once('classes/appmonitor-server-gui.class.php');
 
 $sItem = isset($_GET['item']) && $_GET['item'] ? $_GET['item'] : false;
 $sAppId = isset($_GET['appid']) && $_GET['appid'] ? $_GET['appid'] : false;
-$iCount = isset($_GET['count']) ? $_GET['count'] : false;
-if($iCount=='all'){
-    $iCount=false;
-}
 
 $sHtml = '';
 
@@ -32,7 +28,7 @@ switch ($sItem) {
         $sHtml .= $oMonitor->generateViewDebug();
         break;
     case 'viewnotifications':
-        $sHtml .= $oMonitor->generateViewNotifications($iCount);
+        $sHtml .= $oMonitor->generateViewNotifications($_POST ?? []);
         break;
     case 'viewproblems':
         $sHtml .= $oMonitor->generateViewProblems();
@@ -51,4 +47,5 @@ switch ($sItem) {
         header('HTTP/1.0 400 Bad request');
         die('<h1>400 Bad request</h1>unknown item [' . $sItem . '] ... or it is not implemented yet.');
 }
-echo $sHtml;
+
+echo $sHtml . $oMonitor->renderDbDebug();

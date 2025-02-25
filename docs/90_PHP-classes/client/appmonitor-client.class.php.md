@@ -41,8 +41,9 @@
  * 2023-07-06  0.128  axel.hahn@unibe.ch      update httpcontent check<br>
  * 2024-07-19  0.137  axel.hahn@unibe.ch      php 8 only: use typed variables
  * 2024-11-22  0.141  axel.hahn@unibe.ch      Set client version to server version after updating http, mysqli and app checks
+ * 2025-01-02  0.149  axel.hahn@unibe.ch      add getChecks method
  * --------------------------------------------------------------------------------<br>
- * @version 0.141
+ * @version 0.149
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -158,6 +159,15 @@
 |--         |--    |--
 | \<required\> string $sVarname | `string` | name of GET variable
 | \<required\> string $sToken | `string` | value
+
+
+### 🔹 public getChecks()
+
+Get array with executed checks
+
+**Return**: `array`
+
+**Parameters**: **0**
 
 
 ### 🔹 public getResults()

@@ -121,6 +121,6 @@ class lang
         }
         return $aLangBase[$sWord]
             ?? ($this->_aLang[$sWord] ?? "$sWord (undefined in $sTmpPath $this->_sLang)")
-            ;
+        ;
     }
 }

@@ -112,7 +112,8 @@ class tinyapi
     }
 
 
-    protected function _addDebug($sMessage){
+    protected function _addDebug($sMessage)
+    {
         static $i = 0;
         $i++;
         // header("DEBUG-".str_pad($i, 2, '0', STR_PAD_LEFT).": $s");
@@ -133,7 +134,7 @@ class tinyapi
     public function allowMethods(array $aMethods): bool
     {
         $this->_aAllowedMethods = $aMethods;
-        if (count($aMethods)){
+        if (count($aMethods)) {
             header("Access-Control-Allow-Methods: " . implode(", ", $this->_aAllowedMethods));
         }
         return true;
@@ -240,9 +241,9 @@ class tinyapi
     public function checkUser(): string
     {
         if (
-            isset($this->_aAllowedUsers['*']) 
+            isset($this->_aAllowedUsers['*'])
             && isset($this->_aAllowedUsers['*']['password'])
-            && $this->_aAllowedUsers['*']['password']==false
+            && $this->_aAllowedUsers['*']['password'] == false
         ) {
             return '*';
         }
@@ -255,9 +256,9 @@ class tinyapi
             $sAuthline = $aHeaders['Authorization'];
             $sAuthtype = false;
 
-            if(strstr($sAuthline, ' ')){
+            if (strstr($sAuthline, ' ')) {
                 list($sAuthtype, $sAuthline) = explode(' ', $sAuthline);
-                if($sAuthtype=="Basic"){
+                if ($sAuthtype == "Basic") {
                     $sAuthline = base64_decode($sAuthline);
                 }
             }
@@ -268,42 +269,42 @@ class tinyapi
             if (is_array($aAuth) && count($aAuth) == 2) {
                 list($sGivenUser, $sGivenKey) = $aAuth;
                 // $this->_addDebug("auth type -> '$sAuthtype' .. $sGivenUser : $sGivenKey");
-                $sSelUser=isset($this->_aAllowedUsers[$sGivenUser]) ? $sGivenUser : (isset($this->_aAllowedUsers['*']) ? '*' : false);
-                if ($sSelUser){
-                    $aSelUserdata=$this->_aAllowedUsers[$sSelUser];
+                $sSelUser = isset($this->_aAllowedUsers[$sGivenUser]) ? $sGivenUser : (isset($this->_aAllowedUsers['*']) ? '*' : false);
+                if ($sSelUser) {
+                    $aSelUserdata = $this->_aAllowedUsers[$sSelUser];
 
-                    
+
                     switch ($sAuthtype) {
                         case 'Basic':
                             if (
-                                isset($aSelUserdata['passwordhash']) 
+                                isset($aSelUserdata['passwordhash'])
                                 // php -r "echo password_hash('<password>', PASSWORD_DEFAULT);"
                                 && password_verify($sGivenKey, $aSelUserdata['passwordhash'])
-                            ){
+                            ) {
                                 // $this->_addDebug("auth type -> '$sAuthtype' .. $sGivenUser : found password hash");
                                 return $sSelUser;
-                            } else if ( isset($aSelUserdata['password'])  && $aSelUserdata['password']==$sGivenKey)                                
-                            {
+                            } else if (isset($aSelUserdata['password']) && $aSelUserdata['password'] == $sGivenKey) {
                                 // $this->_addDebug("auth type -> '$sAuthtype' .. $sGivenUser : found password");
                                 return $sSelUser;
                             } else {
                                 $this->sendError(401, 'ERROR: Basic authentication failed. Wrong password.');
                             }
-                            ;;
+                            ;
+                            ;
                         case 'HMAC-SHA1':
                         default:
                             // check hmac hash ... rebuild it with key of found user
-                            if (isset($aSelUserdata['secret'])){
+                            if (isset($aSelUserdata['secret'])) {
 
-                                $sGotDate= $aHeaders['Date'] ?? '<missing Date>';
-                                $sGotMethod=$_SERVER['REQUEST_METHOD'];
-                                $sGotReq=$_SERVER['REQUEST_URI'];
+                                $sGotDate = $aHeaders['Date'] ?? '<missing Date>';
+                                $sGotMethod = $_SERVER['REQUEST_METHOD'];
+                                $sGotReq = $_SERVER['REQUEST_URI'];
 
-                                $sMyData="{$sGotMethod}\n{$sGotReq}\n{$sGotDate}";
-                                $sMyHash=base64_encode(hash_hmac("sha1", $sMyData, $aSelUserdata['secret']));
+                                $sMyData = "{$sGotMethod}\n{$sGotReq}\n{$sGotDate}";
+                                $sMyHash = base64_encode(hash_hmac("sha1", $sMyData, $aSelUserdata['secret']));
                                 // $this->_addDebug("hash source: {$sGotDate}");
 
-                                if($sMyHash!==$sGivenKey){
+                                if ($sMyHash !== $sGivenKey) {
                                     // $this->_addDebug("hash is not $sMyHash");
                                     $this->sendError(401, 'ERROR: Authorization failed. Wrong hmac key.');
                                 } else {
@@ -360,7 +361,7 @@ class tinyapi
      */
     public function appendData(mixed $aData, string $sKey = ''): bool
     {
-        if ($sKey){
+        if ($sKey) {
             $this->_aData[$sKey] = $aData;
         } else {
             $this->_aData[] = $aData;

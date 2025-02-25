@@ -141,7 +141,7 @@ class renderadminlte
      */
     public function getAlert($aOptions)
     {
-        foreach ([ 'type', 'dismissible', 'title', 'text' ] as $sKey) {
+        foreach (['type', 'dismissible', 'title', 'text'] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -180,18 +180,18 @@ class renderadminlte
      */
     public function getBadge($aOptions)
     {
-        foreach ([ 'bgcolor', 'title', 'text', 'type', 'id' ] as $sKey) {
+        foreach (['bgcolor', 'title', 'text', 'type', 'id'] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
             $this->_checkValue($sKey, $aOptions[$sKey]);
         }
         return '<small class="label'
-            . ($aOptions['type']  ? ' label-' . $aOptions['type'] : '')
-            . ($aOptions['bgcolor'] ? ' bg-' . $aOptions['bgcolor']   : '')
+            . ($aOptions['type'] ? ' label-' . $aOptions['type'] : '')
+            . ($aOptions['bgcolor'] ? ' bg-' . $aOptions['bgcolor'] : '')
             . '"'
-            . ($aOptions['id']  ? ' id="' . $aOptions['id'] . '"' : '')
-            . (isset($aOptions['title'])  ? ' title="' . $aOptions['title'] . '"' : '')
+            . ($aOptions['id'] ? ' id="' . $aOptions['id'] . '"' : '')
+            . (isset($aOptions['title']) ? ' title="' . $aOptions['title'] . '"' : '')
             . '>'
             . $aOptions['text']
             . '</small>';
@@ -211,7 +211,7 @@ class renderadminlte
      */
     public function getCallout($aOptions)
     {
-        foreach ([ 'type', 'title', 'text' ] as $sKey) {
+        foreach (['type', 'title', 'text'] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -250,7 +250,7 @@ class renderadminlte
      */
     public function getBox($aOptions)
     {
-        foreach ([ 'type', 'solid', 'collapsable', 'collapsed', 'removable', 'title', 'label', 'text', 'footer' ] as $sKey) {
+        foreach (['type', 'solid', 'collapsable', 'collapsed', 'removable', 'title', 'label', 'text', 'footer'] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -296,7 +296,7 @@ class renderadminlte
     }
 
 
-    
+
     /**
      * Generates a menu item with a label and link options.
      *
@@ -360,15 +360,13 @@ class renderadminlte
      */
     public function getSmallBox($aOptions)
     {
-        foreach ([ 'bgcolor', 'color', 'title', 'text', 'icon', 'footer' ] as $sKey) {
+        foreach (['bgcolor', 'color', 'title', 'text', 'icon', 'footer'] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
             $this->_checkValue($sKey, $aOptions[$sKey]);
         }
-        if (!$aOptions['url']) {
-            $aOptions['url'] = '#';
-        }
+        $aOptions['url'] ??= '#';
         return '<div class="small-box' . ($aOptions['bgcolor'] ? ' bg-' . $aOptions['bgcolor'] : '') . '">
             <div class="inner">
                 ' . ($aOptions['title'] ? '<h3>' . $aOptions['title'] . '</h3>' : '') . '
@@ -396,7 +394,7 @@ class renderadminlte
      */
     public function getWidget($aOptions = [])
     {
-        foreach ([ 'bgcolor', 'color', 'text', 'number', 'icon' ] as $sKey) {
+        foreach (['bgcolor', 'color', 'text', 'number', 'icon'] as $sKey) {
             if (!isset($aOptions[$sKey])) {
                 $aOptions[$sKey] = false;
             }
@@ -409,7 +407,7 @@ class renderadminlte
 
         $aOptions['icon'] = $this->_oHtml->getIcon($aOptions['icon']);
         // foreach(['icon', 'text', 'number', 'progresstext'] as $sKey){
-        foreach ([ 'icon' ] as $sKey) {
+        foreach (['icon'] as $sKey) {
             $aOptions[$sKey] = strstr($aOptions[$sKey], '<a') === false ? $sApre . $aOptions[$sKey] . $sAsuf : $aOptions[$sKey];
         }
 
@@ -456,11 +454,11 @@ class renderadminlte
      * @param string   $sContent  html content to show
      * @return string
      */
-    public function getSectionRow($sContent = false, $sId=false)
+    public function getSectionRow($sContent = false, $sId = false)
     {
         return '<div class="row"'
-            .($sId ? ' id="'.md5($sId).'" data-title="'.$sId.'"' : '')
-            .'>' . $sContent . '</div>';
+            . ($sId ? ' id="' . md5($sId) . '" data-title="' . $sId . '"' : '')
+            . '>' . $sContent . '</div>';
     }
 
     /**

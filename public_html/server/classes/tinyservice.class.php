@@ -222,12 +222,12 @@ class tinyservice
     public function send(string $sMessage, bool $bShow = false): bool
     {
         $this->_checkTouchfile();
-        $sLine = date("Y-m-d H:i:s") 
+        $sLine = date("Y-m-d H:i:s")
             . " [ " . number_format(microtime(true) - $this->iStart, 4) . "s | "
-            . sprintf("%01.3f", memory_get_usage() / 1024 / 1024). ' MB ] '
-            . $sMessage 
+            . sprintf("%01.3f", memory_get_usage() / 1024 / 1024) . ' MB ] '
+            . $sMessage
             . "\n"
-            ;
+        ;
         echo ($bShow || $this->bDebug) ? $sLine : '';
         return $this->touch($sLine);
     }

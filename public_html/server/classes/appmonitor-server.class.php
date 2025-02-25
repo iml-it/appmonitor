@@ -2,8 +2,10 @@
 
 require_once 'cache.class.php';
 require_once 'lang.class.php';
-require_once 'counteritems.class.php';
+require_once 'simplerrd.class.php';
 require_once 'notificationhandler.class.php';
+require __DIR__ . '/../vendor/php-abstract-dbo/src/pdo-db.class.php';
+require_once 'dbobjects/webapps.php';
 
 /**
  * ____________________________________________________________________________
@@ -32,7 +34,7 @@ require_once 'notificationhandler.class.php';
  * SERVICING, REPAIR OR CORRECTION.<br>
  * <br>
  * --------------------------------------------------------------------------------<br>
- * @version 0.142
+ * @version 0.150
  * @author Axel Hahn
  * @link https://github.com/iml-it/appmonitor
  * @license GPL
@@ -41,9 +43,15 @@ require_once 'notificationhandler.class.php';
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
+ * 2025-02-21  0.150  axel.hahn@unibe.ch  use sqlite as storage
  */
 class appmonitorserver
 {
+    /**
+     * Version (will be read from defaults file)
+     * @var string
+     */
+    protected string $_sVersion = "";
 
     /**
      * Key value hash with all clients to fetch appmon client status from
@@ -151,21 +159,38 @@ class appmonitorserver
      */
     protected string $_user = '*';
 
+    /**
+     * database object for web application response data
+     * @var objwebapps
+     */
+    protected object $_oWebapps;
+
     // ----------------------------------------------------------------------
     // Constructor
     // ----------------------------------------------------------------------
 
     /**
      * constructor
+     * @global object $oDB      database connection
      */
-    public function __construct()
+    public function __construct(bool $bReadonly = false)
     {
-        $this->loadConfig();
-        $this->_loadLangTexts();
-        $this->_handleParams();
+        global $oDB;
 
-        $_sUser = $this->getAlreadyAuthenticatedUser();
-        $this->setUser($_sUser ? $_sUser : '*');
+        $this->loadConfig($bReadonly);
+
+        if (!$bReadonly) {
+            // remark: $oDB is initialized in loadConfig()
+            $this->_oWebapps = new objwebapps($oDB);
+
+            $this->_loadLangTexts();
+            $this->_handleParams();
+
+            $_sUser = $this->getAlreadyAuthenticatedUser();
+            $this->setUser($_sUser ? $_sUser : '*');
+
+        }
+
     }
 
     // ----------------------------------------------------------------------
@@ -218,10 +243,12 @@ class appmonitorserver
      * - fills $this->_aCfg
      * - newly initializes $this->oNotification
      * 
+     * @global object $oDB      database connection
      * @return void
      */
-    public function loadConfig(): void
+    public function loadConfig(bool $bReadonly = false): void
     {
+        global $oDB;
         $aUserdata = [];
         $aDefaults = [];
         $this->_urls = [];
@@ -244,30 +271,57 @@ class appmonitorserver
         $this->_aCfg['users'] = $aUserdata['users'] ?? $aDefaults['users'];
 
         // load urls from a separate file
-        $sUrlFile=$this->_getConfigDir() . '/' . $this->_sUrlfile;
-        if(file_exists($sUrlFile)){
-            $this->_urls=json_decode(file_get_contents($this->_getConfigDir() . '/' . $this->_sUrlfile), true);
+        $sUrlFile = $this->_getConfigDir() . '/' . $this->_sUrlfile;
+        if (file_exists($sUrlFile)) {
+            $this->_urls = json_decode(file_get_contents($this->_getConfigDir() . '/' . $this->_sUrlfile), true);
         }
 
-        // migration for old way to load urls
-        if (isset($this->_aCfg['urls']) && is_array($this->_aCfg['urls'])) {
-            foreach ($this->_aCfg["urls"] as $sUrl) {
-                $this->addUrl($sUrl);
+
+        if (!$bReadonly) {
+
+            if (isset($this->_aCfg['curl']['timeout'])) {
+                $this->curl_opts[CURLOPT_TIMEOUT] = (int) $this->_aCfg['curl']['timeout'];
             }
-            $this->saveUrls();
-            unset($this->_aCfg['urls']);
-            $this->saveConfig();
+
+            // initialize database
+            // echo $this->_aCfg['dsn'];
+            if ($this->_aCfg['db']['dsn'] ?? false) {
+                $this->_aCfg['db']['dsn'] = str_replace('{{APPDIR}}', dirname(__DIR__), $this->_aCfg['db']['dsn']);
+            }
+
+            $oDB = new axelhahn\pdo_db([
+                'db' => $this->_aCfg['db'],
+                // 'showdebug'=>true,
+                // 'showerrors'=>true,
+            ]);
+            if (!$oDB->db) {
+                // echo $oDB->error().'<br>';
+                die("SORRY, unable to connect the database.");
+            }
+            /*
+            if($this->hasRole('ui-debug')){
+                $oDB->showErrors(true);
+            }
+            */
+
+            $this->oNotification = new notificationhandler([
+                'lang' => $this->_aCfg['lang'],
+                'serverurl' => $this->_aCfg['serverurl'],
+                'notifications' => $this->_aCfg['notifications']
+            ]);
+
+            // Upgrade if needed
+            $this->_sVersion = $aDefaults['version'];
+            $sLastVersion = $aUserdata['version'] ?? false;
+            if (
+                $sLastVersion !== $this->_sVersion
+            ) {
+                require "appmonitor-server-upgrade.php";
+                $aUserdata['version'] = $this->_sVersion;
+                $this->saveConfig($aUserdata);
+            }
         }
 
-        if (isset($this->_aCfg['curl']['timeout'])) {
-            $this->curl_opts[CURLOPT_TIMEOUT] = (int) $this->_aCfg['curl']['timeout'];
-        }
-
-        $this->oNotification = new notificationhandler([
-            'lang' => $this->_aCfg['lang'],
-            'serverurl' => $this->_aCfg['serverurl'],
-            'notifications' => $this->_aCfg['notifications']
-        ]);
     }
     /**
      * load monitoring data ... if not done yet; used in gui and api
@@ -347,8 +401,8 @@ class appmonitorserver
      */
     protected function _checkResponse(string $sBody): array
     {
-        $aErrors=[];
-        $_iNumber=0;
+        $aErrors = [];
+        $_iNumber = 0;
         if (!is_array(json_decode($sBody, 1))) {
             $aErrors[] = 'Response is not a valid JSON.';
         } else {
@@ -356,15 +410,15 @@ class appmonitorserver
             if (!isset($aResponse['meta'])) {
                 $aErrors[] = 'Section "meta" was not found';
             } else {
-                foreach(['host', 'website', 'result'] as $sField){
+                foreach (['host', 'website', 'result'] as $sField) {
                     if (!isset($aResponse['meta'][$sField])) {
                         $aErrors[] = "Section 'meta > $sField' was not found";
                     }
                 }
-                if(isset($aResponse['meta']['result'])){
-                    if(!is_numeric($aResponse['meta']['result'])){
+                if (isset($aResponse['meta']['result'])) {
+                    if (!is_numeric($aResponse['meta']['result'])) {
                         $aErrors[] = "Section 'meta > result' is not a number - $aResponse[meta][result]";
-                    } else if($aResponse['meta']['result']<RESULT_OK || $aResponse['meta']['result']>RESULT_ERROR) {
+                    } else if ($aResponse['meta']['result'] < RESULT_OK || $aResponse['meta']['result'] > RESULT_ERROR) {
                         $aErrors[] = "Section 'meta > result' is not a valid number - $aResponse[meta][result]";
                     }
                 }
@@ -372,20 +426,20 @@ class appmonitorserver
             if (!isset($aResponse['checks'])) {
                 $aErrors[] = 'Section "checks" was not found';
             } else {
-                foreach($aResponse['checks'] as $aCheck){
+                foreach ($aResponse['checks'] as $aCheck) {
                     $_iNumber++;
-                    if(!is_array($aCheck)){
+                    if (!is_array($aCheck)) {
                         $aErrors[] = "Section 'check #$_iNumber' is not an array - $aCheck";
                     } else {
-                        foreach(['name', 'description', 'result', 'value'] as $sField){
+                        foreach (['name', 'description', 'result', 'value'] as $sField) {
                             if (!isset($aCheck[$sField])) {
                                 $aErrors[] = "Section 'check #$_iNumber > $sField' was not found";
                             }
                         }
-                        if(isset($aCheck['result'])){
-                            if(!is_numeric($aCheck['result'])){
+                        if (isset($aCheck['result'])) {
+                            if (!is_numeric($aCheck['result'])) {
                                 $aErrors[] = "Section 'check #$_iNumber > result' is not a number - $aCheck[result]";
-                            } else if($aCheck['result']<RESULT_OK || $aCheck['result']>RESULT_ERROR) {
+                            } else if ($aCheck['result'] < RESULT_OK || $aCheck['result'] > RESULT_ERROR) {
                                 $aErrors[] = "Section 'check #$_iNumber > result' is not a valid number - $aCheck[result]";
                             }
                         }
@@ -411,16 +465,16 @@ class appmonitorserver
                 $bAdd = true;
                 if ($bMakeCheck) {
                     $aHttpData = $this->_multipleHttpGet([$sUrl]);
-                    
-                    $aErrors=$this->_checkResponse($aHttpData[0]['response_body'] ?? false);
-                    if(count($aErrors)){
+
+                    $aErrors = $this->_checkResponse($aHttpData[0]['response_body'] ?? false);
+                    if (count($aErrors)) {
                         $bAdd = false;
                         $this->_addLog(
                             sprintf(
                                 $this->_tr('msgErr-Url-not-added-no-appmonitor'),
                                 $sUrl,
                                 (isset($aHttpData[0]['response_header']) ? '<pre>' . $aHttpData[0]['response_header'] . '</pre>' : '-')
-                                ."- ".implode('<br>- ', $aErrors)."<br>"
+                                . "- " . implode('<br>- ', $aErrors) . "<br>"
                             ),
                             'error'
                         );
@@ -451,18 +505,19 @@ class appmonitorserver
             if (($key = array_search($sUrl, $this->_urls)) !== false) {
                 $sAppId = $this->_generateUrlKey($sUrl);
 
-                // $this->oNotification->deleteApp($sAppId);
-                // $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
-                // $oCache->delete();
                 unset($this->_urls[$key]);
                 $this->saveUrls();
                 $this->loadConfig();
 
+
                 // delete notification after config was saved
                 if (!isset($this->_urls[$key])) {
                     $this->oNotification->deleteApp($sAppId);
+                    $rrd = new simpleRrd($key);
+                    $rrd->deleteApp();
                     $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
                     $oCache->delete();
+
                     $this->_addLog(sprintf($this->_tr('msgOK-Url-was-removed'), $sUrl), "ok");
                 } else {
                     $this->_addLog(sprintf($this->_tr('msgErr-Url-not-removed-save-config-failed'), $sUrl), "ok");
@@ -474,34 +529,6 @@ class appmonitorserver
         }
         return false;
     }
-
-    /**
-     * check a user in local config
-     * It can skip password check to authenticate anywhere
-    public function checkUser($sUser, $sPassword=false){
-        $this->_user=false;
-        if(!isset($this->_aCfg["users"][$sUser])){
-            return [ 'error' => 'User does not exist.' ];
-        }
-        $aUser=$this->_aCfg["users"][$sUser];
-
-        if ($sPassword){
-            if (isset($aUser['password'])){
-
-                // TODO: this is clear text 
-                // --> implement https://www.php.net/manual/en/function.password-verify.php
-                // 
-                // JS:
-                // headers.set('Authorization', 'Basic ' + btoa(username + ":" + password));
-                if ($aUser['password'] !== $sPassword){
-                    return [ 'error' => 'authentication failed' ];
-                }
-            }
-        }
-        $this->_user=$sUser;
-        return true;
-    }
-     */
 
     // ----------------------------------------------------------------------
     // USER FUNCTIONS
@@ -571,7 +598,7 @@ class appmonitorserver
      * default roles from user "__default_authenticated_user__"
      * @return bool|array
      */
-    public function getRoles():bool|array
+    public function getRoles(): bool|array
     {
         $aUser = $this->getUser();
         if (is_array($aUser)) {
@@ -634,7 +661,7 @@ class appmonitorserver
      * Get a flat array of tags sent from all clients
      * @return array
      */
-    protected function _getClientTags(): array
+    protected function _getAllClientTags(): array
     {
         $aTags = [];
         foreach ($this->_data as $aEntries) {
@@ -854,12 +881,13 @@ class appmonitorserver
             $ForceCache = isset($_SERVER['REQUEST_METHOD']) && isset($this->_aCfg['servicecache']) && $this->_aCfg['servicecache'];
         }
         $this->_data = [];
-        $aUrls = [];
+        $aUrls2Refresh = [];
+
         foreach ($this->_urls as $sKey => $sUrl) {
             $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
             if ($oCache->isExpired() && !$ForceCache) {
                 // Cache does not exist or is expired
-                $aUrls[$sKey] = $sUrl;
+                $aUrls2Refresh[$sKey] = $sUrl;
             } else {
                 // age is bel['result']['error']ow ttl ... read from Cache 
                 $aCached = $oCache->read();
@@ -869,8 +897,8 @@ class appmonitorserver
             }
         }
         // fetch all non cached items
-        if (count($aUrls)) {
-            $aAllHttpdata = $this->_multipleHttpGet($aUrls);
+        if (count($aUrls2Refresh)) {
+            $aAllHttpdata = $this->_multipleHttpGet($aUrls2Refresh);
             foreach ($aAllHttpdata as $sKey => $aResult) {
 
                 // detect http error
@@ -887,26 +915,62 @@ class appmonitorserver
                         # : (!count($aClientData) ? $this->_tr('msgErr-Http-no-jsondata') : false)
                         : false
                     );
-            
+
                 // check syntax of response
-                $aJsonErrors=$this->_checkResponse($aResult['response_body']);
-                if(count($aJsonErrors)){
-                    $aClientData=[];
+                $aJsonErrors = $this->_checkResponse($aResult['response_body']);
+
+                $aClientData = [];
+                if (count($aJsonErrors)) {
+
                     // $aClientData["result"]=RESULT_ERROR;
-                    $sError.="- ".implode('<br>- ', $aJsonErrors)."<br>";
+                    $sError .= "- " . implode('<br>- ', $aJsonErrors) . "<br>";
+
+                    // read last ok data
+                    // $this->_oWebapps->readByFields(['appid'=>$this->_generateUrlKey($sUrl)]);
+                    $this->_oWebapps->readByFields(['appid' => $sKey]);
+                    if ($sLastOK = $this->_oWebapps->get("lastok")) {
+                        $aLastOK = json_decode($sLastOK, true);
+
+                        unset($aLastOK["result"]);
+                        foreach (['ttl', 'result', 'time'] as $delkey) {
+                            if (isset($aLastOK['meta'][$delkey])) {
+                                unset($aLastOK['meta'][$delkey]);
+                            }
+                        }
+                        $aLastOK['meta']['result'] = RESULT_UNKNOWN;
+                        $aLastChecks = [];
+                        foreach ($aLastOK['checks'] as $aCheck) {
+                            foreach (['value', 'result', 'time', 'count'] as $delkey) {
+                                if (isset($aCheck[$delkey])) {
+                                    unset($aCheck[$delkey]);
+                                }
+                            }
+                            $aCheck['result'] = RESULT_UNKNOWN;
+                            $aCheck['value'] = '?';
+                            $aLastChecks[] = $aCheck;
+                        }
+                        // unset($aLastOK['checks']);
+                        $aLastOK['checks'] = $aLastChecks;
+                        // print_r($aLastOK);
+                        $aClientData = $aLastOK;
+                    }
+
+
                 } else {
 
                     $aClientData = json_decode($aResult['response_body'], true);
 
                     // add more metadata
-                    $aClientData["result"] = $this->_generateResultArray($aClientData);
+                    // $aClientData["result"] = $this->_generateResultArray($aClientData);
                 }
-                $aClientData["result"]["ts"]=date('U');
+                $aClientData["result"] = $this->_generateResultArray($aClientData);
+                $aClientData["result"]["ts"] = date('U');
 
-                $iTtl = $sError 
-                    ? $this->_iTtlOnError 
+
+                $iTtl = $sError
+                    ? $this->_iTtlOnError
                     : (int) ($aClientData["meta"]["ttl"] ?? $this->_iTtl);
-                    
+
 
                 // set application status
                 // 2xx -> check json response
@@ -914,7 +978,7 @@ class appmonitorserver
                 // 4xx -> no data -> unknown
                 // 5xx -> application error -> error
                 if (
-                    !$iHttpStatus 
+                    !$iHttpStatus
                     || $iHttpStatus >= 400
                     || count($aJsonErrors)
                 ) {
@@ -938,69 +1002,73 @@ class appmonitorserver
 
                 // $aClientData["result"]["curlinfo"] = $aResult['curlinfo'];
 
-                $oCounters = new counteritems($sKey);
-                $oCounters->setCounter('_responsetime', [
+                $aCounters = [];
+                $aCounters['_responsetime'] = [
                     'title' => $this->_tr('Chart-responsetime'),
                     'visual' => 'bar',
-                ]);
-                $oCounters->add([
                     'status' => $aClientData["result"]["result"],
-                    'value' => floor($aResult['curlinfo']['total_time'] * 1000)
-                ]);
+                    'value' => floor($aResult['curlinfo']['total_time'] * 1000),
+                ];
+
                 // find counters in a check result
                 if (isset($aClientData['checks']) && count($aClientData['checks'])) {
                     // echo '<pre>'.print_r($aClientData['checks'], 1).'</pre>';
                     foreach ($aClientData['checks'] as $aCheck) {
                         $sIdSuffix = preg_replace('/[^a-zA-Z0-9]/', '', $aCheck['name']) . '-' . md5($aCheck['name']);
                         $sTimerId = 'time-' . $sIdSuffix;
-                        $oCounters->setCounter($sTimerId, [
+                        $aCounters[$sTimerId] = [
                             'title' => 'timer for[' . $aCheck['description'] . '] in [ms]',
-                            'visual' => 'bar'
-                        ]);
-                        $oCounters->add([
+                            'visual' => 'bar',
                             'status' => $aCheck['result'],
                             'value' => str_replace('ms', '', isset($aCheck['time']) ? $aCheck['time'] : '')
-                        ]);
+                        ];
                         if (isset($aCheck['count']) || (isset($aCheck['type']) && $aCheck['type'] === 'counter')) {
                             $sCounterId = 'check-' . $sIdSuffix;
-                            // $oCounters->setCounter($sCounterId);
-                            $oCounters->setCounter($sCounterId, [
+                            $aCounters[$sCounterId] = [
                                 'title' => $aCheck['description'],
                                 'visual' => $aCheck['visual'] ?? false,
-                            ]);
-                            $oCounters->add([
                                 'status' => $aCheck['result'],
                                 'value' => $aCheck['count'] ?? $aCheck['value']
-                            ]);
+                            ];
                         }
                     }
                 }
+                $rrd = new simpleRrd($sKey);
+                foreach ($aCounters as $sCounterKey => $aCounter) {
+                    $rrd->setId($sCounterKey);
+                    $rrd->add([
+                        'status' => $aCounter['status'],
+                        'value' => $aCounter['value'],
+                    ]);
+                }
+                $aClientData['counters'] = $aCounters;
                 $this->send(
                     ""
                     . $aResult['url']
-                    . " Httpstatus=" . $iHttpStatus
+                    . " Httpstatus=$iHttpStatus"
                     . " TTL=$iTtl"
                     . " responsetime=" . floor($aResult['curlinfo']['total_time'] * 1000) . "ms"
                     . " appstatus=" . $this->_tr('Resulttype-' . $aClientData["result"]["result"])
-                    . $sError . " " . $aResult['curlerrormsg']
+                    . " $sError $aResult[curlerrormsg]"
                 );
 
                 // write cache
                 $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($aResult['url']));
 
+                // hm, not needed - we run multicurl.
                 // randomize cachetime of appmonitor client response: ttl + 2..30 sec
-                $iTtl = $iTtl + rand(2, min(5 + round($iTtl / 3), 30));
+                // $iTtl = $iTtl + rand(2, min(5 + round($iTtl / 3), 30));
 
                 $oCache->write($aClientData, $iTtl);
 
                 $aClientData["result"]["fromcache"] = false;
                 $this->_data[$sKey] = $aClientData;
 
-
                 $this->oNotification->setApp($sKey);
                 $this->oNotification->notify();
             }
         }
+
         $this->_detect_outdated_appchecks();
         return true;
     }
@@ -1039,21 +1107,6 @@ class appmonitorserver
         $sKey = $this->_generateUrlKey($sUrl);
         $this->_urls[$sKey] = $sUrl;
         return true;
-    }
-
-    /**
-     * remove appmonitor url from current object
-     * @param string $sUrl url to remove
-     * @return boolean
-     */
-    public function removeUrl(string $sUrl): bool
-    {
-        $sKey = $this->_generateUrlKey($sUrl);
-        if (array_key_exists($sKey, $this->_urls)) {
-            unset($this->_urls[$sKey]);
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -1154,8 +1207,20 @@ class appmonitorserver
         return true;
     }
 
+    function getWebappLabel(): string
+    {
+        $sReturn = '';
+
+        return $sReturn;
+    }
+
     /**
      * Get all client data and final result as array
+     * It returns the keys
+     * - return {integer}  total status of all apps; 0 = ok ... 3 = error
+     * - messages {array}  array of messages
+     * - results  {array}  array of status code as key and occurcances as value
+     * 
      * @param   string  $sHost  filter by given hostname
      * @return  array
      */
@@ -1174,10 +1239,12 @@ class appmonitorserver
 
         if (!count($this->_data)) {
             return [
-                'return' => 3,
+                'return' => RESULT_ERROR,
                 'messages' => [$this->_tr('msgErr-nocheck')]
             ];
         }
+
+        // loop over all webapps
         foreach ($this->_data as $sKey => $aEntries) {
 
             // filter if a host was given
@@ -1190,9 +1257,8 @@ class appmonitorserver
                     !isset($aEntries["result"])
                     || !isset($aEntries["checks"]) || !count($aEntries["checks"])
                 ) {
-                    if ($iMaxReturn < 3) {
-                        $iMaxReturn = 3;
-                    }
+                    // no value for app result or no checks = assume no response data
+                    $iMaxReturn = RESULT_ERROR;
                     $aMessages[] = $this->_tr('msgErr-Http-request-failed') . ' (' . $aEntries["result"]["url"] . ')';
                 } else {
                     if ($iMaxReturn < $aEntries["result"]["result"]) {

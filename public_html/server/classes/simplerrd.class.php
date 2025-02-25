@@ -1,4 +1,5 @@
 <?php
+require_once 'dbobjects/simplerrd.php';
 
 /**
  * simple storages to keep last N items of an object
@@ -6,15 +7,10 @@
  * @author hahn
  * 
  * 2024-07-23  axel.hahn@unibe.ch  php 8 only: use typed variables
+ * 2025-02-21  axel.hahn@unibe.ch  use sqlite as storage
  */
 class simpleRrd
 {
-
-    /**
-     * Prefix for cached items of this class
-     * @var string
-     */
-    protected string $_sCacheIdPrefix = "rrd";
 
     /**
      * Maximum number of kept data items
@@ -29,16 +25,23 @@ class simpleRrd
     protected array $_aLog = [];
 
     /**
-     * Id of the cache item
-     * @var string
+     * pdo object for rrd data
+     * @var object
      */
-    protected string $_sCacheId = '';
+    protected objsimplerrd $_oSimplerrd;
 
     /**
-     * Instance of ahcache class
-     * @var AhCache
+     * Row id of a set of rrd data identified by app id and counter name
+     * @var int
      */
-    protected AhCache $_oCache;
+    protected int $_iRowid;
+
+    /**
+     * application id
+     * @var string
+     */
+    protected string $_sAppid = '';
+
 
     // ----------------------------------------------------------------------
     // __construct
@@ -48,10 +51,14 @@ class simpleRrd
      * Constructor
      * @param string $sId  optional id to set
      */
-    public function __construct(string $sId = '')
+    public function __construct(string $sAppId = '', string $sCounterId = '')
     {
-        if ($sId) {
-            $this->setId($sId);
+        global $oDB;
+        $this->_oSimplerrd = new objsimplerrd($oDB);
+        if ($sAppId) {
+            $this->setApp($sAppId);
+            if ($sCounterId)
+                $this->setId($sCounterId);
         }
     }
 
@@ -65,11 +72,11 @@ class simpleRrd
      */
     protected function _cutLogitems(): bool
     {
-        $bHasChange=false;
+        $bHasChange = false;
         if (count($this->_aLog) > $this->_iMaxLogentries) {
             while (count($this->_aLog) > $this->_iMaxLogentries) {
                 array_shift($this->_aLog);
-                $bHasChange=true;
+                $bHasChange = true;
             }
         }
         return $bHasChange;
@@ -83,8 +90,14 @@ class simpleRrd
      */
     protected function _getLogs(): bool
     {
-        $cachedata = $this->_oCache->read();
-        $this->_aLog = (is_array($cachedata)) ? $cachedata : [];
+        if ($this->_iRowid) {
+            $this->_oSimplerrd->read($this->_iRowid);
+            $cachedata = json_decode($this->_oSimplerrd->get('data'), 1);
+            $this->_aLog = (is_array($cachedata)) ? $cachedata : [];
+        } else {
+            $this->_aLog = [];
+        }
+        // echo "RRD id $this->_iRowid - ".count($this->_aLog)."<br>\n";
         return true;
     }
 
@@ -94,7 +107,10 @@ class simpleRrd
      */
     protected function _saveLogs(): bool
     {
-        return $this->_oCache->write($this->_aLog);
+        if ($this->_oSimplerrd->set('data', json_encode($this->_aLog))) {
+            return $this->_oSimplerrd->save();
+        }
+        return false;
     }
 
     // ----------------------------------------------------------------------
@@ -123,10 +139,25 @@ class simpleRrd
      */
     public function delete(): bool
     {
-        if (!$this->_sCacheId) {
+        if (!$this->_iRowid) {
             return false;
         }
-        return $this->_oCache->delete();
+        return $this->_oSimplerrd->delete();
+    }
+    /**
+     * Delete current application
+     * @return boolean
+     */
+    public function deleteApp(string $sAppid = ''): bool
+    {
+        $bReturn = true;
+        foreach ($this->getCountersOfApp() as $sCounterid) {
+            $this->_oSimplerrd->read($sCounterid);
+            if (!$this->_oSimplerrd->delete()) {
+                $bReturn = false;
+            }
+        }
+        return $bReturn;
     }
 
     /**
@@ -147,9 +178,45 @@ class simpleRrd
         $iMax = min($iMax, count($aTmp));
         for ($i = 0; $i < $iMax; $i++) {
             $aReturn[] = array_pop($aTmp);
-            // $aReturn[]=$aTmp;
         }
         return $aReturn;
+    }
+
+    /**
+     * Get array of ids of counters of current application
+     * @return array
+     */
+    public function getCountersOfApp(): array
+    {
+        if (!$this->_sAppid) {
+            echo "WARNING: " . __METHOD__ . " was called without setting an appId first." . PHP_EOL;
+            return [];
+        }
+        $aSearchresult = $this->_oSimplerrd->search(
+            [
+                "columns" => ["id"],
+                "where" => "appid = :appid",
+            ],
+            [
+                "appid" => $this->_sAppid,
+
+            ]
+        );
+        $aReturn = [];
+        foreach ($aSearchresult as $aRow) {
+            $aReturn[] = $aRow['id'];
+        }
+        return $aReturn;
+    }
+
+    /**
+     * Set an application by its id to set counters for
+     * @param string $sAppId
+     * @return string
+     */
+    public function setApp(string $sAppId)
+    {
+        return $this->_sAppid = $sAppId;
     }
 
     /**
@@ -158,10 +225,23 @@ class simpleRrd
      * @param string $sId
      * @return boolean
      */
-    public function setId(string $sId): bool
+    public function setId($sCountername): bool
     {
-        $this->_sCacheId = $sId;
-        $this->_oCache = new AhCache($this->_sCacheIdPrefix, $this->_sCacheId);
+
+        if (
+            $this->_oSimplerrd->readByFields([
+                "appid" => $this->_sAppid,
+                "countername" => $sCountername
+            ])
+        ) {
+            $this->_iRowid = $this->_oSimplerrd->get('id');
+        } else {
+            $this->_iRowid = 0;
+            $this->_oSimplerrd->new();
+            $this->_oSimplerrd->set('appid', $this->_sAppid);
+            $this->_oSimplerrd->set('countername', $sCountername);
+        }
+
         $this->_getLogs();
         return true;
     }
