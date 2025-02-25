@@ -12,6 +12,9 @@ if (!isset($this->_aCfg)) {
     die("ERROR: This file cannot be called directly.");
 }
 
+ignore_user_abort(true);
+set_time_limit(0);
+
 require_once 'dbobjects/simplerrd.php';
 
 // ----------------------------------------------------------------------
