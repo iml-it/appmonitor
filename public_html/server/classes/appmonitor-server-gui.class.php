@@ -1203,38 +1203,30 @@ class appmonitorserver_gui extends appmonitorserver
             return $this->_tr('Notifications-none');
         }
 
-        $aTH = [
-            $this->_tr('Result'),
-            $this->_tr('Timestamp'),
-            $this->_tr('Change'),
-            $this->_tr('Webapp'),
-            $this->_tr('Message')
-        ];
-        $sTable = $this->_generateTableHead($aTH) . "\n";
-        $sTable .= '<tbody>';
-
         $sOut = '';
         $sSplitHeadLast = "";
+
+        // see https://adminlte.io/themes/v3/pages/UI/timeline.html
 
         foreach ($aLogs as $aLogentry) {
             switch ($sSplitBy) {
                 case "hour":
-                    $sSplitHead = date("Y-m-d H:00", $aLogentry['timestamp']);
+                    $sSplitHead = date("Y-m-d .. H:00", $aLogentry['timestamp']);
                     break;
                 default:
                     $sSplitHead = date("Y-m-d", $aLogentry['timestamp']);
                     break;
             }
 
+
             if ($sSplitHead !== $sSplitHeadLast) {
-                $sOut .= ($sOut ? '</ul>' : '')
-                    . "<h3>$sSplitHead</h3>\n<ul>\n";
+                $sOut .= ($sOut ? "<br>" : "") 
+                    ."<div class=\"time-label\"><span>$sSplitHead</span></div>\n";
                 $sSplitHeadLast = $sSplitHead;
             }
 
-            // TODO maybe use $this->_getAdminLteColorByResult()
             $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '-';
-
+            
             $sCheckResults = '';
             if ($aLogentry['status'] > 0) {
                 if (isset($aLogentry['result']['checks'])) {
@@ -1249,22 +1241,54 @@ class appmonitorserver_gui extends appmonitorserver
                 }
             }
 
-            $sOut .= '<li>'
-                . '<label class="result result' . $aLogentry['status'] . '">' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</label> '
-                . date("H:i:s", $aLogentry['timestamp']) . ' - '
-                . $this->_tr('changetype-' . $aLogentry['changetype']) . ' '
-                . ($sAppName
-                    ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
-                    : '-'
-                )
-                . ' '
-                . $aLogentry['message']
-                . ($sCheckResults ? "<ul>$sCheckResults</ul>" : '')
-                . '</li>'
+            switch ($aLogentry['changetype']){
+                case "1": 
+                    $sIconBg='bg-orange';
+                    $sIcon=$this->_aIco["add"];
+                    break;
+                case "2":
+                    $sIconBg='bg-' . $this->_getAdminLteColorByResult($aLogentry['status']);
+                    $sIcon="<i class=\"". $this->_getIconClass("", $aLogentry['status'])."\"></i>";
+                    break;
+                case "3": 
+                    $sIconBg='bg-red';
+                    $sIcon.=$this->_aIco["del"];
+                    break;
+            }
+
+            // icon color in dependency of status
+            $sIcon=str_replace(
+                ' class="', 
+                ' class="'.$sIconBg.' ', 
+                $sIcon
+            );
+            $sOut .= "
+                <div>
+                    $sIcon
+                    <div class=\"timeline-item\">
+                        "
+                        . '<strong>'.date("H:i:s", $aLogentry['timestamp']) . '</strong> '
+                        . '<label class="result result' . $aLogentry['status'] . '">' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</label> '
+                        . $this->_tr('changetype-' . $aLogentry['changetype']) . ' '
+                        . ($sAppName
+                            ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
+                            : '-'
+                        )
+                        . '<br>'
+                        . $aLogentry['message']
+                        . ($sCheckResults ? "<ul>$sCheckResults</ul>" : '')
+        
+                        ."
+                    </div>
+                </div>"
             ;
         }
 
-        $sOut .= $sOut ? '</ul>' : '';
+        // $sOut .= $sOut ? '</ul>' : '';
+        $sOut = $sOut ? "<div class=\"timeline\">
+            $sOut
+            <div>".$this->_aIco["time"]."</div>
+        </div>" : '';
 
         return $sOut;
 
@@ -1424,7 +1448,7 @@ class appmonitorserver_gui extends appmonitorserver
             . sprintf($this->_tr('About-docs'), $this->_sDocUrl) . '<br>'
         ;
         // return $sHtml;
-        return $oA->getSectionHead($this->_aIco["about"] . ' ' . $this->_tr('About'))
+        return $oA->getSectionHead(sHeadline: $this->_aIco["about"] . ' ' . $this->_tr('About'))
             . '<section class="content">'
             . $oA->getSectionRow(
                 $oA->getSectionColumn(
@@ -1850,9 +1874,9 @@ class appmonitorserver_gui extends appmonitorserver
     {
         $oA = new renderadminlte();
         $aPossibleLengths = [25, 50, 100, 500, 1000];
-        $aPossibleViews = ['table', 'timeline'];
+        $aPossibleViews = ['timeline', 'table'];
 
-        $aNotifyOptions['view'] ??= 'table';
+        $aNotifyOptions['view'] ??= 'timeline';
         $aNotifyOptions['page'] = (int) ($aNotifyOptions['page'] ?? 1);
         $aNotifyOptions['count'] = (int) ($aNotifyOptions['count'] ?? $aPossibleLengths[0]);
         $iCurrentPage = $aNotifyOptions['page'];
@@ -1898,8 +1922,9 @@ class appmonitorserver_gui extends appmonitorserver
         $sButtons .= $sBtnSpacer;
 
         // --- pager
+        $sPager='';
         if ($iMaxcount > 1) {
-            $sButtons .= $this->_tr("filter-pagenumber") . ' &nbsp; ';
+            $sPager .= $this->_tr("filter-pagenumber") . ' &nbsp; ';
             $iFrom = max($iCurrentPage - 2, 1);
             $iFrom = min($iCurrentPage, $iFrom);
 
@@ -1914,7 +1939,7 @@ class appmonitorserver_gui extends appmonitorserver
                     || $i >= $iFrom && $i <= $iTo
                     || $iMaxcount == $i
                 ) {
-                    $sButtons .= '<button '
+                    $sPager .= '<button '
                         . 'class="btn' . ($iCurrentPage == $i ? ' btn-primary' : '') . '" '
                         . 'onclick="setTab(\'#divnotifications\', {\'page\': \'' . $i . '\', \'count\': \'' . $aNotifyOptions['count'] . '\', \'view\': \'' . $aNotifyOptions['view'] . '\'})" '
                         . '>' . $i . '</button> '
@@ -1922,10 +1947,11 @@ class appmonitorserver_gui extends appmonitorserver
 
                 }
                 if ($i == 2 && $iFrom > 2 || $i == $iMaxcount - 1 && $iTo < $iMaxcount - 1) {
-                    $sButtons .= ' ... ';
+                    $sPager .= ' ... ';
                 }
             }
         }
+        $sButtons.=$sPager;
 
         // ------------------------------------------------------------------
         // generate content
@@ -1953,7 +1979,7 @@ class appmonitorserver_gui extends appmonitorserver
                 $oA->getSectionColumn(
                     $oA->getBox([
                         'title' => $this->_tr('Notifications-header') . ' (' . $iNotifications . ')',
-                        'text' => "$sButtons<br><br>$sDataview"
+                        'text' => "$sButtons<br><br>$sDataview<br>$sPager"
                     ]),
                     12
                 )

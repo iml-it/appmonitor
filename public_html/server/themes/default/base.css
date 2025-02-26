@@ -53,6 +53,57 @@ tr.result2{background: #fcf8f0 !important;}
 tr.result3{background: #f8f0f0 !important;}
 
 /* notification timeline */
+.timeline::before {
+	border-radius: .25rem;
+	background-color: #dee2e6;
+	bottom: 0;
+	content: "";
+	left: 31px;
+	margin: 0;
+	position: absolute;
+	top: 0;
+	width: 4px;
+}
+.timeline > div {
+	margin-bottom: 15px;
+	margin-right: 10px;
+	position: relative;
+}
+.timeline > div::after, .timeline > div::before {
+	content: "";
+	display: table;
+}
+.timeline > .time-label > span {
+	border: 2px solid #ccc;
+	border-radius: 0.5em;
+	display: inline-block;
+	font-size: 130%;
+	padding: 0.2em 1em;
+}
+.timeline > div > i {
+	background-color: #dee2e6;
+	border-radius: 50%;
+	font-size: 16px;
+	height: 30px;
+	left: 18px;
+	line-height: 30px;
+	position: absolute;
+	text-align: center;
+	top: 0;
+	width: 30px;
+}
+.timeline > div > .timeline-item {
+	box-shadow__: 0 0 1px rgba(0,0,0,.125),0 1px 3px rgba(0,0,0,.2);
+	border-radius: .25rem;
+	background-color: #fff;
+	color: #495057;
+	margin-left: 5em;
+	margin-right: 1em;
+	margin-top: 0;
+	padding: 0;
+	position: relative;
+}
+
 label.result{min-width:10em; text-align: center;}
 /*
 tr.result0{background:rgba(220,240,220,0.4) !important; color:#385;}
