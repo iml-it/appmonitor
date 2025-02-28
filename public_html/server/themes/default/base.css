@@ -104,7 +104,7 @@ tr.result3{background: #f8f0f0 !important;}
 	position: relative;
 }
 
-label.result{min-width:10em; text-align: center;}
+label.result{min-width:10em; text-align: center; margin: 0 1em;}
 /*
 tr.result0{background:rgba(220,240,220,0.4) !important; color:#385;}
 tr.result1{background:rgba(220,200,240,0.2) !important; color:#636;}
