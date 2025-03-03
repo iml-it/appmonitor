@@ -9,8 +9,8 @@ Check if the local server or another host is listening to a given port number.
 ```php
 $oMonitor->addCheck(
     [
-        "name" => "Port local SSH",
-        "description" => "check port 22",
+        "name" => "TCP port check",
+        "description" => "check tcp port <number> on <host>",
         "check" => [
             "function" => "PortTcp",
             "params" => [
@@ -60,8 +60,9 @@ And an additional code snippet for a multiple port check:
 $aPorts=[
     "22"=>["SSH"],
     "25"=>["SMTP"],
-    "5666"=>["Nagios NRPE"],
-    "5667"=>["Nagios NSCA"],
+    "80"=>["HTTP"],
+    "443"=>["HTTPS"],
+    "3306"=>["Mysql"],
 ];
 
 foreach($aPorts as $iPort=>$aDescr){
