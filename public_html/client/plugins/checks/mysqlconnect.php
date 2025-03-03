@@ -20,6 +20,7 @@
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2024-11-22  <axel.hahn@unibe.ch>      detect installed mysqli function
+ * 2025-03-01  <axel.hahn@unibe.ch>      add try catch 
  */
 class checkMysqlConnect extends appmonitorcheck
 {
@@ -59,14 +60,22 @@ class checkMysqlConnect extends appmonitorcheck
             return [RESULT_ERROR, 'ERROR: setting mysqli_options failed.'];
         }
 
-        $db = (isset($aParams["port"]) && $aParams["port"])
-            ? $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"], $aParams["port"])
-            : $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"])
-        ;
-        if ($db) {
-            $mysqli->close();
-            return [RESULT_OK, "OK: Mysql database " . $aParams["db"] . " was connected"];
-        } else {
+        try{
+
+            $db = (isset($aParams["port"]) && $aParams["port"])
+                ? $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"], $aParams["port"])
+                : $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"])
+            ;
+            if ($db) {
+                $mysqli->close();
+                return [RESULT_OK, "OK: Mysql database " . $aParams["db"] . " was connected"];
+            } else {
+                return [
+                    RESULT_ERROR,
+                    "ERROR: Mysql database " . $aParams["db"] . " was not connected. Error " . mysqli_connect_errno() . ": " . mysqli_connect_error()
+                ];
+            }
+        } catch (Exception $e) {
             return [
                 RESULT_ERROR,
                 "ERROR: Mysql database " . $aParams["db"] . " was not connected. Error " . mysqli_connect_errno() . ": " . mysqli_connect_error()

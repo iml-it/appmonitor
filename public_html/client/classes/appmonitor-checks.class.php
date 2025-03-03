@@ -53,8 +53,9 @@ if (!defined('RESULT_OK')) {
  * 2023-06-02  0.125 axel.hahn@unibe.ch      replace array_key_exists for better readability
  * 2024-07-22  0.137 axel.hahn@unibe.ch      php 8 only: use typed variables
  * 2025-02-28  0.152 axel.hahn@unibe.ch      listChecks: add loop over currently loaded classes
+ * 2025-03-03  0.153 axel.hahn@unibe.ch      getSize() preg_replace did not work in compiled binary
  * --------------------------------------------------------------------------------<br>
- * @version 0.152
+ * @version 0.153
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -418,7 +419,8 @@ class appmonitorcheck
         $power = 0;
         foreach ($this->_units as $sUnit) {
             if (preg_match('/^[0-9\.\ ]*' . $sUnit . '/', $sValue)) {
-                $i = preg_replace('/([0-9\.]*).*/', '$1', $sValue);
+                // $i = preg_replace('/([0-9\.]*).*/', '$1', $sValue);
+                $i = str_replace($sUnit, '', $sValue);
                 $iReal = $i * pow(1024, $power);
                 // die("FOUND: $sValue with unit ${sUnit} - 1024^$power * $i = $iReal");
                 return $iReal;

@@ -22,6 +22,7 @@
  * 
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
+ * 2025-03-01  <axel.hahn@unibe.ch>      fix check for files that must be absent
  */
 class checkFile extends appmonitorcheck
 {
@@ -68,7 +69,9 @@ class checkFile extends appmonitorcheck
 
         if (isset($aParams['exists'])) {
             $sMyflag = 'exists=' . ($aParams['exists'] ? 'yes' : 'no');
-            if (file_exists($sFile) && $aParams['exists']) {
+            if (file_exists($sFile) && $aParams['exists']
+                || !file_exists($sFile) && !$aParams['exists']
+            ) {
                 $aOK[] = $sMyflag;
             } else {
                 $aErrors[] = $sMyflag;
