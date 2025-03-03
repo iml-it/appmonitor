@@ -40,7 +40,7 @@
  * 2022-05-02  <axel.hahn@iml.unibe.ch>  set warning to 21 days (old value was 30); add "critical" param
  * 2022-05-03  <axel.hahn@iml.unibe.ch>  critical limit is a warning only (because app is still functional)
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2025-03-03  <axel.hahn@unibe.ch>      comment block for host check in DND names
  */
 class checkCert extends appmonitorcheck
 {
@@ -80,6 +80,11 @@ class checkCert extends appmonitorcheck
             ];
         }
 
+        /*
+        
+            unneeded:
+            when verify is true (=default) then it cannot connect with wrong certificate
+        
         $sDNS = $certinfo['extensions']['subjectAltName'] ?? false;
         $sHost = parse_url($sUrl, PHP_URL_HOST);
         if (strstr($sDNS, "DNS:$sHost") === false) {
@@ -88,6 +93,7 @@ class checkCert extends appmonitorcheck
                 "Wrong certificate: $sHost is not listed as DNS alias in [$sDNS]. $sMessage"
             ];
         }
+        */
 
         $iDaysleft = round(($certinfo['validTo_time_t'] - date('U')) / 60 / 60 / 24);
         $sMessage .= 'Issuer: ' . $certinfo['issuer']['O']
