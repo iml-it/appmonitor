@@ -45,7 +45,7 @@
  * 2019-06-07  <axel.hahn@iml.unibe.ch>
  * 2022-07-06  <axel.hahn@iml.unibe.ch>  set group "monitor"
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2025-03-04  <axel.hahn@unibe.ch>      fix sComment error on failed apache status
  */
 class checkApacheProcesses extends appmonitorcheck
 {
@@ -112,7 +112,7 @@ class checkApacheProcesses extends appmonitorcheck
      */
     protected function _getApacheProcesses(): bool|array
     {
-        $sBody = file_get_contents($this->_sServerStatusUrl);
+        $sBody = @file_get_contents($this->_sServerStatusUrl);
         if (!$sBody) {
             return false;
         }
@@ -163,12 +163,12 @@ class checkApacheProcesses extends appmonitorcheck
         // --- (2) do something magic
         $aProcesses = $this->_getApacheProcesses();
         $iActive = $aProcesses ? $aProcesses['active'] : false;
+        $sComment = '';
 
         // set result code
         if ($iActive === false) {
             $iResult = RESULT_UNKNOWN;
         } else {
-            $sComment = '';
             $iTotal = $aProcesses['total'];
             $iResult = RESULT_OK;
             if (($iActive / $iTotal * 100) > $this->_iWarn) {
