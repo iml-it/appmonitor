@@ -36,26 +36,27 @@ if (!defined('RESULT_OK')) {
  * --------------------------------------------------------------------------------<br>
  * <br>
  * --- HISTORY:<br>
- * 2014-10-24  0.5   axel.hahn@iml.unibe.ch<br>
- * 2015-04-08  0.9   axel.hahn@iml.unibe.ch  added sochket test: checkPortTcp<br>
- * 2018-06-29  0.24  axel.hahn@iml.unibe.ch  add file and directory checks<br>
- * 2018-07-17  0.42  axel.hahn@iml.unibe.ch  add port on mysqli check<br>
- * 2018-07-26  0.46  axel.hahn@iml.unibe.ch  fix mysql connection check with empty port param<br>
- * 2018-08-14  0.47  axel.hahn@iml.unibe.ch  appmonitor client: use timeout of 5 sec for tcp socket connections<br>
- * 2018-08-15  0.49  axel.hahn@iml.unibe.ch  cert check: added flag to skip verification<br>
- * 2018-08-23  0.50  axel.hahn@iml.unibe.ch  replace mysqli connect with mysqli real connect (to use a timeout)<br>
- * 2018-08-27  0.52  axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
- * 2018-11-05  0.58  axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
- * 2019-05-31  0.87  axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
- * 2019-06-05  0.88  axel.hahn@iml.unibe.ch  add plugins<br>
- * 2021-10-28  0.93  axel.hahn@iml.unibe.ch  add plugins<br>
- * 2021-12-14  0.93  axel.hahn@iml.unibe.ch  split plugins into single files; added key group in a check<br>
- * 2023-06-02  0.125 axel.hahn@unibe.ch      replace array_key_exists for better readability
- * 2024-07-22  0.137 axel.hahn@unibe.ch      php 8 only: use typed variables
- * 2025-02-28  0.152 axel.hahn@unibe.ch      listChecks: add loop over currently loaded classes
- * 2025-03-03  0.153 axel.hahn@unibe.ch      getSize() preg_replace did not work in compiled binary
+ * 2014-10-24  0.5    axel.hahn@iml.unibe.ch<br>
+ * 2015-04-08  0.9    axel.hahn@iml.unibe.ch  added sochket test: checkPortTcp<br>
+ * 2018-06-29  0.24   axel.hahn@iml.unibe.ch  add file and directory checks<br>
+ * 2018-07-17  0.42   axel.hahn@iml.unibe.ch  add port on mysqli check<br>
+ * 2018-07-26  0.46   axel.hahn@iml.unibe.ch  fix mysql connection check with empty port param<br>
+ * 2018-08-14  0.47   axel.hahn@iml.unibe.ch  appmonitor client: use timeout of 5 sec for tcp socket connections<br>
+ * 2018-08-15  0.49   axel.hahn@iml.unibe.ch  cert check: added flag to skip verification<br>
+ * 2018-08-23  0.50   axel.hahn@iml.unibe.ch  replace mysqli connect with mysqli real connect (to use a timeout)<br>
+ * 2018-08-27  0.52   axel.hahn@iml.unibe.ch  add pdo connect (starting with mysql)<br>
+ * 2018-11-05  0.58   axel.hahn@iml.unibe.ch  additional flag in http check to show content<br>
+ * 2019-05-31  0.87   axel.hahn@iml.unibe.ch  add timeout as param in connective checks (http, tcp, databases)<br>
+ * 2019-06-05  0.88   axel.hahn@iml.unibe.ch  add plugins<br>
+ * 2021-10-28  0.93   axel.hahn@iml.unibe.ch  add plugins<br>
+ * 2021-12-14  0.93   axel.hahn@iml.unibe.ch  split plugins into single files; added key group in a check<br>
+ * 2023-06-02  0.125  axel.hahn@unibe.ch      replace array_key_exists for better readability
+ * 2024-07-22  0.137  axel.hahn@unibe.ch      php 8 only: use typed variables
+ * 2025-02-28  0.152  axel.hahn@unibe.ch      listChecks: add loop over currently loaded classes
+ * 2025-03-03  0.153  axel.hahn@unibe.ch      getSize() preg_replace did not work in compiled binary
+ * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with existcode instead of die()
  * --------------------------------------------------------------------------------<br>
- * @version 0.153
+ * @version 0.154
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -119,6 +120,25 @@ class appmonitorcheck
     // ----------------------------------------------------------------------
     // PRIVATE FUNCTIONS
     // ----------------------------------------------------------------------
+
+    /**
+     * Exit execution with error message and given exicode.
+     * @param int    $iHttpcode  http statuscode
+     * @param string $sMessage   detailed message
+     * @param int    $iExitcode  exitcode
+     * @return never
+     */
+    protected function _exit($iHttpcode, $sMessage, $iExitcode): never
+    {
+        $aStatus=[
+            503 => 'Service Unavailable',
+        ];
+        header("HTTP/1.1 $iHttpcode $aStatus[$iHttpcode]");
+        echo "<h1>$iHttpcode $aStatus[$iHttpcode]</h1>
+            <h2>Details</h2>
+            $sMessage\n";
+        exit($iExitcode);
+    }
 
     /**
      * Internal: create basic array values for metadata
@@ -204,19 +224,19 @@ class appmonitorcheck
     {
         foreach (explode(",", $sKeyList) as $sKey) {
             if (!isset($aConfig[$sKey])) {
-                header('HTTP/1.0 503 Service Unavailable');
-                die('<h1>503 Service Unavailable</h1>'
-                    . '<h2>Details</h2>'
-                    . __METHOD__ . " - array of check parameters requires the keys [$sKeyList] - but key <code>$sKey</code> was not found in config array."
-                    . "<pre>" . print_r($aConfig, true) . '</pre>'
+                $this->_exit(
+                    503, 
+                    __METHOD__ . " - array of check parameters requires the keys [$sKeyList] - but key <code>$sKey</code> was not found in config array."
+                        . "<pre>" . print_r($aConfig, true) . '</pre>',
+                    20
                 );
             }
             if (is_null($aConfig[$sKey])) {
-                header('HTTP/1.0 503 Service Unavailable');
-                die('<h1>503 Service Unavailable</h1>'
-                    . '<h2>Details</h2>'
-                    . __METHOD__ . " - key <code>$sKey</code> is empty in config array"
-                    . "<pre>" . print_r($aConfig, true) . '</pre>'
+                $this->_exit(
+                    503,
+                    __METHOD__ . " - key <code>$sKey</code> is empty in config array"
+                        . "<pre>" . print_r($aConfig, true) . '</pre>',
+                    21
                 );
             }
         }
@@ -266,33 +286,32 @@ class appmonitorcheck
         }
 
         if (!class_exists($sCheckClass)) {
-            header('HTTP/1.0 503 Service Unavailable');
-            die('<h1>503 Service Unavailable</h1>'
-                . '<h2>Details</h2>'
-                . __METHOD__ . " - check class not found: <code>$sCheckClass</code>"
-                . "<pre>" . print_r($aConfig, true) . '</pre>'
-                . "<h2>Known checks</h2>\n" . print_r($this->listChecks(), 1)
+            $this->_exit(
+                503,
+                __METHOD__ . " - check class not found: <code>$sCheckClass</code>"
+                    . "<pre>" . print_r($aConfig, true) . '</pre>',
+                22
             );
         }
 
         $oPlugin = new $sCheckClass;
         $aResponse = $oPlugin->run($aParams);
         if (!is_array($aResponse)) {
-            header('HTTP/1.0 503 Service Unavailable');
-            die('<h1>503 Service Unavailable</h1>'
-                . '<h2>Details</h2>'
-                . __METHOD__ . " - plugin : $sCheck does not responses an array"
+            $this->_exit(
+                503,
+                __METHOD__ . " - plugin : $sCheck does not responses an array"
                 . "<pre>INPUT " . print_r($aConfig, true) . '</pre>'
-                . "<pre>RESPONSE " . print_r($aResponse, true) . '</pre>'
+                . "<pre>RESPONSE " . print_r($aResponse, true) . '</pre>',
+                23
             );
         }
         if (count($aResponse) < 2) {
-            header('HTTP/1.0 503 Service Unavailable');
-            die('<h1>503 Service Unavailable</h1>'
-                . '<h2>Details</h2>'
-                . __METHOD__ . " - plugin : $sCheck does not responses the minimum of 2 array values"
-                . "<pre>INPUT " . print_r($aConfig, true) . '</pre>'
-                . "<pre>RESPONSE " . print_r($aResponse, true) . '</pre>'
+            $this->_exit(
+                503,
+                __METHOD__ . " - plugin : $sCheck does not responses the minimum of 2 array values"
+                    . "<pre>INPUT " . print_r($aConfig, true) . '</pre>'
+                    . "<pre>RESPONSE " . print_r($aResponse, true) . '</pre>',
+                    24
             );
         }
         if (!isset($aResponse[2]) || !$aResponse[2]) {
@@ -427,10 +446,10 @@ class appmonitorcheck
             }
             $power++;
         }
-        header('HTTP/1.0 503 Service Unavailable');
-        die('<h1>503 Service Unavailable</h1>'
-            . '<h2>Details</h2>'
-            . __METHOD__ . " ERROR in space value parameter - there is no size unit in [$sValue] - allowed size units are " . implode('|', $this->_units)
+        $this->_exit(
+            503,
+            __METHOD__ . " ERROR in space value parameter - there is no size unit in [$sValue] - allowed size units are " . implode('|', $this->_units),
+            25
         );
     }
 
