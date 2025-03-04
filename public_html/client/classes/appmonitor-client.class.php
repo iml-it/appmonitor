@@ -45,8 +45,9 @@ if (!class_exists('appmonitorcheck')) {
  * 2024-11-22  0.141  axel.hahn@unibe.ch      Set client version to server version after updating http, mysqli and app checks
  * 2025-01-02  0.149  axel.hahn@unibe.ch      add getChecks method
  * 2025-03-03  0.153  axel.hahn@unibe.ch      fix client checks during development of a compiled binary 
+ * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with existcode instead of die()
  * --------------------------------------------------------------------------------<br>
- * @version 0.153
+ * @version 0.154
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -60,7 +61,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = 'php-client-v0.153';
+    protected string $_sVersion = 'php-client-v0.154';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -319,8 +320,11 @@ class appmonitor
                 return true;
             }
         }
-        header('HTTP/1.0 403 Forbidden');
-        die('ERROR: Your ip address [' . $sIP . '] has no access.');
+        $this->_exit(
+            403,
+            'ERROR: Your ip address [' . $sIP . '] has no access.',
+            11
+        );
     }
 
     /**
@@ -340,8 +344,11 @@ class appmonitor
         if (isset($_GET[$sVarname]) && $_GET[$sVarname] === $sToken) {
             return true;
         }
-        header('HTTP/1.0 403 Forbidden');
-        die('ERROR: A token is required.');
+        $this->_exit(
+            403,
+            'ERROR: A token is required.',
+            12
+        );
     }
 
     // ----------------------------------------------------------------------
@@ -382,9 +389,11 @@ class appmonitor
         }
 
         if (count($aErrors)) {
-            $this->abort(
-                '<h2>Error: client check is not complete</h2><p>Found errors:</p><ol><li>' . implode('<li>', $aErrors) . '</ol><br><br>'
-                // .'Dump of your data so far:<pre>' . json_encode($this->getResults(), JSON_PRETTY_PRINT) . '</pre><hr>'
+            $this->_exit(
+                503,
+                'Client check is not complete<br>Found errors:<br>'
+                    .'<ol><li>' . implode('<li>', $aErrors) . '</ol><br><br>',
+                10
             );
         }
         return true;
@@ -395,14 +404,24 @@ class appmonitor
     // ----------------------------------------------------------------------
 
     /**
-     * Stop processing the client checks and abort with an error
-     * @param string $sMessage  text to show after a 503 headline
-     * @return void
+     * Exit execution with error message and given exicode.
+     * @param int    $iHttpcode  http statuscode
+     * @param string $sMessage   detailed message
+     * @param int    $iExitcode  exitcode
+     * @return never
      */
-    public function abort(string $sMessage): void
+    protected function _exit($iHttpcode, $sMessage, $iExitcode): never
     {
-        header('HTTP/1.0 503 Service Unavailable');
-        die('<h1>503 Service Unavailable</h1>' . $sMessage);
+        
+        $aStatus=[
+            403 => 'Forbidden',
+            503 => 'Service Unavailable',
+        ];
+        header("HTTP/1.1 $iHttpcode $aStatus[$iHttpcode]");
+        echo "<h1>$iHttpcode $aStatus[$iHttpcode]</h1>
+            <h2>Details</h2>
+            $sMessage\n";
+        exit($iExitcode);
     }
 
     /**
