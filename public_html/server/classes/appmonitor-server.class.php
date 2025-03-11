@@ -44,6 +44,7 @@ require_once 'dbobjects/webapps.php';
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-11-26  0.142  axel.hahn@unibe.ch  handle invalid response data
  * 2025-02-21  0.150  axel.hahn@unibe.ch  use sqlite as storage
+ * 2025-03-11  0.154  axel.hahn@unibe.ch  add routes wth public keyword in API
  */
 class appmonitorserver
 {

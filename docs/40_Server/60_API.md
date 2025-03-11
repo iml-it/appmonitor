@@ -213,12 +213,10 @@ List all apps in appmonitor.
 ```json
 {
     "60b1104800798cd79b694ca6f6764c15": {
-        "website": "Appmonitor server",
-        "url": "http:\/\/localhost\/client\/check-appmonitor-server.php"
+        "website": "Appmonitor server"
     },
     "<id>": {
-        "website": "<label>",
-        "url": "<client url>"
+        "website": "<label>"
     }
 }
 ```
@@ -227,7 +225,6 @@ Key       | Type   | Description
 ----------|--------|--------------
 \<key\>   | string | The first key is the application id.
 `website` | string | a label for the web application
-`url`     | string | the requested url to fetch the application status
 
 #### /api/v1/apps/id/\<id\>
 
@@ -237,8 +234,10 @@ This request has no data and responds the possible next levels.
 {
     "allowed_subkeys": [
         "all",
+        "appid",
         "checks",
-        "meta"
+        "meta",
+        "public"
     ]
 }
 ```
@@ -395,7 +394,8 @@ Key               | Type   | Description
             "error": false,
             "curlerrorcode": 0,
             "curlerrormsg": ""
-        }
+        },
+        "since": "1740560976"
     }
 }
 ```
@@ -403,9 +403,10 @@ Key               | Type   | Description
 Key            | Type   | Description
 ---------------|--------|--------------
 \<key\>        | string | The first key is the application id.
-`meta`         | string | Key for metadata
-`checks`       | string | Key for checks for this app
-`result`       | string | Key for response infos
+`meta`         | array  | Key for metadata
+`checks`       | array  | Key for checks for this app
+`result`       | array  | Key for response infos
+`since`        | int    | Unix timestamp when the change to the current status was
 
 Subkeys in `"meta"` section:
 
@@ -459,6 +460,43 @@ Key             | Type   | Description
 `curlerrorcode` | int    | Curl error code
 `curlerrormsg`  | string | Curl error message; for more details see see <https://curl.se/libcurl/c/libcurl-errors.html>
 
+Value in `"since"` key is a unix timestamp when the change to the current state was.
+
+#### /api/v1/apps/id/\<id\>/appid
+
+Shows appids and the name only.
+
+Key       | Type   | Description
+----------|--------|--------------
+\<key\>   | string | The first key is the application id.
+`website` | string | a label for the web application
+
+#### /api/v1/apps/id/\<id\>/checks
+
+See request to `/all` data ... get checks section only.
+
+#### /api/v1/apps/id/\<id\>/meta
+
+See request to `/all` data ... get meta section only.
+
+#### /api/v1/apps/id/\<id\>/public
+
+Get a set of non sensitive meta information and value "since".
+
+```json
+{
+    "60b1104800798cd79b694ca6f6764c15": {
+        "meta": {
+            "host": "81449a93a081",
+            "website": "Appmonitor server",
+            "result": 0,
+            "ttl": 300
+        },
+        "since": "1740560976"
+    }
+}
+```
+
 #### /api/v1/apps/tags
 
 Lists all tags from all applications in alphabetic order.
@@ -485,8 +523,10 @@ This request has no data and responds the possible next levels.
 {
     "allowed_subkeys": [
         "all",
+        "appid",
         "checks",
-        "meta"
+        "meta",
+        "public"
     ]
 }
 ```
@@ -506,7 +546,8 @@ The output is the same like described in **/api/v1/apps/id/\<id\>/all** - but wi
     "<id-1>": {
         "meta": { ... },
         "checks": [ ... ],
-        "result": { ... }
+        "result": { ... },
+        "since": <Unix timestamp>
     },
     "<id-2>": { ... },
     "<id-N>": { ... }
@@ -516,6 +557,27 @@ The output is the same like described in **/api/v1/apps/id/\<id\>/all** - but wi
 !!! info "Remark"
     You can use multiple tags too to list all apps with AND condition using a comma separated list.
     `/api/v1/apps/tags/<tag_1>,<tag_2>,<tag_N>/all`
+
+#### /api/v1/apps/tags/\<tag\>/appid
+
+Shows appids and the name only.
+
+Key       | Type   | Description
+----------|--------|--------------
+\<key\>   | string | The first key is the application id.
+`website` | string | a label for the web application
+
+#### /api/v1/apps/tags/\<tag\>/checks
+
+See request to `/all` data ... get checks section only.
+
+#### /api/v1/apps/tags/\<tag\>/meta
+
+See request to `/all` data ... get meta section only.
+
+#### /api/v1/apps/tags/\<tag\>/public
+
+Get a set of non sensitive meta information and value "since".
 
 #### /api/v1/tags
 

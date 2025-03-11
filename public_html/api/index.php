@@ -7,6 +7,7 @@
  * ah <axel.hahm@iml.unibe.ch>
  * 2022-06-17  v0.1  ah  initial version
  * 2022-07-01  v1.0  ah  first public version
+ * 2025-03-11  v1.1  ah  add routes wth public keyword in API
  * ======================================================================
  */
 
@@ -23,26 +24,29 @@ require_once('../server/classes/tinyrouter.class.php');
 
 $aRoutes=[
 
-    [ "/",                                         "_help_"                                                , "Show help."],
-    [ "/health",                                   "_health_"                                              , "Health check for mintoring tools."],
-    [ "/v1",                                       "_list_"                                                , "Version 1"],
+    [ "/",                                          "_help_"                                                , "Show help."],
+    [ "/health",                                    "_health_"                                              , "Health check for mintoring tools."],
+    [ "/v1",                                        "_list_"                                                , "Version 1"],
 
-    [ "/v1/apps",                                  "_list_"                                                , "List available subdirs"],
+    [ "/v1/apps",                                   "_list_"                                                , "List available subdirs"],
 
     // single application data
-    [ "/v1/apps/id",                               ["method"=>"apiGetFilteredApp", "outmode" => "appid"]   , "List all apps with ids"],
-    [ "/v1/apps/id/@appid:[0-9a-f]*",              "_list_"                                                , "List available subdirs"],
+    [ "/v1/apps/id",                                ["method"=>"apiGetFilteredApp", "outmode" => "appid"]   , "List all apps with ids"],
+    [ "/v1/apps/id/@appid:[0-9a-f]*",               "_list_"                                                , "List available subdirs"],
 
-    [ "/v1/apps/id/@appid:[0-9a-f]*/all",          ["method"=>"apiGetFilteredApp", "outmode" => "all"]     , "Show Metadata and checks"],
-    [ "/v1/apps/id/@appid:[0-9a-f]*/checks",       ["method"=>"apiGetFilteredApp", "outmode" => "checks"]  , "Show checks only"],
-    [ "/v1/apps/id/@appid:[0-9a-f]*/meta",         ["method"=>"apiGetFilteredApp", "outmode" => "meta"]    , "Show metzadata only"],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/all",           ["method"=>"apiGetFilteredApp", "outmode" => "all"]     , "Show Metadata and checks"],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/checks",        ["method"=>"apiGetFilteredApp", "outmode" => "checks"]  , "Show checks only"],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/meta",          ["method"=>"apiGetFilteredApp", "outmode" => "meta"]    , "Show metadata only"],
+    [ "/v1/apps/id/@appid:[0-9a-f]*/public",         ["method"=>"apiGetFilteredApp", "outmode" => "public"] , "Show public infos - no technical details"],
 
     // multipe applications having a list of tags
-    [ "/v1/apps/tags",                              ["method"=>"apiGetTags"]                               , "List all available tags"],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*",        "_list_"                                               , "List available subdirs"],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/all",    ["method"=>"apiGetFilteredApp", "outmode" => "all"]    , "Show Metadata and checks"],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/checks", ["method"=>"apiGetFilteredApp", "outmode" => "checks"] , "Show checks only"],
-    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/meta",   ["method"=>"apiGetFilteredApp", "outmode" => "meta"]   , "Show metzadata only"],
+    [ "/v1/apps/tags",                              ["method"=>"apiGetTags"]                                , "List all available tags"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*",        "_list_"                                                , "List available subdirs"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/all",    ["method"=>"apiGetFilteredApp", "outmode" => "all"]     , "Show Metadata and checks"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/appid",  ["method"=>"apiGetFilteredApp", "outmode" => "appid"]   , "Show app id and name for each app"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/checks", ["method"=>"apiGetFilteredApp", "outmode" => "checks"]  , "Show checks only"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/meta",   ["method"=>"apiGetFilteredApp", "outmode" => "meta"]    , "Show metadata only"],
+    [ "/v1/apps/tags/@tags:[a-zA-Z,0-9\-]*/public", ["method"=>"apiGetFilteredApp", "outmode" => "public"]  , "Show public infos - no technical details"],
 
     // tags
     [ "/v1/tags",                                   ["method"=>"apiGetTags"]                               , "List all available tags"],
