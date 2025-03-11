@@ -64,8 +64,9 @@ $aDb = [
 // checks
 // ----------------------------------------------------------------------
 
-// required php modules
-// see https://ertano.com/required-php-modules-for-wordpress/
+// required php modules * WIP
+// see https://wordpress.org/about/requirements/ << doesn't say anything about php modules
+// see https://ertano.com/rired-php-modules-for-wordpress/ << too many modules
 $oMonitor->addCheck(
     [
         "name" => "PHP modules",
@@ -76,21 +77,21 @@ $oMonitor->addCheck(
             "params" => [
                 "required" => [
                     // "cmath",
-                    "cli",
+                    // "cli",
                     "curl",
                     "date",
                     "dom",
                     "fileinfo",
                     "filter",
-                    "gd",
+                    // "gd",
                     "gettext",
                     "hash",
                     "iconv",
-                    "imagick",
+                    // "imagick",
                     "json",
                     // "libsodium",
-                    "mysql",
-                    "openssl",
+                    // "mysql",
+                    // "openssl",
                     "pcre",
                     // "opcache",
                     // "readline",
