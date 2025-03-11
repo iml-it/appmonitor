@@ -67,6 +67,7 @@ $aDb = [
 // required php modules * WIP
 // see https://wordpress.org/about/requirements/ << doesn't say anything about php modules
 // see https://ertano.com/rired-php-modules-for-wordpress/ << too many modules
+// see https://zeropointdevelopment.com/required-php-extensions-for-wordpress-wpquickies/
 $oMonitor->addCheck(
     [
         "name" => "PHP modules",
@@ -82,17 +83,19 @@ $oMonitor->addCheck(
                     "date",
                     "dom",
                     "fileinfo",
-                    "filter",
+                    // "filter",
                     // "gd",
                     "gettext",
                     "hash",
-                    "iconv",
-                    // "imagick",
+                    // "iconv",
+                    "imagick",
                     "json",
                     // "libsodium",
-                    // "mysql",
-                    // "openssl",
+                    "mbstring",
+                    "mysqli",
+                    "openssl",
                     "pcre",
+                    "sodium",
                     // "opcache",
                     // "readline",
                     "xml",
