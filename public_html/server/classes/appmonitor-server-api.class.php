@@ -38,6 +38,7 @@ require_once 'appmonitor-server.class.php';
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-11-14  0.141  axel.hahn@unibe.ch  API access with basic auth and hmac hash key
+ * 2025-03-11  0.154  axel.hahn@unibe.ch  add routes wth public keyword in API
  */
 class appmonitorserver_api extends appmonitorserver
 {
@@ -233,7 +234,7 @@ class appmonitorserver_api extends appmonitorserver
                     case 'appid':
                         $aTmp[$sAppName][$sKey] = [
                             'website' => $aData['result']['website'] ?? false,
-                            'url' => $aData['result']['url'] ?? false,
+                            // 'url' => $aData['result']['url'] ?? false,
                         ];
                         break;
                         ;
@@ -244,12 +245,25 @@ class appmonitorserver_api extends appmonitorserver
                         $aTmp[$sAppName][$sKey] = $aData[$outmode] ?? false;
                         break;
                         ;
-                        ;
 
-                    // all
-                    default:
-                        $aTmp[$sAppName][$sKey] = $aData;
+                    case 'public':    
+                    case 'all':
+                        if($outmode=="public"){
+                            $aTmp[$sAppName][$sKey]['meta']=[
+                                'host' => $aData['meta']['host'] ?? false,
+                                'website' => $aData['meta']['website'] ?? false,
+                                'result' => $aData['meta']['result'] ?? false,
+                                'ttl' => $aData['meta']['ttl'] ?? false,
+                            ];
+                        } else {
+                            $aTmp[$sAppName][$sKey] = $aData;
+                        }
+                        // get infos from database
+                        $this->_oWebapps->readByFields(['appid' => $sKey]);
+                        $sTsLast = $this->_oWebapps->get("timeupdated") ?? $this->_oWebapps->get("timecreated");
+                        $aTmp[$sAppName][$sKey]['since'] = date("U", strtotime($sTsLast));
                         ;
+                    default:
                         ;
                 }
             }
