@@ -34,8 +34,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> $sLang = '' | ` *` | 
-
+| \<optional\> $sLang | ` *` | -
 
 ### 🔹 public getAllEntries()
 
@@ -65,8 +64,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sLang | `string` | name of language (without extension "json")
-
+| \<required\> $sLang | `string` | name of language (without extension "json")
 
 ### 🔹 public tr()
 
@@ -78,11 +76,8 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sWord | `string` | item to find in language array
-| \<optional\> $aSubkeys = false | `subkeys *` | subkeys to walk in (for nested lang files); eg ["gui"]
-
-
-
+| \<required\> $sWord | `string` | item to find in language array
+| \<optional\> $aSubkeys | `subkeys *` | subkeys to walk in (for nested lang files); eg ["gui"]
 
 ---
 Generated with Axels PHP class doc parser.

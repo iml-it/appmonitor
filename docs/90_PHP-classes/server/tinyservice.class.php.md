@@ -47,10 +47,9 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sAppname | `string` | string   app id to prevent starting a script multiuple times
-| \<optional\> int $iNewSleeptime = 10 | `int` | integer  idle time between loops
-| \<optional\> string $sTmpdir = '' | `string` | string   custom temp dir
-
+| \<required\> $sAppname | `string` | string   app id to prevent starting a script multiuple times
+| \<optional\> $iNewSleeptime | `int` | integer  idle time between loops
+| \<optional\> $sTmpdir | `string` | string   custom temp dir
 
 ### 🔹 public canStart()
 
@@ -82,9 +81,8 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sMessage | `string` | message text
-| \<optional\> bool $bShow = false | `bool` | flag to write to stdout
-
+| \<required\> $sMessage | `string` | message text
+| \<optional\> $bShow | `bool` | flag to write to stdout
 
 ### 🔹 public setAppname()
 
@@ -97,9 +95,8 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sAppname | `string` | name of the application
-| \<optional\> string $sTmpdir = '' | `string` | optional: location of temp dir; default: system temp (often /tmp)
-
+| \<required\> $sAppname | `string` | name of the application
+| \<optional\> $sTmpdir | `string` | optional: location of temp dir; default: system temp (often /tmp)
 
 ### 🔹 public setDebug()
 
@@ -112,8 +109,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> bool $bDebug | `bool` | flag with true|false
-
+| \<required\> $bDebug | `bool` | flag with true|false
 
 ### 🔹 public setSleeptime()
 
@@ -125,8 +121,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> int $iNewSleeptime | `int` | value in seconds
-
+| \<required\> $iNewSleeptime | `int` | value in seconds
 
 ### 🔹 public sigHandler()
 
@@ -138,8 +133,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> int $signo | `int` | sent signal
-
+| \<required\> $signo | `int` | sent signal
 
 ### 🔹 public sleep()
 
@@ -152,8 +146,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> bool $bShow = false | `bool` | flag to write to stdout
-
+| \<optional\> $bShow | `bool` | flag to write to stdout
 
 ### 🔹 public touch()
 
@@ -166,10 +159,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sMessage | `string` | message text
-
-
-
+| \<required\> $sMessage | `string` | message text
 
 ---
 Generated with Axels PHP class doc parser.

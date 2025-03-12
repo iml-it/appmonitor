@@ -42,8 +42,10 @@
  * 2024-07-19  0.137  axel.hahn@unibe.ch      php 8 only: use typed variables
  * 2024-11-22  0.141  axel.hahn@unibe.ch      Set client version to server version after updating http, mysqli and app checks
  * 2025-01-02  0.149  axel.hahn@unibe.ch      add getChecks method
+ * 2025-03-03  0.153  axel.hahn@unibe.ch      fix client checks during development of a compiled binary 
+ * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with existcode instead of die()
  * --------------------------------------------------------------------------------<br>
- * @version 0.149
+ * @version 0.154
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -68,19 +70,6 @@
 **Parameters**: **0**
 
 
-### 🔹 public abort()
-
-Stop processing the client checks and abort with an error
-
-**Return**: `void`
-
-**Parameters**: **1**
-
-| Parameter | Type | Description
-|--         |--    |--
-| \<required\> string $sMessage | `string` | text to show after a 503 headline
-
-
 ### 🔹 public addCheck()
 
 Add a check array
@@ -91,8 +80,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> $aJob = [] | `array *` | array with check data
-
+| \<optional\> $aJob | `array *` | array with check data
 
 ### 🔹 public addEmail()
 
@@ -104,8 +92,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sEmailAddress | `string` | email address to add
-
+| \<required\> $sEmailAddress | `string` | email address to add
 
 ### 🔹 public addSlackWebhook()
 
@@ -117,9 +104,8 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sLabel | `string` | 
-| \<required\> string $sSlackWebhookUrl | `string` | 
-
+| \<required\> $sLabel | `string` | -
+| \<required\> $sSlackWebhookUrl | `string` | -
 
 ### 🔹 public addTag()
 
@@ -131,8 +117,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sTag | `string` | tag to add
-
+| \<required\> $sTag | `string` | tag to add
 
 ### 🔹 public checkIp()
 
@@ -144,8 +129,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aAllowedIps = [] | `array` | array of allowed ip addresses / ranges<br>                           the ip must match from the beginning, i.e.<br>                           "127.0." will allow requests from 127.0.X.Y
-
+| \<optional\> $aAllowedIps | `array` | array of allowed ip addresses / ranges<br>                           the ip must match from the beginning, i.e.<br>                           "127.0." will allow requests from 127.0.X.Y
 
 ### 🔹 public checkToken()
 
@@ -157,9 +141,8 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sVarname | `string` | name of GET variable
-| \<required\> string $sToken | `string` | value
-
+| \<required\> $sVarname | `string` | name of GET variable
+| \<required\> $sToken | `string` | value
 
 ### 🔹 public getChecks()
 
@@ -211,8 +194,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sJson | `string` | JSON of client output
-
+| \<required\> $sJson | `string` | JSON of client output
 
 ### 🔹 public setHost()
 
@@ -224,8 +206,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $s = '' | `string` | hostname
-
+| \<optional\> $s | `string` | hostname
 
 ### 🔹 public setResult()
 
@@ -237,8 +218,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> int $iResult = -1 | `int` | set resultcode; one of RESULT_OK|RESULT_WARNING|RESULT_ERROR|RESULT_UNKNOWN
-
+| \<optional\> $iResult | `int` | set resultcode; one of RESULT_OK|RESULT_WARNING|RESULT_ERROR|RESULT_UNKNOWN
 
 ### 🔹 public setTTL()
 
@@ -250,8 +230,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> $iTTl = 0 | `TTL *` | TTL value in sec
-
+| \<optional\> $iTTl | `TTL *` | TTL value in sec
 
 ### 🔹 public setWebsite()
 
@@ -263,10 +242,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> $sWebsite = '' | `Name *` | Name of the website or web application
-
-
-
+| \<optional\> $sWebsite | `Name *` | Name of the website or web application
 
 ---
 Generated with Axels PHP class doc parser.
