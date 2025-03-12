@@ -76,8 +76,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> bool $bReadonly = false | `bool` | 
-
+| \<optional\> $bReadonly | `bool` | -
 
 ### 🔹 public _access_denied()
 
@@ -89,8 +88,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sMessage | `string` | message text to display
-
+| \<required\> $sMessage | `string` | message text to display
 
 ### 🔹 public _generateWeblist()
 
@@ -102,9 +100,8 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> bool $bSkipOk = false | `bool` | flag: do not show apps with status "OK"? (for warning page)
-| \<optional\> array $aOptions = [] | `array` | options; valid keys are:<br>                             - mode  render mode; one of legacy|default
-
+| \<optional\> $bSkipOk | `bool` | flag: do not show apps with status "OK"? (for warning page)
+| \<optional\> $aOptions | `array` | options; valid keys are:<br>                             - mode  render mode; one of legacy|default
 
 ### 🔹 public actionAddUrl()
 
@@ -116,9 +113,8 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sUrl | `string` | url to add
-| \<optional\> bool $bMakeCheck = true | `bool` | Flag: check a valid url and response is JSON
-
+| \<required\> $sUrl | `string` | url to add
+| \<optional\> $bMakeCheck | `bool` | Flag: check a valid url and response is JSON
 
 ### 🔹 public actionDeleteUrl()
 
@@ -130,8 +126,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sUrl | `string` | url to delete in the config
-
+| \<required\> $sUrl | `string` | url to delete in the config
 
 ### 🔹 public addUrl()
 
@@ -144,7 +139,6 @@ default value:
 | Parameter | Type | Description
 |--         |--    |--
 | \<required\> $sUrl | `url *` | url to add
-
 
 ### 🔹 public generateViewAbout()
 
@@ -165,8 +159,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sAppId | `string` | appid
-
+| \<required\> $sAppId | `string` | appid
 
 ### 🔹 public generateViewDebug()
 
@@ -187,8 +180,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aNotifyOptions = [] | `array` | options to show; default: last 500 entries; subkeys<br>                              - mode   {string} one of last<br>                              - count  {integer} number of entries to fetch<br>                              - page   {integer} page number to display
-
+| \<optional\> $aNotifyOptions | `array` | options to show; default: last 500 entries; subkeys<br>                              - mode   {string} one of last<br>                              - count  {integer} number of entries to fetch<br>                              - page   {integer} page number to display
 
 ### 🔹 public generateViewProblems()
 
@@ -254,8 +246,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $sHost = '' | `string` | filter by given hostname
-
+| \<optional\> $sHost | `string` | filter by given hostname
 
 ### 🔹 public getResultValue()
 
@@ -267,8 +258,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> int $i | `int` | 
-
+| \<required\> $i | `int` | -
 
 ### 🔹 public getRoles()
 
@@ -289,8 +279,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $sUsername = '' | `string` | optional: override current user id
-
+| \<optional\> $sUsername | `string` | optional: override current user id
 
 ### 🔹 public getUserid()
 
@@ -329,8 +318,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sRequiredRole | `string` | name of the role to verify
-
+| \<required\> $sRequiredRole | `string` | name of the role to verify
 
 ### 🔹 public loadClientData()
 
@@ -351,8 +339,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> bool $bReadonly = false | `bool` | 
-
+| \<optional\> $bReadonly | `bool` | -
 
 ### 🔹 public renderDBDebug()
 
@@ -382,8 +369,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aNewCfg = [] | `array` | 
-
+| \<optional\> $aNewCfg | `array` | -
 
 ### 🔹 public saveUrls()
 
@@ -395,8 +381,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aNewCfg = [] | `array` | 
-
+| \<optional\> $aNewCfg | `array` | -
 
 ### 🔹 public send()
 
@@ -409,9 +394,8 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sMessage | `string` | message text
-| \<optional\> $bShow = false | `flag *` | flag to write to stdout (overrides set show log value)
-
+| \<required\> $sMessage | `string` | message text
+| \<optional\> $bShow | `flag *` | flag to write to stdout (overrides set show log value)
 
 ### 🔹 public setDemoMode()
 
@@ -423,8 +407,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> $bBool = true | ` *` | 
-
+| \<optional\> $bBool | ` *` | -
 
 ### 🔹 public setLogging()
 
@@ -436,8 +419,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> bool $bShow | `bool` | new logging flag
-
+| \<required\> $bShow | `bool` | new logging flag
 
 ### 🔹 public setUser()
 
@@ -449,10 +431,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sNewUser | `string` | username; it should be a user in config users key (or you loose all access)
-
-
-
+| \<required\> $sNewUser | `string` | username; it should be a user in config users key (or you loose all access)
 
 ---
 Generated with Axels PHP class doc parser.

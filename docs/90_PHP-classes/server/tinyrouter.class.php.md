@@ -47,9 +47,8 @@ Constructor
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aRoutes = [] | `array` | array   array of routes
-| \<optional\> string $sUrl = '' | `string` | string  incoming url
-
+| \<optional\> $aRoutes | `array` | array   array of routes
+| \<optional\> $sUrl | `string` | string  incoming url
 
 ### 🔹 public getCallback()
 
@@ -88,8 +87,7 @@ Helper function: get url request parts as array
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $sUrl = '' | `string` | url to handle; /api/v1/productbyid/3424084
-
+| \<optional\> $sUrl | `string` | url to handle; /api/v1/productbyid/3424084
 
 ### 🔹 public getVar()
 
@@ -101,8 +99,7 @@ Get a single variable in route parts with starting @ characterIf no route was ma
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sVarname | `string` | name of the variable
-
+| \<required\> $sVarname | `string` | name of the variable
 
 ### 🔹 public getVars()
 
@@ -123,8 +120,7 @@ Set routes configuration.It calls the _getRoute method to find the matching rout
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aRoutes = [] | `array` | list of [ route, more params ... ]
-
+| \<optional\> $aRoutes | `array` | list of [ route, more params ... ]
 
 ### 🔹 public setUrl()
 
@@ -136,10 +132,7 @@ Set incoming url, add the request behind protocol and domain.It calls the _getRo
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sUrl | `string` | string  sUrl  url to fetch; /api/v1/productbyid/3424084
-
-
-
+| \<required\> $sUrl | `string` | string  sUrl  url to fetch; /api/v1/productbyid/3424084
 
 ---
 Generated with Axels PHP class doc parser.

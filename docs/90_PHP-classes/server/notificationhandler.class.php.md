@@ -42,8 +42,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aOptions = [] | `array` | options array with the keys<br>                         - {string} lang       language of the GUI<br>                         - {string} serverurl  base url of the web app to build an url to an app specific page<br>                         - {string} notifications  appmionitor config settings in notification settings (for sleeptime and messages)
-
+| \<optional\> $aOptions | `array` | options array with the keys<br>                         - {string} lang       language of the GUI<br>                         - {string} serverurl  base url of the web app to build an url to an app specific page<br>                         - {string} notifications  appmionitor config settings in notification settings (for sleeptime and messages)
 
 ### 🔹 public countLogitems()
 
@@ -64,8 +63,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sAppId | `string` | app id
-
+| \<required\> $sAppId | `string` | app id
 
 ### 🔹 public getAppLastResult()
 
@@ -86,8 +84,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $sType = '' | `string` | optional: type email|slack; defailt: false (=return all keys)
-
+| \<optional\> $sType | `string` | optional: type email|slack; defailt: false (=return all keys)
 
 ### 🔹 public getAppResult()
 
@@ -108,10 +105,9 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aFilter = [] | `array` | filter with possible keys timestamp|changetype|status|appid|message (see addLogitem())<br>                         - mode  {string} "last" = newest entries first<br>                         - count {integer} number of entries to return<br>                         - page  {integer}
-| \<optional\> int $iLimit = 0 | `int` | set a maximum of log entries
-| \<optional\> bool $bRsort = true | `bool` | flag to reverse sort logs; default is true (=newest entry first)
-
+| \<optional\> $aFilter | `array` | filter with possible keys timestamp|changetype|status|appid|message (see addLogitem())<br>                         - mode  {string} "last" = newest entries first<br>                         - count {integer} number of entries to return<br>                         - page  {integer}
+| \<optional\> $iLimit | `int` | set a maximum of log entries
+| \<optional\> $bRsort | `bool` | flag to reverse sort logs; default is true (=newest entry first)
 
 ### 🔹 public getMessageReplacements()
 
@@ -143,7 +139,6 @@
 |--         |--    |--
 | \<required\> $sMessageId | `one *` | one of changetype-[N].logmessage | changetype-[N].email.message | email.subject
 
-
 ### 🔹 public isSleeptime()
 
 Check if a defined sleep time was reached.It returns false if no sleep time is defined.It returns the 1st matching regex if a match was found.
@@ -172,10 +167,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sAppId | `string` | application id
-
-
-
+| \<required\> $sAppId | `string` | application id
 
 ---
 Generated with Axels PHP class doc parser.

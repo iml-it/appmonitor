@@ -37,6 +37,7 @@
  * --------------------------------------------------------------------------------<br>
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-11-14  0.141  axel.hahn@unibe.ch  API access with basic auth and hmac hash key
+ * 2025-03-11  0.154  axel.hahn@unibe.ch  add routes wth public keyword in API
  */
 ```
 
@@ -66,8 +67,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> bool $bReadonly = false | `bool` | 
-
+| \<optional\> $bReadonly | `bool` | -
 
 ### 🔹 public actionAddUrl()
 
@@ -79,9 +79,8 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sUrl | `string` | url to add
-| \<optional\> bool $bMakeCheck = true | `bool` | Flag: check a valid url and response is JSON
-
+| \<required\> $sUrl | `string` | url to add
+| \<optional\> $bMakeCheck | `bool` | Flag: check a valid url and response is JSON
 
 ### 🔹 public actionDeleteUrl()
 
@@ -93,8 +92,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sUrl | `string` | url to delete in the config
-
+| \<required\> $sUrl | `string` | url to delete in the config
 
 ### 🔹 public addUrl()
 
@@ -108,7 +106,6 @@ default value:
 |--         |--    |--
 | \<required\> $sUrl | `url *` | url to add
 
-
 ### 🔹 public apiGetFilteredApp()
 
 Get an array of all applications that match a filter
@@ -119,9 +116,8 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aFilter = [] | `array` | filter definitions using AND condition over all filters<br>                          appid   - string of appid<br>                          tags    - array of tags that must match (AND condition)<br>                          website - substring of website
-| \<optional\> string $outmode = 'all' | `string` | kind of result data; one of appid|checks|meta|all
-
+| \<optional\> $aFilter | `array` | filter definitions using AND condition over all filters<br>                          appid   - string of appid<br>                          tags    - array of tags that must match (AND condition)<br>                          website - substring of website
+| \<optional\> $outmode | `string` | kind of result data; one of appid|checks|meta|all
 
 ### 🔹 public apiGetHeatlth()
 
@@ -196,8 +192,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $sHost = '' | `string` | filter by given hostname
-
+| \<optional\> $sHost | `string` | filter by given hostname
 
 ### 🔹 public getResultValue()
 
@@ -209,8 +204,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> int $i | `int` | 
-
+| \<required\> $i | `int` | -
 
 ### 🔹 public getRoles()
 
@@ -231,8 +225,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $sUsername = '' | `string` | optional: override current user id
-
+| \<optional\> $sUsername | `string` | optional: override current user id
 
 ### 🔹 public getUserid()
 
@@ -271,8 +264,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sRequiredRole | `string` | name of the role to verify
-
+| \<required\> $sRequiredRole | `string` | name of the role to verify
 
 ### 🔹 public loadClientData()
 
@@ -293,8 +285,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> bool $bReadonly = false | `bool` | 
-
+| \<optional\> $bReadonly | `bool` | -
 
 ### 🔹 public saveConfig()
 
@@ -306,8 +297,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aNewCfg = [] | `array` | 
-
+| \<optional\> $aNewCfg | `array` | -
 
 ### 🔹 public saveUrls()
 
@@ -319,8 +309,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aNewCfg = [] | `array` | 
-
+| \<optional\> $aNewCfg | `array` | -
 
 ### 🔹 public send()
 
@@ -333,9 +322,8 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sMessage | `string` | message text
-| \<optional\> $bShow = false | `flag *` | flag to write to stdout (overrides set show log value)
-
+| \<required\> $sMessage | `string` | message text
+| \<optional\> $bShow | `flag *` | flag to write to stdout (overrides set show log value)
 
 ### 🔹 public setDemoMode()
 
@@ -347,8 +335,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> $bBool = true | ` *` | 
-
+| \<optional\> $bBool | ` *` | -
 
 ### 🔹 public setLogging()
 
@@ -360,8 +347,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> bool $bShow | `bool` | new logging flag
-
+| \<required\> $bShow | `bool` | new logging flag
 
 ### 🔹 public setUser()
 
@@ -373,10 +359,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sNewUser | `string` | username; it should be a user in config users key (or you loose all access)
-
-
-
+| \<required\> $sNewUser | `string` | username; it should be a user in config users key (or you loose all access)
 
 ---
 Generated with Axels PHP class doc parser.

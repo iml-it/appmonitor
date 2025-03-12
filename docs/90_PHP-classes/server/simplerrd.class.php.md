@@ -27,9 +27,8 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $sAppId = '' | `string` | optional id to set
-| \<optional\> string $sCounterId = '' | `string` | 
-
+| \<optional\> $sAppId | `string` | optional id to set
+| \<optional\> $sCounterId | `string` | -
 
 ### 🔹 public add()
 
@@ -42,7 +41,6 @@
 | Parameter | Type | Description
 |--         |--    |--
 | \<required\> $aDataItem | `dataitem *` | dataitem
-
 
 ### 🔹 public delete()
 
@@ -63,8 +61,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> string $sAppid = '' | `string` | 
-
+| \<optional\> $sAppid | `string` | -
 
 ### 🔹 public get()
 
@@ -76,8 +73,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> int $iMax = 0 | `int` | optional: limit
-
+| \<optional\> $iMax | `int` | optional: limit
 
 ### 🔹 public getCountersOfApp()
 
@@ -98,8 +94,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> string $sAppId | `string` | 
-
+| \<required\> $sAppId | `string` | -
 
 ### 🔹 public setId()
 
@@ -111,10 +106,7 @@
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> $sCountername | ` *` | 
-
-
-
+| \<required\> $sCountername | ` *` | -
 
 ---
 Generated with Axels PHP class doc parser.

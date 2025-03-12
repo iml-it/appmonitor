@@ -20,8 +20,7 @@ constructor
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aRequirements = [] | `array` | optional: requirements with subkeys                                 methods                                  ips
-
+| \<optional\> $aRequirements | `array` | optional: requirements with subkeys                                 methods                                  ips
 
 ### 🔹 public allowIPs()
 
@@ -33,8 +32,7 @@ Set allowed ip addresses by a given list of regex
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> array $aIpRegex | `array` | array  aIpRegex  array of regex
-
+| \<required\> $aIpRegex | `array` | array  aIpRegex  array of regex
 
 ### 🔹 public allowMethods()
 
@@ -46,8 +44,7 @@ Set allowed http methods
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> array $aMethods | `array` | array  aMethods  array of strings containing GET, PUT, POST, DELETE, OPTIONS
-
+| \<required\> $aMethods | `array` | array  aMethods  array of strings containing GET, PUT, POST, DELETE, OPTIONS
 
 ### 🔹 public allowUsers()
 
@@ -59,8 +56,7 @@ Set allowed users
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> array $aUsers | `array` | array  aUsers  array of allowed users; key= username ('' or userid); subkeys:                        - 'password'; value = password hash (BASIC AUTH) and/ or                        - 'secret'; clear text for hmac
-
+| \<required\> $aUsers | `array` | array  aUsers  array of allowed users; key= username ('' or userid); subkeys:                        - 'password'; value = password hash (BASIC AUTH) and/ or                        - 'secret'; clear text for hmac
 
 ### 🔹 public appendData()
 
@@ -72,9 +68,8 @@ Append response dataIf no key as 2nd param is given the given array will be adde
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> mixed $aData | `mixed` | additional response data
-| \<optional\> string $sKey = '' | `string` | optional: use key
-
+| \<required\> $aData | `mixed` | additional response data
+| \<optional\> $sKey | `string` | optional: use key
 
 ### 🔹 public checkIp()
 
@@ -95,8 +90,7 @@ Check allowed http methods
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aMethods = [] | `array` | array  aMethods  optional: array of strings containing GET, PUT, POST, DELETE, OPTIONS
-
+| \<optional\> $aMethods | `array` | array  aMethods  optional: array of strings containing GET, PUT, POST, DELETE, OPTIONS
 
 ### 🔹 public checkUser()
 
@@ -117,9 +111,8 @@ Send error message using the sendJson method.
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> int $iHttpstatus | `int` | http statuscode
-| \<required\> string $sErrormessage | `string` | string with error message
-
+| \<required\> $iHttpstatus | `int` | http statuscode
+| \<required\> $sErrormessage | `string` | string with error message
 
 ### 🔹 public sendJson()
 
@@ -131,8 +124,7 @@ Send API response:set content type in http response header and transform data to
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> array $aData = [] | `array` | array of data to send
-
+| \<optional\> $aData | `array` | array of data to send
 
 ### 🔹 public setData()
 
@@ -144,8 +136,7 @@ Set response data; "should" be an array
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> array $aData | `array` | response data
-
+| \<required\> $aData | `array` | response data
 
 ### 🔹 public setPretty()
 
@@ -157,8 +148,7 @@ Set response data; "should" be an array
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<required\> bool $bPretty | `bool` | response data
-
+| \<required\> $bPretty | `bool` | response data
 
 ### 🔹 public stopIfOptions()
 
@@ -167,8 +157,6 @@ If http method is OPTIONS, send json and stop.
 **Return**: `void`
 
 **Parameters**: **0**
-
-
 
 
 ---
