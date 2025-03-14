@@ -67,7 +67,7 @@ class checkHttpContent extends appmonitorcheck
     {
         $this->_checkArrayKeys($aParams, "url");
         if (!function_exists("curl_init")) {
-            return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform mysqli test. The php-curl module is not active."];
+            return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform http test. The php-curl module is not active."];
         }
         $bShowContent = (isset($aParams["content"]) && $aParams["content"]) ? true : false;
         $ch = curl_init($aParams["url"]);
