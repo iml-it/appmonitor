@@ -45,9 +45,10 @@ if (!class_exists('appmonitorcheck')) {
  * 2024-11-22  0.141  axel.hahn@unibe.ch      Set client version to server version after updating http, mysqli and app checks
  * 2025-01-02  0.149  axel.hahn@unibe.ch      add getChecks method
  * 2025-03-03  0.153  axel.hahn@unibe.ch      fix client checks during development of a compiled binary 
- * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with existcode instead of die()
+ * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with exitcode instead of die()
+ * 2025-03-17  0.155  axel.hahn@unibe.ch      added: getVersion() and etVersion()
  * --------------------------------------------------------------------------------<br>
- * @version 0.154
+ * @version 0.155
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -61,7 +62,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = 'php-client-v0.154';
+    protected string $_sVersion = '0.155';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -121,13 +122,14 @@ class appmonitor
             "ttl" => false,
             "result" => false,
             "time" => false,
-            "version" => $this->_sVersion,
+            "version" => false,
         ];
 
         // fill with default values
         $this->setHost();
         $this->setWebsite();
         $this->setTTL();
+        $this->setVersion();
         return true;
     }
 
@@ -153,7 +155,49 @@ class appmonitor
         $this->_aMeta["host"] = $s;
         return true;
     }
+    /**
+     * Set final result in meta data; if no value was given then it
+     * sets the biggest value of any check.
+     * 
+     * @param integer  $iResult  set resultcode; one of RESULT_OK|RESULT_WARNING|RESULT_ERROR|RESULT_UNKNOWN
+     * @return boolean
+     */
+    public function setResult(int $iResult = -1): bool
+    {
+        if ($iResult === -1) {
+            $iResult = $this->_iMaxResult; // see addCheck()
+        }
+        $this->_aMeta["result"] = $iResult;
+        return true;
+    }
 
+    /**
+     * set a ttl value in seconds to define how long a server should not
+     * ask again for a new status of this instance
+     * 
+     * @param int $iTTl TTL value in sec
+     * @return boolean
+     */
+    public function setTTL($iTTl = 0)
+    {
+        if ($iTTl == 0) {
+            $iTTl = $this->_iDefaultTtl;
+        }
+        return $this->_aMeta["ttl"] = $iTTl;
+    }
+
+    /**
+     * Set a prefix for meta -> version ... before "-php-client-v<VERSION>"
+     * @param string $sVersionPrefix  new prefix
+     * @return bool
+     */
+    public function setVersion($sVersionPrefix = ""): bool
+    {
+        $this->_aMeta["version"] = ($sVersionPrefix ? "$sVersionPrefix-" : "")
+            . "php-client-v$this->_sVersion"
+        ;
+        return true;
+    }
     /**
      * Set a name for this website or application and its environment 
      * (dev, test, prod); 
@@ -175,37 +219,6 @@ class appmonitor
             return false;
         }
         $this->_aMeta["website"] = $sWebsite;
-        return true;
-    }
-
-    /**
-     * set a ttl value in seconds to define how long a server should not
-     * ask again for a new status of this instance
-     * 
-     * @param int $iTTl TTL value in sec
-     * @return boolean
-     */
-    public function setTTL($iTTl = 0)
-    {
-        if ($iTTl == 0) {
-            $iTTl = $this->_iDefaultTtl;
-        }
-        return $this->_aMeta["ttl"] = $iTTl;
-    }
-
-    /**
-     * Set final result in meta data; if no value was given then it
-     * sets the biggest value of any check.
-     * 
-     * @param integer  $iResult  set resultcode; one of RESULT_OK|RESULT_WARNING|RESULT_ERROR|RESULT_UNKNOWN
-     * @return boolean
-     */
-    public function setResult(int $iResult = -1): bool
-    {
-        if ($iResult === -1) {
-            $iResult = $this->_iMaxResult; // see addCheck()
-        }
-        $this->_aMeta["result"] = $iResult;
         return true;
     }
 
@@ -356,6 +369,15 @@ class appmonitor
     // ----------------------------------------------------------------------
 
     /**
+     * Get version of the appmoinitor php client
+     * @return string
+     */
+    public function getVersion(): string
+    {
+        return $this->_sVersion;
+    }
+
+    /**
      * list all available check functions. This is a helper class you cann call
      * to get an overview over built in functions. You get a flat array with
      * all function names.
@@ -392,7 +414,7 @@ class appmonitor
             $this->_exit(
                 503,
                 'Client check is not complete<br>Found errors:<br>'
-                    .'<ol><li>' . implode('<li>', $aErrors) . '</ol><br><br>',
+                . '<ol><li>' . implode('<li>', $aErrors) . '</ol><br><br>',
                 10
             );
         }
@@ -412,8 +434,8 @@ class appmonitor
      */
     protected function _exit($iHttpcode, $sMessage, $iExitcode): never
     {
-        
-        $aStatus=[
+
+        $aStatus = [
             403 => 'Forbidden',
             503 => 'Service Unavailable',
         ];
@@ -453,7 +475,7 @@ class appmonitor
     {
         $this->_checkData();
         $this->_aMeta['time'] = number_format((microtime(true) - $this->_iStart) * 1000, 3) . 'ms';
-        $sOut=json_encode($this->getResults());
+        $sOut = json_encode($this->getResults());
 
         header('Content-type: application/json');
         header('Cache-Control: cache');
@@ -528,7 +550,7 @@ class appmonitor
             $sOut .= '<span class="result' . $i . '">' . $sText . '</span> ';
         }
 
-        $sRaw=json_encode($aData, JSON_PRETTY_PRINT);
+        $sRaw = json_encode($aData, JSON_PRETTY_PRINT);
         $sRaw = preg_replace('/:\ \"(.*)\"/U', ': "<span class="string">$1</span>"', $sRaw);
         $sRaw = preg_replace('/:\ ([0-9]*)/', ': <span class="int">$1</span>', $sRaw);
         $sRaw = preg_replace('/\"(.*)\":/U', '"<span class="key">$1</span>":', $sRaw);

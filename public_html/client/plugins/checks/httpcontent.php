@@ -22,6 +22,7 @@
  * 2023-07-06  <axel.hahn@unibe.ch>      add flag userpwd
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2024-11-22  <axel.hahn@unibe.ch>      Return unknown if curl module is not active
+ * 2025-03-17  <axel.hahn@unibe.ch>      Fix check for http status code
  */
 class checkHttpContent extends appmonitorcheck
 {
@@ -32,7 +33,7 @@ class checkHttpContent extends appmonitorcheck
      * @param array   $aParams with optional 'status' containing http response code
      * @return string
      */
-    public function getGroup(array $aParams=[]): string
+    public function getGroup(array $aParams = []): string
     {
         $sReturn = 'service';
         if (isset($aParams['status']) && $aParams['status'] > 300 && $aParams['status'] < 500) {
@@ -141,12 +142,12 @@ class checkHttpContent extends appmonitorcheck
         // ---------- check functions
 
         // --- http status code
-        $sOut .= "Http status: " . $aInfos['http_code'] . " - ";
+        $sOut .= "Http status: $aInfos[http_code] - ";
         if (isset($aParams["status"])) {
-            if ($aInfos['http_code'] === $aParams["status"]) {
-                $sOut .= "compare OK<br>";
+            if ($aInfos['http_code'] == $aParams["status"]) {
+                $sOut .= "as expected - OK<br>";
             } else {
-                $sOut .= "compare failed<br>";
+                $sOut .= "compare failed - not eaqual $aParams[status]<br>";
                 $bError = true;
             }
         } else {
@@ -159,7 +160,7 @@ class checkHttpContent extends appmonitorcheck
         }
         // --- http header
         if (isset($aParams["headercontains"]) && $aParams["headercontains"]) {
-            $sOut .= "Http header contains &quot;" . $aParams["headercontains"] . "&quot; - ";
+            $sOut .= "Http header contains '$aParams[headercontains]' - ";
             if (!strstr($sHttpHeader, $aParams["headercontains"]) === false) {
                 $sOut .= "compare OK<br>";
             } else {
@@ -168,7 +169,7 @@ class checkHttpContent extends appmonitorcheck
             }
         }
         if (isset($aParams["headernotcontains"]) && $aParams["headernotcontains"]) {
-            $sOut .= "Http header does not contain &quot;" . $aParams["headernotcontains"] . "&quot; - ";
+            $sOut .= "Http header does not contain '$aParams[headernotcontains]' - ";
             if (strstr($sHttpHeader, $aParams["headernotcontains"]) === false) {
                 $sOut .= "compare OK<br>";
             } else {
@@ -177,7 +178,7 @@ class checkHttpContent extends appmonitorcheck
             }
         }
         if (isset($aParams["headerregex"]) && $aParams["headerregex"]) {
-            $sOut .= "Http header regex test &quot;" . $aParams["headerregex"] . "&quot; - ";
+            $sOut .= "Http header regex test '$aParams[headerregex]' - ";
             try {
                 $bRegex = preg_match($aParams["headerregex"], $sHttpHeader);
                 if ($bRegex) {
@@ -193,7 +194,7 @@ class checkHttpContent extends appmonitorcheck
         }
         // --- http body
         if (isset($aParams["bodycontains"]) && $aParams["bodycontains"]) {
-            $sOut .= "Http body contains &quot;" . $aParams["bodycontains"] . "&quot; - ";
+            $sOut .= "Http body contains '$aParams[bodycontains]' - ";
             if (!strstr($sHttpBody, $aParams["bodycontains"]) === false) {
                 $sOut .= "compare OK<br>";
             } else {
@@ -202,7 +203,7 @@ class checkHttpContent extends appmonitorcheck
             }
         }
         if (isset($aParams["bodynotcontains"]) && $aParams["bodynotcontains"]) {
-            $sOut .= "Http body does not contain &quot;" . $aParams["bodynotcontains"] . "&quot; - ";
+            $sOut .= "Http body does not contain '$aParams[bodynotcontains]' - ";
             if (strstr($sHttpBody, $aParams["bodynotcontains"]) === false) {
                 $sOut .= "compare OK<br>";
             } else {
@@ -211,7 +212,7 @@ class checkHttpContent extends appmonitorcheck
             }
         }
         if (isset($aParams["bodyregex"]) && $aParams["bodyregex"]) {
-            $sOut .= "Http body regex test &quot;" . $aParams["bodyregex"] . "&quot; - ";
+            $sOut .= "Http body regex test '$aParams[bodyregex]' - ";
             try {
                 $bRegex = preg_match($aParams["bodyregex"], $sHttpBody);
                 if ($bRegex) {
@@ -229,12 +230,12 @@ class checkHttpContent extends appmonitorcheck
         if (!$bError) {
             return [
                 RESULT_OK,
-                'OK: http check "' . $aParams["url"] . '".<br>' . $sOut
+                "OK: http check '$aParams[url]'<br>$sOut"
             ];
         } else {
             return [
                 RESULT_ERROR,
-                'ERROR: http check "' . $aParams["url"] . '".<br>' . $sOut
+                "ERROR: http check '$aParams[url]'<br>$sOut"
             ];
         }
 
