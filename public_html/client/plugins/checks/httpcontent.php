@@ -33,7 +33,7 @@ class checkHttpContent extends appmonitorcheck
      * @param array   $aParams with optional 'status' containing http response code
      * @return string
      */
-    public function getGroup(array $aParams=[]): string
+    public function getGroup(array $aParams = []): string
     {
         $sReturn = 'service';
         if (isset($aParams['status']) && $aParams['status'] > 300 && $aParams['status'] < 500) {
