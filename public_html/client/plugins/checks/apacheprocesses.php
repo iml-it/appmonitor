@@ -50,6 +50,35 @@
 class checkApacheProcesses extends appmonitorcheck
 {
 
+    protected array $_aDoc = [
+        'name' => 'Plugin ApacheProcesses',
+        'description' => 'Check count running Apache processes',
+        'parameters' => [
+            'url' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Override https server-status page; default is http://localhost/server-status; Use it if the protocol to localhost is not http, but https or if it requires an authentication',
+                'default' => $this->_sServerStatusUrl,
+                'regex'=>'^https?:\/\/[^\s]+',
+                'example' => '',
+            ],
+            'warning' => [
+                'type' => 'int',
+                'required' => false,
+                'description' => 'Limit to switch to warning (in percent)',
+                'default' => $this->_iWarn,
+                'example' => 30,
+            ],
+            'error' => [
+                'type' => 'int',
+                'required' => false,
+                'description' => 'Limit to switch to critical (in percent)',
+                'default' => $this->_iError,
+                'example' => 50,
+            ],
+        ],
+    ];
+
     /**
      * url of server status
      * @var string
@@ -69,38 +98,12 @@ class checkApacheProcesses extends appmonitorcheck
     protected float $_iError = 75;
 
     /**
-     * Self documentation (as idea)
+     * Self documentation
      * @return array
      */
     public function explain(): array
     {
-        return [
-            'name' => 'Plugin ApacheProcesses',
-            'descriptionm' => 'Check count running Apache processes',
-            'parameters' => [
-                'url' => [
-                    'type' => 'string',
-                    'required' => false,
-                    'decsription' => 'Override https server-status page; default is http://localhost/server-status; Use it if the protocol to localhost is not http, but https or if it requires an authentication',
-                    'default' => $this->_sServerStatusUrl,
-                    'example' => '',
-                ],
-                'warning' => [
-                    'type' => 'float',
-                    'required' => false,
-                    'decsription' => 'Limit to switch to warning (in percent)',
-                    'default' => $this->_iWarn,
-                    'example' => 30,
-                ],
-                'error' => [
-                    'type' => 'float',
-                    'required' => false,
-                    'decsription' => 'Limit to switch to critical (in percent)',
-                    'default' => $this->_iError,
-                    'example' => 50,
-                ],
-            ],
-        ];
+        return $this->_aDoc;
     }
 
     /**
