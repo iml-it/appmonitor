@@ -47,7 +47,7 @@ $oMonitor->addCheck(
 |name🔸        |(string)  | "id" if the check
 |description🔸 |(string)  | a short description
 |group         |(string)  | optional override name of a group
-|parent        |(string)  | optional set a "name" of another check to create a deoendency chain
+|parent        |(string)  | optional set a "name" of another check to create a deoendency chain; without parent do not use this key or set it to `null`.
 |check🔸       |(array)   | check to perform
 |worstresult   |(integer) | optional: limit maximum error level if the check fails; if the check should fail then its result is an error - but this check is not highly relevant for a running application then you can override the influence to the total result set a maximum level i.e. RESULT_WARNING.
 
