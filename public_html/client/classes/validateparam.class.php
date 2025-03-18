@@ -109,6 +109,7 @@ class validateparam {
 
         $aTmp=$aParams;
         foreach($aDefs as $sKey => $aOpt){
+            unset($aTmp[$sKey]);
             if ($aOpt['required']??false){
 
                 $this->_wd("Check MUST $sKey");
@@ -123,7 +124,7 @@ class validateparam {
                     } else {
                         $this->_wd("$sKey was successfully validated.<hr>");
                     }
-                    unset($aTmp[$sKey]);
+                    
                 }
             }
             if(isset($aOpt['required']) && !$aOpt['required'] && isset($aParams[$sKey])){
@@ -132,7 +133,6 @@ class validateparam {
                 if($sError){
                     $aErrors[$sKey]=$sError;
                 }
-                unset($aTmp[$sKey]);
             }
         }
         if($bStrict && count($aTmp)){
