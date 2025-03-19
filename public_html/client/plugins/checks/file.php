@@ -23,9 +23,78 @@
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-01  <axel.hahn@unibe.ch>      fix check for files that must be absent
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkFile extends appmonitorcheck
 {
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin File',
+        'description' => 'Check existing or absent file objects: files, directories, softlinks',
+        'parameters' => [
+            'filename' => [
+                'type' => 'string',
+                'required' => true,
+                'description' => 'filename or directory to check',
+                'default' => "",
+                'regex' => '/./',
+                'example' => '/var/www/myfile.txt',
+            ],
+            'exists' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'true = file object must exist (default); false = file object must not exist',
+                'default' => true,
+                'example' => "true",
+            ],
+            'dir' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'If true then check if fileobject is a directory',
+                'default' => null,
+                'example' => "false",
+            ],
+            'file' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'If true then check if fileobject is a file',
+                'default' => null,
+                'example' => "true",
+            ],
+            'link' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'If true then check if fileobject is a file',
+                'default' => null,
+                'example' => "true",
+            ],
+            'executable' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'If true then check if fileobject has executable permissions; if false it must be not executable',
+                'default' => null,
+                'example' => "false",
+            ],
+            'readable' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'If true then check if fileobject is readable; if false it must be not readable',
+                'default' => null,
+                'example' => "true",
+            ],
+            'writable' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'If true then check if fileobject is writable; ; if false it must be not writable',
+                'default' => null,
+                'example' => "true",
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * @param array   $aParams - see run() method
@@ -69,7 +138,8 @@ class checkFile extends appmonitorcheck
 
         if (isset($aParams['exists'])) {
             $sMyflag = 'exists=' . ($aParams['exists'] ? 'yes' : 'no');
-            if (file_exists($sFile) && $aParams['exists']
+            if (
+                file_exists($sFile) && $aParams['exists']
                 || !file_exists($sFile) && !$aParams['exists']
             ) {
                 $aOK[] = $sMyflag;

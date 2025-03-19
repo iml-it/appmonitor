@@ -19,10 +19,37 @@
  * 
  * 2022-05-06  <axel.hahn@iml.unibe.ch>  first lines
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkPhpmodules extends appmonitorcheck
 {
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin Phpmodules',
+        'description' => 'Check loaded php modules',
+        'parameters' => [
+            'required' => [
+                'type' => 'array',
+                'required' => true,
+                'description' => 'List of php modules that are required',
+
+                // doc
+                'default' => [],
+                'example' => '["curl", "PDO"]',
+            ],
+            'optional' => [
+                'type' => 'array',
+                'required' => false,
+                'description' => 'List of php modules that are optional. If one is missing, the status is set to warning.',
+                'default' => [],
+                'example' => '["gd"]',
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * @return string

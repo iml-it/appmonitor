@@ -22,10 +22,47 @@
  * 2022-09-16  <axel.hahn@iml.unibe.ch>  read error before closing socket.
  * 2022-12-05  <axel.hahn@unibe.ch>      add @ sign at socket functions to prevent warning
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkPortTcp extends appmonitorcheck
 {
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin PortTcp',
+        'description' => 'Check if the local server or another host is listening to a given port number.',
+        'parameters' => [
+            'host' => [
+                'type' => 'string',
+                'required' => true,
+                'description' => 'optional: hostname to connect to; if unavailable 127.0.0.1 will be tested',
+                'regex' => '/./',
+
+                // doc
+                'default' => null,
+                'example' => 'mysql:host=$aDb[server];port=3306;dbname=$aDb[database]',
+            ],
+            'port' => [
+                'type' => 'int',
+                'required' => true,
+                'description' => 'port number to check',
+                'default' => null,
+                'min' => 0,
+                'max' => 65535,
+                'example' => '22',
+            ],
+            'timeout' => [
+                'type' => 'int',
+                'required' => false,
+                'description' => 'optional timeout in sec; default: 5',
+                'default' => 5,
+                'example' => '3',
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * @return string

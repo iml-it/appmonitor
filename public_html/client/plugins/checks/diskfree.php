@@ -20,9 +20,44 @@
  * 2021-10-26  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-01-02  <www.axel-hahn.de>        update output
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkDiskfree extends appmonitorcheck
 {
+
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin Diskfree',
+        'description' => 'Check if a given filesystem / directory that it has enough space.',
+        'parameters' => [
+            'directory' => [
+                'type' => 'string',
+                'required' => true,
+                'description' => 'directory to check',
+                'default' => null,
+                'regex'=>'^https?:\/\/[^\s]+',
+                'example' => '',
+            ],
+            'warning' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'size for warning level',
+                'default' => 21,
+                'example' => "1.25GB",
+            ],
+            'critical' => [
+                'type' => 'string',
+                'required' => true,
+                'description' => 'size for critical level',
+                'default' => 5,
+                'example' => "500.7MB",
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * @return string

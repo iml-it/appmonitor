@@ -41,9 +41,51 @@
  * 2022-05-03  <axel.hahn@iml.unibe.ch>  critical limit is a warning only (because app is still functional)
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-03  <axel.hahn@unibe.ch>      comment block for host check in DND names
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkCert extends appmonitorcheck
 {
+
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin Cert',
+        'description' => 'Check if a SSL certificate is still valid … and does not expire soon.',
+        'parameters' => [
+            'url' => [
+                'type' => 'string',
+                'required' => true,
+                'description' => 'Url to check https://[server}[:{port}] or ssl://[server}[:{port}]',
+                'default' => null,
+                'regex'=>'^https?:\/\/[^\s]+',
+                'example' => '',
+            ],
+            'verify' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'optional: flag verify certificate; default = true',
+                'default' => true,
+                'example' => "false",
+            ],
+            'warning' => [
+                'type' => 'int',
+                'required' => false,
+                'description' => 'optional: count of days to warn; default=21',
+                'default' => 21,
+                'example' => 30,
+            ],
+            'critical' => [
+                'type' => 'int',
+                'required' => false,
+                'description' => 'optional: count of days to raise critical; default=5',
+                'default' => 5,
+                'example' => "7",
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * @return string

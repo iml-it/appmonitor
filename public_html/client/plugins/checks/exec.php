@@ -21,10 +21,58 @@
  * 
  * 2022-09-19  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkExec extends appmonitorcheck
 {
+
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin Exec',
+        'description' => 'Execute a shell command.',
+        'parameters' => [
+            'command' => [
+                'type' => 'string',
+                'required' => true,
+                'description' => 'Command line',
+                'default' => null,
+                'regex'=>'/./',
+                'example' => '[command] [parameters] 2>&1',
+            ],
+            'output' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'size for warning level',
+                'default' => 21,
+                'example' => "1.25GB",
+            ],
+            'exitOk' => [
+                'type' => 'array',
+                'required' => false,
+                'description' => 'array of integers for ok exitcodes',
+                'default' => null,
+                'example' => "",
+            ],
+            'exitWarn' => [
+                'type' => 'array',
+                'required' => false,
+                'description' => 'array of integers for warning exitcodes',
+                'default' => null,
+                'example' => "",
+            ],
+            'exitCritical' => [
+                'type' => 'array',
+                'required' => false,
+                'description' => 'array of integers for critical exitcodes',
+                'default' => null,
+                'example' => "",
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * @return string

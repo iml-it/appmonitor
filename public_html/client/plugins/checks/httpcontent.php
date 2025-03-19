@@ -23,9 +23,114 @@
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2024-11-22  <axel.hahn@unibe.ch>      Return unknown if curl module is not active
  * 2025-03-17  <axel.hahn@unibe.ch>      Fix check for http status code
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkHttpContent extends appmonitorcheck
 {
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin HttpContent',
+        'description' => 'This check verifies if a given url can be requested. Optionally you can test if it follows wanted rules.',
+        'parameters' => [
+            'url' => [
+                'type' => 'string',
+                'required' => true,
+                'description' => 'Url to fetch',
+                'default' => "",
+                'regex' => '/https?:\/\//',
+                'example' => 'https://www.example.com/',
+            ],
+            'userpwd' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'User and password; syntax: “[username]:[password]”',
+                'regex' => '/.*:.*/',
+                'default' => "",
+                'example' => "myuser:aVerySecretPassword",
+            ],
+            'timeout' => [
+                'type' => 'int',
+                'required' => false,
+                'description' => 'Timeout in sec',
+                'default' => 5,
+                'example' => "10",
+            ],
+            'headeronly' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'flag to fetch http response herader only (HEAD request); default: false = returns header and body;',
+                'default' => false,
+                'example' => "true",
+            ],
+            'follow' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'flag to follow a location; default: false = do not follow; If you set it to true it ries to follow (but this is not a safe method)',
+                'default' => false,
+                'example' => "true",
+            ],
+            'sslverify' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'Enable/ disable verification of ssl certificate; default: true (verification is on)',
+                'default' => true,
+                'example' => "false",
+            ],
+            'status' => [
+                'type' => 'int',
+                'required' => false,
+                'description' => 'Test for an expected http status code; if none is given then test fails on status 400 and greater.',
+                'default' => null,
+                'example' => "401",
+            ],
+            'headercontains' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Test for a string in the http response header; it returns OK if the text was found',
+                'default' => null,
+                'example' => "Content-Type: text/css",
+            ],
+            'headernotcontains' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Test for a string in the http response header; it returns OK if the text was not found',
+                'default' => null,
+                'example' => "Server:",
+            ],
+            'headerregex' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Test for a regex in the http response header; it returns OK if the regex matches',
+                'default' => null,
+                'example' => "",
+            ],
+            'bodycontains' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Test for a string in the http response body; it returns OK if the text was found',
+                'default' => null,
+                'example' => "Content-Type: text/css",
+            ],
+            'bodynotcontains' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Test for a string in the http response body; it returns OK if the text was not found',
+                'default' => null,
+                'example' => "Server:",
+            ],
+            'bodyregex' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Test for a regex in the http response body; it returns OK if the regex matches',
+                'default' => null,
+                'example' => "",
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * It is a "service" icon or "deny" for expected failures
