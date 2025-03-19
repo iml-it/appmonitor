@@ -1,7 +1,8 @@
 <?php
-class validateparam {
+class validateparam
+{
 
-    protected array $_aRegexDefs=[
+    protected array $_aRegexDefs = [
         'website' => '/https?:\/\//'
     ];
 
@@ -10,9 +11,40 @@ class validateparam {
 
     protected function _wd($s)
     {
-        if($this->_flag_debug){
+        if ($this->_flag_debug) {
             echo "DEBUG: $s<br>\n";
         }
+    }
+
+
+    /**
+     * shared validaten checks for floor and integer
+     * 
+     * @param array $aOpt  Validation rules
+     * @param mixed $value value to verify
+     * @return string with found error
+     */
+    protected function _checkCount(array $aOpt, mixed $value)
+    {
+        $sError = "";
+
+        if ($aOpt['min'] ?? false) {
+            if ($value < $aOpt['min']) {
+                $sError .= "Value is too small; minimum is $aOpt[min]. ";
+            }
+        }
+        if ($aOpt['max'] ?? false) {
+            if ($value > $aOpt['max']) {
+                $sError .= "Value is too big; maximum is $aOpt[max]. ";
+            }
+        }
+        if (isset($aOpt['oneof']) && is_array($aOpt['oneof'])) {
+            if (array_search($value, $aOpt['oneof']) == false) {
+                $sError .= "Value is invalid. Value doesn't match one of these values " . print_r($aOpt['oneof']);
+            }
+        }
+
+        return $sError;
     }
 
     /**
@@ -23,66 +55,61 @@ class validateparam {
      * @param mixed $value value to verify
      * @return string with found error
      */
-    public function validateValue($aOpt, $value){
-        $sError='';
+    public function validateValue(array $aOpt, mixed $value): string
+    {
+        $sError = '';
 
         // check type
-        if(isset($aOpt['type'])){
+        if (isset($aOpt['type'])) {
             $this->_wd("check type $aOpt[type]");
-            switch ($aOpt['type']){
+            switch ($aOpt['type']) {
                 case 'array':
-                    if (!is_array($value)){
-                        $sError.="Value isn't an array";
+                    if (!is_array($value)) {
+                        $sError .= "Value isn't an array";
                     }
                     break;
                 case 'bool':
-                    if (!is_bool($value)){
-                        $sError.="Value '$value' isn't a bool";
+                    if (!is_bool($value)) {
+                        $sError .= "Value '$value' isn't a bool";
                     }
                     break;
+
                 case 'float':
-                    if (!is_float($value)){
-                        $sError.="Value isn't a float";
+                    if (!is_float($value) && !is_int($value)) {
+                        $sError .= "Value isn't a float";
+                    } else {
+                        $sError .= $this->_checkCount($aOpt, $value);
                     }
                     break;
-    
+
                 case 'int':
                 case 'integer':
-                    if (!is_int($value)){
-                        $sError.="Value '$value' isn't an integer";
+                    if (!is_int($value)) {
+                        $sError .= "Value '$value' isn't an integer";
                     } else {
-                        if($aOpt['min']??false){
-                            if($value<$aOpt['min']){
-                                $sError.="Value is too small; minimum is $aOpt[min]";
-                            }
-                        }
-                        if($aOpt['max']??false){
-                            if($value>$aOpt['max']){
-                                $sError.="Value is too big; maximum is $aOpt[max]";
-                            }
-                        }
+                        $sError .= $this->_checkCount($aOpt, $value);
                     }
                     break;
-    
+
                 case 'string':
-                    if (!is_string($value) ){
-                        $sError.="Value '$value' isn't a string";
+                    if (!is_string($value)) {
+                        $sError .= "Value '$value' isn't a string";
                     } else {
-                        if($aOpt['regex']??false){
-                            if(!preg_match($aOpt['regex'], $value)){
-                                $sError.="Value is invalid. Regex doesn't match: $aOpt[regex]";
+                        if ($aOpt['regex'] ?? false) {
+                            if (!preg_match($aOpt['regex'], $value)) {
+                                $sError .= "Value is invalid. Regex doesn't match: $aOpt[regex]";
                             }
                         }
-                        if(isset($aOpt['oneof']) && is_array($aOpt['oneof'])){
-                            if(array_search($value, $aOpt['oneof'])==false){
-                                $sError.="Value is invalid. Value doesn't match one of these values ".print_r($aOpt['oneof']);
+                        if (isset($aOpt['oneof']) && is_array($aOpt['oneof'])) {
+                            if (array_search($value, $aOpt['oneof']) == false) {
+                                $sError .= "Value is invalid. Value doesn't match one of these values " . print_r($aOpt['oneof']);
                             }
                         }
                     }
                     break;
 
                 default:
-                    echo "SKIP valdation - unknown type: $aOpt[type]<br>\n";
+                    $sError.="ERROR Cannot validate unknown type: '$aOpt[type]'<br>\n";
             }
         }
         // if string: verify regex
@@ -99,46 +126,49 @@ class validateparam {
      * @param mixed $bStrict  flag: strict checking to detect wrong keys.
      * @return array with errors
      */
-    public function validateArray($aDefs, $aParams, $bStrict = true)
+    public function validateArray(array $aDefs, array $aParams, bool $bStrict = true)
     {
-        $aErrors=[];
-        // echo "<pre>";
-        // print_r($aParams);
-        // print_r($aDefs); 
-        // echo "<hr>";
+        $aErrors = [];
 
-        $aTmp=$aParams;
-        foreach($aDefs as $sKey => $aOpt){
+        // echo "<pre>";
+        // echo "aDefs = "; print_r($aDefs); 
+        // echo "aParams = "; print_r($aParams);
+        // echo "<hr>";
+        if (!count($aDefs)) {
+            return ['Defs' => 'No validation rules given.'];
+        }
+
+        $aTmp = $aParams;
+        foreach ($aDefs as $sKey => $aOpt) {
             unset($aTmp[$sKey]);
-            if ($aOpt['required']??false){
+            if ($aOpt['required'] ?? false) {
 
                 $this->_wd("Check MUST $sKey");
                 // verify MUST field
-                if(!isset($aParams[$sKey])){
-                    $aErrors[$sKey]="Missing required key '$sKey'";
+                if (!isset($aParams[$sKey])) {
+                    $aErrors[$sKey] = "Missing required key '$sKey'";
                 } else {
                     $this->_wd("MUST field exists: $sKey");
-                    $sError=$this->validateValue($aOpt, $aParams[$sKey]);
-                    if($sError){
-                        $aErrors[$sKey]=$sError;
+                    $sError = $this->validateValue($aOpt, $aParams[$sKey]);
+                    if ($sError) {
+                        $aErrors[$sKey] = $sError;
                     } else {
                         $this->_wd("$sKey was successfully validated.<hr>");
                     }
-                    
+
                 }
             }
-            if(isset($aOpt['required']) && !$aOpt['required'] && isset($aParams[$sKey])){
+            if (isset($aOpt['required']) && !$aOpt['required'] && isset($aParams[$sKey])) {
                 $this->_wd("Check OPTIONAL $sKey");
-                $sError=$this->validateValue($aOpt, $aParams[$sKey]);
-                if($sError){
-                    $aErrors[$sKey]=$sError;
+                $sError = $this->validateValue($aOpt, $aParams[$sKey]);
+                if ($sError) {
+                    $aErrors[$sKey] = $sError;
                 }
             }
         }
-        if($bStrict && count($aTmp)){
-            foreach(array_keys($aTmp) as $sKey)
-            {
-                $aErrors[$sKey]="Invalid key was found: '$sKey'; allowed keys are '".implode("', '", array_keys($aDefs))."'";
+        if ($bStrict && isset($aTmp) && count($aTmp)) {
+            foreach (array_keys($aTmp) as $sKey) {
+                $aErrors[$sKey] = "Invalid key was found: '$sKey'; allowed keys are '" . implode("', '", array_keys($aDefs ?? [])) . "'";
             }
         }
         $this->_wd("found errors: " . print_r($aErrors, 1));

@@ -59,19 +59,25 @@ It can be a mandantory value or optional.
 
 | Name       | Type       | Description
 |--          |--          |--
-| 'type'     | {string}   | variable type that must match; one of "array", "bool", "float", "int", "integer", "string"
+| 'type'     | {string}   | variable type that must match; one of "array", "bool", "count", "float", "int", "integer", "string"
 | 'required' | {bool}     | define value as required
 
 Next to these keys per type you can define validation rules in dependency of the type.
 
 ### Validate numbers
 
-Values of the types "float" and "int"/ "integer" you can verify if it is in awanted range. Both values are optional.
+This section describes values of the `type`
+
+* int|integer - integer values
+* float - float values (or integer)
+
+Values you can verify if it is in a wanted range.
 
 | Name       | Type         | Description
 |--          |--            |--
 | 'min'      | {float\|int} | allowed minimum value
 | 'max'      | {float\|int} | allowed maximum value
+| 'oneof'    | {array}      | value must match one of the given values
 
 ### Validate string
 
@@ -80,7 +86,7 @@ Values of type "string" can be verified
 * against a given regex
 * with a set of allowed values
 
-| Name       | Type       | Description
-|--          |--          |--
-| 'regex'    | {string}   | value must match given regex
-| 'oneof'    | {array}    | value must match one of the given values
+| Name       | Type         | Description
+|--          |--            |--
+| 'regex'    | {string}     | value must match given regex
+| 'oneof'    | {array}      | value must match one of the given values

@@ -90,24 +90,6 @@ class appmonitorcheck
             'type' => 'array',
             'required' => true,
             'description' => 'Array of the check',
-            'children' => [
-                'function' => [
-                    'type' => 'string',
-                    'required' => true,
-                    'description' => 'Function name to call',
-                    'regex'=>'/^[a-zA-Z]*$/',
-                    'example' => 'File',
-                ],
-                'params' => [
-                    'type' => 'array',
-                    // 'required' => true | false, - depends on check
-                    'description' => 'parameters to call',
-
-                    // Remark
-                    // other values will merged from an individual check by fetching explain();
-
-                ]
-            ],
         ],
         'parent' => [
             'type' => 'string',
@@ -314,6 +296,17 @@ class appmonitorcheck
     // ----------------------------------------------------------------------
 
     /**
+     * Self documentation of a check. The array is defined in 
+     * plugins/checks/*.php files
+     * 
+     * @return array
+     */
+    public function explain(): array
+    {
+        return $this->_aDoc??[];
+    }
+
+    /**
      * Perform a check
      * @param array $aConfig  configuration array for a check, eg.
      * <code>
@@ -373,29 +366,29 @@ class appmonitorcheck
         if (!class_exists($sCheckClass)) {
             $this->_exit(
                 503,
-                __METHOD__ . " - check class not found: <code>$sCheckClass</code>"
+                __METHOD__ . " - [$aConfig[name]] - check class not found: <code>$sCheckClass</code>"
                     . "<pre>" . print_r($aConfig, true) . '</pre>',
                 22
             );
         }
 
         $oPlugin = new $sCheckClass;
-        if(method_exists($oPlugin, "explain")){
-            $aCheckDoc=$oPlugin->explain();
-            $aErrors=$oVal->validateArray($oPlugin->explain(), $aParams);
-            if(count($aErrors)){
-                $this->_exit(
-                    503,
-                    __METHOD__ . " - validation of check -> params failed"
-                        . "<pre>Errors: " 
-                            . print_r($aErrors, true)
-                            . "Input array: " 
-                            . print_r($aConfig, true)
-                        . '</pre>',
-                    22
-                );
-            }
+        $aCheckDoc=$oPlugin->explain();
+
+        $aErrors=$oVal->validateArray($oPlugin->explain()['parameters']??[], $aParams);
+        if(count($aErrors)){
+            $this->_exit(
+                503,
+                __METHOD__ . " - [$aConfig[name]] - validation of check -> params failed"
+                    . "<pre>Errors: " 
+                        . print_r($aErrors, true)
+                        . "Input array: " 
+                        . print_r($aConfig, true)
+                    . '</pre>',
+                22
+            );
         }
+            // die(__FILE__.":".__LINE__);
 
         $aResponse = $oPlugin->run($aParams);
         if (!is_array($aResponse)) {

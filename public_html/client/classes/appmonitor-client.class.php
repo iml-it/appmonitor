@@ -46,7 +46,8 @@ if (!class_exists('appmonitorcheck')) {
  * 2025-01-02  0.149  axel.hahn@unibe.ch      add getChecks method
  * 2025-03-03  0.153  axel.hahn@unibe.ch      fix client checks during development of a compiled binary 
  * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with exitcode instead of die()
- * 2025-03-17  0.155  axel.hahn@unibe.ch      added: getVersion() and etVersion()
+ * 2025-03-17  0.155  axel.hahn@unibe.ch      added: getVersion() and setVersion()
+ * 2025-03-19  0.156  axel.hahn@unibe.ch      added: validation rules for parameters in all checks
  * --------------------------------------------------------------------------------<br>
  * @version 0.155
  * @author Axel Hahn
@@ -62,7 +63,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.155';
+    protected string $_sVersion = '0.156';
 
     /**
      * config: default ttl for server before requesting the client check again
