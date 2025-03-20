@@ -184,7 +184,7 @@ class validateparam
 
                 }
             }
-            if (isset($aOpt['required']) && !$aOpt['required'] && isset($aParams[$sKey])) {
+            if (isset($aParams[$sKey])) {
                 $this->_wd("Check OPTIONAL $sKey");
                 $sError = $this->validateValue($aOpt, $aParams[$sKey]);
                 if ($sError) {
