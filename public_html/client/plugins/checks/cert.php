@@ -59,7 +59,7 @@ class checkCert extends appmonitorcheck
                 'required' => true,
                 'description' => 'Url to check https://[server}[:{port}] or ssl://[server}[:{port}]',
                 'default' => null,
-                'regex'=>'^https?:\/\/[^\s]+',
+                'regex'=>'/^(https|ssl):\/\/[^\s]+/',
                 'example' => '',
             ],
             'verify' => [

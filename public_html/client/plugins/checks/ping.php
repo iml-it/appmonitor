@@ -34,11 +34,11 @@ class checkPing extends appmonitorcheck
         'name' => 'Plugin Ping',
         'description' => 'Check if a given host can be pinged.',
         'parameters' => [
-            'connect' => [
+            'host' => [
                 'type' => 'string',
                 'required' => false,
                 'description' => 'Hostname to ping; default: 127.0.0.1',
-                'regex' => '/./',
+                'regex' => '/^[a-z0-9\_\-\.]/i',
 
                 // doc
                 'default' => "127.0.0.1",

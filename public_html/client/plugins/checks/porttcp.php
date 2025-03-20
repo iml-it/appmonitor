@@ -49,8 +49,7 @@ class checkPortTcp extends appmonitorcheck
                 'required' => true,
                 'description' => 'port number to check',
                 'default' => null,
-                'min' => 0,
-                'max' => 65535,
+                'validate' => 'portnumber',
                 'example' => '22',
             ],
             'timeout' => [

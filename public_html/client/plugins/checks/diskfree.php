@@ -38,7 +38,7 @@ class checkDiskfree extends appmonitorcheck
                 'required' => true,
                 'description' => 'directory to check',
                 'default' => null,
-                'regex'=>'^https?:\/\/[^\s]+',
+                'regex'=>'/./',
                 'example' => '',
             ],
             'warning' => [

@@ -37,10 +37,20 @@ class checkMysqlConnect extends appmonitorcheck
                 'type' => 'string',
                 'required' => true,
                 'description' => 'Hostname/ ip of mysql server',
+                'validate' => 'hostname',
 
                 // doc
                 'default' => null,
                 'example' => 'localhost',
+            ],
+            'port' => [
+                'type' => 'int',
+                'required' => false,
+                'description' => 'port of mysql server',
+                'validate' => 'portnumber',
+
+                'default' => 5,
+                'example' => '3',
             ],
             'user' => [
                 'type' => 'string',
