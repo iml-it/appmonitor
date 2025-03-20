@@ -15,3 +15,6 @@ The Appmonitor repository contains the server and the client - written in PHP.
 You can implement a client in other languages. Your script must be able to generate
 the monitorng data in the given JSON structure. You can respond the data directly
 or create static json files.
+
+Another option is using the compiled binary that contains all PHP checks. Instead of writing php code to perform the checks all checks are taken from an INI file.
+📗 <https://os-docs.iml.unibe.ch/appmonitor-cli-client/>
