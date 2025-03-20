@@ -334,7 +334,7 @@ class appmonitorcheck
         if(count($aErrors)){
             $this->_exit(
                 503,
-                __METHOD__ . " - validation of params failed"
+                __METHOD__ . " - validation of params failed\n"
                     . "<pre>Errors: " 
                         . print_r($aErrors, true)
                         . "Input array was: " 
@@ -379,7 +379,7 @@ class appmonitorcheck
         if(count($aErrors)){
             $this->_exit(
                 503,
-                __METHOD__ . " - [$aConfig[name]] - validation of check -> params failed"
+                __METHOD__ . " - [$aConfig[name]] - validation of check -> params failed\n"
                     . "<pre>Errors: " 
                         . print_r($aErrors, true)
                         . "Input array: " 
