@@ -17,7 +17,7 @@ $oMonitor->addCheck(
                 "server"   => $aDb['host'],
                 "user"     => $aDb['user'],
                 "password" => $aDb['pass'],
-                "db"       => $aDb['path'],
+                "db"       => $aDb['database'],
                 "port"     => $aDb['port'], // optional
             ],
         ],

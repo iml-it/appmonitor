@@ -41,10 +41,28 @@
  * 
  * 2019-06-05  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkHello extends appmonitorcheck
 {
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin Hello',
+        'description' => 'Show a simple message',
+        'parameters' => [
+            'message' => [
+                'type' => 'string',
+                'required' => true,
+                'description' => 'Message to show',
+                'default' => "",
+                'regex' => '/./',
+                'example' => 'Here I am',
+            ],
+        ],
+    ];
 
     /**
      * Run the check

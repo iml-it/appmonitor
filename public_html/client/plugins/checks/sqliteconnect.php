@@ -19,10 +19,54 @@
  * 
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
- * 
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkSqliteConnect extends appmonitorcheck
 {
+
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin SqliteConnect',
+        'description' => 'Verify a database connection with PDO connect',
+        'parameters' => [
+            'db' => [
+                'type' => 'string',
+                'required' => true,
+                'description' => 'full path of the sqlite database file',
+                'regex' => '/./',
+
+                // doc
+                'default' => null,
+                'example' => 'mysql:host=$aDb[server];port=3306;dbname=$aDb[database]',
+            ],
+            'user' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Database user to connect with',
+                'default' => null,
+                'example' => 'dbuser',
+            ],
+            'password' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Password of the database user to authenticate',
+                'default' => null,
+                'example' => 'mySecretDatabasePassword',
+            ],
+            'timeout' => [
+                'type' => 'float',
+                'required' => false,
+                'description' => 'Timeout in sec',
+
+                'default' => 5,
+                'example' => '3',
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * @return string

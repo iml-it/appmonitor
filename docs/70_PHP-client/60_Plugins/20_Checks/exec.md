@@ -43,9 +43,9 @@ $oMonitor->addCheck(
 | key         | type     | description
 |---          |---       |---
 |command🔸    |(string)  |filename or directory to check
-|exitOK       |(array)   |array of integegers for ok exitcodes
-|exitWarn     |(array)   |array of integegers for exitcodes with warning
-|exitCritical |(array)   |array of integegers for exitcodes that result in an error (otherwise the plugin can return OK or CRITITCAL only)
+|exitOK       |(array)   |array of integers for ok exitcodes
+|exitWarn     |(array)   |array of integers for exitcodes with warning
+|exitCritical |(array)   |array of integers for exitcodes that result in an error (otherwise the plugin can return OK or CRITITCAL only)
 |output       |(bool)    |flag: show output of the executed command; default: true
 
 🔸 required

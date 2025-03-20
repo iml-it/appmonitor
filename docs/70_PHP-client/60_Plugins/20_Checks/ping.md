@@ -2,7 +2,7 @@
 
 ## Description ##
 
-Check if the local server or another host is listening to a given port number.
+Check if a given host can be pinged.
 
 ## Syntax ##
 

@@ -21,9 +21,32 @@
  * 2022-09-16  <axel.hahn@iml.unibe.ch>  read error before closing socket.
  * 2022-11-22  <axel.hahn@iml.unibe.ch>  Use exec with detecting MS Win for the ping parameter for count of pings
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkPing extends appmonitorcheck
 {
+
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin Ping',
+        'description' => 'Check if a given host can be pinged.',
+        'parameters' => [
+            'host' => [
+                'type' => 'string',
+                'required' => false,
+                'description' => 'Hostname to ping; default: 127.0.0.1',
+                'regex' => '/^[a-z0-9\_\-\.]/i',
+
+                // doc
+                'default' => "127.0.0.1",
+                'example' => 'www.example.com',
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * @return string

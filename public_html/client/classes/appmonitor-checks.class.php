@@ -1,4 +1,5 @@
 <?php
+require_once 'validateparam.class.php';
 
 if (!defined('RESULT_OK')) {
     define("RESULT_OK", 0);
@@ -55,8 +56,9 @@ if (!defined('RESULT_OK')) {
  * 2025-02-28  0.152  axel.hahn@unibe.ch      listChecks: add loop over currently loaded classes
  * 2025-03-03  0.153  axel.hahn@unibe.ch      getSize() preg_replace did not work in compiled binary
  * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with existcode instead of die()
+ * 2025-03-18  0.156  axel.hahn@unibe.ch      add validation class
  * --------------------------------------------------------------------------------<br>
- * @version 0.154
+ * @version 0.156-dev
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -68,6 +70,47 @@ class appmonitorcheck
     // ----------------------------------------------------------------------
     // CONFIG
     // ----------------------------------------------------------------------
+
+    protected array $_aCheckDocs = [
+        'name' => [
+            'type' => 'string',
+            'required' => true,
+            'description' => 'Name of a check',
+            'regex'=>'/./',
+            'example' => 'configfile',
+        ],
+        'description' => [
+            'type' => 'string',
+            'required' => true,
+            'description' => 'A short description to describe what is tested',
+            'regex'=>'/./',
+            'example' => 'Check if config file inc_config.php exists, is readable and writable',
+        ],
+        'check' => [
+            'type' => 'array',
+            'required' => true,
+            'description' => 'Array of the check',
+        ],
+        'parent' => [
+            'type' => 'string',
+            'required' => false,
+            'description' => 'Reference a \'name\' of another check to generate a dependency tree',
+            'regex'=>'/./',
+        ],
+        'group' => [
+            'type' => 'string',
+            'required' => false,
+            'description' => 'Name of a group to be nedsted in',
+            'regex'=>'/./',
+        ],
+        'worstresult' => [
+            'type' => 'int',
+            'required' => false,
+            'description' => 'A failed check is max counted as given result. Use it on not required but optional checks',
+            'min'=>RESULT_OK,
+            'max'=>RESULT_ERROR,
+        ],
+    ];
 
     /**
      * starting time using microtime
@@ -217,16 +260,17 @@ class appmonitorcheck
     /**
      * Check a given array if it contains wanted keys
      * @param array  $aConfig   array to verify
-     * @param string $sKeyList  key or keys as comma seprated list 
+     * @param string $sMustKeys  key or keys as comma seprated list 
      * @return boolean
      */
-    protected function _checkArrayKeys($aConfig, $sKeyList)
+    protected function _checkArrayKeys($aConfig, $sMustKeys, $sOptionalKeys = '')
     {
-        foreach (explode(",", $sKeyList) as $sKey) {
+        $aTmp=$aConfig;
+        foreach (explode(",", $sMustKeys) as $sKey) {
             if (!isset($aConfig[$sKey])) {
                 $this->_exit(
                     503, 
-                    __METHOD__ . " - array of check parameters requires the keys [$sKeyList] - but key <code>$sKey</code> was not found in config array."
+                    __METHOD__ . " - array of check parameters requires the keys [$sMustKeys] - but key <code>$sKey</code> was not found in config array."
                         . "<pre>" . print_r($aConfig, true) . '</pre>',
                     20
                 );
@@ -239,13 +283,28 @@ class appmonitorcheck
                     21
                 );
             }
+            unset($aTmp[$sKey]);
         }
+
         return true;
     }
+
+ 
 
     // ----------------------------------------------------------------------
     // PUBLIC FUNCTIONS
     // ----------------------------------------------------------------------
+
+    /**
+     * Self documentation of a check. The array is defined in 
+     * plugins/checks/*.php files
+     * 
+     * @return array
+     */
+    public function explain(): array
+    {
+        return $this->_aDoc??[];
+    }
 
     /**
      * Perform a check
@@ -259,6 +318,9 @@ class appmonitorcheck
      *         [params] => [array]            // optional; arguments for Check function
      *                                        // its keys depend on the function  
      *     ]
+     *     [group] => Group A
+     *     [parent] => field "name" of another check
+     *     [worstresult] => RESULT_WARNING
      * ]
      * </code>
      * @return array
@@ -266,8 +328,24 @@ class appmonitorcheck
     public function makeCheck(array $aConfig): array
     {
         $this->_iStart = microtime(true);
-        $this->_checkArrayKeys($aConfig, "name,description,check");
-        $this->_checkArrayKeys($aConfig["check"], "function");
+
+        $oVal=new validateparam();
+        $aErrors=$oVal->validateArray($this->_aCheckDocs, $aConfig);
+        if(count($aErrors)){
+            $this->_exit(
+                503,
+                __METHOD__ . " - validation of params failed\n"
+                    . "<pre>Errors: " 
+                        . print_r($aErrors, true)
+                        . "Input array was: " 
+                        . print_r($aConfig, true)
+                    . '</pre>',
+                22
+            );
+        }
+
+        $this->_checkArrayKeys($aConfig, "name,description,check", "group,parent,worstresult", true);
+        $this->_checkArrayKeys($aConfig["check"], "function", "params", true);
 
         $this->_aConfig = $aConfig;
         $this->_createDefaultMetadata();
@@ -288,13 +366,30 @@ class appmonitorcheck
         if (!class_exists($sCheckClass)) {
             $this->_exit(
                 503,
-                __METHOD__ . " - check class not found: <code>$sCheckClass</code>"
+                __METHOD__ . " - [$aConfig[name]] - check class not found: <code>$sCheckClass</code>"
                     . "<pre>" . print_r($aConfig, true) . '</pre>',
                 22
             );
         }
 
         $oPlugin = new $sCheckClass;
+        $aCheckDoc=$oPlugin->explain();
+
+        $aErrors=$oVal->validateArray($oPlugin->explain()['parameters']??[], $aParams);
+        if(count($aErrors)){
+            $this->_exit(
+                503,
+                __METHOD__ . " - [$aConfig[name]] - validation of check -> params failed\n"
+                    . "<pre>Errors: " 
+                        . print_r($aErrors, true)
+                        . "Input array: " 
+                        . print_r($aConfig, true)
+                    . '</pre>',
+                22
+            );
+        }
+            // die(__FILE__.":".__LINE__);
+
         $aResponse = $oPlugin->run($aParams);
         if (!is_array($aResponse)) {
             $this->_exit(

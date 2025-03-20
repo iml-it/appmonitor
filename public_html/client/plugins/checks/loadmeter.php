@@ -45,10 +45,37 @@
  * 2019-06-06  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2024-07-25  <axel.hahn@unibe.ch>      float return with 2 digits behind comma
- * 
+ * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  */
 class checkLoadmeter extends appmonitorcheck
 {
+    /**
+     * Self documentation and validation rules
+     * @var array
+     */
+    protected array $_aDoc = [
+        'name' => 'Plugin Loadmeter',
+        'description' => 'Get system load and render it as a tile.',
+        'parameters' => [
+            'warning' => [
+                'type' => 'float',
+                'required' => false,
+                'description' => 'Warning level',
+
+                // doc
+                'default' => null,
+                'example' => '1.5',
+            ],
+            'error' => [
+                'type' => 'float',
+                'required' => false,
+                'description' => 'Critical level when to raise an error',
+                'default' => null,
+                'example' => '2.5',
+            ],
+        ],
+    ];
+
     /**
      * Get default group of this check
      * @return string

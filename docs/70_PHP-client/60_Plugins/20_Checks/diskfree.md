@@ -59,4 +59,23 @@ Example for Diskfree size params:
 
 ## Examples ##
 
-None yet.
+```php
+
+// Remark: 
+// $aConfig['archiveDir'] is a directory read from configuration file.
+
+$oMonitor->addCheck([
+    "name" => "Free space in Archive dir ",
+    "description" => "The file storage must have some space left",
+    "check" => [
+        "function" => "Diskfree",
+        "parent" => "read config file",
+        "params" => [
+            "directory" => $aConfig['archiveDir'],
+            "warning"   => "2GB",
+            "critical"  => "500MB",
+        ],
+    ],
+    ]
+);
+```

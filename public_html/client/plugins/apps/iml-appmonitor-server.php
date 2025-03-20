@@ -222,7 +222,7 @@ $oMonitor->addCheck(
         "name" => "appcounter",
         "description" => "Monitored apps",
         "group" => "monitor",
-        "parent" => false,
+        "parent" => null,
         "check" => [
             "function" => "Simple",
             "params" => [
@@ -273,7 +273,7 @@ $oMonitor->addCheck(
         "name" => "plugin Load",
         "description" => "current load",
         "group" => 'monitor',
-        "parent" => false,
+        "parent" => null,
         "check" => [
             "function" => "Loadmeter",
             "params" => [
