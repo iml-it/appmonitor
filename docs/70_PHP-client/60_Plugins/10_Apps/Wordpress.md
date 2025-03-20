@@ -5,6 +5,12 @@
 * Source: <https://github.com/WordPress/WordPress>
 * License: GNU General Public License 2
 
+## Screenshot
+
+Tree view of application default check with **5** items in the server web ui:
+
+![wordpress](../../../images/apps_wordpress.png)
+
 ## Minimal variant
 
 You can open .../appmonitor/plugins/apps/**wordpress**.php as url like
