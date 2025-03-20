@@ -51,6 +51,7 @@ Array
 )
 ```
 
+
 ### Type check
 
 Each key can be marked to be a value of a given type.
@@ -90,3 +91,42 @@ Values of type "string" can be verified
 |--          |--            |--
 | 'regex'    | {string}     | value must match given regex
 | 'oneof'    | {array}      | value must match one of the given values
+
+### Validate with presets
+
+In the file *validateparam.settings.php* you can put presets and their validation rules for elements that repeat.
+
+```php
+<?php
+/*
+
+    validation rules 
+    if a param has the key 'validate' that matches a key then its values will
+    be added for validation.
+
+    SYNTAX
+
+    KEY - value for'validate' key
+    VALUE - array with these possible keys
+            - type  - set a type
+            - regex - define a regex for type sting
+            - min, max - range for types float and int
+            - oneof
+*/
+
+
+return [
+    'hostname'   => [ 'type' => 'string', 'regex' => '/^[a-z0-9\_\-\.]/i'],
+    'portnumber' => [ 'type' => 'int',    'min' => 0, 'max' => 65535],
+    'website'    => [ 'type' => 'string', 'regex' => '/https?:\/\//'],
+];
+```
+
+```txt
+[port] => Array
+    (
+        [type] => int
+        [required] => true
+        [validate] => portnumber
+    )
+```

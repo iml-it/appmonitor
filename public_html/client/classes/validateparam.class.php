@@ -2,20 +2,37 @@
 class validateparam
 {
 
-    protected array $_aRegexDefs = [
-        'website' => '/https?:\/\//'
-    ];
+    /**
+     * Summary of _aValidationDefs
+     * @var array
+     */
+    protected array $_aValidationDefs = [];
 
     protected bool $_flag_debug = false;
 
 
-    protected function _wd($s)
+    /**
+     * Write debug line if _flag_debug is set to true
+     * @param string $s  message to show
+     * @return void
+     */
+    protected function _wd(string $s)
     {
         if ($this->_flag_debug) {
             echo "DEBUG: $s<br>\n";
         }
     }
 
+    /**
+     * Include the default validation rules defined in validateparam.settings.php
+     */
+    public function __construct(){
+        // IMPORTANT:
+        // This style is not so nice like <variable> = include <file>;
+        // keep the include line unchanged - it is detected by installer 
+        // CLI client project (amcli)
+        include 'validateparam.settings.php';
+    }
 
     /**
      * shared validaten checks for floor and integer
@@ -59,6 +76,15 @@ class validateparam
     {
         $sError = '';
 
+        if (isset($aOpt['validate'])){
+
+            if ($this->_aValidationDefs[$aOpt['validate']] ?? false) {
+                $this->_wd("adding options ".print_r($this->_aValidationDefs[$aOpt['validate']],true));
+                $aOpt = array_merge($aOpt, $this->_aValidationDefs[$aOpt['validate']]);
+            } else {
+                $sError .= "Unknown value in 'validate'='$aOpt[validate]'";
+            }
+        }
         // check type
         if (isset($aOpt['type'])) {
             $this->_wd("check type $aOpt[type]");
@@ -109,7 +135,7 @@ class validateparam
                     break;
 
                 default:
-                    $sError.="ERROR Cannot validate unknown type: '$aOpt[type]'<br>\n";
+                    $sError .= "ERROR Cannot validate unknown type: '$aOpt[type]'<br>\n";
             }
         }
         // if string: verify regex
