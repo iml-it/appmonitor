@@ -28,12 +28,14 @@ $oMonitor->addCheck(
 
 | key      | type     | description
 |---       |---       |---
-|url       |(string)  |url to connect check i.e. <https://example.com:3000>; default: own protocol + server of your webapp
+|url *     |(string)  |url to connect check i.e. <https://example.com:3000>; default: own protocol + server of your webapp
 |verify    |(boolean) |optional: flag verify certificate; default = true
 |warning   |(integer) |optional: count of days to warn; default=21
 |critical  |(integer) |optional: count of days to raise critical; default=5
 
-I recommend to set verify to *true*. If you should get a warning like
+(*) The field url is required for fon non PHP webs eg. when using amcli client.
+
+I recommend to leave verify on *true*. If you should get a warning like
 
 ```text
 PHP Warning:  stream_socket_client(): SSL operation failed with code 1. OpenSSL Error messages:

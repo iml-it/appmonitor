@@ -57,7 +57,7 @@ class checkCert extends appmonitorcheck
             'url' => [
                 'type' => 'string',
                 'required' => true,
-                'description' => 'Url to check https://[server}[:{port}] or ssl://[server}[:{port}]',
+                'description' => 'Url to check https://[server}[:{port}] or ssl://[server}[:{port}]; autodetected on webserver with php but required on cli',
                 'default' => null,
                 'regex'=>'/^(https|ssl):\/\/[^\s]+/',
                 'example' => '',
@@ -85,6 +85,18 @@ class checkCert extends appmonitorcheck
             ],
         ],
     ];
+
+    /**
+     * Override explain()
+     * If https is used, url is not required because it can be autodetected from $_SERVER
+     */
+    public function explain(): array
+    {
+        if($_SERVER['HTTPS']??false && $_SERVER['SERVER_NAME']??false){
+            $this->_aDoc['parameters']['url']['required']=false;
+        }
+        return $this->_aDoc;
+    }
 
     /**
      * Get default group of this check
