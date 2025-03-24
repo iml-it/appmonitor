@@ -48,8 +48,9 @@ if (!class_exists('appmonitorcheck')) {
  * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with exitcode instead of die()
  * 2025-03-17  0.155  axel.hahn@unibe.ch      added: getVersion() and setVersion()
  * 2025-03-19  0.156  axel.hahn@unibe.ch      added: validation rules for parameters in all checks
+ * 2025-03-24  0.157  axel.hahn@unibe.ch      update validator for bool check in ini files
  * --------------------------------------------------------------------------------<br>
- * @version 0.155
+ * @version 0.157
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -63,7 +64,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.156';
+    protected string $_sVersion = '0.157';
 
     /**
      * config: default ttl for server before requesting the client check again

@@ -96,7 +96,10 @@ class validateparam
                     break;
                 case 'bool':
                     if (!is_bool($value)) {
-                        $sError .= "Value '$value' isn't a bool";
+                        // special case for bool after ini parsing
+                        if(!$value==="" || !$value===1){
+                            $sError .= "Value '$value' isn't a bool";
+                        }
                     }
                     break;
 
