@@ -2781,6 +2781,15 @@ class appmonitorserver_gui extends appmonitorserver
     public function renderHtml(): string
     {
 
+        $aRoles = $this->getRoles();
+        if (!$this->hasRole('ui')) {
+            die("No ui access for user " . $this->getUsername() . ".");
+        }
+
+        if ($this->hasRole('ui-config')) {
+            require __DIR__ . '/../vendor/mfa-client/mfa-ensure.php';
+        }
+
         $oCdn = new axelhahn\cdnorlocal([
             'vendordir' => __DIR__ . '/../vendor',
             'vendorurl' => './vendor/',
@@ -2807,10 +2816,6 @@ class appmonitorserver_gui extends appmonitorserver
 
         $iReload = ((isset($this->_aCfg['pagereload']) && (int) $this->_aCfg['pagereload']) ? (int) $this->_aCfg['pagereload'] : 0);
 
-        $aRoles = $this->getRoles();
-        if (!$this->hasRole('ui')) {
-            die("No ui access for user " . $this->getUsername() . ".");
-        }
         $sNavi .= '<li><a href="#" title="'
             . 'uid: ' . $this->getUserid() . "\n"
             . $this->_tr('Hello-roles') . ': ' . ($aRoles && count($aRoles) ? implode(', ', $aRoles) : '-') . "\n"
