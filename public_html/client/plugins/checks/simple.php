@@ -20,6 +20,7 @@
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2025-04-35  <axel.hahn@unibe.ch>      validate count in simple check as string (before: float)
  */
 class checkSimple extends appmonitorcheck
 {
@@ -58,7 +59,7 @@ class checkSimple extends appmonitorcheck
                 'example' => 'counter',
             ],
             'count' => [
-                'type' => 'float',
+                'type' => 'string',
                 'required' => false,
                 'description' => 'If a count exists in a check then a tile will be rendered as a tile',
                 'default' => null,

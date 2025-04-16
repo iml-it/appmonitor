@@ -49,8 +49,9 @@ if (!class_exists('appmonitorcheck')) {
  * 2025-03-17  0.155  axel.hahn@unibe.ch      added: getVersion() and setVersion()
  * 2025-03-19  0.156  axel.hahn@unibe.ch      added: validation rules for parameters in all checks
  * 2025-03-24  0.157  axel.hahn@unibe.ch      update validator for bool check in ini files
+ * 2025-04-35  0.158  axel.hahn@unibe.ch      validate count in simple check as string (before: float)
  * --------------------------------------------------------------------------------<br>
- * @version 0.157
+ * @version 0.158
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -64,7 +65,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.157';
+    protected string $_sVersion = '0.158';
 
     /**
      * config: default ttl for server before requesting the client check again
