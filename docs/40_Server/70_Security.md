@@ -82,6 +82,8 @@ Add a section for each known `[username]` to define its roles on account level.
 
 ## MFA
 
+⚠️ This feature is work in progress.
+
 Since April 2025 the program includes a mfa client that connects to an MFA server instance - <https://git-repo.iml.unibe.ch/iml-open-source/mfa-server>.
 
 (1)

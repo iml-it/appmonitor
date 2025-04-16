@@ -142,8 +142,8 @@ $oMonitor->addCheck(
             "params" => [
                 "result" => RESULT_OK,
                 "value" => $CONFIG['version'] ?? "??",
-                "count" => $CONFIG['version'] ?? "??",
-                "visual" => "simple"
+                // "count" => $CONFIG['version'] ?? "??",
+                // "visual" => "simple"
             ],
         ],
     ]

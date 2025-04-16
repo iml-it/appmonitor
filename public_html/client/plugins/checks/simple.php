@@ -59,7 +59,7 @@ class checkSimple extends appmonitorcheck
                 'example' => 'counter',
             ],
             'count' => [
-                'type' => 'string',
+                'type' => 'float',
                 'required' => false,
                 'description' => 'If a count exists in a check then a tile will be rendered as a tile',
                 'default' => null,
