@@ -103,13 +103,12 @@ class mfaclient
         return $aReturn;
     }
 
-
     /**
      * Generate a HMAC key
      * 
-     * @param string $sMethod
-     * @param string $sRequest
-     * @param string $sTimestamp
+     * @param string $sMethod     http method, eg POST
+     * @param string $sRequest    request path
+     * @param string $sTimestamp  timestamp
      * @return string
      */
     protected function _getToken(string $sMethod, string $sRequest, string $sTimestamp): string
@@ -127,7 +126,7 @@ class mfaclient
      * @param string $sAction  name of action; one of checks|urls|logout
      * @return array of request and response
      */
-    protected function _api($sAction): array
+    protected function _api(string $sAction): array
     {
         // $sTimestamp = date("r");
         $sTimestamp = microtime(true);
@@ -145,16 +144,16 @@ class mfaclient
                 "timestamp" => $sTimestamp,
                 "appid" => $this->aConfig['appid'],
                 "token" => $this->_getToken("POST", $sRequest, $sTimestamp),
-                
+
                 // don't set client ip if gateway ip is needed
                 // "ip" => $_SERVER['REMOTE_ADDR']??'',
-                
-                "useragent" => $_SERVER['HTTP_USER_AGENT']??'',
+
+                "useragent" => $_SERVER['HTTP_USER_AGENT'] ?? '',
             ]
         ];
-        // store request to see it in debugging output
+
         $aReturn['request'] = $aRequest;
-        $aReturn=[
+        $aReturn = [
             'request' => $aRequest,
             'response' => $this->_httpRequest($aRequest),
         ];
@@ -162,11 +161,21 @@ class mfaclient
 
     }
 
-
-    public function jumpform($sUrl, $sSubmit = '<button>Follow me</button>', $sBackUrl='', $sFormId = '')
+    /**
+     * Generate html code for jump form.
+     * With it a user can jump from current app to mfa server to setup mfa 
+     * methods or solve a challenge
+     * 
+     * @param string $sUrl      url to jump (mfa server setup page or page to solve challenge)
+     * @param string $sSubmit   html code for a submit button
+     * @param string $sBackUrl  url to return from mfa server to the application
+     * @param string $sFormId   form id
+     * @return string
+     */
+    public function jumpform(string $sUrl, string $sSubmit = '<button>Follow me</button>', string $sBackUrl = '', string $sFormId = '')
     {
         // $sTimestamp = date("r");
-        $sTimestamp = microtime(true);
+        $sTimestamp = microtime(true); // microtime to have more uniqueness on milliseconds
 
         $sRequest = parse_url($sUrl, PHP_URL_PATH) . '' . parse_url($sUrl, PHP_URL_QUERY);
 
@@ -174,8 +183,8 @@ class mfaclient
             . ""
             . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"
         ;
-        $sFormId = $sFormId?:"mfa-form";
-        return "<form method=\"POST\" id=\"$sFormId\" action=\"$sUrl\">
+        $sFormId = $sFormId ?: "mfa-form";
+        $sReturn = "<form method=\"POST\" id=\"$sFormId\" action=\"$sUrl\">
                     <input type=\"hidden\" name=\"user\" value=\"" . $this->sUser . "\">
                     <input type=\"hidden\" name=\"appid\" value=\"" . $this->aConfig['appid'] . "\">
                     <input type=\"hidden\" name=\"request\" value=\"$sRequest\">
@@ -187,23 +196,52 @@ class mfaclient
                     $sSubmit
                 </form>
         ";
+        $this->_wd(__METHOD__ . '<br>Html code of form with jump button:<pre>' . htmlentities($sReturn) . '</pre>');
+        return $sReturn;
     }
 
-    protected function _jump($sUrl, $sSubmit = '<button>Follow me</button>', $sBackUrl=''): string
+    /**
+     * Initiate a smooth direct jump from current app to mfa server to setup mfa 
+     * methods or solve a challenge.
+     * It uses jumpform() to render a form and adds a javascript for an automatic 
+     * submit.
+     * 
+     * @see jumpform()
+     * 
+     * @param string $sUrl      url to jump (mfa server setup page or page to solve challenge)
+     * @param string $sSubmit   html code for a submit button
+     * @param string $sBackUrl  url to return from mfa server to the application
+     * @return string
+     */
+    protected function _jump(string $sUrl, string $sSubmit = '<button>Follow me</button>', string $sBackUrl = ''): string
     {
         $sFormId = "form-" . md5($sBackUrl);
-        return $this->jumpform($sUrl, $sSubmit , $sBackUrl, $sFormId )
-            ."<script>
+        return $this->jumpform($sUrl, $sSubmit, $sBackUrl, $sFormId)
+            . ($this->bDebug
+                ? ''
+                : "<script>
                     window.onload = function() {
-                        // document.getElementById('$sFormId').submit();
+                        document.getElementById('$sFormId').submit();
                     }
-              </script>";
+                </script>"
+            )
+        ;
 
     }
 
+    /**
+     * Write dubug output.
+     * Debug mode must be enabled first.
+     * $o->debug(true);
+     * 
+     * @see debug()
+     * 
+     * @param string $sMessage
+     * @return void
+     */
     protected function _wd(string $sMessage): void
     {
-        if($this->bDebug){
+        if ($this->bDebug) {
             echo __CLASS__ . " - DEBUG: $sMessage<br>\n";
         }
     }
@@ -249,8 +287,8 @@ class mfaclient
      * Logout
      * @return void
      */
-    public function logout(){
-        $this->_api("logout");
+    public function logout()
+    {
         unset($_SESSION['mfa']['user']);
     }
 
@@ -259,17 +297,31 @@ class mfaclient
     // ----------------------------------------------------------------------
 
 
-    public function showHtml($iHttpStatus, $sHtmlcode){
-        http_response_code($iHttpStatus);
+    /**
+     * Show html message and abort to prevent visibility of the app without 
+     * solved mfa
+     * 
+     * @param int $iHttpStatus   http statuscode to set
+     * @param string $sHtmlcode  http body to show
+     * @return never
+     */
+    public function showHtml(int $iHttpStatus, string $sHtmlcode)
+    {
+        if ($this->bDebug) {
+            echo "Remark: Cannot set http status [$iHttpStatus] because of debug output<hr>";
+        } else {
+            http_response_code($iHttpStatus);
+        }
         die('<!doctype html><html>
         <head><title>MFA server message</title>
         <style>
-            body{background:#f8f8f8f; color: #345; font-size: 1.2em; font-family: Arial, Helvetica, sans-serif; margin: 2em;}
+            body{background:#f0f5f8; color: #335; font-size: 1.2em; font-family: Arial, Helvetica, sans-serif;}
             a{color: #44c;}
             button{border-color: 2px solid #ccc ; border-radius: 0.5em; padding: 0.7em;}
-            h1{color: #9ab;}
+            div{background:#fff; border-radius: 1em; box-shadow: 0 0 1em #ccc; margin: 4em auto; max-width: 600px; padding: 2em;}
+            h1{margin: 0 0 1em;;}
         </style></head>
-        <body>'.$sHtmlcode.'</body>
+        <body><div>' . $sHtmlcode . '</div></body>
         </html>');
     }
 
@@ -300,24 +352,28 @@ class mfaclient
         }
 
         $aMfaReturn = $this->check();
-        $this->_wd("<pre>DEBUG: ".print_r($aMfaReturn, 1)."</pre>"); 
-        // die();
-        $aBody = json_decode($aMfaReturn['response']['body'], 1);
+        $this->_wd(__METHOD__ . "<br>Http request to mfa api<pre>" . print_r($aMfaReturn, 1) . "</pre>");
+        $aBody = json_decode($aMfaReturn['response']['body'] ?? '', 1);
         $iHttpStatus = $aBody['status'] ?? -1;
 
-        // die();
         if ($iHttpStatus == 401) {
-            $this->showHtml($iHttpStatus, 
-                "<h1>MFA server</h1>" . $aBody['message'].'<br><br>'
-                .$this->_jump($aBody['url'],'<button>Follow me</button>', )
+            $this->showHtml(
+                $iHttpStatus,
+                "<h1>MFA server</h1>"
+                . "⚠️ " . $aBody['message'] . '<br><br>'
+                . $this->_jump($aBody['url'], '<button>Follow me</button>', )
             );
         }
         if ($iHttpStatus != 200) {
-            http_response_code($iHttpStatus);
-            $this->showHtml($iHttpStatus, 
-                "<h1>MFA server - Error $iHttpStatus</h1>" 
-                . ($aBody['error'] ?? 'Invalid response') . "<br>" 
-                . ($aBody['message'] ?? 'No valid response was sent back.') . '<br><a href="">Try again</a>'
+            $this->showHtml(
+                $iHttpStatus,
+                "<h1>MFA server - Error $iHttpStatus</h1>"
+                . "❌ <strong>" . ($aBody['error'] ?? 'Invalid API response') . "</strong><br>"
+                . ($aBody['message'] ?? 'No valid JSON response was sent back.') . '<br>'
+                . ($aMfaReturn['response']['header'][0] ?? '') . '<br>'
+                . (($aMfaReturn['response']['error'] ?? '') ? '<br><strong>Curl error:</strong><br>' . $aMfaReturn['response']['error'] . '<br>' : '')
+                . '<br><br><a href="">Try again</a>'
+                //.'<br><pre>'.print_r($aMfaReturn, 1).'</pre>'
             );
         }
 
@@ -330,18 +386,19 @@ class mfaclient
 
     /**
      * Open User settings to setup mfa methods
+     * 
      * @param string $sUrl
      * @param string $sSubmitBtn
      * @return void
      */
-    public function openSetup(string $sUrl='', string $sSubmitBtn='<button>MFA Setup</button>', $sBackUrl='')
+    public function openSetup(string $sUrl = '', string $sSubmitBtn = '<button>MFA Setup</button>', $sBackUrl = '')
     {
-        if(!$sUrl){
-            $aBody=json_decode($this->_api("urls")['response']['body'], 1);
-            $sUrl=$aBody['setup']??'';
+        if (!$sUrl) {
+            $aBody = json_decode($this->_api("urls")['response']['body'], 1);
+            $sUrl = $aBody['setup'] ?? '';
         }
-        if($sUrl){
-            $sBackUrl=$sBackUrl?:$_SERVER['HTTP_REFERER'];
+        if ($sUrl) {
+            $sBackUrl = $sBackUrl ?: $_SERVER['HTTP_REFERER'];
             $this->_jump($sUrl, $sSubmitBtn, $sBackUrl);
         }
     }

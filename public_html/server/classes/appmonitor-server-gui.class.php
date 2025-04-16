@@ -2785,9 +2785,10 @@ class appmonitorserver_gui extends appmonitorserver
         if (!$this->hasRole('ui')) {
             die("No ui access for user " . $this->getUsername() . ".");
         }
-
-        if ($this->hasRole('ui-config')) {
-            require __DIR__ . '/../vendor/mfa-client/mfa-ensure.php';
+        if ($this->_aCfg["mfa"]["include"]??false && $this->_aCfg["mfa"]["role"]&&false){
+            if ($this->hasRole($this->_aCfg["mfa"]["role"])) {
+                require __DIR__ . '/..'.$this->_aCfg["mfa"]["include"];
+            }    
         }
 
         $oCdn = new axelhahn\cdnorlocal([

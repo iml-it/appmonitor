@@ -1,6 +1,12 @@
 <?php
+/**
+ * mfa-ensure.php
+ * 
+ * @author Axel Hahn <axel.hahn@unibe>
+ * @package IML-Appmonitor
+ * 
+ */
 
-// $_SERVER['REMOTE_USER']="axel";
 if(!($_SERVER['REMOTE_USER']??false)){
     return true;
 }
@@ -13,6 +19,6 @@ if(!($aConfig["mfa"]['api']??false)){
 require_once __DIR__.'/mfaclient.class.php';
 $mfa = new mfaclient($aConfig["mfa"], ($_SERVER['REMOTE_USER']??''));
 
-// $mfa->debug(true);
+$mfa->debug($aConfig["mfa"]['debug']??false);
 
 $iHttpStatus=$mfa->ensure();

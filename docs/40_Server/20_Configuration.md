@@ -38,6 +38,10 @@ appmonitor-server-config-defaults.json to appmonitor-server-config.json
     "curl":{
         "timeout": 15
     },
+    "mfa": {
+        "role": "ui-config"
+        "include": "/vendor/mfa-client/mfa-ensure.php"
+    },
     "notifications":{
         "from": {
             "email":"sysadmin@example.com",
@@ -91,6 +95,7 @@ _debug_         | \{bool\} show debug tab with internal values
 _db_            | \{array\} databse connection
 _lang_          | \{string\} language (en-en\|de-de)
 _layout_        | \{string\} name of adminLte layout (one of fixed\|layout-boxed\|layout-top-nav\|sidebar-mini(=default)\|sidebar-collapse)
+_mfa_           | \{array\} enable mfa by a given include script
 _notifications_ | \{array\} notification setup
 _pagereload_    | \{integer\} auto refresh of server webgui in sec (0=off; default: 60)
 _serverurl_     | \{string\} url of installation; it is used for notification only
@@ -149,6 +154,15 @@ see <https://www.php.net/manual/en/pdo.connect.php>.
 The default configuration handles a sqlite file in data directory. In custom settings you can define another filename eg. to put the database file outside webroot.
 
 Using a mysql database and switching between mysql and sqlite will be possible too (needs to be tested and documented).
+
+### mfa
+
+Enable MFA by a given include script
+
+key       | description
+----------|---------------------------
+role      | Name of role that is needed to require mfa, one of "ui" or "ui-config"
+include   | script wih replative ptah from webroot; "/vendor/mfa-client/mfa-ensure.php" is part of the delivered source code and requests mfa from mfa server - <https://git-repo.iml.unibe.ch/iml-open-source/mfa-server>
 
 ### notifications
 
