@@ -80,7 +80,56 @@ Add a section for each known `[username]` to define its roles on account level.
     ...
 ```
 
-### Sensitive data
+## MFA
+
+Since April 2025 the program includes a mfa client that connects to an MFA server instance - <https://git-repo.iml.unibe.ch/iml-open-source/mfa-server>.
+
+(1)
+
+You need to run a MFA server instance before using before you can configure a connection to it on IML Appmonitor.
+
+In its admin add a new application with name and the url of the web app.
+You get a snippet with application id and a generated secret.
+
+(2)
+
+You need to enable mfa.
+
+You can configure the IML appmonitor to use mfa for all users or users with edit permissions only by setting a role.
+The value for "include" points to a script that will be includede to ensure that a mfa chllenge was solved.
+
+Configuration snippet:
+
+```txt
+    "mfa": {
+        "role": "ui-config" << "ui" or "ui-config"
+        "include": "/vendor/mfa-client/mfa-ensure.php"
+    },
+    ...
+```
+
+(3)
+
+Create the file `/server/vendor/mfa-client/mfaconfig.php`. Paste the code snippet with the configuration to connect the MFA server api.
+
+```text
+<?php
+
+return [
+
+  "mfa" => [
+    "api" => "https://mfa.example.com/api/",
+    "appid" => "c1cabd22fbdb698861ad08b27de7399a",
+    "shared_secret" => "p9wjjXSewZq0VkM1t5Sm3ZbI4ATEVetU",
+
+    "debug" => false,
+
+  ]
+
+];
+```
+
+## Sensitive data
 
 These files _may_ contain sensitive data and could be interesting for hackers. Deny the web access for
 
