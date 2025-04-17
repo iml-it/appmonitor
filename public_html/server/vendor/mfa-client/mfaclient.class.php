@@ -139,14 +139,14 @@ class mfaclient
             "method" => "POST",
             "postdata" => [
                 "action" => $sAction,
-                "user" => $this->sUser,
+                "username" => $this->sUser,
                 "request" => $sRequest,
                 "timestamp" => $sTimestamp,
                 "appid" => $this->aConfig['appid'],
                 "token" => $this->_getToken("POST", $sRequest, $sTimestamp),
 
                 // don't set client ip if gateway ip is needed
-                // "ip" => $_SERVER['REMOTE_ADDR']??'',
+                "ip" => $this->getClientIp(),
 
                 "useragent" => $_SERVER['HTTP_USER_AGENT'] ?? '',
             ]
@@ -185,8 +185,10 @@ class mfaclient
         ;
         $sFormId = $sFormId ?: "mfa-form";
         $sReturn = "<form method=\"POST\" id=\"$sFormId\" action=\"$sUrl\">
-                    <input type=\"hidden\" name=\"user\" value=\"" . $this->sUser . "\">
+                    <input type=\"hidden\" name=\"username\" value=\"" . $this->sUser . "\">
                     <input type=\"hidden\" name=\"appid\" value=\"" . $this->aConfig['appid'] . "\">
+                    <input type=\"hidden\" name=\"ip\" value=\"" . $this->getClientIp() . "\">
+
                     <input type=\"hidden\" name=\"request\" value=\"$sRequest\">
                     <input type=\"hidden\" name=\"timestamp\" value=\"$sTimestamp\">
                     
@@ -401,6 +403,23 @@ class mfaclient
             $sBackUrl = $sBackUrl ?: $_SERVER['HTTP_REFERER'];
             $this->_jump($sUrl, $sSubmitBtn, $sBackUrl);
         }
+    }
+
+    /**
+     * Get IP of current client (to be sent to MFA server)
+     * @return string
+     */
+    public function getClientIp(): string
+    {
+        $ipaddress = '';
+        foreach (['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR', 'REMOTE_HOST'] as $sKey) {
+            if (getenv($sKey))
+                $ipaddress = getenv($sKey);
+        }
+        if (!$ipaddress) {
+            $ipaddress = 'UNKNOWN';
+        }
+        return $ipaddress;
     }
 
     /**
