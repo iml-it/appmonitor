@@ -20,6 +20,7 @@
  * 2021-10-27  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2025-04-25  <www.axel-hahn.de>        update timeout validation rule
  */
 class checkPdoConnect extends appmonitorcheck
 {
@@ -60,7 +61,7 @@ class checkPdoConnect extends appmonitorcheck
                 'description' => 'Timeout in sec',
 
                 'default' => 5,
-                'example' => '3',
+                'example' => 3,
             ],
         ],
     ];
