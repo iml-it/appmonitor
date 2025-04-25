@@ -2138,22 +2138,23 @@ class appmonitorserver_gui extends appmonitorserver
             && ($this->_aCfg["mfa"]["role"]??false)
         ) {
             $sMfaBtn=$this->_tr("settings-mfa-setup-na").'<br><br>';
-        } elseif (
-            $this->hasRole($this->_aCfg["mfa"]["role"]??false)
-            && $this->getUserid()!=="*"
-        ){
+            if (
+                $this->hasRole($this->_aCfg["mfa"]["role"]??false)
+                && $this->getUserid()!=="*"
+            ){
 
-            require __DIR__."/../vendor/mfa-client/mfaclient.class.php";
-            $oMfa = new mfaclient();
-            // $oMfa->debug(true);
-            $oMfa->setUser($this->getUserid());
+                require __DIR__."/../vendor/mfa-client/mfaclient.class.php";
+                $oMfa = new mfaclient();
+                // $oMfa->debug(true);
+                $oMfa->setUser($this->getUserid());
 
-            $sMfaBtn=$this->_tr('settings-mfa-hint').'<br>'
-                . $oMfa->getButtonSetup(
-                "<button class=\"btn btn-default btn-primary\" >".$this->_aIco['mfa']." ".$this->_tr('settings-mfa-setup') . "</button>",
-                $this->_aCfg["serverurl"]."#divsetup"
-                )."<br>";
-                // "<button class=\"btn btn-default\" >".$this->_aIco['mfa']." ".$this->_tr('MFA') . "</button>";
+                $sMfaBtn=$this->_tr('settings-mfa-hint').'<br>'
+                    . $oMfa->getButtonSetup(
+                    "<button class=\"btn btn-default btn-primary\" >".$this->_aIco['mfa']." ".$this->_tr('settings-mfa-setup') . "</button>",
+                    $this->_aCfg["serverurl"]."#divsetup"
+                    )."<br>";
+                    // "<button class=\"btn btn-default\" >".$this->_aIco['mfa']." ".$this->_tr('MFA') . "</button>";
+            }
         }
 
 
