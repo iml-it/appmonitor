@@ -24,11 +24,12 @@ class mfaclient
      */
     public function __construct(array $aConfig = [], string $sUser = "")
     {
-        if ($aConfig) {
-            $this->setConfig($aConfig);
-        }
+        $this->loadConfig();
         if ($sUser) {
-            $this->setUser($sUser);
+            $aConfig['user'] = $sUser;
+        }
+        if (count($aConfig)) {
+            $this->setConfig($aConfig);
         }
     }
 
@@ -172,12 +173,12 @@ class mfaclient
      * @param string $sFormId   form id
      * @return string
      */
-    public function jumpform(string $sUrl, string $sSubmit = '<button>Follow me</button>', string $sBackUrl = '', string $sFormId = '')
+    public function jumpform(string $sUrl, string $sSubmit = '<button>Follow me</button>', string $sBackUrl = '', string $sFormId = ''): string
     {
         // $sTimestamp = date("r");
         $sTimestamp = microtime(true); // microtime to have more uniqueness on milliseconds
 
-        $sRequest = parse_url($sUrl, PHP_URL_PATH) . '' . parse_url($sUrl, PHP_URL_QUERY);
+        $sRequest = parse_url($sUrl, PHP_URL_PATH) . '?' . parse_url($sUrl, PHP_URL_QUERY);
 
         $sBackUrl = $sBackUrl ?: "http"
             . ""
@@ -264,6 +265,18 @@ class mfaclient
     }
 
     /**
+     * Load configuration file from current directory
+     * @return void
+     */
+    public function loadConfig(): void
+    {
+        $sCfgfile= __DIR__ . '/mfaconfig.php';
+        if (file_exists($sCfgfile)) {
+            $aTmp = include $sCfgfile;
+            $this->setConfig($aTmp??[]);
+        }
+    }
+    /**
      * Apply a given config with app id and base url
      * 
      * @param array $aConfig  configuration with app id and base url
@@ -272,6 +285,8 @@ class mfaclient
     public function setConfig(array $aConfig): void
     {
         $this->aConfig = $aConfig;
+        $this->debug($aConfig['debug']??false);
+        $this->setUser($aConfig['user']??'');
     }
 
     /**
@@ -320,7 +335,7 @@ class mfaclient
             body{background:#f0f5f8; color: #335; font-size: 1.2em; font-family: Arial, Helvetica, sans-serif;}
             a{color: #44c;}
             button{border-color: 2px solid #ccc ; border-radius: 0.5em; padding: 0.7em;}
-            div{background:#fff; border-radius: 1em; box-shadow: 0 0 1em #ccc; margin: 4em auto; max-width: 600px; padding: 2em;}
+            div{background:#fff; border-radius: 1em; box-shadow: 0 0 1em #ccc; margin: 4em auto; max-width: 800px; padding: 2em;}
             h1{margin: 0 0 1em;;}
         </style></head>
         <body><div>' . $sHtmlcode . '</div></body>
@@ -341,19 +356,32 @@ class mfaclient
      * Check if MFA login is needed and jump to its url
      * @return int
      */
-    public function ensure(): int
+    public function ensure($bUseSession=true): int
     {
 
+        if(!$this->getUser()){
+            $this->showHtml(
+                403,
+                "<h1>Missing userid</h1>"
+                . "⚠️ MFA challenge required - but userid of logged in user is missing.<br><ul>"
+                . "<li>Maybe you didn't login yet.</li>"
+                . "<li>Maybe there misconfiguration to fetch the user id.</li>"
+                . "</ul>"
+            );
+        }
         if (!isset($_SESSION) || !count($_SESSION)) {
             session_start();
         }
-        if (($_SESSION['mfa']['user'] ?? '') == $this->sUser) {
-            return 200;
-        } else {
-            $this->logout();
+        if($bUseSession){
+            if (($_SESSION['mfa']['user'] ?? '') == $this->sUser) {
+                return 200;
+            } else {
+                $this->logout();
+            }
         }
 
         $aMfaReturn = $this->check();
+        // print_r($aMfaReturn);
         $this->_wd(__METHOD__ . "<br>Http request to mfa api<pre>" . print_r($aMfaReturn, 1) . "</pre>");
         $aBody = json_decode($aMfaReturn['response']['body'] ?? '', 1);
         $iHttpStatus = $aBody['status'] ?? -1;
@@ -378,11 +406,33 @@ class mfaclient
                 //.'<br><pre>'.print_r($aMfaReturn, 1).'</pre>'
             );
         }
-
-        $_SESSION['mfa']['user'] = $this->sUser;
+        if ($iHttpStatus == 200) {
+            $_SESSION['mfa']['user'] = $this->sUser;
+        }
         session_write_close();
 
         return $iHttpStatus;
+    }
+
+
+    /**
+     * Get an html button to open mfa setup page
+     * 
+     * @param string $sSubmitBtn
+     * @return void
+     */
+    public function getButtonSetup(string $sSubmitBtn = '<button>MFA Setup</button>', $sBackUrl = ''): string
+    {
+        $aBody = json_decode($this->_api("urls")['response']['body'], 1);
+        // print_r($aBody);
+        
+        $sUrl = $aBody['setup'] ?? '';
+        if ($sUrl) {
+            $sBackUrl = $sBackUrl ?: $_SERVER['HTTP_REFERER'];
+            return $this->jumpform($sUrl, $sSubmitBtn, $sBackUrl);
+        } else {
+            return $aBody['message']??'';
+        }
     }
 
 
@@ -404,6 +454,10 @@ class mfaclient
             $this->_jump($sUrl, $sSubmitBtn, $sBackUrl);
         }
     }
+
+    // ----------------------------------------------------------------------
+    // getter
+    // ----------------------------------------------------------------------
 
     /**
      * Get IP of current client (to be sent to MFA server)
@@ -432,5 +486,13 @@ class mfaclient
         return $this->_api("urls");
     }
 
+    /**
+     * Get current user
+     * @return string
+     */
+    public function getUser(): string
+    {
+        return $this->sUser;
+    }
 
 }

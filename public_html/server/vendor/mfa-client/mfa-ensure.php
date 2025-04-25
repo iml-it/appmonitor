@@ -1,24 +1,16 @@
 <?php
 /**
  * mfa-ensure.php
+ * included by public_html/server/classes/appmonitor-server-gui.class.php
  * 
  * @author Axel Hahn <axel.hahn@unibe>
- * @package IML-Appmonitor
  * 
  */
 
-if(!($_SERVER['REMOTE_USER']??false)){
-    return true;
-}
-
-$aConfig = @include "mfaconfig.php";
-if(!($aConfig["mfa"]['api']??false)){
-    return true;
-}
-
 require_once __DIR__.'/mfaclient.class.php';
-$mfa = new mfaclient($aConfig["mfa"], ($_SERVER['REMOTE_USER']??''));
+$mfa = new mfaclient();
 
-$mfa->debug($aConfig["mfa"]['debug']??false);
+// set custom user (ignores field "user" in mfaconfig.php)
+$mfa->setUser($this->getUserid());
 
-$iHttpStatus=$mfa->ensure();
+$iHttpStatus=$mfa->ensure(false);

@@ -564,6 +564,7 @@ class appmonitorserver
      */
     public function getUserid(): string
     {
+        // return $this->_user=="*" ? "fred" : $this->_user;
         return $this->_user;
     }
 
@@ -573,16 +574,16 @@ class appmonitorserver
      */
     public function getUsername(): string
     {
-        $aUser = $this->getUser();
+        $aUser = $this->getUserSettings();
         return isset($aUser['username']) ? print_r($aUser['username'], 1) : "[$this->_user]";
     }
 
     /**
      * Get meta fields for current or given user
-     * @param  string  $sUsername  optional: override current user id 
+     * @param  string  $sUsername  optional: override current user id - used for generic user field "__default_authenticated_user__"
      * @return bool|array
      */
-    public function getUser(string $sUsername = ''): bool|array
+    public function getUserSettings(string $sUsername = ''): bool|array
     {
         $sUsername = $sUsername ? $sUsername : $this->_user;
         return ($sUsername && isset($this->_aCfg["users"][$sUsername]))
@@ -597,7 +598,10 @@ class appmonitorserver
      */
     public function setUser(string $sNewUser): bool
     {
-        $this->_user = preg_replace('/[^a-z0-9\*]/', '', $sNewUser);
+        // Shibboleth:
+        // [REMOTE_USER] => https://idp.example.com/idp/shibboleth!https://myapp.example.com/shibboleth!9ZF/Gm0Mh5L+m14tU4rlwKLkqTM=
+        // $this->_user = preg_replace('/[^a-z0-9\*]/', '', $sNewUser);
+        $this->_user = $sNewUser;
         return true;
     }
 
@@ -609,7 +613,7 @@ class appmonitorserver
      */
     public function getRoles(): bool|array
     {
-        $aUser = $this->getUser();
+        $aUser = $this->getUserSettings();
         if (is_array($aUser)) {
             if (isset($aUser['roles'])) {
                 return $aUser['roles'];
@@ -620,7 +624,7 @@ class appmonitorserver
             return false;
         }
         // non detected authenticated users inherit data from __default_authenticated_user__
-        $aDefault = $this->getUser('__default_authenticated_user__');
+        $aDefault = $this->getUserSettings('__default_authenticated_user__');
         return $aDefault['roles'] ?? false;
     }
 
