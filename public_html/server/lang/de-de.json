@@ -128,6 +128,10 @@
         "Validator-warning-title": "Gefundene Validierungs-Warnungen: %s",
         
         "hint": "Hinweis",
+        "settings-mfa": "MFA",
+        "settings-mfa-hint": "Zum MFA Server wechseln, um dort den 2. Faktor zu konfigurieren.",
+        "settings-mfa-setup": "MFA Setup",
+        "settings-mfa-setup-na": "Das MFA Setup ist für Ihren Benutzer nicht verf&uuml;gbar.",
         "settings-hint": "Sie k&ouml;nnen die Datei <code>server/config/appmonitor-server-config.json</code> direkt editieren<br>ODER<br>aud Kommandozeile wechseln Sie zu [approot]/server/ und verwenden <code>php ./cli.php</code> um Werte anzusehen oder anzupassen.",
             "settings-thene": "Skin",
             "settings-lang": "Sprache",

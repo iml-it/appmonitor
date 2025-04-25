@@ -117,6 +117,7 @@ class appmonitorserver_gui extends appmonitorserver
         'error' => '<i class="fa-solid fa-bolt"></i>',
         'add' => '<i class="fa-solid fa-plus"></i>',
         'del' => '<i class="fa-solid fa-trash"></i>',
+        'mfa' => '<i class="fa-solid fa-user-lock"></i>',
         'plus' => '<i class="fa-solid fa-plus"></i>',
         'close' => '<i class="fa-solid fa-times"></i>',
         'save' => '<i class="fa-solid fa-paper-plane"></i>',
@@ -2070,7 +2071,6 @@ class appmonitorserver_gui extends appmonitorserver
     public function _access_denied(string $sMessage): string
     {
         $oA = new renderadminlte();
-        // $this->setUser('hahn');
         if (!$this->hasRole('ui-config')) {
             return $oA->getAlert([
                 'type' => 'danger',
@@ -2132,20 +2132,43 @@ class appmonitorserver_gui extends appmonitorserver
             );
         }
 
-        $sSetup = $sFormOpenTag . '<input type="hidden" name="action" value="savesettings">';
+        $sMfaBtn="";
+        if (
+            ($this->_aCfg["mfa"]["include"]??false)
+            && ($this->_aCfg["mfa"]["role"]??false)
+        ) {
+            $sMfaBtn=$this->_tr("settings-mfa-setup-na").'<br><br>';
+        } elseif (
+            $this->hasRole($this->_aCfg["mfa"]["role"]??false)
+            && $this->getUserid()!=="*"
+        ){
 
-        $sSetup .= '<h4>' . $this->_tr('hint') . '</h4><p>'
+            require __DIR__."/../vendor/mfa-client/mfaclient.class.php";
+            $oMfa = new mfaclient();
+            // $oMfa->debug(true);
+            $oMfa->setUser($this->getUserid());
+
+            $sMfaBtn=$this->_tr('settings-mfa-hint').'<br>'
+                . $oMfa->getButtonSetup(
+                "<button class=\"btn btn-default btn-primary\" >".$this->_aIco['mfa']." ".$this->_tr('settings-mfa-setup') . "</button>",
+                $this->_aCfg["serverurl"]."#divsetup"
+                )."<br>";
+                // "<button class=\"btn btn-default\" >".$this->_aIco['mfa']." ".$this->_tr('MFA') . "</button>";
+        }
+
+
+        $sSetup = (
+            $sMfaBtn 
+                ? ''
+                    .'<h4>' . $this->_tr('settings-mfa') . '</h4><p>'
+                    . $sMfaBtn
+                    .'</p>'
+                : ''
+            )
+            .'<h4>' . $this->_tr('hint') . '</h4><p>'
             . $this->_tr('settings-hint')
             . '</p>';
-        /*  
-        // add elements
 
-        $sSetup.='<button class="btn btn-success" '
-                                // . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
-                                . '>' . $this->_aIco['save'].' '.$this->_tr('btn-save') 
-                            . '</button>';
-        */
-        $sSetup .= '</form>';
         $sAppId = $sAppId ?? 'no-app-id';
         $sDivMoredetails = 'div-http-' . $sAppId;
         $sShowHide = '<br><button class="btn btn-default" id="btn-plus-' . $sAppId . '"  onclick="$(\'#' . $sDivMoredetails . '\').slideDown(); $(this).hide(); $(\'#btn-minus-' . $sAppId . '\').show(); return false;"'
@@ -2785,10 +2808,14 @@ class appmonitorserver_gui extends appmonitorserver
         if (!$this->hasRole('ui')) {
             die("No ui access for user " . $this->getUsername() . ".");
         }
-        if ($this->_aCfg["mfa"]["include"]??false && $this->_aCfg["mfa"]["role"]&&false){
-            if ($this->hasRole($this->_aCfg["mfa"]["role"])) {
-                require __DIR__ . '/..'.$this->_aCfg["mfa"]["include"];
-            }    
+
+        if (
+            ($this->_aCfg["mfa"]["include"]??false)
+            && ($this->_aCfg["mfa"]["role"]??false)
+            && $this->hasRole($this->_aCfg["mfa"]["role"]??false)
+            && $this->getUserid()!=="*"
+        ){
+            require __DIR__ . '/..'.$this->_aCfg["mfa"]["include"];
         }
 
         $oCdn = new axelhahn\cdnorlocal([

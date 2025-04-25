@@ -129,6 +129,9 @@
         "Validator-warning-title": "Found validation warnings: %s",
         
         "hint": "Hint",
+        "settings-mfa": "MFA",
+        "settings-mfa-hint": "Switch to the MFA server to configure the 2nd factor.",
+        "settings-mfa-setup": "MFA setup",
         "settings-hint": "You can edit the file <code>server/config/appmonitor-server-config.json</code><br>OR<br>on command line go to [approot]/server/ and call <code>php ./cli.php</code> to view or edit values.",
             "settings-thene": "Theme",
             "settings-lang": "Language",
