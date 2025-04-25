@@ -16,6 +16,7 @@
  * @author: Axel Hahn - https://www.axel-hahn.de/
  * ----------------------------------------------------------------------
  * 2025-01-02  v1.0
+ * 2025-04-25  v1.1  set mysql port to null on empty string
  */
 
 // ----------------------------------------------------------------------
@@ -181,7 +182,7 @@ if($CONFIG['dbtype'] == "mysql"){
                     "user" => $CONFIG['dbuser'],
                     "password" => $CONFIG['dbpassword'],
                     "db" => $CONFIG['dbname'],
-                    "port" => $CONFIG['dbport'],
+                    "port" => (int)$CONFIG['dbport']?:null,
                 ],
             ],
         ]
