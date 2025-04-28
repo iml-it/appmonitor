@@ -22,6 +22,7 @@
  * 2024-11-22  <axel.hahn@unibe.ch>      detect installed mysqli function
  * 2025-03-01  <axel.hahn@unibe.ch>      add try catch 
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2025-04-25  <www.axel-hahn.de>        update port + timeout validation rule
  */
 class checkMysqlConnect extends appmonitorcheck
 {
@@ -49,8 +50,8 @@ class checkMysqlConnect extends appmonitorcheck
                 'description' => 'port of mysql server',
                 'validate' => 'portnumber',
 
-                'default' => 5,
-                'example' => '3',
+                'default' => 3306,
+                'example' => 3306,
             ],
             'user' => [
                 'type' => 'string',
@@ -79,7 +80,7 @@ class checkMysqlConnect extends appmonitorcheck
                 'description' => 'Timeout in sec',
 
                 'default' => 5,
-                'example' => '3',
+                'example' => 3,
             ],
         ],
     ];
