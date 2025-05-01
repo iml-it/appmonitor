@@ -51,13 +51,8 @@ var visJsNetworkMap = function(){
     // ----------------------------------------------------------------------
 
     this._getVarKey = function(sName){
-        // the same settings for all apps:
-        return location.pathname+'__visJsNetworkMap__'+sName;
-
         // individual settings per app:
-        // has issues when location was not rewritten yet, i.e. coming from 
-        // webapp overview to app detail page
-        // return location.href+'__visJsNetworkMap__'+sName;
+        return location.pathname+location.hash+'__visJsNetworkMap__'+sName;
     }
 
     /**
@@ -75,7 +70,6 @@ var visJsNetworkMap = function(){
      * @returns 
      */
     this._getVar = function(sName){
-        // console.log("_getVar() with key " + this._getVarKey(sName));
         return localStorage.getItem(this._getVarKey(sName));
     }
 
@@ -235,6 +229,9 @@ var visJsNetworkMap = function(){
         this.container.className=bToFull ? 'fullscreen' : '';
 
         this.redrawMap();
+
+        window.setTimeout("oMap.switchViewSize()", 100);
+
         return true;
     }
 
@@ -242,16 +239,7 @@ var visJsNetworkMap = function(){
     // MAIN
     // ----------------------------------------------------------------------
 
-    /*
-    if (arguments[0]) {
-        this.setConfig(arguments[0]);
-    }
-    */
-
-    // removed because fullscreen was added
-    // this.bViewFullsize=this._getVar("this.bViewFullsize") ? this._getVar("this.bViewFullsize") : false;
-    this.bViewFullscreen=this._getVar("this.bViewFullscreen") ? this._getVar("this.bViewFullscreen") : false;
-    
+    this.sViewmode=this._getVar("this.sViewmode") ? this._getVar("this.sViewmode") : this.sViewmode;
     this._updateVisOptions();
 
     return true;    

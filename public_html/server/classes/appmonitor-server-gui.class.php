@@ -980,14 +980,15 @@ class appmonitorserver_gui extends appmonitorserver
 
         <script type="text/javascript">
         
-        // GRRR instance must have the name oMap at the moment
-        var oMap=new visJsNetworkMap();
-        if(!oMap){
-            console.log("ERROR: var oMap=new visJsNetworkMap(); failed.")
-        } else {
-            oMap.setData(' . json_encode($aNodes) . ', ' . json_encode($aEdges) . ');
-            oMap.redrawMap();
-        }
+            // GRRR instance must have the name oMap at the moment
+            var oMap=new visJsNetworkMap();
+            if(!oMap){
+                console.log("ERROR: var oMap=new visJsNetworkMap(); failed.")
+            } else {
+                oMap.setData(' . json_encode($aNodes) . ', ' . json_encode($aEdges) . ');
+                oMap.redrawMap();
+                document.getElementById(\'mynetwork\').addEventListener(\'dblclick\', function(){ oMap.toggleFullscreen(\'networkContainer\') });
+            }
 
       </script>        
         ';
@@ -1207,24 +1208,27 @@ class appmonitorserver_gui extends appmonitorserver
         $sOut = '';
         $sSplitHeadLast = "";
 
+        $aFormats=[
+            "day" => "Y-m-d",
+            "hour" => "Y-m-d .. H:00"
+        ];
+        $sSplitFormat = $aFormats[$sSplitBy];
+
+        $LastTime = time();
+
         // see https://adminlte.io/themes/v3/pages/UI/timeline.html
 
         foreach ($aLogs as $aLogentry) {
-            switch ($sSplitBy) {
-                case "hour":
-                    $sSplitHead = date("Y-m-d .. H:00", $aLogentry['timestamp']);
-                    break;
-                default:
-                    $sSplitHead = date("Y-m-d", $aLogentry['timestamp']);
-                    break;
-            }
-
+            $sSplitHead = date($sSplitFormat, $aLogentry['timestamp']);
 
             if ($sSplitHead !== $sSplitHeadLast) {
+                $sTimediff = round(($LastTime - $aLogentry['timestamp']) / 60/60/24);
+                $sTimediff = $sTimediff>1 ? "<span>$sTimediff d</span>" : "";
                 $sOut .= ($sOut ? "<br>" : "") 
-                    ."<div class=\"time-label\"><span>$sSplitHead</span></div>\n";
+                    ."$sTimediff<div class=\"time-label\"><span>$sSplitHead</span> </div>\n";
                 $sSplitHeadLast = $sSplitHead;
             }
+            $LastTime = $aLogentry['timestamp'];
 
             $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '-';
             
@@ -1463,17 +1467,17 @@ class appmonitorserver_gui extends appmonitorserver
                     $oA->getBox([
                         // 'title' => '', 
                         'text' => $this->_tr('About-vendor') . '<ul>
-                            <li><a href="https://adminlte.io/">AdminLTE</a></li>                
-                            <li><a href="https://developer.snapappointments.com/bootstrap-select/">Bootstrap-Select</a></li>
-                            <li><a href="https://datatables.net/">datatables.net</a></li>
-                            <li><a href="https://fontawesome.com/">FontAwesome</a></li>
-                            <li><a href="https://jquery.com/">jQuery</a></li>
-                            <li><a href="https://getbootstrap.com/">Bootstrap</a></li>
-                            <li><a href="https://www.chartjs.org/">ChartJs</a></li>
-                            <li><a href="https://visjs.org/">Vis.js</a></li>
-                            <li><a href="https://github.com/axelhahn/ahcache/">AhCache</a></li>
-                            <li><a href="https://github.com/axelhahn/php-abstract-dbo">Axels PDO-DB class</a></li>
-                            <li><a href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
+                            <li><a target="_blank" href="https://adminlte.io/">AdminLTE</a></li>                
+                            <li><a target="_blank" href="https://developer.snapappointments.com/bootstrap-select/">Bootstrap-Select</a></li>
+                            <li><a target="_blank" href="https://datatables.net/">datatables.net</a></li>
+                            <li><a target="_blank" href="https://fontawesome.com/">FontAwesome</a></li>
+                            <li><a target="_blank" href="https://jquery.com/">jQuery</a></li>
+                            <li><a target="_blank" href="https://getbootstrap.com/">Bootstrap</a></li>
+                            <li><a target="_blank" href="https://www.chartjs.org/">ChartJs</a></li>
+                            <li><a target="_blank" href="https://visjs.org/">Vis.js</a></li>
+                            <li><a target="_blank" href="https://github.com/axelhahn/ahcache/">AhCache</a></li>
+                            <li><a target="_blank" href="https://github.com/axelhahn/php-abstract-dbo">Axels PDO-DB class</a></li>
+                            <li><a target="_blank" href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
                         </ul>'
                     ]),
                     6
@@ -1887,7 +1891,7 @@ class appmonitorserver_gui extends appmonitorserver
 
         $aLogs = $this->oNotification->getLogdata($aNotifyOptions);
         $sButtons = '';
-        $iMaxcount = floor($iNotifications / $iPerPage) + 1;
+        $iMaxcount = floor(($iNotifications-1) / $iPerPage) + 1;
 
         $sBtnSpacer = ' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ';
 
@@ -2097,18 +2101,33 @@ class appmonitorserver_gui extends appmonitorserver
 
         // list of all clients
         $sHostlist = '';
+        $aHostlist=[];
         foreach ($this->_data as $sAppId => $aData) {
             $iResult = $aData["result"]["result"] ?? 3;
             $sUrl = $aData["result"]["url"];
             $sHost = $aData["result"]["host"] ?? $this->_tr('unknown');
 
             $aTags = $aData["meta"]["tags"] ?? false;
-            $sHostlist .= $oA->getSectionRow(
+            $sSortKey=strtolower( strip_tags($this->_getAppLabel($sAppId)));
+            $sDelBtn='<div style="float: right;">'
+                    . $sFormOpenTag
+                        . '<input type="hidden" name="action" value="deleteurl">'
+                        . '<input type="hidden" name="url" value="' . $sUrl . '">'
+                        . '<button class="btn btn-danger" '
+                        . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
+                            . '>' . $this->_aIco['del'] . ' ' . $this->_tr('btn-deleteUrl')
+                        . '</button>'
+                    . '</form>'
+                    . '</div>'
+            ;
+
+            $aHostlist[$sSortKey]=$oA->getSectionRow(
                 $oA->getSectionColumn(
                     '<div class="divhost result' . $iResult . ' tags ' . $this->_getCssclassForTag($aTags) . '" style="float: none; ">'
                     . $oA->getBox([
                         'title' => ''
-                            . $this->_getAppLabel($sAppId),
+                            . $aData["result"]["website"],
+                            // . $this->_getAppLabel($sAppId),
                         'text' => ''
                             // Button DELETE
                             . '<div style="float: right;">'
@@ -2130,6 +2149,23 @@ class appmonitorserver_gui extends appmonitorserver
                     12
                 )
             );
+
+            $aHostlist[$sSortKey]="<tr class=\"tr-app\">
+                <td><strong>".$aData['result']['website']."</strong></td>
+                <td>
+                    ".$this->_aIco['url']." <a href=\"$sUrl\" target=\"_blank\">$sUrl</a><br>
+                    ".$this->_aIco['host']." ".$this->_tr('Host')." $sHost<br>
+                </td>
+                <td>$sDelBtn</td>
+                </tr>";
+
+        }
+        if(count($aHostlist)){
+            ksort($aHostlist);
+            $sHostlist = "<table class=\"table table-striped\">"
+                .implode("\n\n", $aHostlist)
+                ."</table>"
+                ;
         }
 
         $sMfaBtn="";
@@ -2194,14 +2230,13 @@ class appmonitorserver_gui extends appmonitorserver
                             . '</div>'
 
                     ]),
-                    6
+                    12
                 )
                 . $oA->getSectionColumn(
-                    // box for adding new client url
-                    // box for adding new client url
                     $oA->getBox([
-                        'title' => $this->_tr('Setup-add-client'),
-                        'text' => '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
+                        'title' => $this->_tr('Setup-client-list'),
+                        'text' => 
+                            '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
                             . $sFormOpenTag
                             . '<div class="input-group">'
                             . '<div class="input-group-addon">'
@@ -2218,19 +2253,12 @@ class appmonitorserver_gui extends appmonitorserver
                             . '</span>'
                             . '</div>'
                             . '</form><br>'
-
-                    ]),
-                    6
-                )
-                . $oA->getSectionColumn(
-                    $oA->getBox([
-                        'title' => $this->_tr('Setup-client-list'),
-                        'text' => '<div id="divsetupfilter"></div><br>'
+                            .'<div id="divsetupfilter"></div><br>'
                             . '<div id="divsetup">'
                             . $sHostlist
                             . '</div>'
                     ]),
-                    6
+                    12
                 )
             )
             . '</section>';

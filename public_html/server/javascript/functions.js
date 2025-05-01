@@ -154,10 +154,10 @@ function setAdressbar() {
  * @param {string} s    name of div where to put form
  * @returns {undefined}
  */
-function addFilter4Webapps(sTarget) {
+function addFilter4Webapps(sTarget, bFullWitdth=false) {
     var sValue = aViewFilters[sTarget];
     var sForm = '<form class="form-horizontal frmFilter">\n\
-        <div class="col-xs-3">\n\
+        '+(bFullWitdth ? '' : '<div class="col-xs-3">\n')+'\
             <div class="input-group">\n\
                 <div class="input-group-addon">\n\
                     <i class="fa fa-filter"></i>\n\
@@ -168,7 +168,7 @@ function addFilter4Webapps(sTarget) {
                     onchange="setTextfilter(\'' + sTarget + '\', this.value);"\n\
                 >\n\
             </div>\n\
-        </div>\n\
+        '+(bFullWitdth ? '' : '</div>\n')+'\
         \n\
         <div class="col-xs-9">\n\
             <span class="tagfilterinfo"></span>\n\
@@ -221,7 +221,7 @@ function applyViewFilter() {
 
     // filter hosts
     filterApps('divwebs',  'appname', true);  // app overview
-    filterApps('divsetup', 'divhost', false); // page "setup"
+    filterApps('divsetup', 'tr-app', false); // page "setup"
 
     // update url int the browser
     setAdressbar();
@@ -244,6 +244,7 @@ function filterApps(sDiv, sClass, bIsOverview) {
     var filter = aViewFilters[sDiv];
     var oHide=false;
     $(sTarget).removeHighlight();
+    $(sTarget).show();
     if (filter) {
         oHide=bIsOverview 
             ? $(sTarget + ":not(:regex('" + filter + "'))").parent().parent()
@@ -358,11 +359,13 @@ function refreshTimer() {
             + '<div style="width:100%; float: left;">&nbsp;</div>'
         );
     }
+    
     if (
         location.hash == '#divnotifications'
         || location.hash == '#divsetup'
         || location.hash == '#divabout'
         || location.hash == '#divdebug'
+        || document.fullscreenElement
     ) {
         $('a.reload').hide();
         return false;
@@ -552,7 +555,7 @@ function postLoad(bIsFirstload) {
     }
 
     addFilter4Webapps('divwebs');
-    addFilter4Webapps('divsetup');
+    addFilter4Webapps('divsetup', true);
 
     applyViewFilter();
 
