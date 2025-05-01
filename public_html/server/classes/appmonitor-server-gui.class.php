@@ -980,14 +980,14 @@ class appmonitorserver_gui extends appmonitorserver
 
         <script type="text/javascript">
         
-        // GRRR instance must have the name oMap at the moment
-        var oMap=new visJsNetworkMap();
-        if(!oMap){
-            console.log("ERROR: var oMap=new visJsNetworkMap(); failed.")
-        } else {
-            oMap.setData(' . json_encode($aNodes) . ', ' . json_encode($aEdges) . ');
-            oMap.redrawMap();
-        }
+            // GRRR instance must have the name oMap at the moment
+            var oMap=new visJsNetworkMap();
+            if(!oMap){
+                console.log("ERROR: var oMap=new visJsNetworkMap(); failed.")
+            } else {
+                oMap.setData(' . json_encode($aNodes) . ', ' . json_encode($aEdges) . ');
+                oMap.redrawMap();
+            }
 
       </script>        
         ';
@@ -2097,18 +2097,33 @@ class appmonitorserver_gui extends appmonitorserver
 
         // list of all clients
         $sHostlist = '';
+        $aHostlist=[];
         foreach ($this->_data as $sAppId => $aData) {
             $iResult = $aData["result"]["result"] ?? 3;
             $sUrl = $aData["result"]["url"];
             $sHost = $aData["result"]["host"] ?? $this->_tr('unknown');
 
             $aTags = $aData["meta"]["tags"] ?? false;
-            $sHostlist .= $oA->getSectionRow(
+            $sSortKey=strtolower( strip_tags($this->_getAppLabel($sAppId)));
+            $sDelBtn='<div style="float: right;">'
+                    . $sFormOpenTag
+                        . '<input type="hidden" name="action" value="deleteurl">'
+                        . '<input type="hidden" name="url" value="' . $sUrl . '">'
+                        . '<button class="btn btn-danger" '
+                        . 'onclick="return confirm(\'' . sprintf($this->_tr('btn-deleteUrl-confirm'), $sUrl) . '\')" '
+                            . '>' . $this->_aIco['del'] . ' ' . $this->_tr('btn-deleteUrl')
+                        . '</button>'
+                    . '</form>'
+                    . '</div>'
+            ;
+
+            $aHostlist[$sSortKey]=$oA->getSectionRow(
                 $oA->getSectionColumn(
                     '<div class="divhost result' . $iResult . ' tags ' . $this->_getCssclassForTag($aTags) . '" style="float: none; ">'
                     . $oA->getBox([
                         'title' => ''
-                            . $this->_getAppLabel($sAppId),
+                            . $aData["result"]["website"],
+                            // . $this->_getAppLabel($sAppId),
                         'text' => ''
                             // Button DELETE
                             . '<div style="float: right;">'
@@ -2130,6 +2145,23 @@ class appmonitorserver_gui extends appmonitorserver
                     12
                 )
             );
+
+            $aHostlist[$sSortKey]="<tr class=\"tr-app\">
+                <td><strong>".$aData['result']['website']."</strong></td>
+                <td>
+                    ".$this->_aIco['url']." <a href=\"$sUrl\" target=\"_blank\">$sUrl</a><br>
+                    ".$this->_aIco['host']." ".$this->_tr('Host')." $sHost<br>
+                </td>
+                <td>$sDelBtn</td>
+                </tr>";
+
+        }
+        if(count($aHostlist)){
+            ksort($aHostlist);
+            $sHostlist = "<table class=\"table table-striped\">"
+                .implode("\n\n", $aHostlist)
+                ."</table>"
+                ;
         }
 
         $sMfaBtn="";
@@ -2194,14 +2226,13 @@ class appmonitorserver_gui extends appmonitorserver
                             . '</div>'
 
                     ]),
-                    6
+                    12
                 )
                 . $oA->getSectionColumn(
-                    // box for adding new client url
-                    // box for adding new client url
                     $oA->getBox([
-                        'title' => $this->_tr('Setup-add-client'),
-                        'text' => '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
+                        'title' => $this->_tr('Setup-client-list'),
+                        'text' => 
+                            '<p>' . $this->_tr('Setup-add-client-pretext') . '</p>'
                             . $sFormOpenTag
                             . '<div class="input-group">'
                             . '<div class="input-group-addon">'
@@ -2218,19 +2249,12 @@ class appmonitorserver_gui extends appmonitorserver
                             . '</span>'
                             . '</div>'
                             . '</form><br>'
-
-                    ]),
-                    6
-                )
-                . $oA->getSectionColumn(
-                    $oA->getBox([
-                        'title' => $this->_tr('Setup-client-list'),
-                        'text' => '<div id="divsetupfilter"></div><br>'
+                            .'<div id="divsetupfilter"></div><br>'
                             . '<div id="divsetup">'
                             . $sHostlist
                             . '</div>'
                     ]),
-                    6
+                    12
                 )
             )
             . '</section>';
