@@ -102,3 +102,7 @@ If you have more control you can install it outside webroot and add an alias `/a
 You need to implement the checks and a JSON response in the given format.
 
 👉 See [Decription of response](../50_Client/20_Description_of_response.md)
+
+You can implent it in your favourite programming language ... or try the 
+
+👉 [Appmonitor CLI binary](https://os-docs.iml.unibe.ch/appmonitor-cli-client/)
