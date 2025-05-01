@@ -1208,24 +1208,27 @@ class appmonitorserver_gui extends appmonitorserver
         $sOut = '';
         $sSplitHeadLast = "";
 
+        $aFormats=[
+            "day" => "Y-m-d",
+            "hour" => "Y-m-d .. H:00"
+        ];
+        $sSplitFormat = $aFormats[$sSplitBy];
+
+        $LastTime = time();
+
         // see https://adminlte.io/themes/v3/pages/UI/timeline.html
 
         foreach ($aLogs as $aLogentry) {
-            switch ($sSplitBy) {
-                case "hour":
-                    $sSplitHead = date("Y-m-d .. H:00", $aLogentry['timestamp']);
-                    break;
-                default:
-                    $sSplitHead = date("Y-m-d", $aLogentry['timestamp']);
-                    break;
-            }
-
+            $sSplitHead = date($sSplitFormat, $aLogentry['timestamp']);
 
             if ($sSplitHead !== $sSplitHeadLast) {
+                $sTimediff = round(($LastTime - $aLogentry['timestamp']) / 60/60/24);
+                $sTimediff = $sTimediff>1 ? "<span>$sTimediff d</span>" : "";
                 $sOut .= ($sOut ? "<br>" : "") 
-                    ."<div class=\"time-label\"><span>$sSplitHead</span></div>\n";
+                    ."$sTimediff<div class=\"time-label\"><span>$sSplitHead</span> </div>\n";
                 $sSplitHeadLast = $sSplitHead;
             }
+            $LastTime = $aLogentry['timestamp'];
 
             $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '-';
             
@@ -1888,7 +1891,7 @@ class appmonitorserver_gui extends appmonitorserver
 
         $aLogs = $this->oNotification->getLogdata($aNotifyOptions);
         $sButtons = '';
-        $iMaxcount = floor($iNotifications / $iPerPage) + 1;
+        $iMaxcount = floor(($iNotifications-1) / $iPerPage) + 1;
 
         $sBtnSpacer = ' &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ';
 
