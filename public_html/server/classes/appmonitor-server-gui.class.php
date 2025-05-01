@@ -987,6 +987,7 @@ class appmonitorserver_gui extends appmonitorserver
             } else {
                 oMap.setData(' . json_encode($aNodes) . ', ' . json_encode($aEdges) . ');
                 oMap.redrawMap();
+                document.getElementById(\'mynetwork\').addEventListener(\'dblclick\', function(){ oMap.toggleFullscreen(\'networkContainer\') });
             }
 
       </script>        
