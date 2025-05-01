@@ -358,11 +358,13 @@ function refreshTimer() {
             + '<div style="width:100%; float: left;">&nbsp;</div>'
         );
     }
+    
     if (
         location.hash == '#divnotifications'
         || location.hash == '#divsetup'
         || location.hash == '#divabout'
         || location.hash == '#divdebug'
+        || document.fullscreenElement
     ) {
         $('a.reload').hide();
         return false;
