@@ -1464,17 +1464,17 @@ class appmonitorserver_gui extends appmonitorserver
                     $oA->getBox([
                         // 'title' => '', 
                         'text' => $this->_tr('About-vendor') . '<ul>
-                            <li><a href="https://adminlte.io/">AdminLTE</a></li>                
-                            <li><a href="https://developer.snapappointments.com/bootstrap-select/">Bootstrap-Select</a></li>
-                            <li><a href="https://datatables.net/">datatables.net</a></li>
-                            <li><a href="https://fontawesome.com/">FontAwesome</a></li>
-                            <li><a href="https://jquery.com/">jQuery</a></li>
-                            <li><a href="https://getbootstrap.com/">Bootstrap</a></li>
-                            <li><a href="https://www.chartjs.org/">ChartJs</a></li>
-                            <li><a href="https://visjs.org/">Vis.js</a></li>
-                            <li><a href="https://github.com/axelhahn/ahcache/">AhCache</a></li>
-                            <li><a href="https://github.com/axelhahn/php-abstract-dbo">Axels PDO-DB class</a></li>
-                            <li><a href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
+                            <li><a target="_blank" href="https://adminlte.io/">AdminLTE</a></li>                
+                            <li><a target="_blank" href="https://developer.snapappointments.com/bootstrap-select/">Bootstrap-Select</a></li>
+                            <li><a target="_blank" href="https://datatables.net/">datatables.net</a></li>
+                            <li><a target="_blank" href="https://fontawesome.com/">FontAwesome</a></li>
+                            <li><a target="_blank" href="https://jquery.com/">jQuery</a></li>
+                            <li><a target="_blank" href="https://getbootstrap.com/">Bootstrap</a></li>
+                            <li><a target="_blank" href="https://www.chartjs.org/">ChartJs</a></li>
+                            <li><a target="_blank" href="https://visjs.org/">Vis.js</a></li>
+                            <li><a target="_blank" href="https://github.com/axelhahn/ahcache/">AhCache</a></li>
+                            <li><a target="_blank" href="https://github.com/axelhahn/php-abstract-dbo">Axels PDO-DB class</a></li>
+                            <li><a target="_blank" href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
                         </ul>'
                     ]),
                     6
