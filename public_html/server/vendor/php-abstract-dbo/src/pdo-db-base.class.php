@@ -18,7 +18,7 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
- * 2025-02-20  ___  ah  last changes: create indexes
+ * 2025-05-12  ___  ah  fix required attribute
  * ======================================================================
  */
 
@@ -506,19 +506,29 @@ class pdo_db_base
 
         $aData = [];
         $Where = [];
-        $Where[] = "1=1";
+        // $Where[] = "1=1";
 
         $this->new();
 
         foreach ($aColumns as $skey => $value) {
 
-            $Where[] = "AND `$skey` = :$skey";
+            if(strstr($value, '%')){
+                $Where[] = "AND `$skey` LIKE :$skey ESCAPE '\\'";
+                $value = addcslashes($value, '%_');
+            } else {
+                $Where[] = "AND `$skey` = :$skey";                
+            }
             $aData[$skey] = $value;
             if (isset($this->_aProperties[$skey])) {
                 $this->set($skey, $value); // pre defined fields on new object
             }
         }
-        $this->_bChanged = false;
+
+        // cut starting "AND " from 1st condition
+        if($Where[0]??false){
+            $Where[0] = substr($Where[0], 4);
+        }
+        $this->_bChanged = false; 
 
         // search fetches 2 items.
         // 1 is needed to apply value and a 2nd for detection of multiple values
@@ -1054,16 +1064,27 @@ class pdo_db_base
     }
 
     /**
-     * Get relations of the current item
+     * Get array with all relations of the current item
+     * 
+     * @see relReadLookupItem()
+     * @see relReadObjects()
+     * 
      * @param  array  $aFilter  optional: filter existing relations by table and column
      *                          Keys:
-     *                            table => <TARGETTABLE>  table must match
-     *                            column => <COLNAME>     column name must match too
+     *                            table => TARGETTABLE  table must match
+     *                            column => COLNAME     DEPRECATED - column name must match too; use relReadLookupItem(COLNAME)
      * @return array
      */
     public function relRead(array $aFilter = []): array
     {
         $this->_wd(__METHOD__ . '() reading relations for ' . $this->_table . ' item id ' . $this->id());
+        if($aFilter['column']??false){
+            $this->_log(
+                PB_LOGLEVEL_WARN, 
+                __METHOD__ . '()', 
+                "The 'column' filter is deprecated. Use relReadLookupItem(COLUMN) instead.");
+        }
+
         if (is_array($this->_aRelations) && !count($this->_aRelations)) {
             $this->_relRead();
         }
@@ -1084,6 +1105,45 @@ class pdo_db_base
             }
         } else {
             $aReturn = $this->_aRelations;
+        }
+        return $aReturn;
+    }
+
+    /**
+     * Get array of referenced item of a lookup column
+     * 
+     * @param string $sColumn  name of the lookup column
+     * @return array
+     */
+    public function relReadLookupItem(string $sColumn): array
+    {
+        if (!isset($this->_aProperties[$sColumn]['lookup']['table'])) {
+            throw new Exception(__METHOD__ . ' Column ' . $sColumn . ' is not a lookup column');
+        }
+        if (!$this->get($sColumn)) {
+            return [];
+        }
+
+        $sTargetTable = $this->_aProperties[$sColumn]['lookup']['table'];
+        $sRelKey = $this->_getRelationKey($sTargetTable, 0, $sColumn);
+        return $this->relRead([
+            'table' => $this->_aProperties[$sColumn]['lookup']['table'],
+            'column' => $sColumn,
+        ])['_targets'][$sRelKey]['_target'] ?? [];
+    }
+
+    /**
+     * Get array of all related objects of a given object type
+     * 
+     * @param string $sObjectname  name of the object type
+     * @return array
+     */
+    public function relReadObjects(string $sObjectname): array
+    {
+        $aRel=$this->relRead(['table' => $sObjectname]);
+        $aReturn=[];
+        foreach($aRel['_targets']??[] as $aTarget){
+            $aReturn[]=$aTarget['_target'];
         }
         return $aReturn;
     }
@@ -1368,21 +1428,7 @@ class pdo_db_base
      */
     public function getRelLabel(string $sColumn): string|bool
     {
-        if (!isset($this->_aProperties[$sColumn]['lookup']['table'])) {
-            throw new Exception(__METHOD__ . ' Column ' . $sColumn . ' is not a lookup column');
-        }
-        if (!$this->get($sColumn)) {
-            return false;
-        }
-
-        $sTargetTable = $this->_aProperties[$sColumn]['lookup']['table'];
-        $sRelKey = $this->_getRelationKey($sTargetTable, 0, $sColumn);
-        $aItem = $this->relRead([
-            'table' => $this->_aProperties[$sColumn]['lookup']['table'],
-            'column' => $sColumn,
-        ])['_targets'][$sRelKey]['_target'] ?? false;
-
-        // print_r($aItem);
+        $aItem = $this->relReadLookupItem($sColumn);
         return $this->getLabel($aItem);
     }
 
@@ -1604,10 +1650,10 @@ class pdo_db_base
         $aReturn['name'] = $sAttr;
         $aReturn['label'] = isset($aReturn['label']) ? $aReturn['label'] : $sAttr;
 
-        if (isset($aReturn['required']) && $aReturn['required']) {
-            $aReturn['label'] .= ' <span class="required">*</span>';
-        }
-
+        // if (isset($aReturn['required']) && $aReturn['required']) {
+        //     $aReturn['label'] .= ' <span class="required">*</span>';
+        // }
+  
         // DEBUG:
         // $aReturn['title']=$sAttr . ' --> '.(isset($aReturn['debug']) ? print_r($aReturn['debug'], 1) : 'NO DEBUG');
 
