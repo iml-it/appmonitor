@@ -223,6 +223,9 @@ function applyViewFilter() {
     filterApps('divwebs',  'appname', true);  // app overview
     filterApps('divsetup', 'tr-app', false); // page "setup"
 
+    // filter settings
+    filterApps('divsetupconfig', 'tr-config', false); // page "setup"
+
     // update url int the browser
     setAdressbar();
 
@@ -556,6 +559,7 @@ function postLoad(bIsFirstload) {
 
     addFilter4Webapps('divwebs');
     addFilter4Webapps('divsetup', true);
+    addFilter4Webapps('divsetupconfig', true);
 
     applyViewFilter();
 
@@ -591,7 +595,8 @@ function initGuiStuff() {
         'tag': getQueryVariable('tag') ? getQueryVariable('tag').split(',') : [],
         'tab': window.location.hash ? window.location.hash : '#divwebs',
         'divwebs': getQueryVariable('divwebs'),
-        'divsetup': getQueryVariable('divsetup')
+        'divsetupconfig': getQueryVariable('divsetup'),
+        'divsetup': getQueryVariable('divsetup'),
     };
 
     // set onclick event for links (navigation bar)

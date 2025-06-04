@@ -53,6 +53,17 @@ class pdo_db_attachments extends pdo_db_base{
     }
 
 
+    /**
+     * Get relative path of a file with full path relative to upload base dir
+     * Used in storeNewFile()
+     * 
+     * @param string $FileWithFullPath  filename
+     * @return string
+     */
+    public function getRelativePath(string $FileWithFullPath): string
+    {
+        return str_replace("{$this->_sUploadDir}/", '', $FileWithFullPath);
+    }
     // ----------------------------------------------------------------------
     // FULE UPLOAD
     // ----------------------------------------------------------------------
@@ -130,6 +141,44 @@ class pdo_db_attachments extends pdo_db_base{
     }
 
     /**
+     * Add a file that is located in the upload base path as attachment object
+     * 
+     * @param string $sFileWithFullPath
+     * @param mixed $aProperties         array with settings to write; possible keys are
+     *                                   - label
+     *                                   - description
+     *                                   - mime
+     *                                   - width    
+     *                                   - height
+     * @return bool|int
+     */
+    public function storeNewFile(string $sFileWithFullPath, array $aProperties=[]): bool|int
+    {
+        $sRelFile=$this->getRelativePath($sFileWithFullPath);
+        if($this->readByFields(['filename'=>$sRelFile])){
+            return $this->id();
+        } else {
+            $this->new();
+            $this->setItem([
+                'label'=>$aProperties['label'] ?? null,
+                'filename'=>$sRelFile,
+                'mime'=>$aProperties['mime'] ?? mime_content_type($sFileWithFullPath),
+                'description'=>$aProperties['description'] ?? null,
+                'size'=>filesize($sFileWithFullPath),
+                'width'=>$aProperties['width'] ?? null,
+                'height'=>$aProperties['height'] ?? null,
+            ]);
+
+        }
+
+        if($this->save()){
+            return $this->id();
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Hook for delete() method
      * Delete local file before deleting database item
      * It returns false if the file does not exist or the deletion failed.
@@ -202,6 +251,7 @@ class pdo_db_attachments extends pdo_db_base{
                 break;
 
             // ---- video
+            case "application/x-mpegURL":
             case 'video/mp4':
             case 'video/ogg':
                 $sReturn .= "<video controls><source src=\"$sAttachmentUrl\" type=\"$aFile[mime]\"></video>";

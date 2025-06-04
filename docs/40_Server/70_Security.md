@@ -119,14 +119,11 @@ Create the file `/server/vendor/mfa-client/mfaconfig.php`. Paste the code snippe
 
 return [
 
-  "mfa" => [
     "api" => "https://mfa.example.com/api/",
     "appid" => "c1cabd22fbdb698861ad08b27de7399a",
     "shared_secret" => "p9wjjXSewZq0VkM1t5Sm3ZbI4ATEVetU",
 
     "debug" => false,
-
-  ]
 
 ];
 ```
