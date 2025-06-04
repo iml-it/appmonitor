@@ -18,7 +18,7 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
- * 2025-05-12  ___  ah  fix required attribute
+ * 2025-05-22  ___  ah  add input type "range"
  * ======================================================================
  */
 
@@ -1443,7 +1443,7 @@ class pdo_db_base
 
     /**
      * Return or guess the form type of a given attribute
-     * If $this->_aProperties[$sAttr]['force'] was defined then it returns that value.
+     * If $this->_aProperties[$sAttr]['attr'] was defined then it returns that value.
      * Otherwise the type will be guessed based on the attribute name or create statement.
      * 
      * Guess behaviour by create statement
@@ -1452,18 +1452,19 @@ class pdo_db_base
      * - varchar with more than 1024 byte -> textarea
      * 
      * If attribute starts with 
-     *   - "color"    -> input with type color
-     *   - "date"     -> input with type date
-     *   - "datetime" -> input with type datetime-local
+     *   - "color"    -> input with type "color"
+     *   - "date"     -> input with type "date"
+     *   - "datetime" -> input with type "datetime-local"
      *   - "email"    -> input with type "email"
      *   - "html"     -> textarea with type "html"
-     *   - "month"    -> input with type "number"
+     *   - "month"    -> input with type "month"    !! check browser compatibility
      *   - "number"   -> input with type "number"
-     *   - "password" -> input with type "password" !! DO NOT USE YET
+     *   - "password" -> input with type "password" !! additional logic required
+     *   - "range"    -> input with type "range"
      *   - "tel"      -> input with type "tel"
      *   - "time"     -> input with type "time"
      *   - "url"      -> input with type "url"
-     *   - "week"     -> input with type "week"
+     *   - "week"     -> input with type "week"     !! check browser compatibility
      * 
      * @param  string  $sAttr  name of the property
      * @return array|bool
@@ -1490,11 +1491,11 @@ class pdo_db_base
             ['regex' => '/^month/',    'tag' => 'input',    'type' => 'month'],
             ['regex' => '/^number/',   'tag' => 'input',    'type' => 'number'],
             ['regex' => '/^password/', 'tag' => 'input',    'type' => 'password'], // TODO: add dummy password in value
+            ['regex' => '/^range/',    'tag' => 'input',    'type' => 'range'],
             ['regex' => '/^tel/',      'tag' => 'input',    'type' => 'tel'],
             ['regex' => '/^time/',     'tag' => 'input',    'type' => 'time'],
             ['regex' => '/^url/',      'tag' => 'input',    'type' => 'url'],
             ['regex' => '/^week/',     'tag' => 'input',    'type' => 'week'],
-
         ];
 
         $aReturn = [];
@@ -1552,7 +1553,7 @@ class pdo_db_base
                 // echo "DEBUG: sSql = $sSql<br>";
                 $aLookupdata = $this->makeQuery($sSql);
                 $aReturn['tag'] = 'select';
-                $aReturn['bootstrap-select'] = isset($aLookup['bootstrap-select']) ? $aLookup['bootstrap-select'] : false;
+                $aReturn['bootstrap-select'] = $aLookup['bootstrap-select'] ?? false;
 
                 unset($aReturn['type']);
                 $aReturn['size'] = isset($aLookup['size']) && (int) $aLookup['size'] ? (int) $aLookup['size'] : 1;
@@ -1605,29 +1606,29 @@ class pdo_db_base
                 switch ($sBasetype) {
                     case 'int':
                     case 'integer':
-                        $aReturn['tag'] = isset($aReturn['tag']) ? $aReturn['tag'] : 'input';
-                        $aReturn['type'] = isset($aReturn['type']) ? $aReturn['type'] : 'integer';
+                        $aReturn['tag'] ??= 'input';
+                        $aReturn['type'] ??= 'number';
                         break;
                         ;
                     case 'text':
-                        $aReturn['tag'] = isset($aReturn['tag']) ? $aReturn['tag'] : 'textarea';
-                        $aReturn['rows'] = isset($aReturn['rows']) ? $aReturn['rows'] : 5;
+                        $aReturn['tag'] ??= 'textarea';
+                        $aReturn['rows'] ??= 5;
                         break;
                         ;
                     case 'varchar':
                         if ($iSize) {
                             if ($iSize > 1024) {
-                                $aReturn['tag'] = isset($aReturn['tag']) ? $aReturn['tag'] : 'textarea';
-                                $aReturn['maxlength'] = isset($aReturn['maxlength']) ? $aReturn['maxlength'] : $iSize;
-                                $aReturn['rows'] = isset($aReturn['rows']) ? $aReturn['rows'] : 5;
+                                $aReturn['tag'] ??= 'textarea';
+                                $aReturn['maxlength'] ??= $iSize;
+                                $aReturn['rows'] ??= 5;
                             } else {
-                                $aReturn['tag'] = isset($aReturn['tag']) ? $aReturn['tag'] : 'input';
-                                $aReturn['type'] = isset($aReturn['type']) ? $aReturn['type'] : 'text';
-                                $aReturn['maxlength'] = isset($aReturn['maxlength']) ? $aReturn['maxlength'] : $iSize;
+                                $aReturn['tag'] ??= 'input';
+                                $aReturn['type'] ??= 'text';
+                                $aReturn['maxlength'] ??= $iSize;
                             }
                         } else {
-                            $aReturn['tag'] = isset($aReturn['tag']) ? $aReturn['tag'] : 'input';
-                            $aReturn['type'] = isset($aReturn['type']) ? $aReturn['type'] : 'text';
+                            $aReturn['tag'] ??= 'input';
+                            $aReturn['type'] ??= 'text';
                         }
                         break;
                         ;
@@ -1648,7 +1649,10 @@ class pdo_db_base
         }
 
         $aReturn['name'] = $sAttr;
-        $aReturn['label'] = isset($aReturn['label']) ? $aReturn['label'] : $sAttr;
+        $aReturn['label']??=$sAttr;
+
+        $aReturn['markup-pre'] = $this->_aProperties[$sAttr]['markup-pre'] ?? null;
+        $aReturn['markup-post'] = $this->_aProperties[$sAttr]['markup-post'] ?? null;
 
         // if (isset($aReturn['required']) && $aReturn['required']) {
         //     $aReturn['label'] .= ' <span class="required">*</span>';
