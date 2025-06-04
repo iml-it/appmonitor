@@ -2207,11 +2207,61 @@ class appmonitorserver_gui extends appmonitorserver
             . '</p>';
 
         $sAppId = $sAppId ?? 'no-app-id';
-        $sDivMoredetails = 'div-http-' . $sAppId;
-        $sShowHide = '<br><button class="btn btn-default" id="btn-plus-' . $sAppId . '"  onclick="$(\'#' . $sDivMoredetails . '\').slideDown(); $(this).hide(); $(\'#btn-minus-' . $sAppId . '\').show(); return false;"'
-            . '> ' . $this->_aIco['plus'] . ' ' . $this->_tr('btn-details') . ' </button>'
-            . '<button class="btn btn-default" id="btn-minus-' . $sAppId . '"  onclick="$(\'#' . $sDivMoredetails . '\').slideUp();   $(this).hide(); $(\'#btn-plus-' . $sAppId . '\').show(); return false;" style="display: none;"'
-            . '> ' . $this->_aIco['close'] . ' ' . $this->_tr('btn-hide-details') . ' </button>';
+
+        $aTmp=$this->_aCfg;
+        $sTable="<table class=\"table table-striped\">";
+        foreach([
+            "version",
+            "theme",
+            "lang",
+            "debug",
+            "serverurl",
+            "pagereload",
+            "servicecache",
+            "db",
+            "curl",
+            "notifications",
+            "api",
+            "userfields",
+            "users",
+            "view",
+            "mfa",
+        ] as $sKey){
+            $value='';
+            if(!isset($this->_aCfg[$sKey])){
+                $value="<div class=\"msg error\">?</div>";
+            } else {
+                unset($aTmp[$sKey]);
+                if (is_array($this->_aCfg[$sKey])) {
+                    $valtype="array";
+                    $value='<pre>'.print_r($this->_aCfg[$sKey], 1).'</pre>';
+                    $value='<pre class="array">'.json_encode($this->_aCfg[$sKey], JSON_PRETTY_PRINT).'</pre>';
+                } else if (is_string($this->_aCfg[$sKey])) {
+                    $valtype="string";
+                    $value='<code class="string">"'.$this->_aCfg[$sKey].'"</code>';
+                } else if (is_bool($this->_aCfg[$sKey])) {
+                    $valtype="bool";
+                    $value='<code class="bool">'.($this->_aCfg[$sKey]?"true":"false").'</code>';
+                } else if (is_integer((int) $this->_aCfg[$sKey])) {
+                    $valtype="int";
+                    $value='<code class="int">'.$this->_aCfg[$sKey].'</code>';
+                }
+                if(!$value){
+                    $valtype="??";
+                    $value='{TODO: set type} <code class="">'.$this->_aCfg[$sKey].'</code>';
+                }
+
+            }
+
+            $sTable.="<tr class=\"tr-config\">
+                <td>
+                    <strong><code>$sKey</code> {{$valtype}}</strong><br>"
+                        .$this->_tr("Setup-key-$sKey")
+                        ."</td>
+                <td>$value</td>
+            </tr>";
+        }
+        $sTable.="</table><br>";
 
         return $oA->getSectionHead($this->_aIco["setup"] . ' ' . $this->_tr('Setup'))
             . '<section class="content">'
@@ -2223,14 +2273,14 @@ class appmonitorserver_gui extends appmonitorserver
                     $oA->getBox([
                         'title' => $this->_tr('Setup-configuration'),
                         'text' => ''
-                            . $sSetup
-                            . $sShowHide
-                            . '<div id="' . $sDivMoredetails . '" style="display: none;">'
-                            . '<pre>' . print_r($this->_aCfg, 1) . '</pre>'
-                            . '</div>'
+                            . $sSetup.'<br>'
+                            . '<div id="divsetupconfigfilter"></div><br>'
+                            . '<div id="divsetupconfig">'
+                            . $sTable
+                            .'</div>'
 
                     ]),
-                    12
+                    6
                 )
                 . $oA->getSectionColumn(
                     $oA->getBox([
@@ -2253,12 +2303,12 @@ class appmonitorserver_gui extends appmonitorserver
                             . '</span>'
                             . '</div>'
                             . '</form><br>'
-                            .'<div id="divsetupfilter"></div><br>'
+                            . '<div id="divsetupfilter"></div><br>'
                             . '<div id="divsetup">'
                             . $sHostlist
                             . '</div>'
                     ]),
-                    12
+                    6
                 )
             )
             . '</section>';

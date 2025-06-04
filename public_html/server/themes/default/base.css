@@ -196,3 +196,6 @@ div.counter .graph{
     border: 1px solid #eee;
 }
 
+pre.array{ background: #fff8; color:#055;}
+code.string{ background: none; color:#00a;}
+code.int{    background: none; color:#080;}
