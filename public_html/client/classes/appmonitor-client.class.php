@@ -50,6 +50,7 @@ if (!class_exists('appmonitorcheck')) {
  * 2025-03-19  0.156  axel.hahn@unibe.ch      added: validation rules for parameters in all checks
  * 2025-03-24  0.157  axel.hahn@unibe.ch      update validator for bool check in ini files
  * 2025-04-35  0.158  axel.hahn@unibe.ch      validate count in simple check as string (before: float)
+ * 2025-04-35  0.161  axel.hahn@unibe.ch      validate parent values if they match a name of another check
  * --------------------------------------------------------------------------------<br>
  * @version 0.158
  * @author Axel Hahn
@@ -65,7 +66,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.158';
+    protected string $_sVersion = '0.161';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -407,10 +408,19 @@ class appmonitor
 
         if (!count($this->_aChecks)) {
             $aErrors[] = "No checks have been defined.";
+        } else {
+            foreach ($this->_aChecks as $sCheck => $aCheck) {
+                if(!$this->_verifyParent($this->_aChecks, $aCheck["parent"]??'')){
+                    $aErrors[] = "Check '$aCheck[name]' - value for parent = '$aCheck[parent]' is wrong. No check has this name.";
+                }
+                if(($aCheck['parent']??false) == $aCheck['name']){
+                    $aErrors[] = "Check '$aCheck[name]' - value for parent = '$aCheck[parent]' points to itself.";
+                }
+            }
         }
 
         if ($this->_aMeta["result"] === false) {
-            $aErrors[] = "method setResult was not used to set a final result for all checks.";
+            $aErrors[] = "Method setResult was not used to set a final result for all checks.";
         }
 
         if (count($aErrors)) {
@@ -488,6 +498,24 @@ class appmonitor
     }
 
     /**
+     * Verify if parent value is valid and points to a name of an existing check
+     * @param array  $aChecks  array of all checks
+     * @param string $sParent  a parent value of a check
+     * @return bool
+     */
+    function _verifyParent(array $aChecks, string $sParent): bool
+    {
+        if(!$sParent){
+            return true;
+        }
+        foreach ($aChecks as $aCheck) {
+            if ($aCheck["name"] === $sParent) {
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
      * Output appmonitor client status as single html page
      * 
      * @example <code>
@@ -534,7 +562,7 @@ class appmonitor
         if (isset($aData['checks'][0]) && count($aData['checks'])) {
             foreach ($aData['checks'] as $aCheck) {
                 $sOut .= ''
-                    . '<span class="result' . $aCheck['result'] . '"> <strong>' . $aCheck['name'] . '</strong></span> <br>'
+                    . '<span id="'.$aCheck['name'].'" class="result' . $aCheck['result'] . '"> <strong>' . $aCheck['name'] . '</strong></span> <br>'
                     . '<div class="check">'
                     . '<div class="description">'
                     . $aCheck['description'] . '<br>'
@@ -542,7 +570,7 @@ class appmonitor
                     . '</div>'
                     . 'Execution time: <span class="float">' . (isset($aCheck['time']) ? $aCheck['time'] : ' - ') . '</span><br>'
                     . 'Group: <span class="string">' . (isset($aCheck['group']) ? $aCheck['group'] : '-') . '</span><br>'
-                    . 'parent: <span class="string">' . (isset($aCheck['parent']) ? $aCheck['parent'] : '-') . '</span><br>'
+                    . 'parent: <span class="string">' . (isset($aCheck['parent']) ? "<a href=\"#$aCheck[parent]\">$aCheck[parent]</a>"  : '-') . '</span><br>'
                     . 'Status: ' . $aMsg[$aCheck['result']] . '<br>'
                     . '</div>'
                 ;
@@ -562,6 +590,7 @@ class appmonitor
 
 
         $sOut = '<!DOCTYPE html><html><head>'
+            . '<meta http-equiv="refresh" content="5">'
             . '<style>'
             . 'body{background:#eee; color:#444; font-family: verdana,arial; margin: 0; }'
             . 'body>div#content{background: #fff; border-radius: 2em; border: 4px solid #abc; box-shadow: 0.5em 0.5em 2em #aaa; margin: 2em 10%; padding: 2em;}'
@@ -579,7 +608,7 @@ class appmonitor
             . '.result1{background:#ccc; border-left: 1em solid #aaa; padding: 0.5em; }'
             . '.result2{background:#fc9; border-left: 1em solid #860; padding: 0.5em; }'
             . '.result3{background:#f88; border-left: 1em solid #f00; padding: 0.5em; }'
-            . '.string{color:#338;}'
+            . '.string{color:#338; background: #eef;}'
             . '</style>'
             . '<title>' . __CLASS__ . '</title>'
             . '</head><body>'
