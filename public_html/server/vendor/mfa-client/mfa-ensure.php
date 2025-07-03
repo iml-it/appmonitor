@@ -10,7 +10,9 @@
 require_once __DIR__.'/mfaclient.class.php';
 $mfa = new mfaclient();
 
-// set custom user (ignores field "user" in mfaconfig.php)
 $mfa->setUser($this->getUserid());
 
-$iHttpStatus=$mfa->ensure(false);
+$iHttpStatus=$mfa->ensure();
+
+// mfa was skipped? Enable this line to see the reason
+// echo $mfa->showStatus();

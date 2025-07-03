@@ -1,7 +1,22 @@
 <?php
 
+/**
+ * 
+ * MFA CLIENT CLASS
+ * 
+ * Connect a web app with MFA server
+ * 
+ * Source: https://git-repo.iml.unibe.ch/iml-open-source/
+ * Docs: https://os-docs.iml.unibe.ch/mfa-client/index.html
+ * License: GNU GPL 3.0
+ * 
+ * 2025-06-11  <axel.hahn@unibe.ch>  initial version
+ * 2025-06-30  <axel.hahn@unibe.ch>  set version 1.0.1 in user agenmt in http requests
+ */
 class mfaclient
 {
+
+    protected string $_sVersion = "1.0.1";
 
     protected array $aConfig = [];
     // protected string $sSessionvarname = "mfaclient";
@@ -13,6 +28,8 @@ class mfaclient
 
     protected bool $bDebug = false;
 
+    protected array $aStatus = [];
+
     /**
      * Intialize mfa client - optional set config and user
      * 
@@ -20,17 +37,14 @@ class mfaclient
      * @see setUser
      * 
      * @param array $aConfig  optional: configuration with app id and base url
-     * @param string $sUser   optional: user id that was logged in
      */
-    public function __construct(array $aConfig = [], string $sUser = "")
+    public function __construct(array $aConfig = [])
     {
         $this->loadConfig();
-        if ($sUser) {
-            $aConfig['user'] = $sUser;
-        }
-        if (count($aConfig)) {
+        if ($aConfig) {
             $this->setConfig($aConfig);
         }
+        $this->setUser($this->aConfig['user']??'');
     }
 
 
@@ -77,7 +91,7 @@ class mfaclient
         // }
 
         curl_setopt($ch, CURLOPT_TIMEOUT, $iTimeout);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'IML MFA client' . __CLASS__);
+        curl_setopt($ch, CURLOPT_USERAGENT, "IML MFA client PHP v$this->_sVersion");
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
@@ -273,7 +287,7 @@ class mfaclient
         $sCfgfile= __DIR__ . '/mfaconfig.php';
         if (file_exists($sCfgfile)) {
             $aTmp = include $sCfgfile;
-            $this->setConfig($aTmp??[]);
+            $this->aConfig = $aTmp??[];
         }
     }
     /**
@@ -285,8 +299,6 @@ class mfaclient
     public function setConfig(array $aConfig): void
     {
         $this->aConfig = $aConfig;
-        $this->debug($aConfig['debug']??false);
-        $this->setUser($aConfig['user']??'');
     }
 
     /**
@@ -301,7 +313,8 @@ class mfaclient
     }
 
     /**
-     * Logout
+     * Logout; unset user in session scope
+     *
      * @return void
      */
     public function logout()
@@ -335,7 +348,7 @@ class mfaclient
             body{background:#f0f5f8; color: #335; font-size: 1.2em; font-family: Arial, Helvetica, sans-serif;}
             a{color: #44c;}
             button{border-color: 2px solid #ccc ; border-radius: 0.5em; padding: 0.7em;}
-            div{background:#fff; border-radius: 1em; box-shadow: 0 0 1em #ccc; margin: 4em auto; max-width: 800px; padding: 2em;}
+            div{background:#fff; border-radius: 1em; box-shadow: 0 0 1em #ccc; margin: 4em auto; max-width: 600px; padding: 2em;}
             h1{margin: 0 0 1em;;}
         </style></head>
         <body><div>' . $sHtmlcode . '</div></body>
@@ -356,32 +369,32 @@ class mfaclient
      * Check if MFA login is needed and jump to its url
      * @return int
      */
-    public function ensure($bUseSession=true): int
+    public function ensure(): int
     {
 
-        if(!$this->getUser()){
-            $this->showHtml(
-                403,
-                "<h1>Missing userid</h1>"
-                . "⚠️ MFA challenge required - but userid of logged in user is missing.<br><ul>"
-                . "<li>Maybe you didn't login yet.</li>"
-                . "<li>Maybe there misconfiguration to fetch the user id.</li>"
-                . "</ul>"
-            );
-        }
         if (!isset($_SESSION) || !count($_SESSION)) {
             session_start();
         }
-        if($bUseSession){
-            if (($_SESSION['mfa']['user'] ?? '') == $this->sUser) {
+        if (($_SESSION['mfa']['user'] ?? '') == $this->sUser) {
+            $this->aStatus[] = 'User still has a valid session after solving a challenge.';
+            return 200;
+        } else {
+            $this->logout();
+        }
+
+        foreach(['api', 'appid', 'shared_secret', 'user'] as $sKey){
+            if(!isset($this->aConfig[$sKey])){
+                $this->aStatus[] = "Skip: Key '$sKey' was not set in config.";
                 return 200;
-            } else {
-                $this->logout();
+            }
+            if(!$this->aConfig[$sKey]){
+                $this->aStatus[] = "Skip: Key '$sKey' is empty in config.";
+                return 200;
             }
         }
 
+
         $aMfaReturn = $this->check();
-        // print_r($aMfaReturn);
         $this->_wd(__METHOD__ . "<br>Http request to mfa api<pre>" . print_r($aMfaReturn, 1) . "</pre>");
         $aBody = json_decode($aMfaReturn['response']['body'] ?? '', 1);
         $iHttpStatus = $aBody['status'] ?? -1;
@@ -406,9 +419,10 @@ class mfaclient
                 //.'<br><pre>'.print_r($aMfaReturn, 1).'</pre>'
             );
         }
-        if ($iHttpStatus == 200) {
-            $_SESSION['mfa']['user'] = $this->sUser;
-        }
+
+        $this->aStatus[] = 'User solved the session now.';
+
+        $_SESSION['mfa']['user'] = $this->sUser;
         session_write_close();
 
         return $iHttpStatus;
@@ -418,17 +432,17 @@ class mfaclient
     /**
      * Get an html button to open mfa setup page
      * 
-     * @param string $sSubmitBtn
+     * @param string $sSubmitBtn  optional: html code for a submit button; default: '<button>MFA Setup</button>'
+     * @param string $sBackUrl    optional: url to return from mfa server to the application; default: current url
      * @return void
      */
     public function getButtonSetup(string $sSubmitBtn = '<button>MFA Setup</button>', $sBackUrl = ''): string
     {
         $aBody = json_decode($this->_api("urls")['response']['body'], 1);
         // print_r($aBody);
-        
         $sUrl = $aBody['setup'] ?? '';
         if ($sUrl) {
-            $sBackUrl = $sBackUrl ?: $_SERVER['HTTP_REFERER'];
+            $sBackUrl = $sBackUrl ?: ( "http".(($_SERVER['HTTPS']??'') === 'on' ? "s" : "")."://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
             return $this->jumpform($sUrl, $sSubmitBtn, $sBackUrl);
         } else {
             return $aBody['message']??'';
@@ -439,10 +453,9 @@ class mfaclient
     /**
      * Open User settings to setup mfa methods
      * 
-     * @param string $sUrl
-     * @param string $sSubmitBtn
+     * @param string $sUrl        url to open
+     * @param string $sSubmitBtn  html code for a submit button
      * @return void
-     */
     public function openSetup(string $sUrl = '', string $sSubmitBtn = '<button>MFA Setup</button>', $sBackUrl = '')
     {
         if (!$sUrl) {
@@ -454,10 +467,7 @@ class mfaclient
             $this->_jump($sUrl, $sSubmitBtn, $sBackUrl);
         }
     }
-
-    // ----------------------------------------------------------------------
-    // getter
-    // ----------------------------------------------------------------------
+     */
 
     /**
      * Get IP of current client (to be sent to MFA server)
@@ -466,7 +476,15 @@ class mfaclient
     public function getClientIp(): string
     {
         $ipaddress = '';
-        foreach (['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR', 'REMOTE_HOST'] as $sKey) {
+        foreach([
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR',
+            'REMOTE_HOST'
+        ] as $sKey){
             if (getenv($sKey))
                 $ipaddress = getenv($sKey);
         }
@@ -474,6 +492,24 @@ class mfaclient
             $ipaddress = 'UNKNOWN';
         }
         return $ipaddress;
+    }
+
+    /**
+     * return current config
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->aConfig;
+    }
+
+    /**
+     * return current status
+     * @return array
+     */
+    public function getStatus(): array
+    {
+        return $this->aStatus;
     }
 
     /**
@@ -487,12 +523,15 @@ class mfaclient
     }
 
     /**
-     * Get current user
+     * show current status if you want to find out why mfa was skipped
+     * @example <code>echo $mfa->showStatus();</code>
      * @return string
      */
-    public function getUser(): string
+    public function showStatus(): string
     {
-        return $this->sUser;
+        return 'MFA status: <ul><li>'
+            . implode('</li><li>', $this->aStatus)
+            .'</li></ul>'
+            ;
     }
-
 }
