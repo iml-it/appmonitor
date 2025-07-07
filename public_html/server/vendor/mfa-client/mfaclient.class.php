@@ -12,11 +12,12 @@
  * 
  * 2025-06-11  <axel.hahn@unibe.ch>  initial version
  * 2025-06-30  <axel.hahn@unibe.ch>  set version 1.0.1 in user agenmt in http requests
+ * 2025-07-07  <axel.hahn@unibe.ch>  1.0.2 handle executed setUser() before ensure()
  */
 class mfaclient
 {
 
-    protected string $_sVersion = "1.0.1";
+    protected string $_sVersion = "1.0.2";
 
     protected array $aConfig = [];
     // protected string $sSessionvarname = "mfaclient";
@@ -382,12 +383,14 @@ class mfaclient
             $this->logout();
         }
 
+        $aVerify=$this->aConfig;
+        $aVerify['user']=$this->sUser ?: ($this->aConfig['user'] ?? null); 
         foreach(['api', 'appid', 'shared_secret', 'user'] as $sKey){
-            if(!isset($this->aConfig[$sKey])){
+            if(!isset($aVerify[$sKey])){
                 $this->aStatus[] = "Skip: Key '$sKey' was not set in config.";
                 return 200;
             }
-            if(!$this->aConfig[$sKey]){
+            if(!$aVerify[$sKey]){
                 $this->aStatus[] = "Skip: Key '$sKey' is empty in config.";
                 return 200;
             }
