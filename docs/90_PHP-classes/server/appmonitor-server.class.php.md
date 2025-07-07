@@ -167,7 +167,7 @@ default value:
 **Parameters**: **0**
 
 
-### 🔹 public getUser()
+### 🔹 public getUserSettings()
 
 Get meta fields for current or given user
 
@@ -177,7 +177,7 @@ default value:
 
 | Parameter | Type | Description
 |--         |--    |--
-| \<optional\> $sUsername | `string` | optional: override current user id
+| \<optional\> $sUsername | `string` | optional: override current user id - used for generic user field "__default_authenticated_user__"
 
 ### 🔹 public getUserid()
 

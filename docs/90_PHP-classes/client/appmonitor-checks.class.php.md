@@ -49,8 +49,9 @@
  * 2025-02-28  0.152  axel.hahn@unibe.ch      listChecks: add loop over currently loaded classes
  * 2025-03-03  0.153  axel.hahn@unibe.ch      getSize() preg_replace did not work in compiled binary
  * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with existcode instead of die()
+ * 2025-03-18  0.156  axel.hahn@unibe.ch      add validation class
  * --------------------------------------------------------------------------------<br>
- * @version 0.154
+ * @version 0.156-dev
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -71,6 +72,15 @@
 
 
 **Return**: ``
+
+**Parameters**: **0**
+
+
+### 🔹 public explain()
+
+Self documentation of a check. The array is defined in plugins/checks/.php files
+
+**Return**: `array`
 
 **Parameters**: **0**
 
@@ -96,7 +106,7 @@
 |--         |--    |--
 | \<required\> $aConfig | `array` | configuration array for a check, eg.<br>
 
-```txt <br>[<br>    [name] => Dummy<br>    [description] => Dummy Test<br>    [check] => [<br>        [function] => [check function] // i.e. Simple<br>        [params] => [array]            // optional; arguments for Check function<br>                                       // its keys depend on the function  <br>    ]<br>]<br>```
+```txt <br>[<br>    [name] => Dummy<br>    [description] => Dummy Test<br>    [check] => [<br>        [function] => [check function] // i.e. Simple<br>        [params] => [array]            // optional; arguments for Check function<br>                                       // its keys depend on the function  <br>    ]<br>    [group] => Group A<br>    [parent] => field "name" of another check<br>    [worstresult] => RESULT_WARNING<br>]<br>```
 
 ### 🔹 public respond()
 

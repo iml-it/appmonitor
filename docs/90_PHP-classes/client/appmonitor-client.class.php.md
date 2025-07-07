@@ -43,9 +43,14 @@
  * 2024-11-22  0.141  axel.hahn@unibe.ch      Set client version to server version after updating http, mysqli and app checks
  * 2025-01-02  0.149  axel.hahn@unibe.ch      add getChecks method
  * 2025-03-03  0.153  axel.hahn@unibe.ch      fix client checks during development of a compiled binary 
- * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with existcode instead of die()
+ * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with exitcode instead of die()
+ * 2025-03-17  0.155  axel.hahn@unibe.ch      added: getVersion() and setVersion()
+ * 2025-03-19  0.156  axel.hahn@unibe.ch      added: validation rules for parameters in all checks
+ * 2025-03-24  0.157  axel.hahn@unibe.ch      update validator for bool check in ini files
+ * 2025-04-35  0.158  axel.hahn@unibe.ch      validate count in simple check as string (before: float)
+ * 2025-04-35  0.161  axel.hahn@unibe.ch      validate parent values if they match a name of another check
  * --------------------------------------------------------------------------------<br>
- * @version 0.154
+ * @version 0.158
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -69,6 +74,19 @@
 
 **Parameters**: **0**
 
+
+### 🔹 public _verifyParent()
+
+Verify if parent value is valid and points to a name of an existing check
+
+**Return**: `bool`
+
+**Parameters**: **2**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $aChecks | `array` | array of all checks
+| \<required\> $sParent | `string` | a parent value of a check
 
 ### 🔹 public addCheck()
 
@@ -162,6 +180,15 @@
 **Parameters**: **0**
 
 
+### 🔹 public getVersion()
+
+Get version of the appmoinitor php client
+
+**Return**: `string`
+
+**Parameters**: **0**
+
+
 ### 🔹 public listChecks()
 
 list all available check functions. This is a helper class you cann callto get an overview over built in functions. You get a flat array withall function names.
@@ -231,6 +258,18 @@
 | Parameter | Type | Description
 |--         |--    |--
 | \<optional\> $iTTl | `TTL *` | TTL value in sec
+
+### 🔹 public setVersion()
+
+Set a prefix for meta -> version ... before "-php-client-v<VERSION>"
+
+**Return**: `bool`
+
+**Parameters**: **1**
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $sVersionPrefix | `new *` | new prefix
 
 ### 🔹 public setWebsite()
 
