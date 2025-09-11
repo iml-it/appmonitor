@@ -1,0 +1,25 @@
+# TARGET: docker/containers/proxy-server/Dockerfile
+#
+# {{generator}}
+#
+
+FROM debian:latest
+
+# install packages old
+RUN apt-get update && apt-get install -y {{APP_APT_PACKAGES}}
+
+# install packages
+RUN rm -rf /var/lib/apt/lists/* 
+RUN mkdir -p /var/cache/apt/archives/partial
+RUN apt-get update
+RUN apt-get install -y apache2
+# RUN apt-get install -y {{PROXY_APT_PACKAGES}}
+
+# enable mpm event
+# RUN a2dismod mpm_prefork && a2enmod mpm_event
+
+# enable apache modules
+RUN a2enmod {{APP_APACHE_MODULES}}
+
+# Start apache httpd - because we don't use http image
+CMD ["/usr/sbin/apachectl", "-X"]

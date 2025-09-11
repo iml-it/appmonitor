@@ -13,40 +13,70 @@ networks:
 
 services:
 
-  # ----- apache httpd + php
+  # ======================================================================
+  # PROXY # apache httpd
+  # ======================================================================
+  {{APP_NAME}}-proxy:
+    build:
+      context: .
+      dockerfile: ./containers/proxy-server/Dockerfile
+    container_name: '{{APP_NAME}}-proxy'
+
+    working_dir: ${WEBROOT}
+
+    ports:
+      - '${APP_PORT}:80'
+    volumes:
+      - ../:/var/www/${APP_NAME}
+      - ./containers/proxy-server/apache/sites-enabled:/etc/apache2/sites-enabled
+      # - ./containers/proxy-server/apache:/usr/local/apache2/conf/custom
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/healthcheck.html"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      # start_period: 40s
+    networks:
+      - {{APP_NAME}}-network
+
+    # user: ${DOCKER_USER_UID}
+
+  # ======================================================================
+  # PHP-FPM
+  # ======================================================================
   {{APP_NAME}}-web:
     build:
       context: .
       dockerfile: ./containers/web-server/Dockerfile
     # image: "php:{{APP_PHP_VERSION}}-apache"
     container_name: '{{APP_NAME}}-server'
-    ports:
-      - '${APP_PORT}:80'
 
     working_dir: ${WEBROOT}
     
     volumes:
       - ../:/var/www/${APP_NAME}
-      - ./containers/web-server/apache/sites-enabled:/etc/apache2/sites-enabled
       - ./containers/web-server/php/extra-php-config.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      # start_period: 40s
+
+    # healthcheck:
+    #   test: ["php", "healthcheck.php"]
+    #   interval: 10s
+    #   timeout: 3s
+    #   retries: 5
+    #   # start_period: 40s
 
     networks:
       - {{APP_NAME}}-network
 
-    user: ${DOCKER_USER_UID}
+    # user: ${DOCKER_USER_UID}
 
     # --- 8< --- {{CUTTER_NO_DATABASE}} --- 8< ---
-
     depends_on:
-      - db-server
+      - {{APP_NAME}}-proxy
+      - {{APP_NAME}}-db
 
-  # ----- mariadb
+  # ======================================================================
+  # DATABASE # Mariadb
+  # ======================================================================
   {{APP_NAME}}-db:
     image: {{MYSQL_IMAGE}}
     container_name: '${APP_NAME}-db'

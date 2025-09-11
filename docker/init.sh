@@ -31,11 +31,15 @@
 # 2024-11-20  v1.24 <axel.hahn@unibe.ch>      fix menu with started database less app; apply template permissions on target file; add $WEBURL; remove $frontendurl
 # 2024-11-20  v1.25 <axel.hahn@unibe.ch>      fix menu startup containers
 # 2024-11-21  v1.26 <axel.hahn@unibe.ch>      Reset colors in _checkConfig 
+# 2025-05-13  v1.27 <axel.hahn@unibe.ch>      handle addition variables config file for non sharable values 
+# 2025-06-30  v1.28 <axel.hahn@unibe.ch>      supress grep errors on missing init.sh_not_shared.cfg; support mariadb tools
+# 2025-06-30  v1.29 <axel.hahn@unibe.ch>      short docker ps output for all containers; small fixes
+# 2025-07-25  v1.30 <axel.hahn@unibe.ch>      Hide DB info block if no database is configured
 # ======================================================================
 
 cd "$( dirname "$0" )" || exit 1
 
-_version="1.26"
+_version="1.30"
 
 # init used vars
 gittarget=
@@ -45,7 +49,7 @@ _self=$( basename "$0" )
 
 # shellcheck source=/dev/null
 . "${_self}.cfg" || exit 1
-
+. "${_self}_not_shared.cfg" 2>/dev/null
 
 # git@git-repo.iml.unibe.ch:iml-open-source/docker-php-starterkit.git
 selfgitrepo="docker-php-starterkit.git"
@@ -61,6 +65,7 @@ fgReset="\e[0m"
 
 # ----- status varsiables
 # running containers
+DC_PS=
 DC_WEB_UP=0
 DC_DB_UP=0
 DC_ALL_UP=0
@@ -78,6 +83,15 @@ DC_SHOW_MENUHINTS=0
 
 isDockerRootless=0
 ps -ef | grep  dockerd-rootless | grep -q $USER && isDockerRootless=1
+
+DBTOOL=mysql
+DBDUMP=mysqldump
+if grep -q "mariadb" <<< "$MYSQL_IMAGE"; then
+    DBTOOL=mariadb
+    DBDUMP=mariadb-dump
+fi
+
+
 
 # ----------------------------------------------------------------------
 # FUNCTIONS
@@ -118,15 +132,19 @@ function _getStatus_template(){
 #   0 = down
 #   1 = up
 function _getStatus_docker(){
-    local _out
-    _out=$( docker-compose -p "$APP_NAME" ps)    
 
     DC_WEB_UP=0
     DC_DB_UP=0
     DC_ALL_UP=0
 
-    grep -q "${APP_NAME}-server" <<< "$_out" && DC_WEB_UP=1
-    grep -q "${APP_NAME}-db"     <<< "$_out"  && DC_DB_UP=1
+    if which jq >/dev/null 2>&1; then
+        DC_PS=$( docker-compose -p "$APP_NAME" ps --format '{{ json . }}' | jq "[.Name, .Service, .State, .RunningFor, .Status, .Ports] | @csv" | column -t -s ',' | sed 's#\\\"##g' | tr -d '"' )
+    else
+        DC_PS=$( docker-compose -p "$APP_NAME" ps | grep "$APP_NAME")
+    fi
+
+    grep -q "${APP_NAME}-web" <<< "$DC_PS" && DC_WEB_UP=1
+    grep -q "${APP_NAME}-db"  <<< "$DC_PS" && DC_DB_UP=1
 
     if [ "$DB_ADD" != "false" ] && [ ! -d "${DC_DUMP_DIR}" ]; then
         echo "INFO: creating subdir ${DC_DUMP_DIR} to import/ export databases ..."
@@ -149,8 +167,8 @@ function _getStatus_docker(){
 # https://github.com/axelhahn/nginx-docker-proxy
 # It returns http://localhost:<port> or a https://<appname> plus $WEBURL
 function _getWebUrl(){
-    if grep -q "^[0-9\.]* ${APP_NAME}-server" /etc/hosts; then
-        DC_WEB_URL="https://${APP_NAME}-server$WEBURL"
+    if grep -q "^[0-9\.]* ${APP_NAME}-web" /etc/hosts; then
+        DC_WEB_URL="https://${APP_NAME}-web$WEBURL"
     else
         DC_WEB_URL=http://localhost:${APP_PORT}$WEBURL
     fi
@@ -248,7 +266,7 @@ function showMenu(){
         menuhint $_bAll "Database container is up"
         echo "${_spacer}$( _key d ) - Dump container database"
         echo "${_spacer}$( _key D ) - Import Dump into container database"
-        echo "${_spacer}$( _key M ) - Open Mysql client in database container"
+        echo "${_spacer}$( _key M ) - Open $DBTOOL client in database container"
         echo
     fi
     menuhint $_bAll "Always available"
@@ -307,7 +325,7 @@ function _showInfos(){
 
     h3 "processes webserver"
     # docker-compose top
-    docker top "${APP_NAME}-server"
+    docker top "${APP_NAME}-web"
     if [ ! "$DB_ADD" = "false" ]; then
         h3 "processes database"
         docker top "${APP_NAME}-db"
@@ -406,15 +424,18 @@ function _fix_no-db(){
 # used in _generateFiles
 function _getreplaces(){
     # loop over vars to make the replacement
-    grep "^[a-zA-Z]" "$_self.cfg" | while read -r line
+    for myfile in "${_self}.cfg" "${_self}_not_shared.cfg"
     do
-        # echo replacement: $line
-        mykey=$( echo "$line" | cut -f 1 -d '=' )
-        myvalue="$( eval echo \"\$"$mykey"\" )"
+        grep "^[a-zA-Z]" "${myfile}" 2>/dev/null | while read -r line
+        do
+            # echo replacement: $line
+            mykey=$( echo "$line" | cut -f 1 -d '=' )
+            myvalue="$( eval echo \"\$"$mykey"\" )"
 
-        # TODO: multiline values fail here in replacement with sed 
-        echo -e "s#{{$mykey}}#${myvalue}#g"
+            # TODO: multiline values fail here in replacement with sed 
+            echo -e "s#{{$mykey}}#${myvalue}#g"
 
+        done
     done
 }
 
@@ -526,7 +547,6 @@ function _showContainers(){
     local sUp=".. UP"
     local sDown=".. down"
 
-    local Status=
     local StatusWeb="$sDown"
     local StatusDb="$sDown"
     local colWeb=
@@ -547,23 +567,20 @@ function _showContainers(){
 
     if [ "$DB_ADD" = "false" ]; then
         colDb="$fgGray"
-        local StatusDb=".. N/A"
-        Status="This app has no database container."
+        local StatusDb=""
     fi
 
     h2 CONTAINERS
 
     echo
-    printf "  $colWeb$fgInvert  %-32s  $fgReset   $colDb$fgInvert  %-32s  $fgReset\n"      "WEB ${StatusWeb}"  "DB ${StatusDb}"
-    printf "    %-32s  $fgReset     %-32s  $fgReset\n"      "PHP ${APP_PHP_VERSION}"      "${MYSQL_IMAGE}"
-    printf "    %-32s  $fgReset     %-32s  $fgReset\n"      ":${APP_PORT}"                ":${DB_PORT}"
+    echo "$DC_PS" | sed 's#^#  #g'
 
     echo
+    printf "  $colWeb$fgInvert  %-32s  $fgReset   $colDb$fgInvert  %-32s  $fgReset\n"     "WEB ${StatusWeb}"  "$( test -n "$StatusDb" && echo DB ${StatusDb} )"
+    printf "    %-32s  $fgReset     %-32s  $fgReset\n"      "PHP ${APP_PHP_VERSION}"      "$( test -n "$StatusDb" && echo ${MYSQL_IMAGE} || echo "(no database)" )"
+    printf "    %-32s  $fgReset     %-32s  $fgReset\n"      ":${APP_PORT}"                "$( test -n "$StatusDb" && echo :${DB_PORT} )"
 
-    if [ -n "$Status" ]; then
-        echo "  $Status"
-        echo
-    fi
+    echo
 
     if [ -n "$bLong" ]; then
         echo "$_out"
@@ -595,7 +612,7 @@ function _dbDump(){
     fi
     outfile=${DC_DUMP_DIR}/${MYSQL_DB}_$( date +%Y%m%d_%H%M%S ).sql
     echo -n "dumping ${MYSQL_DB} ... "
-    if docker exec -i "${APP_NAME}-db" mysqldump -uroot -p${MYSQL_ROOT_PASS} ${MYSQL_DB} > "$outfile"; then
+    if docker exec -i "${APP_NAME}-db" ${DBDUMP} -uroot -p${MYSQL_ROOT_PASS} ${MYSQL_DB} > "$outfile"; then
         echo -n "OK ... Gzip ... "
         if gzip "${outfile}"; then
             echo "OK"
@@ -614,11 +631,11 @@ function _dbDump(){
             du -hs ${DC_DUMP_DIR} | awk '{ print $1 }'
 
         else
-            echo "ERROR"
+            echo "ERROR: gzip failed."
             rm -f "$outfile"
         fi
     else
-        echo "ERROR"
+        echo "ERROR: docker exec -i "${APP_NAME}-db" ${DBDUMP} failed."
         rm -f "$outfile"
     fi
 }
@@ -646,7 +663,7 @@ function _dbImport(){
 
     # Mac OS compatibility
     # if zcat "$dumpfile" | docker exec -i "${APP_NAME}-db" mysql -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
-    if cat "$dumpfile" | zcat | docker exec -i "${APP_NAME}-db" mysql -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
+    if cat "$dumpfile" | zcat | docker exec -i "${APP_NAME}-db" ${DBTOOL} -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
     then
         echo "OK"
     else
@@ -729,8 +746,10 @@ while true; do
                 _showBrowserurl
             else
                 echo "ERROR: docker-compose up failed :-/"
-                docker-compose -p "$APP_NAME" logs | tail
+                # docker-compose -p "$APP_NAME" logs | tail
             fi
+            echo "last lines of 'docker-compose -p $APP_NAME logs'..."
+            docker-compose -p "$APP_NAME" logs | tail -100
             echo
 
             ;;
@@ -762,7 +781,7 @@ while true; do
         p)
             h2 "PHP $APP_PHP_VERSION linter"
 
-            dockerid="${APP_NAME}-server"
+            dockerid="${APP_NAME}-web"
             echo -n "Scanning ... "
             typeset -i _iFiles
             _iFiles=$( docker exec -it "$dockerid" /bin/bash -c "find . -name '*.php' " | wc -l )
@@ -789,8 +808,8 @@ while true; do
             _dbImport
             ;;
         M)
-            h2 "DB tools :: mysql client"
-            docker exec -it "${APP_NAME}-db" mysql -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
+            h2 "DB tools :: ${DBTOOL} client"
+            docker exec -it "${APP_NAME}-db" ${DBTOOL} -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
             ;;
         o) 
             h2 "Open app ..."
