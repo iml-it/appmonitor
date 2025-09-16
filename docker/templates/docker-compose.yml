@@ -24,7 +24,6 @@ services:
 
     ports:
       - '${APP_PORT}:443'
-      - '8000:80'
     volumes:
       - ../:/var/www/${APP_NAME}
       - ./containers/proxy-server/apache/sites-enabled:/etc/apache2/sites-enabled
