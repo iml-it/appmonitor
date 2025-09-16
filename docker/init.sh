@@ -35,11 +35,12 @@
 # 2025-06-30  v1.28 <axel.hahn@unibe.ch>      supress grep errors on missing init.sh_not_shared.cfg; support mariadb tools
 # 2025-06-30  v1.29 <axel.hahn@unibe.ch>      short docker ps output for all containers; small fixes
 # 2025-07-25  v1.30 <axel.hahn@unibe.ch>      Hide DB info block if no database is configured
+# 2025-09-16  v1.31 <axel.hahn@unibe.ch>      adpations for new docker dev setup
 # ======================================================================
 
 cd "$( dirname "$0" )" || exit 1
 
-_version="1.30"
+_version="1.31"
 
 # init used vars
 gittarget=
@@ -138,13 +139,13 @@ function _getStatus_docker(){
     DC_ALL_UP=0
 
     if which jq >/dev/null 2>&1; then
-        DC_PS=$( docker-compose -p "$APP_NAME" ps --format '{{ json . }}' | jq "[.Name, .Service, .State, .RunningFor, .Status, .Ports] | @csv" | column -t -s ',' | sed 's#\\\"##g' | tr -d '"' )
+        DC_PS=$( docker-compose -p "$APP_NAME" ps --format '{{ json . }}' | jq "[.Name, .State, .RunningFor, .Status, .Ports] | @csv" | column -t -s ',' | sed 's#\\\"##g' | tr -d '"' )
     else
         DC_PS=$( docker-compose -p "$APP_NAME" ps | grep "$APP_NAME")
     fi
 
-    grep -q "${APP_NAME}-web" <<< "$DC_PS" && DC_WEB_UP=1
-    grep -q "${APP_NAME}-db"  <<< "$DC_PS" && DC_DB_UP=1
+    grep -q ":${APP_PORT}->" <<< "$DC_PS" && DC_WEB_UP=1
+    grep -q ":${DB_PORT}->"  <<< "$DC_PS" && DC_DB_UP=1
 
     if [ "$DB_ADD" != "false" ] && [ ! -d "${DC_DUMP_DIR}" ]; then
         echo "INFO: creating subdir ${DC_DUMP_DIR} to import/ export databases ..."
@@ -167,12 +168,13 @@ function _getStatus_docker(){
 # https://github.com/axelhahn/nginx-docker-proxy
 # It returns http://localhost:<port> or a https://<appname> plus $WEBURL
 function _getWebUrl(){
-    if grep -q "^[0-9\.]* ${APP_NAME}-web" /etc/hosts; then
-        DC_WEB_URL="https://${APP_NAME}-web$WEBURL"
+    local fqdn
+    fqdn=$(grep "^[0-9\.]* ${APP_NAME}" /etc/hosts | awk '{ print $2}')
+    if [ -n "$fqdn" ]; then
+        DC_WEB_URL="https://${fqdn}$WEBURL"
     else
         DC_WEB_URL=http://localhost:${APP_PORT}$WEBURL
     fi
-    set +vx
 }
 
 # ----------------------------------------------------------------------
@@ -567,7 +569,7 @@ function _showContainers(){
 
     if [ "$DB_ADD" = "false" ]; then
         colDb="$fgGray"
-        local StatusDb=""
+        StatusDb=""
     fi
 
     h2 CONTAINERS
