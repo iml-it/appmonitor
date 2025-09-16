@@ -166,14 +166,21 @@ function _getStatus_docker(){
 # Get web url of the application
 # It is for support of Nginx Docker Proxy
 # https://github.com/axelhahn/nginx-docker-proxy
-# It returns http://localhost:<port> or a https://<appname> plus $WEBURL
+# It puts http://localhost:<port> or a https://<appname> plus $WEBURL
+# into global var DC_WEB_URL
 function _getWebUrl(){
-    local fqdn
-    fqdn=$(grep "^[0-9\.]* ${APP_NAME}" /etc/hosts | awk '{ print $2}')
-    if [ -n "$fqdn" ]; then
-        DC_WEB_URL="https://${fqdn}$WEBURL"
-    else
-        DC_WEB_URL=http://localhost:${APP_PORT}$WEBURL
+    local protocol=http
+    local hosts_line="127.0.0.1  ${APP_NAME} # ADDED BY DOCKER INIT"
+    
+    grep -q "ssl" <<< "$APP_APACHE_MODULES" && protocol=https
+    DC_WEB_URL="${protocol}://${APP_NAME}:${APP_PORT}$WEBURL"
+
+    if ! grep -q "$hosts_line" /etc/hosts; then
+        echo "INFO: need to add /etc/hosts: $hosts_line"
+        if ! echo "$hosts_line - created at $(date)" | sudo tee -a /etc/hosts ; then
+            echo "ERROR: Failed. Using fallback to localhost"
+            DC_WEB_URL="${protocol}://localhost:${APP_PORT}$WEBURL"
+        fi
     fi
 }
 
