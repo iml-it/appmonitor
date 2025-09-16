@@ -619,9 +619,13 @@ function _dbDump(){
         echo "Database container is not running. Aborting."
         return
     fi
+
+    dockerid="${APP_NAME}-db"
+    grep -q "$dockerid" <<< "$DC_PS" || dockerid="db"
+    
     outfile=${DC_DUMP_DIR}/${MYSQL_DB}_$( date +%Y%m%d_%H%M%S ).sql
     echo -n "dumping ${MYSQL_DB} ... "
-    if docker exec -i "${APP_NAME}-db" ${DBDUMP} -uroot -p${MYSQL_ROOT_PASS} ${MYSQL_DB} > "$outfile"; then
+    if docker exec -i "$dockerid" ${DBDUMP} -uroot -p${MYSQL_ROOT_PASS} ${MYSQL_DB} > "$outfile"; then
         echo -n "OK ... Gzip ... "
         if gzip "${outfile}"; then
             echo "OK"
@@ -644,7 +648,7 @@ function _dbDump(){
             rm -f "$outfile"
         fi
     else
-        echo "ERROR: docker exec -i "${APP_NAME}-db" ${DBDUMP} failed."
+        echo "ERROR: docker exec -i "$dockerid" ${DBDUMP} failed."
         rm -f "$outfile"
     fi
 }
@@ -668,11 +672,14 @@ function _dbImport(){
         return
     fi
 
-    echo -n "Importing $dumpfile ... "
+    dockerid="${APP_NAME}-db"
+    grep -q "$dockerid" <<< "$DC_PS" || dockerid="db"
+    
+    echo -n "Importing $dumpfile to $dockerid ... "
 
     # Mac OS compatibility
     # if zcat "$dumpfile" | docker exec -i "${APP_NAME}-db" mysql -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
-    if cat "$dumpfile" | zcat | docker exec -i "${APP_NAME}-db" ${DBTOOL} -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
+    if cat "$dumpfile" | zcat | docker exec -i "$dockerid" ${DBTOOL} -uroot -p${MYSQL_ROOT_PASS} "${MYSQL_DB}"
     then
         echo "OK"
     else
@@ -772,15 +779,11 @@ while true; do
             ;;
         c)
             h2 "Console"
-            _containers=$( docker-compose -p "$APP_NAME" ps | sed -n "2,\$p" | awk '{ print $1}' )
-            if [ "$DB_ADD" = "false" ]; then
-                dockerid=$_containers
-            else
-                echo "Select a container:"
-                sed "s#^#    #g" <<< "$_containers"
-                echo -n "id or name >"
-                read -r dockerid
-            fi
+            echo "Select a container:"
+            echo "$DC_PS" | awk '{ print $1 }' | sed "s#^#    #g"
+            echo -n "id or name >"
+            read -r dockerid
+            
             test -z "$dockerid" || (
                 echo
                 echo "> docker exec -it $dockerid /bin/bash     (type 'exit' + Return when finished)"
@@ -791,7 +794,8 @@ while true; do
             h2 "PHP $APP_PHP_VERSION linter"
 
             dockerid="${APP_NAME}-web"
-            echo -n "Scanning ... "
+            grep -q "$dockerid" <<< "$DC_PS" || dockerid="php-fpm"
+            echo -n "Scanning php files in '$dockerid' ... "
             typeset -i _iFiles
             _iFiles=$( docker exec -it "$dockerid" /bin/bash -c "find . -name '*.php' " | wc -l )
 
