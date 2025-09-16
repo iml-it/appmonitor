@@ -1,13 +1,11 @@
 # TARGET: docker/docker-compose.yml
 #
 # {{generator}}
-#
-# ======================================================================
-#
-# (1) see .env for set variables
-# (2) run "docker-compose up" to startup
 # 
 # ======================================================================
+
+name: {{APP_NAME}}
+
 networks:
   {{APP_NAME}}-network:
 
@@ -16,70 +14,94 @@ services:
   # ======================================================================
   # PROXY # apache httpd
   # ======================================================================
-  {{APP_NAME}}-proxy:
+  proxy:
     build:
       context: .
       dockerfile: ./containers/proxy-server/Dockerfile
-    container_name: '{{APP_NAME}}-proxy'
+    container_name: 'proxy'
 
     working_dir: ${WEBROOT}
 
     ports:
-      - '${APP_PORT}:80'
+      - '${APP_PORT}:443'
+      - '8000:80'
     volumes:
       - ../:/var/www/${APP_NAME}
       - ./containers/proxy-server/apache/sites-enabled:/etc/apache2/sites-enabled
       # - ./containers/proxy-server/apache:/usr/local/apache2/conf/custom
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 250M
+          pids: 75
+        reservations:
+          cpus: '0.25'
+          memory: 100M
+
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/healthcheck.html"]
-      interval: 10s
-      timeout: 3s
+      test: ["CMD", "curl", "-f", "-k", "https://localhost/"]
+      interval: 5s
+      timeout: 1s
       retries: 5
       # start_period: 40s
+
     networks:
       - {{APP_NAME}}-network
 
     # user: ${DOCKER_USER_UID}
 
-  # ======================================================================
+  # ====================================================================q==
   # PHP-FPM
   # ======================================================================
-  {{APP_NAME}}-web:
+  php-fpm:
     build:
       context: .
-      dockerfile: ./containers/web-server/Dockerfile
+      dockerfile: ./containers/php-fpm/Dockerfile
     # image: "php:{{APP_PHP_VERSION}}-apache"
-    container_name: '{{APP_NAME}}-server'
+    container_name: 'php-fpm'
 
     working_dir: ${WEBROOT}
     
     volumes:
       - ../:/var/www/${APP_NAME}
-      - ./containers/web-server/php/extra-php-config.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
+      - ./containers/php-fpm/php/extra-php-config.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
 
-    # healthcheck:
-    #   test: ["php", "healthcheck.php"]
-    #   interval: 10s
-    #   timeout: 3s
-    #   retries: 5
-    #   # start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 250M
+          pids: 10
+        reservations:
+          cpus: '0.25'
+          memory: 100M
+
+    healthcheck:
+      test: ["CMD", "php", "${WEBROOT}/index.php", ">/dev/stderr", "2>&1"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
+      # start_period: 40s
 
     networks:
       - {{APP_NAME}}-network
 
-    # user: ${DOCKER_USER_UID}
+    user: ${DOCKER_USER_UID}
 
-    # --- 8< --- {{CUTTER_NO_DATABASE}} --- 8< ---
     depends_on:
-      - {{APP_NAME}}-proxy
-      - {{APP_NAME}}-db
+      - proxy
+
+      # --- 8< --- {{CUTTER_NO_DATABASE}} --- 8< ---
+      - db
 
   # ======================================================================
   # DATABASE # Mariadb
   # ======================================================================
-  {{APP_NAME}}-db:
+  db:
     image: {{MYSQL_IMAGE}}
-    container_name: '${APP_NAME}-db'
+    container_name: 'db'
     # restart: always
     ports:
       - '${DB_PORT}:3306'
@@ -88,9 +110,21 @@ services:
       MYSQL_USER: '${MYSQL_USER}'
       MYSQL_PASSWORD: '${MYSQL_PASS}'
       MYSQL_DATABASE: '${MYSQL_DB}'
+
     volumes:
       # - ./containers/db-server/db_data:/var/lib/mysql
       - ./containers/db-server/mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 250M
+          pids: 100
+        reservations:
+          cpus: '0.25'
+          memory: 100M
+
     healthcheck:
       test: mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD
       interval: 5s
