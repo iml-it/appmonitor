@@ -727,12 +727,20 @@ class appmonitorserver_gui extends appmonitorserver
      */
     protected function _showWelcomeMessage(): string
     {
-        $sSurl = $_SERVER['REQUEST_SCHEME'] . '://'
-            . $_SERVER['SERVER_NAME']
-            // . ':'.$_SERVER['SERVER_PORT']
+        $bIsDevContainer=!($_SERVER['SERVER_PORT'] < 1024);
+        $sBaseUrl = $bIsDevContainer
+                ? "https://proxy"
+                : $_SERVER['REQUEST_SCHEME'] . '://'. $_SERVER['SERVER_NAME']
+            ;
+
+        $sSurl = $sBaseUrl
             . dirname(dirname($_SERVER['SCRIPT_NAME'])) . 'client/check-appmonitor-server.php';
         ;
         return $this->_aIco["welcome"] . ' ' . $this->_tr('msgErr-nocheck-welcome')
+            . ($bIsDevContainer
+                ? $this->_tr('msgErr-nocheck-welcome-docker')
+                : $this->_tr('msgErr-nocheck-welcome-host')
+            )
             . '<form action="?" method="post">'
             . '<div class="input-group">'
             . '<div class="input-group-addon">'
@@ -843,10 +851,10 @@ class appmonitorserver_gui extends appmonitorserver
         $iCounter = 1;
 
         $aShapes = [
-            RESULT_OK => ['color' => '#55aa55', 'width' => 3],
-            RESULT_UNKNOWN => ['color' => '#605ca8', 'width' => 3, 'shape' => 'ellipse'],
-            RESULT_WARNING => ['color' => '#f39c12', 'width' => 6, 'shape' => 'dot'],
-            RESULT_ERROR => ['color' => '#ff3333', 'width' => 9, 'shape' => 'star'],
+            RESULT_OK => ['color' => '#55aa55', 'width' => 3, 'char' => "✅"],
+            RESULT_UNKNOWN => ['color' => '#605ca8', 'width' => 3, 'shape' => 'ellipse', 'char' => "🔹"],
+            RESULT_WARNING => ['color' => '#f39c12', 'width' => 6, 'shape' => 'dot', 'char' => "⚠️"],
+            RESULT_ERROR => ['color' => '#ff3333', 'width' => 9, 'shape' => 'star', 'char' => "❌"],
         ];
 
         foreach ($this->_data as $sAppId => $aEntries) {
@@ -886,11 +894,17 @@ class appmonitorserver_gui extends appmonitorserver
                 $iCheckId = $iCounter;
                 $iParent = 1;
                 $iGroup = false;
+
+                $sImgNode=$aParentsCfg[$aCheck['group']]['image'] ?? false ? $aParentsCfg[$aCheck['group']]['image']  : '';
                 $aNodes[] = [
                     '_check' => $aCheck['name'], // original check name - used for _findNodeId()
                     '_data' => $aCheck,          // original check data
                     'id' => $iCheckId,
                     'label' => $aCheck['name'],
+                    // 'label' => $aShapes[$aCheck["result"]]['char']." " . $aCheck['name'],
+                    'color' => $aShapes[$aCheck['result']]['color'],
+
+                    // 'label' => $aCheck['name'],
                     'title' => '<table class="result' . $aCheck["result"] . '"><tr>'
                         . '<td align="center">'
                         . '<img src="images/icons/check-' . $aCheck["result"] . '.png"><br>'
@@ -898,7 +912,7 @@ class appmonitorserver_gui extends appmonitorserver
                         . '</td><td>'
                         . '&nbsp;&nbsp;&nbsp;&nbsp;'
                         . '</td><td>'
-                        . (isset($aCheck['group']) && isset($aParentsCfg[$aCheck['group']]['image']) ? '<img src="' . $aParentsCfg[$aCheck['group']]['image'] . '" width="22"> ' : '')
+                        . ($sImgNode ? '<img src="' . $sImgNode . '" width="22"> ' : '')
                         . '<strong>' . $aCheck["name"] . '</strong><br>'
                         . '<em>' . $aCheck["description"] . '</em><br>'
                         . "<br>"
@@ -908,6 +922,7 @@ class appmonitorserver_gui extends appmonitorserver
 
                     'shape' => 'image',
                     'image' => "images/icons/check-" . $aCheck["result"] . ".png",
+                    // 'image' => $sImgNode,
                 ];
             }
 
@@ -935,12 +950,15 @@ class appmonitorserver_gui extends appmonitorserver
                         // create group node
                         $iCounter++;
                         $iGroup = $iCounter;
+                        $sGroupImage=$aParentsCfg[$aCheck['group']]['image']??'';
                         $aNodes[] = [
                             '_group' => $aCheck['group'] . '_' . $iParent, // group name - used for _findNodeId()
                             'id' => $iGroup,
-                            'label' => isset($aParentsCfg[$aCheck['group']]['label']) ? $aParentsCfg[$aCheck['group']]['label'] : '[' . $aCheck['group'] . ']',
-                            'shape' => isset($aParentsCfg[$aCheck['group']]['image']) ? 'image' : 'box',
-                            'image' => isset($aParentsCfg[$aCheck['group']]['image']) ? $aParentsCfg[$aCheck['group']]['image'] : 'NOIMAGE ' . $aCheck['group'],
+                            'color' => '#ddd',
+                            'label' => $aParentsCfg[$aCheck['group']]['label'] ?: '[' . $aCheck['group'] . ']',
+                            'shape' => $sGroupImage  ? 'image' : 'box',
+                            'image' => $sGroupImage ?: 'NOIMAGE ' . $aCheck['group'],
+                            // 'shape' => 'box',
                             'opacity' => 0.2
                         ];
                         // connect it with app or perent check
@@ -1257,7 +1275,7 @@ class appmonitorserver_gui extends appmonitorserver
                     break;
                 case "3": 
                     $sIconBg='bg-red';
-                    $sIcon.=$this->_aIco["del"];
+                    $sIcon=$this->_aIco["del"];
                     break;
             }
 
