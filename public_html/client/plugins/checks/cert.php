@@ -42,6 +42,7 @@
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-03  <axel.hahn@unibe.ch>      comment block for host check in DND names
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2025-09-17  <axel.hahn@unibe.ch>      show issuer "None (self signed)" if empty
  */
 class checkCert extends appmonitorcheck
 {
@@ -150,7 +151,7 @@ class checkCert extends appmonitorcheck
         */
 
         $iDaysleft = round(($certinfo['validTo_time_t'] - date('U')) / 60 / 60 / 24);
-        $sMessage .= 'Issuer: ' . $certinfo['issuer']['O']
+        $sMessage .= 'Issuer: ' . ($certinfo['issuer']['O']??'None (self signed)')
             . '; valid from: ' . date("Y-m-d H:i", $certinfo['validFrom_time_t'])
             . ' to ' . date("Y-m-d H:i", $certinfo['validTo_time_t']) . ' '
             . ($iDaysleft ? "($iDaysleft days left)" : "expired since " . (-$iDaysleft) . " days.")
