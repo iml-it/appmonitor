@@ -15,6 +15,7 @@
  * 2024-07-23  php 8: short array syntax
  * 2024-12-28  added check for custom config and url file (if they exist)
  * 2025-02-24  add checks for sqlite and data dir
+ * 2025-09-17  detect docker dev instance and disable SSL verification
  */
 
 // ----------------------------------------------------------------------
@@ -149,6 +150,15 @@ $sBaseUrl = 'http' . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] ? 's' : '')
     . '://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT']
     . dirname(dirname($_SERVER['REQUEST_URI']));
 
+// detect docker dev instance and disable SSL verification
+$bVerifySSL=true;
+if(strstr($sBaseUrl, "http://")
+    || strstr($sBaseUrl, "//proxy:")
+    || strstr($sBaseUrl, "//appmonitor:")
+){
+    $bVerifySSL=false;
+}
+
 foreach (['server/config', 'server/data', 'server/tmp'] as $sMyDir) {
     $oMonitor->addCheck(
         [
@@ -160,6 +170,7 @@ foreach (['server/config', 'server/data', 'server/tmp'] as $sMyDir) {
                 "params" => [
                     "url" => "$sBaseUrl/$sMyDir/readme.md",
                     "status" => 403,
+                    "sslverify" => $bVerifySSL,
                 ],
             ],
             "worstresult" => RESULT_WARNING
@@ -277,7 +288,7 @@ $oMonitor->addCheck(
         "check" => [
             "function" => "Loadmeter",
             "params" => [
-                "warning" => 1.0,
+                "warning" => 5.0,
                 "error" => 3,
             ],
         ],
