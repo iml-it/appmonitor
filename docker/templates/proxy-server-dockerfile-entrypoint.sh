@@ -31,7 +31,7 @@ function _createSslCert(){
             -out "${certfile}" \
             -days 3650 \
             -subj "/CN=${myhost}" \
-            -addext "subjectAltName=DNS:${myhost},DNS:localhost,IP:127.0.0.1"
+            -addext "subjectAltName=DNS:${myhost},DNS:localhost,DNS:proxy,IP:127.0.0.1"
         set +vx
     fi
 
