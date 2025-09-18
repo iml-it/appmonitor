@@ -18,7 +18,8 @@ services:
     build:
       context: .
       dockerfile: ./containers/proxy-server/Dockerfile
-    container_name: 'proxy'
+
+    container_name: '{{APP_NAME}}-proxy'
 
     working_dir: ${WEBROOT}
 
@@ -58,8 +59,8 @@ services:
     build:
       context: .
       dockerfile: ./containers/php-fpm/Dockerfile
-    # image: "php:{{APP_PHP_VERSION}}-apache"
-    container_name: 'php-fpm'
+
+    container_name: '{{APP_NAME}}-php-fpm'
 
     working_dir: ${WEBROOT}
     
@@ -100,7 +101,7 @@ services:
   # ======================================================================
   db:
     image: {{MYSQL_IMAGE}}
-    container_name: 'db'
+    container_name: '{{APP_NAME}}-db'
     # restart: always
     ports:
       - '${DB_PORT}:3306'

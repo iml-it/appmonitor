@@ -25,7 +25,4 @@ COPY containers/proxy-server/dockerfile-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/dockerfile-entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/dockerfile-entrypoint.sh"]
 
-# Start Apache and PHP-FPM, runs after the entrypoint script
-# CMD httpd && php-fpm
-
 CMD /usr/sbin/apachectl -X

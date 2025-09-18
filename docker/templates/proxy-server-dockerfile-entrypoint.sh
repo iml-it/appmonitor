@@ -24,8 +24,6 @@ function _createSslCert(){
     else
         echo "INFO: Creating cert ..."
         set -vx
-        # openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt
-
         openssl req -nodes -x509 -newkey rsa:4096 \
             -keyout "${keyfile}" \
             -out "${certfile}" \
