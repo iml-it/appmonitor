@@ -895,7 +895,7 @@ class appmonitorserver_gui extends appmonitorserver
                 $iParent = 1;
                 $iGroup = false;
 
-                $sImgNode=$aParentsCfg[$aCheck['group']]['image'] ?? false ? $aParentsCfg[$aCheck['group']]['image']  : '';
+                $sImgNode=$aParentsCfg[$aCheck['group']??'']['image'] ?? false ? $aParentsCfg[$aCheck['group']]['image']  : '';
                 $aNodes[] = [
                     '_check' => $aCheck['name'], // original check name - used for _findNodeId()
                     '_data' => $aCheck,          // original check data
@@ -1395,7 +1395,10 @@ class appmonitorserver_gui extends appmonitorserver
         $sInnerTile = '';
         $sGraph = '';
         // print_r($aResponseTimeData[0]);
-        $iTtl = isset($this->_data[$sAppId]["result"]["ttl"]) ? $this->_data[$sAppId]["result"]["ttl"] : 300;
+        $iTtl = isset($this->_data[$sAppId]["result"]["ttl"]) ? $this->_data[$sAppId]["result"]["ttl"] : 300; 
+        if($iTtl<1) {
+            $iTtl=1;
+        }
         $iAge = date('U') - ($aResponseTimeData[0]['timestamp'] ?? date('U'));
 
         $iLast = $aResponseTimeData[0]['data']['value'] ?? '-';

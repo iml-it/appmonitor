@@ -862,7 +862,7 @@ class appmonitorserver
             $iAge = isset($this->_data[$sKey]["result"]["ts"]) ? (time() - $this->_data[$sKey]["result"]["ts"]) : 0;
             if (
                 $iAge
-                && $iAge > 2 * $this->_data[$sKey]["result"]["ttl"]
+                && $iAge > 2 * max($this->_data[$sKey]["result"]["ttl"], $this->_iTtl)
                 && $this->_data[$sKey]["result"]["error"] != $this->_tr('msgErr-Http-outdated')
             ) {
                 $this->_data[$sKey]["result"]["error"] = $this->_tr('msgErr-Http-outdated');
