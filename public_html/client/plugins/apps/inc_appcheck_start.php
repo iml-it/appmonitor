@@ -31,11 +31,11 @@ if ($bStandalone) {
     // "host"
     // "tags"    
     // "dfw", "dfc"    
-    $aAppDefaults['name'] = (isset($_GET['name']) && $_GET['name']) ? $_GET['name'] : $aAppDefaults['name'];
-    $aAppDefaults['host'] = $_GET['host']
+    $aAppDefaults['name'] = $_GET['name']??$aAppDefaults['name'];
+    $aAppDefaults['host'] = $_GET['host']??false
         ? explode(',', $_GET['host'])
         : ($_SERVER['HTTP_HOST'] ?? '');
-    $aAppDefaults['tags'] = $_GET['tags'] ? explode(',', $_GET['tags']) : $aAppDefaults['tags'];
+    $aAppDefaults['tags'] = $_GET['tags']??false ? explode(',', $_GET['tags']) : $aAppDefaults['tags'];
 
     $aAppDefaults['df']['warning'] = (isset($_GET['dfw']) && $_GET['dfw']) ? $_GET['dfw'] : $aAppDefaults['df']['warning'] ?? false;
     $aAppDefaults['df']['critical'] = (isset($_GET['dfc']) && $_GET['dfc']) ? $_GET['dfc'] : $aAppDefaults['df']['critical'] ?? false;
