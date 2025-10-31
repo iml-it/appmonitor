@@ -73,7 +73,7 @@ $oMonitor->addCheck(
                     "gd",
                     "intl",
                     "mbstring",
-                    "mysql",
+                    "mysqli",
                     "redis",
                     "soap",
                     "xml",
