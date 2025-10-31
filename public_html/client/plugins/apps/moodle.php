@@ -38,10 +38,16 @@ require 'inc_appcheck_start.php';
 // Read config items
 // ----------------------------------------------------------------------
 
+// Moodle 5.1: from webroot one dir up....
 $sConfigfile = dirname($sApproot) . '/config.php';
 if (!file_exists($sConfigfile)) {
-    header('HTTP/1.0 400 Bad request');
-    die('ERROR: Config file [config.php] was not found. Set a correct app root pointing to Moodle install dir.');
+
+    // Moodle 5.0: config.php is in webroot
+    $sConfigfile = $sApproot . '/config.php';
+    if (!file_exists($sConfigfile)) {
+        header('HTTP/1.0 400 Bad request');
+        die('ERROR: Config file [config.php] was not found. Set a correct app root pointing to Moodle install dir.');
+    }
 }
 require($sConfigfile);
 $aDb = [
