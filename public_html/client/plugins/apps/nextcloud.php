@@ -40,12 +40,12 @@ require 'inc_appcheck_start.php';
 
 $sConfigfile = "$sApproot/config/config.php";
 if (!file_exists($sConfigfile)) {
-    header('HTTP/1.0 400 Bad request');
+    http_response_code(400);
     die('ERROR: Config file was not found. Use ?rel=/NAME or similiar to set a relative install dir.');
 }
 
 if (!include "$sConfigfile") {
-    header('HTTP/1.0 400 Bad request');
+    http_response_code(400);
     die('ERROR: Unable to read config file.');
 }
 
@@ -82,7 +82,7 @@ Array
 */
 
 if (!isset($CONFIG) || !is_array($CONFIG)) {
-    header('HTTP/1.0 400 Bad request');
+    http_response_code(400);
     die('ERROR: Config file was found but has unexpected format.');
 } 
 

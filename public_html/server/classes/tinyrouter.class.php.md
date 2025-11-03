@@ -43,7 +43,7 @@ $oRouter=new tinyrouter($aRoutes, $sApiUrl);
 // get the last matching route
 $aFoundRoute=$oRouter->getRoute();
 if(!$aFoundRoute){
-    header('HTTP/1.0 400 Bad request');
+    http_response_code(400);
     die('<h1>400 Bad request</h1>');
 }
 

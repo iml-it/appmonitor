@@ -5,7 +5,7 @@
  */
 
  if(!isset($aRoutes)){
-    header("HTTP/1.1 400 Bad request");
+    http_response_code(400);
     die('<h1>400 Bad request</h1>');
 }
 

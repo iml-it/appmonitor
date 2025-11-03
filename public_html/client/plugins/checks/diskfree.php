@@ -97,7 +97,7 @@ class checkDiskfree extends appmonitorcheck
 
         if ($iWarn) {
             if ($iWarn <= $iCritical) {
-                header('HTTP/1.0 503 Service Unavailable');
+                http_response_code(503);
                 die("ERROR in a Diskfree check - warning value must be larger than critical.<pre>" . print_r($aParams, true));
             }
             if ($iWarn < $iSpaceLeft) {

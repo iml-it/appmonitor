@@ -176,7 +176,7 @@ class appmonitorcheck
         $aStatus=[
             503 => 'Service Unavailable',
         ];
-        header("HTTP/1.1 $iHttpcode $aStatus[$iHttpcode]");
+        http_response_code($iHttpcode);
         echo "<h1>$iHttpcode $aStatus[$iHttpcode]</h1>
             <h2>Details</h2>
             $sMessage\n";

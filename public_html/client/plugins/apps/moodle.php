@@ -46,7 +46,7 @@ if (!file_exists($sConfigfile)) {
     // Moodle 5.0: config.php is in webroot
     $sConfigfile = $sApproot . '/config.php';
     if (!file_exists($sConfigfile)) {
-        header('HTTP/1.0 400 Bad request');
+        http_response_code(400);
         die('ERROR: Config file [config.php] was not found. Set a correct app root pointing to Moodle install dir.');
     }
 }
