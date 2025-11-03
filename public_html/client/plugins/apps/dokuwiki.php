@@ -35,7 +35,7 @@ require 'inc_appcheck_start.php';
 
 $sConfigfile = "$sApproot/conf/local.php";
 if (!file_exists($sConfigfile)) {
-    header('HTTP/1.0 400 Bad request');
+    http_response_code(400);
     die('ERROR: Config file was not found. Use ?rel=[subdir] to set the correct subdir to find /conf/local.php.');
 }
 

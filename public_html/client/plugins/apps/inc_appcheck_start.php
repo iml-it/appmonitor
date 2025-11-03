@@ -20,7 +20,7 @@ if ($bStandalone) {
         if (isset($_GET['rel'])) {
             $sApproot .= str_replace('..', '__', $_GET['rel']);
             if (!is_dir($sApproot)) {
-                header('HTTP/1.0 400 Bad request');
+                http_response_code(400);
                 die('ERROR: The given rel dir does not exist below webroot.');
             }
         }

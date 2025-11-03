@@ -45,7 +45,7 @@ require 'inc_appcheck_start.php';
 
 $sConfigfile = $sApproot . '/application/config/database.php';
 if (!file_exists($sConfigfile)) {
-    header('HTTP/1.0 400 Bad request');
+    http_response_code(400);
     die('ERROR: Config file was not found. Use ?rel=[subdir] to set the correct subdir to find /application/config/database.php.');
 }
 
@@ -53,7 +53,7 @@ $aConfig = include($sConfigfile);
 $sActive = $aConfig['default-connection'];
 
 if (!isset($aConfig['connections'][$sActive])) {
-    header('HTTP/1.0 400 Bad request');
+    http_response_code(400);
     die('ERROR: Config file application/config/database.php was read - but database connection could not be detected from it in connections -> ' . $sActive . '.');
 }
 // print_r($aConfig['connections'][$sActive]); die();
