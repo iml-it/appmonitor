@@ -17,6 +17,7 @@
  * @author: <axel.hahn@unibe.ch>
  * ----------------------------------------------------------------------
  * 2025-10-31  v0.01
+ * 2025-11-03  v0.02  update parents; update php modules
  */
 
 // ----------------------------------------------------------------------
@@ -55,38 +56,64 @@ $aDb = [
     'username' => $CFG->dbuser??null,
     'password' => $CFG->dbpass??null,
     'database' => $CFG->dbname??null,
-    // 'port'     => ??,
+    'port'     => $CFG->dboptions['dbport']??null,
 ];
 
 // ----------------------------------------------------------------------
 // checks
 // ----------------------------------------------------------------------
 
-// required php modules * WIP
-// see https://wordpress.org/about/requirements/ << doesn't say anything about php modules
-// see https://ertano.com/rired-php-modules-for-wordpress/ << too many modules
-// see https://zeropointdevelopment.com/required-php-extensions-for-wordpress-wpquickies/
+// Set a required database module
+$aDbModules=[
+    "mariadb"=>"mysqli",
+    // to be continued here for other database types
+];
+
+$db_module=$aDbModules[$CFG->dbtype??false]??null;
+
+// required php modules
+// https://docs.moodle.org/501/en/PHP
 $oMonitor->addCheck(
     [
         "name" => "PHP modules",
         "description" => "Check needed PHP modules",
-        // "group" => "folder",
         "check" => [
             "function" => "Phpmodules",
             "params" => [
                 "required" => [
+                    "ctype",
                     "curl",
                     "gd",
+                    "iconv",
                     "intl",
+                    "json",
                     "mbstring",
-                    "mysqli",
+                    "pcre",
                     "redis",
+                    "SimpleXML",
+                    "SPL",
                     "soap",
                     "xml",
-                    "xmlrpc",
-                    "zip"
+                    "zip",
+
+                    // database ... one of it
+                    // "mysqli",
+                    // "oci8",
+                    // "pdo",
+                    // "pgsql",
+                    // "sqlsrv",
+                    $db_module,
+
                 ],
-                "optional" => [],
+                "optional" => [
+
+                    // recommenmded
+                    "openssl",  // required for networking and web services
+                    "soap",     // required for web services
+                    "sodium",   // required on PHP 8 and above
+                    "tokenizer",
+                    "xmlrpc",   // required for networking and web services
+                ],
             ],
         ],
     ]
@@ -95,7 +122,7 @@ $oMonitor->addCheck(
 $oMonitor->addCheck(
     [
         "name" => "config file",
-        "description" => "The config file must be readable (readonly)",
+        "description" => "The config file must be readable (readonly is OK)",
         "check" => [
             "function" => "File",
             "params" => [
@@ -132,6 +159,7 @@ $oMonitor->addCheck(
     [
         "name" => "Moodle data dir",
         "description" => "The data dir must be writable",
+        "parent" => "config file",
         "check" => [
             "function" => "File",
             "params" => [
@@ -150,6 +178,7 @@ if (isset($aAppDefaults['df'])) {
         [
             "name" => "check disk space in moodledata dir",
             "description" => "The file storage must have some space left - warn: " . $aAppDefaults["df"]['warning'] . "/ critical: " . $aAppDefaults["df"]['critical'],
+            "parent" => "Moodle data dir",
             "check" => [
                 "function" => "Diskfree",
                 "params" => [
