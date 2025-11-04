@@ -66,7 +66,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.161';
+    protected string $_sVersion = '0.164';
 
     /**
      * config: default ttl for server before requesting the client check again
