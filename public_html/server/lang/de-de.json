@@ -249,7 +249,7 @@
         "changetype-3.email.subject": "[Appmonitor] :: Webapp wurde entfernt: __URL__",
         "changetype-3.email.message": "<h2>Entfernt: __WEBSITE__</h2>Die Webapp <code>__URL__</code> wurde im Appmonitor entfernt.<br>Sie werden fortan keine Benachrichtigungen bei Statuswechsel mehr erhalten.<br><br>Wenn dies ein Fehler war, kontaktieren Sie den Sysadmin.",
 
-        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Die kann bei einem Timeout oder einem Fehler auftreten.",
+        "msgErr-missing-section-checks":"Es gibt keine Sektion &quot;checks&quot; in der Antwort. Dies kann bei einem Timeout oder einem Fehler auftreten.",
         
         "zzz_lastentry": "This is just a Dummy entry without comma at the end of line"
     },

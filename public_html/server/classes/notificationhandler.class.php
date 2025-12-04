@@ -250,21 +250,6 @@ class notificationhandler
         return false;
     }
 
-    /**
-     * Save last app status data to conpare with the item of the next time
-     * @return boolean
-     */
-    protected function _saveAppResult__UNUSED()
-    {
-        $this->_oWebapps->set("lastresult", json_encode($this->_aAppResult));
-
-        if (($this->_aAppResult['meta']['result'] ?? RESULT_ERROR) == RESULT_OK) {
-            $this->_oWebapps->set("lastok", json_encode($this->_aAppResult));
-        }
-
-        return $this->_oWebapps->save();
-    }
-
 
     // ----------------------------------------------------------------------
     // public functions - check changes (create/ update) and delete appdata
@@ -419,7 +404,17 @@ class notificationhandler
     }
 
     /**
-     * Get 2nd last resultset of an application
+     * Get last in database stored notification line.
+     * You need to call setApp(<id>) first
+     * 
+     * @return array
+     */
+    public function getAppLastNotification(): array{
+        return $this->_aLastNotification;
+    }
+
+    /**
+     * Get last in database stored resultset of an application check
      * @return array
      */
     public function getAppLastResult()
@@ -519,51 +514,59 @@ class notificationhandler
     public function getMessageReplacements(): array
     {
         $sMode = 'html';
-        /*
-                [result] => Array
-                (
-                    [ts] => 1529672793
-                    [result] => 3
-                    [ttl] => 300
-                    [url] => http://example.com/appmonitor/
-                    [header] => 
-                    [headerarray] => 
-                    [httpstatus] => 
-                    [error] => Http Request to appmonitor failed: host or service is unreachable.
-                    [fromcache] => 
-                )
-
-         */
         if ($this->_iAppResultChange === -1) {
             $this->_detectChangetype();
         }
         $sMiss = '-';
 
         // @see notify()
-        $aCompare = isset($this->_aAppResult['laststatus']) ? $this->_aAppResult['laststatus'] : [];
+
+        // current request
+        if($this->_aAppResult){
+            $aCurrent = $this->_aAppResult;
+        } else {
+            $aCurrent = json_decode($this->_oWebapps->get('lastresult'), 1);
+            if(!is_array($aCurrent)){
+                $aCurrent=[];
+            }
+
+        }
+
+        // last OK state
+        $aLastOK = json_decode($this->_oWebapps->get('lastok'), 1);
+        if(!is_array($aLastOK)){
+            $aLastOK=[];
+        }
+
+        // last notification message
+        $aLastNotify = $this->getAppLastNotification();
+
         $aReplace = [
-            '__APPID__' => $this->_sAppId,
+            '__APPID__' => $this->_sAppId ?: $sMiss,
             '__CHANGE__' => isset($this->_iAppResultChange) ? $this->_tr('changetype-' . $this->_iAppResultChange) : $sMiss,
             '__TIME__' => date("Y-m-d H:i:s", (time())),
-            '__URL__' => isset($this->_aAppResult['result']['url']) ? $this->_aAppResult['result']['url']
-                : (isset($aCompare['result']['url']) ? $aCompare['result']['url'] : $sMiss),
-            '__HOST__' => isset($this->_aAppResult['result']['host']) ? $this->_aAppResult['result']['host'] : $sMiss,
-            '__WEBSITE__' => isset($this->_aAppResult['result']['website']) ? $this->_aAppResult['result']['website'] : $sMiss,
 
-            '__RESULT__' => isset($this->_aAppResult['result']['result']) ? $this->_tr('Resulttype-' . $this->_aAppResult['result']['result']) : $sMiss,
-            '__ERROR__' => isset($this->_aAppResult['result']['error']) && $this->_aAppResult['result']['error']
-                ? $this->_aAppResult['result']['error'] : '',
+            '__URL__' => $aCurrent['result']['url'] ?? (
+                $aLastOK['result']['url'] ?? $sMiss
+            ),
+            '__HOST__' => $aCurrent['result']['host'] ?? $sMiss,
+            '__WEBSITE__' => $aCurrent['result']['website'] ?? $sMiss,
 
-            '__HEADER__' => isset($this->_aAppResult['result']['header']) ? $this->_aAppResult['result']['header'] : $sMiss,
+            '__RESULT__' => isset($aCurrent['result']['result']) ? $this->_tr('Resulttype-' . $aCurrent['result']['result']) : $sMiss,
+            '__ERROR__' => $aCurrent['result']['error'] ?? '',
 
-            '__LAST-TIME__' => isset($aCompare['result']['ts']) ? date("Y-m-d H:i:s", $aCompare['result']['ts']) : $sMiss,
-            '__LAST-RESULT__' => isset($aCompare['result']['result']) ? $this->_tr('Resulttype-' . $aCompare['result']['result']) : $sMiss,
-            '__DELTA-TIME__' => isset($aCompare['result']['ts']) ?
-                round((time() - $aCompare['result']['ts']) / 60) . " min "
-                . "(" . round((time() - $aCompare['result']['ts']) / 60 / 60 * 4) / 4 . " h)"
+            '__HEADER__' => $aCurrent['result']['header'] ?? $sMiss,
+
+            '__LAST-TIME__' => $aLastNotify['timestamp']??false 
+                ? date("Y-m-d H:i:s", $aLastNotify['timestamp']) : $sMiss,
+
+            '__LAST-RESULT__' => isset($aLastNotify['status']) ? $this->_tr('Resulttype-' . $aLastNotify['status']) : $sMiss,
+            '__DELTA-TIME__' => $aLastNotify['timestamp']??false ?
+                round((time() - $aLastNotify['timestamp']) / 60) . " min "
+                . "(" . round((time() - $aLastNotify['timestamp']) / 60 / 60 * 4) / 4 . " h)"
                 : $sMiss,
-            '__CURLERROR__' => isset($this->_aAppResult['result']['curlerrormsg']) && $this->_aAppResult['result']['curlerrormsg']
-                ? sprintf($this->_tr('Curl-error'), $this->_aAppResult['result']['curlerrormsg'], $this->_aAppResult['result']['curlerrorcode'])
+            '__CURLERROR__' => $aCurrent['result']['curlerrormsg']??false
+                ? sprintf($this->_tr('Curl-error'), $aCurrent['result']['curlerrormsg'], $aCurrent['result']['curlerrorcode'])
                 : '',
 
         ];
@@ -576,7 +579,7 @@ class notificationhandler
                 $aReplace['__ERROR__'] = '<span class="error">' . $aReplace['__ERROR__'] . '</span>';
                 $aReplace['__CURLERROR__'] = '<span class="error">' . $aReplace['__CURLERROR__'] . '</span>';
                 if ($aReplace['__RESULT__'] != $sMiss) {
-                    $aReplace['__RESULT__'] = '<span class="result-' . $this->_aAppResult['result']['result'] . '">' . $aReplace['__RESULT__'] . '</span>';
+                    $aReplace['__RESULT__'] = '<span class="result-' . $aCurrent['result']['result'] . '">' . $aReplace['__RESULT__'] . '</span>';
                 }
                 break;
 
@@ -585,14 +588,14 @@ class notificationhandler
                 break;
         }
 
-        if (isset($this->_aAppResult['checks']) && count($this->_aAppResult['checks'])) {
+        if (isset($aCurrent['checks']) && count($aCurrent['checks'])) {
 
             // force sortorder in notifications - one key for each result ... 3 is error .. 0 is OK
             $aSortedChecks = [];
             for ($i = 3; $i >= 0; $i--) {
                 $aSortedChecks[$i] = '';
             }
-            foreach ($this->_aAppResult['checks'] as $aCheck) {
+            foreach ($aCurrent['checks'] as $aCheck) {
                 $iResult = $aCheck['result'];
                 $aSortedChecks[$iResult] .= "<br>\n<br>\n"
                     . '----- <strong>' . $aCheck['name'] . '</strong> (' . $aCheck['description'] . ")<br>\n"
@@ -603,6 +606,7 @@ class notificationhandler
         } else {
             $aReplace['__CHECKS__'] = html_entity_decode($this->_tr('msgErr-missing-section-checks'));
         }
+
         return $aReplace;
     }
 
