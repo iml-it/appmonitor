@@ -218,15 +218,14 @@ class appmonitorserver
     }
 
     /**
-     * Get a flat array with all application ids and website + url
+     * Get a flat array with all application id
      * as subkeys
      * 
      * @return array
      */
     public function getAppIds(): array
     {
-        $this->_getClientData(true);
-        return array_keys($this->_data);
+        return array_keys($this->_urls);
     }
 
     /**
@@ -244,7 +243,11 @@ class appmonitorserver
      * - fills $this->_aCfg
      * - newly initializes $this->oNotification
      * 
-     * @global object $oDB      database connection
+     * @global object $oDB         database connection
+     * @param  bool   $bReadonly   readonly; default false; true skips 
+     *                             - datbase intialisation
+     *                             - notification handler
+     *                             - version check and upgrade
      * @return void
      */
     public function loadConfig(bool $bReadonly = false): void
@@ -285,12 +288,11 @@ class appmonitorserver
             $this->_urls = json_decode(file_get_contents($this->_getConfigDir() . '/' . $this->_sUrlfile), true);
         }
 
+        if (isset($this->_aCfg['curl']['timeout'])) {
+            $this->curl_opts[CURLOPT_TIMEOUT] = (int) $this->_aCfg['curl']['timeout'];
+        }
 
         if (!$bReadonly) {
-
-            if (isset($this->_aCfg['curl']['timeout'])) {
-                $this->curl_opts[CURLOPT_TIMEOUT] = (int) $this->_aCfg['curl']['timeout'];
-            }
 
             // initialize database
             // echo $this->_aCfg['dsn'];
@@ -524,9 +526,6 @@ class appmonitorserver
                     $this->oNotification->deleteApp($sAppId);
                     $rrd = new simpleRrd($key);
                     $rrd->deleteApp();
-                    $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
-                    $oCache->delete();
-
                     $this->_addLog(sprintf($this->_tr('msgOK-Url-was-removed'), $sUrl), "ok");
                 } else {
                     $this->_addLog(sprintf($this->_tr('msgErr-Url-not-removed-save-config-failed'), $sUrl), "ok");
@@ -847,38 +846,23 @@ class appmonitorserver
         return $aReturn;
     }
 
+
     /**
-     * Detect outdated application checks by reading cached data
-     * if age (since last write) is larger 2 x TTL then it uis marked as outdated.
-     * @return void
+     * Check if the timestamp of last check is still within given ttl
+     * and return true if so (= can be taken from cache) or false (= need to refresh)
+     * 
+     * @param array $aLastResult
+     * @return bool
      */
-    protected function _detect_outdated_appchecks(): void
-    {
-        foreach ($this->_urls as $sKey => $sUrl) {
-            $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
-
-            $this->_data[$sKey] = $oCache->read();
-
-            $iAge = isset($this->_data[$sKey]["result"]["ts"]) ? (time() - $this->_data[$sKey]["result"]["ts"]) : 0;
-            if (
-                $iAge
-                && $iAge > 2 * max($this->_data[$sKey]["result"]["ttl"], $this->_iTtl)
-                && $this->_data[$sKey]["result"]["error"] != $this->_tr('msgErr-Http-outdated')
-            ) {
-                $this->_data[$sKey]["result"]["error"] = $this->_tr('msgErr-Http-outdated');
-                $this->_data[$sKey]["result"]["result"] = RESULT_UNKNOWN;
-                if (!isset($this->_data[$sKey]["result"]["outdated"])) {
-                    $this->_data[$sKey]["result"]["outdated"] = true;
-
-                    /*
-                    // write to cache that notification class can read from it
-                    $oCache->write($this->_data[$sKey], 0);
-                    $this->oNotification->setApp($sKey);
-                    $this->oNotification->notify();
-                    */
-                }
-            }
+    protected function _isResultExpired(array $aLastResult=[]): bool{
+        if(!count($aLastResult)
+            || !($aLastResult['result']['ts']??false)
+            || !($aLastResult['result']['ttl']??false)
+            || time() - $aLastResult['result']['ts'] > $aLastResult['result']['ttl']
+        ){
+            return true;
         }
+        return false;
     }
 
     /**
@@ -891,28 +875,39 @@ class appmonitorserver
     protected function _getClientData(bool $ForceCache = false): bool
     {
         if (!$ForceCache) {
-            $ForceCache = isset($_SERVER['REQUEST_METHOD']) && isset($this->_aCfg['servicecache']) && $this->_aCfg['servicecache'];
+            $ForceCache = isset($_SERVER['REQUEST_METHOD']) && ($this->_aCfg['servicecache']??false);
         }
         $this->_data = [];
         $aUrls2Refresh = [];
+        
+        foreach ($this->_urls as $sKey => $sUrl){
+            $aResult=$this->_oWebapps->search([
+                'columns' =>['lastresult'],
+                "where" => "appid = :appid",
+                ],
+            
+                [
+                "appid" => $sKey,
+                ]
+            );
+            // echo "<pre>"; print_r($aResult); die();
+            $aLastResult=json_decode($aResult[0]['lastresult']??[], 1);
+            // echo "<pre>".print_r($aLastResult['result']['result'], 1) . '</pre>'; // die();
+            $this->_data[$sKey] = $aLastResult;
+            $this->_data[$sKey]["result"]["fromdb"] = true;
 
-        foreach ($this->_urls as $sKey => $sUrl) {
-            $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($sUrl));
-            if ($oCache->isExpired() && !$ForceCache) {
-                // Cache does not exist or is expired
+            if($this->_isResultExpired($aLastResult)){
                 $aUrls2Refresh[$sKey] = $sUrl;
-            } else {
-                // age is bel['result']['error']ow ttl ... read from Cache 
-                $aCached = $oCache->read();
-                $this->_data[$sKey] = $aCached ? $aCached : [];
-
-                $this->_data[$sKey]["result"]["fromcache"] = true;
+                $this->_data[$sKey]["result"]["outdated"] = true;
             }
         }
+
         // fetch all non cached items
         if (count($aUrls2Refresh)) {
             $aAllHttpdata = $this->_multipleHttpGet($aUrls2Refresh);
             foreach ($aAllHttpdata as $sKey => $aResult) {
+
+                $this->_oWebapps->readByFields(['appid' => $sKey]);
 
                 // detect http error
                 $iHttpStatus = $this->_getHttpStatus($aResult['response_header']);
@@ -935,12 +930,14 @@ class appmonitorserver
                 $aClientData = [];
                 if (count($aJsonErrors)) {
 
+                    // no response eg on 503:
+                    // load list of last checks and set its checks to unknown
+
                     // $aClientData["result"]=RESULT_ERROR;
                     $sError .= "- " . implode('<br>- ', $aJsonErrors) . "<br>";
 
                     // read last ok data
                     // $this->_oWebapps->readByFields(['appid'=>$this->_generateUrlKey($sUrl)]);
-                    $this->_oWebapps->readByFields(['appid' => $sKey]);
                     if ($sLastOK = $this->_oWebapps->get("lastok")) {
                         $aLastOK = json_decode($sLastOK, true);
 
@@ -952,7 +949,7 @@ class appmonitorserver
                         }
                         $aLastOK['meta']['result'] = RESULT_UNKNOWN;
                         $aLastChecks = [];
-                        foreach ($aLastOK['checks'] as $aCheck) {
+                        foreach ($aLastOK['checks']??[] as $aCheck) {
                             foreach (['value', 'result', 'time', 'count'] as $delkey) {
                                 if (isset($aCheck[$delkey])) {
                                     unset($aCheck[$delkey]);
@@ -1054,7 +1051,22 @@ class appmonitorserver
                         'value' => $aCounter['value'],
                     ]);
                 }
-                $aClientData['counters'] = $aCounters;
+
+                $LastInDB=[];
+                if ($sLastWritten = $this->_oWebapps->get("lastresult")) {
+                        $LastInDB = json_decode($sLastWritten, true);
+                }
+
+                $iCurrentCounter=($LastInDB["result"]["resultcounter"][$aClientData["result"]["result"]]??0);
+                $aResultCounter=[
+                    RESULT_OK=>0,
+                    RESULT_UNKNOWN=>0,
+                    RESULT_WARNING=>0,
+                    RESULT_ERROR=>0,
+                ];
+                $aResultCounter[$aClientData["result"]["result"]]=$iCurrentCounter+1;
+                $aClientData["result"]["resultcounter"] = $aResultCounter;
+
                 $this->send(
                     ""
                     . $aResult['url']
@@ -1065,24 +1077,38 @@ class appmonitorserver
                     . " $sError $aResult[curlerrormsg]"
                 );
 
-                // write cache
-                $oCache = new AhCache("appmonitor-server", $this->_generateUrlKey($aResult['url']));
-
-                // hm, not needed - we run multicurl.
-                // randomize cachetime of appmonitor client response: ttl + 2..30 sec
-                // $iTtl = $iTtl + rand(2, min(5 + round($iTtl / 3), 30));
-
-                $oCache->write($aClientData, $iTtl);
-
-                $aClientData["result"]["fromcache"] = false;
+                // $aClientData["result"]["fromcache"] = false;
                 $this->_data[$sKey] = $aClientData;
 
-                $this->oNotification->setApp($sKey);
+                // TODO
+                // Flap detection
+                // via counter der Responsetime kann ich den letzten Status
+                // der letzten N requests abgreifen und den bisherigen Counter
+                // abbilden
+                // $rrd = new simpleRrd($sKey);
+                // $rrd->setId('_responsetime');
+                // $aResponses=$rrd->get(3);
+
+                //     // -- wenn aktueller Status = RESULT_OK - vorletzter <> OK --> versenden
+                //     // -- wenn aktueller Status = RESULT_OK - letzte Notifikation <> OK --> versenden
+                //     // -- wenn aktueller Status <> RESULT_OK
+                //     //    vorherige 3 x derselbe Status --> mit delay versenden
+
+                //     print_r($aResponses);
+
+                $this->oNotification->setApp($sKey, $aClientData);
                 $this->oNotification->notify();
+
+                // store in database
+                $this->_oWebapps->set("lastresult", json_encode($aClientData));
+                if (($aClientData['meta']['result'] ?? false) == RESULT_OK) {
+                    $this->_oWebapps->set("lastok", json_encode($aClientData));
+                }
+                $this->_oWebapps->save();
+
             }
         }
 
-        $this->_detect_outdated_appchecks();
         return true;
     }
 
@@ -1155,7 +1181,7 @@ class appmonitorserver
         if ($iSec > 60 * 60 * 24 * 2) {
             $sReturn = round($iSec / (60 * 60 * 24)) . " d";
         }
-        return ' (' . $sReturn . ' ago)';
+        return $sReturn;
     }
 
     /**

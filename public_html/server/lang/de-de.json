@@ -133,7 +133,7 @@
         "Time": "Zeit",
         "Time-for-all-checks": "Zeiten aller Checks",
         
-        "Uptime": "Uptime",
+        "Uptime": "Uptime (letzte 90 Tage)",
 
         "Validator-ok": "Validierung erfolgreich.",
         "Validator-error": "Validierungs-Fehler",

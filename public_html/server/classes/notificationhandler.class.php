@@ -101,6 +101,26 @@ class notificationhandler
     protected int $_iAppResultChange = -1;
 
     /**
+     * Last sent notification fur current app
+     * 
+     * Example:
+     * Array
+     *  (
+     *     [id] => 98
+     *     [timecreated] => 2025-09-11 11:02:18
+     *     [timeupdated] => 
+     *     [deleted] => 0
+     *     [timestamp] => 1757588538
+     *     [appid] => 60b1104800798cd79b694ca6f6764c15
+     *     [changetype] => 2
+     *     [status] => 3
+     *     [message] => "..."
+     *   )
+     * @var array
+     */
+    protected array $_aLastNotification = [];
+    
+    /**
      * Currently fetched result of an web application
      * @var array
      */
@@ -109,8 +129,8 @@ class notificationhandler
     /**
      * Last fetched result of an web application
      * @var array
-     */
     protected array $_aAppLastResult = [];
+     */
 
     /**
      * delay sending a notification n times based on a result value
@@ -118,9 +138,9 @@ class notificationhandler
      */
     protected array $_aDelayNotification = [
         RESULT_OK => 0, // 0 = OK comes immediately
-        RESULT_UNKNOWN => 2, // N = other types skip n repeats of same status
-        RESULT_WARNING => 2,
-        RESULT_ERROR => 2
+        RESULT_UNKNOWN => 3, // N = other types skip n repeats of same status
+        RESULT_WARNING => 3,
+        RESULT_ERROR => 3
     ];
 
     /**
@@ -234,7 +254,7 @@ class notificationhandler
      * Save last app status data to conpare with the item of the next time
      * @return boolean
      */
-    protected function _saveAppResult()
+    protected function _saveAppResult__UNUSED()
     {
         $this->_oWebapps->set("lastresult", json_encode($this->_aAppResult));
 
@@ -262,38 +282,48 @@ class notificationhandler
         if (!$this->_sAppId) {
             die("ERROR: " . __METHOD__ . " no application was initialized ... use setApp() first");
         }
-        if (!$aCompareItem) {
-            $aCompareItem = $this->_aAppLastResult ? $this->_aAppLastResult : false;
-        }
-        if (!$aCompareItem || !is_array($aCompareItem)) {
+
+        // print_r($this->_aAppResult);
+        $iCurrentResult=$this->_aAppResult['result']['result'] ?? -1;
+        $iLastResult=$this->_aLastNotification['status'] ?? -1;
+
+        if ($iLastResult<0) {
             $this->_iAppResultChange = CHANGETYPE_NEW;
         } else {
-            if (
-                isset($aCompareItem['result']['result']) && isset($this->_aAppResult['result']['result'])
-                && $aCompareItem['result']['result'] !== $this->_aAppResult['result']['result']
-            ) {
-                $this->_iAppResultChange = CHANGETYPE_CHANGE;
-            } else {
-                $this->_iAppResultChange = CHANGETYPE_NOCHANGE;
-            }
+            $this->_iAppResultChange = $iCurrentResult == $iLastResult
+                ? CHANGETYPE_NOCHANGE
+                : CHANGETYPE_CHANGE
+                ;
         }
         return $this->_iAppResultChange;
     }
 
-
     /**
      * Set application with its current check result
-     * @param string  $sAppId  application id
+     * @param  string  $sAppId       application id
+     * @param  array   $aClientData  optional: application response of a fresh request; default: read 'lastresult' column from database
      * @return boolean
      */
-    public function setApp(string $sAppId): bool
+    public function setApp(string $sAppId, $aClientData = []): bool
     {
+        if($this->_sAppId == $sAppId){
+            // we keep current data
+            return false;
+        }
         $this->_sAppId = $sAppId;
+
         $this->_oWebapps->readByFields(['appid' => $this->_sAppId]);
 
-        $this->_aAppResult = $this->getAppResult();
+        $this->_aAppResult = count($aClientData) 
+            ? $aClientData 
+            : []
+        ;
+
         $this->_iAppResultChange = -1;
-        $this->_aAppLastResult = $this->getAppLastResult();
+        // $this->_aAppLastResult = $this->getAppLastResult();
+
+        $aLastNotify=$this->getLogdata(['appid'=>$this->_sAppId, 'count'=>1]);
+        $this->_aLastNotification = $aLastNotify[0] ?? [];
         // echo "DEBUG: ".__METHOD__ . " current data = <pre>".print_r($this->_aAppResult, 1)."</pre>";
         return true;
     }
@@ -313,82 +343,20 @@ class notificationhandler
             return false;
         }
         $iChangetype = $this->_detectChangetype();
+        if($iChangetype == CHANGETYPE_NOCHANGE){
+            return false;
+        }
+
         $iResult = $this->_aAppResult['result']['result'] ?? RESULT_ERROR;
+        $iCounter = $this->_aAppResult["result"]["resultcounter"][$iResult];
+        $iDelay = $this->_aDelayNotification[$iResult];
 
-        // get the highest value for a delay
-        $iMaxDelay = max(array_values($this->_aDelayNotification));
-
-        $bDoNotify = false;
-        switch ($iChangetype) {
-            case CHANGETYPE_NOCHANGE:
-                // increase counter
-                $iCounter = (isset($this->_aAppLastResult['result']['counter']) ? $this->_aAppLastResult['result']['counter'] + 1 : $iMaxDelay + 1);
-                $this->_aAppResult['laststatus'] = isset($this->_aAppLastResult['laststatus']) ? $this->_aAppLastResult['laststatus'] : false;
-                break;
-
-            case CHANGETYPE_CHANGE:
-                // store last different application status - @see getMessageReplacements
-                $this->_aAppResult['laststatus'] = $this->_aAppLastResult;
-                // reset counter
-                $iCounter = 0;
-                break;
-
-            case CHANGETYPE_NEW:
-                // reset counter
-                $iCounter = 0;
-                $bDoNotify = true;
-                break;
-
-            default:
-                break;
-        }
-
-        // setting $this->_aAppResult['laststatus'] above can create recursion
-        if (isset($this->_aAppResult['laststatus']['laststatus'])) {
-            unset($this->_aAppResult['laststatus']['laststatus']);
-            $this->_saveAppResult();
-        }
-
-        // handle delayed notification:
-        // actions as long counter is lower max delay only
-        if ($iCounter <= $iMaxDelay) {
-
-            $this->_aAppResult['result']['counter'] = $iCounter;
-            $this->_saveAppResult();
-
-            // not needed for CHANGETYPE_NEW: detect if count of repeats
-            // with the same current status reached the notification delay value
-            if (!$bDoNotify && $iCounter === $this->_aDelayNotification[$iResult]) {
-
-                $iLastCounter = isset($this->_aAppResult['laststatus']['result']['counter'])
-                    ? $this->_aAppResult['laststatus']['result']['counter']
-                    : -1;
-                $iLastResult = isset($this->_aAppResult['laststatus']['result']['result'])
-                    ? $this->_aAppResult['laststatus']['result']['result']
-                    : -1;
-
-                if ($iLastResult >= 0 && $iLastCounter >= 0 && $iLastCounter >= $this->_aDelayNotification[$iLastResult]) {
-                    $bDoNotify = true;
-                }
-            }
-            /*
-            IDEA: track skipped notifications
-
-            if (!$bDoNotify && $iCounter<$this->_aDelayNotification[$iResult]){
-                // echo "DEBUG: ".__METHOD__." skip notification for delayed sending ...\n";
-                $aTexts=$this->getMessageReplacements();
-                $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
-            }
-            */
-        }
-        if ($bDoNotify) {
-            // on delayed sending: overwrite change type to send correct information
-            if ($this->_iAppResultChange == CHANGETYPE_NOCHANGE) {
-                $this->_iAppResultChange = CHANGETYPE_CHANGE;
-            }
+        // echo __METHOD__." result = $iResult .. change = $iChangetype ... counter = $iCounter delay = $iDelay\n";
+        if ($iCounter >= $iDelay) {
             $this->sendAllNotifications();
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -451,20 +419,6 @@ class notificationhandler
     }
 
     /**
-     * Get current result from cache using a shared cache object 
-     * that was written by appmonitor-server class
-     * @return array
-     */
-    public function getAppResult(): array
-    {
-        $oCache = new AhCache("appmonitor-server", $this->_sAppId);
-
-        // in the cache is an array - but cache->read() is general and can return any data type
-        $aData = $oCache->read();
-        return is_array($aData) ? $aData : [];
-    }
-
-    /**
      * Get 2nd last resultset of an application
      * @return array
      */
@@ -478,16 +432,19 @@ class notificationhandler
     }
 
     /**
-     * Get current log data and filter them
+     * Get current log data and filter them.
+     * When using 'since' or 'age' the log entry before starting range will be searched.
+     * 
      * @param array   $aFilter  filter with possible keys timestamp|changetype|status|appid|message (see addLogitem())
      *                          - mode  {string} "last" = newest entries first
      *                          - count {integer} number of entries to return
-     *                          - page  {integer}
-     * @param integer $iLimit   set a maximum of log entries
-     * @param boolean $bRsort   flag to reverse sort logs; default is true (=newest entry first)
+     *                          - page  {integer} page number to show; default: 1
+     *                          - where {string}  where clause
+     *                          - since {string}  unix timestamp
+     *                          - age   {int}     entries of the last N days
      * @return array
      */
-    public function getLogdata(array $aFilter = [], int $iLimit = 0, bool $bRsort = true): array
+    public function getLogdata(array $aFilter = []): array
     {
 
         $aFilter['mode'] ??= 'last';
@@ -500,7 +457,30 @@ class notificationhandler
             $aFilter['where'] = '`appid` = :appid';
             $aSearchParams = ['appid' => $aFilter['appid']];
         }
+        if ($aFilter['age']??false){
+            $aFilter['since'] = date('U', strtotime("-{$aFilter['age']} days", time()));
+        }
 
+        if ($aFilter['since']??false){
+            // detect the last logentry before given range
+            $aSearchParams['tsfrom'] = $aFilter['since'];
+
+            $aBefore=$this->_oNotifications->search(
+                [
+                    'columns' => '*',
+                    'where' => ($aFilter['where'] ? $aFilter['where'] . " AND " : "") . "`timestamp` <= :tsfrom",
+                    'order' => ['timestamp DESC'],
+                    'limit' => "0,1",
+                ],
+                $aSearchParams
+            );
+
+            $aFilter['where'].=($aFilter['where'] ? " AND " : "") . "`timestamp` >= :tsfrom";
+            $aSearchParams['tsfrom'] = $aBefore[0]['timestamp']??$aFilter['since'];
+            unset($aFilter['since']);
+        }
+
+        // print_r($aFilter);
         $aData = $this->_oNotifications->search(
             [
                 'columns' => '*',
@@ -668,7 +648,7 @@ class notificationhandler
             );
 
         // echo "DEBUG:".__METHOD__." add log an sending messages - $sLogMessage\n";
-        $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage, $this->_aAppResult);
+        $this->addLogitem($this->_iAppResultChange, $iResult, $this->_sAppId, $sLogMessage);
 
         $sMessage = $this->getReplacedMessage('changetype-' . $this->_iAppResultChange . '.email.message');
         foreach ($this->getPlugins() as $sPlugin) {

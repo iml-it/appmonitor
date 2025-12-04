@@ -103,6 +103,9 @@ tr.result3{background: #f8f0f0 !important;}
 	padding: 0;
 	position: relative;
 }
+.item-disabled {
+	opacity: 50%;
+}
 
 label.result{min-width:10em; text-align: center; margin: 0 1em;}
 /*

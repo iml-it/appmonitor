@@ -134,7 +134,7 @@
         "Time": "Time",
         "Time-for-all-checks": "time for all checks",
 
-        "Uptime": "Uptime",
+        "Uptime": "Uptime (last 90 days)",
 
         "Validator-ok": "Validation successful.",
         "Validator-error": "Validation errors",
