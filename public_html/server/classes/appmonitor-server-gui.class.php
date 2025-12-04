@@ -370,8 +370,9 @@ class appmonitorserver_gui extends appmonitorserver
      * @param array $aLog
      * @return array
      */
-    protected function _getUptime(array $aLog = []): array
+    protected function _getUptime(array $aLog, int $iAge): array
     {
+        $iMaxAge=time()-($iAge*24*60*60);
         $aReturn = ['counter' => [0 => 0, 1 => 0, 2 => 0, 3 => 0], 'items' => []];
         $iLastTimer = date("U");
         $iTotal = 0;
@@ -379,7 +380,7 @@ class appmonitorserver_gui extends appmonitorserver
             foreach ($aLog as $aLogItem) {
                 $aItem = $aLogItem;
                 unset($aItem['result']);
-                $iDelta = $iLastTimer - $aItem['timestamp'];
+                $iDelta = $iLastTimer - max($aItem['timestamp'], $iMaxAge);
                 $iLastTimer = $aItem['timestamp'];
 
                 $aItem['duration'] = $iDelta;
@@ -387,6 +388,9 @@ class appmonitorserver_gui extends appmonitorserver
                 $aReturn['items'][] = $aItem;
                 $aReturn['counter'][$aItem['status']] += $iDelta;
                 $iTotal += $iDelta;
+                if($aItem['timestamp']<$iMaxAge){
+                    break;
+                }
             }
         }
         $aReturn['total'] = $iTotal;
@@ -873,10 +877,10 @@ class appmonitorserver_gui extends appmonitorserver
                     . '<img src="images/icons/check-' . $aEntries['meta']["result"] . '.png">'
                     . $this->_tr('Resulttype-' . $aEntries['meta']["result"])
                     . ' - '
-                    . '<strong>' . $aEntries['meta']['website'] . '</strong><br>'
+                    . '<strong>' . ($aEntries['meta']['website']??'[no-meta-website]') . '</strong><br>'
 
                     . '</div>',
-                'label' => $aEntries['meta']['website'],
+                'label' => $aEntries['meta']['website']??'[no-meta-website]',
                 'shape' => 'box',
                 'widthConstraint' => ['maximum' => 300],
                 'font' => ['size' => 18, 'color' => '#ffffff'],
@@ -1154,7 +1158,7 @@ class appmonitorserver_gui extends appmonitorserver
             $iLastTimer = $aLogentry['timestamp'];
 
             // TODO maybe use $this->_getAdminLteColorByResult()
-            $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '-';
+            $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '';
             $aTags = $this->_data[$aLogentry['appid']]["meta"]["tags"] ?? false;
 
             $sCheckResults = '';
@@ -1174,15 +1178,15 @@ class appmonitorserver_gui extends appmonitorserver
             }
 
 
-            $sTable .= '<tr class="result' . $aLogentry['status'] . ' tags ' . $this->_getCssclassForTag($aTags) . '">'
+            $sTable .= '<tr class="result' . $aLogentry['status'] . ' tags ' . $this->_getCssclassForTag($aTags) . ($sAppName ? "" : " item-disabled").'">'
                 . '<td class="result' . $aLogentry['status'] . '"><span style="display: none;">' . $aLogentry['status'] . '</span>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
                 . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
                 . ($bShowDuration ? '<td>' . round($iDelta / 60) . ' min</td>' : '')
                 . '<td>' . $this->_tr('changetype-' . $aLogentry['changetype']) . '</td>'
                 . '<td>' . ($sAppName
-                ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
-                : '-'
-            )
+                        ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
+                        : $aLogentry['appid']
+                    )
                 . '</td>'
                 . '<td>'
                 . $aLogentry['message']
@@ -1248,7 +1252,7 @@ class appmonitorserver_gui extends appmonitorserver
             }
             $LastTime = $aLogentry['timestamp'];
 
-            $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '-';
+            $sAppName = $this->_data[$aLogentry['appid']]["result"]["website"] ?? '';
             
             $sCheckResults = '';
             if ($aLogentry['status'] > 0) {
@@ -1285,8 +1289,14 @@ class appmonitorserver_gui extends appmonitorserver
                 ' class="'.$sIconBg.' ', 
                 $sIcon
             );
+
+            $sTrClass="tags ".$this->_getCssclassForTag($this->_data[$aLogentry['appid']]["meta"]["tags"] ?? false)
+                .($sAppName ? "" : " item-disabled")
+                .""
+                ;
+            
             $sOut .= "
-                <div>
+                <div class=\"$sTrClass\">
                     $sIcon
                     <div class=\"timeline-item\">
                         "
@@ -1295,7 +1305,7 @@ class appmonitorserver_gui extends appmonitorserver
                         . $this->_tr('changetype-' . $aLogentry['changetype']) . ' '
                         . ($sAppName
                             ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
-                            : '-'
+                            : "($aLogentry[appid])"
                         )
                         . '<br>'
                         . $aLogentry['message']
@@ -1349,6 +1359,106 @@ class appmonitorserver_gui extends appmonitorserver
                 }
             }
         }
+        return $sHtml;
+    }
+
+    /**
+     * Get html code for uptime and notification
+     * to be show in an app detail page
+     * 
+     * @param array $aFilter filter items with keys
+     *                       - age   {int}     number of days for uptime info; default: 90
+     *                       - appid {string}  application id
+     * @return string
+     */
+    public function getPartWebappUptimeAndNotification(array $aFilter): string {
+        $iAge=$aFilter['age']??90;
+        $aUptimeRanges=[1, 7, 28, 90, 365];
+
+        $oA = new renderadminlte();
+        $aLogs = $this->oNotification->getLogdata([
+            'appid' => $aFilter['appid']??'',
+            // 'count' => 100,           // max number of entries
+            // 'since' => date("U", strtotime("2025-10-01")),
+            // 'age' => $iAge,
+        ]);
+        
+        $aUptime = $this->_getUptime($aLogs, $iAge);
+
+        $aChartData = [
+            'label' => [],
+            'value' => [],
+            'color' => [],
+        ];
+        foreach ($aUptime['counter'] as $iResult => $iResultCount) {
+            if ($iResultCount) {
+                array_unshift($aChartData['label'], $this->_tr('Resulttype-' . $iResult));
+                array_unshift($aChartData['value'], $iResultCount);
+                array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($iResult));
+            }
+        }
+
+        $aChartUptime = [
+            'type' => 'pie',
+            // 'xLabel'=>$this->_tr('Chart-time'),
+            // 'yLabel'=>$this->_tr('Chart-responsetime'),
+            'data' => $aChartData,
+        ];
+        $iFirstentry = count($aLogs) ? $aLogs[count($aLogs) - 1]['timestamp'] : date('U');
+
+        $sUptime = '';
+        if ($aUptime['total']) {
+            $sUptime .= '<table class="table">';
+            foreach ($this->_getResultDefs() as $i) {
+
+                $sUptime .= $aUptime['counter'][$i]
+                    ?
+                    '<tr class="result' . $i . '">'
+                    . '<td class="result' . $i . '">' . $this->_tr('Resulttype-' . $i) . '</td>'
+                    . '<td style="text-align: right">' . round($aUptime['counter'][$i] / 60) . ' min</td>'
+                    . '<td style="text-align: right"> ' . number_format($aUptime['counter'][$i] * 100 / $aUptime['total'], 1) . ' %</td>'
+                    . '</tr>'
+                    : '';
+            }
+            $sUptime .= '</table><br>'
+                . $this->_renderGraph($aChartUptime);
+        }
+
+        // _hrTime
+        $sButtons='';
+            foreach ($aUptimeRanges as $iLength) {
+                $sButtons .= '<button '
+                    . 'class="btn '.($iLength == $iAge ? 'btn-primary' : '' ).'" '
+                    // . 'onclick="setTab(\'#divnotifications\', {\'page\': 1, \'count\': \'' . $iLength . '\', \'view\': \'' . $aNotifyOptions['view'] . '\'})" '
+                    . '>' . $iLength . '</button> '
+                ;
+            }
+
+
+        // Notification + Uptime + Http-results
+        $sHtml = $oA->getSectionRow(
+            $oA->getSectionColumn(
+                $oA->getBox([
+                    'title' => $this->_tr('Notifications'),
+                    'text' => $this->_generateNotificationlog($aLogs, 'datatable-notifications-webapp', true)
+                ]),
+                9,
+                'right'
+            )
+            . $oA->getSectionColumn(
+                $oA->getBox([
+                    // 'title' => $this->_tr('Uptime') . ' (' . $this->_tr('since') . ' ' . date('Y-m-d', $iFirstentry) . '; ~' . round((date('U') - $iFirstentry) / 60 / 60 / 24) . ' d)',
+                    'title' => $this->_tr('Uptime'),
+                    
+                    'text' => ""
+                        // . " $sButtons d<br><br>"
+                        .$sUptime
+                ]),
+                3
+            ),
+            $this->_tr('row-history')
+        );
+
         return $sHtml;
     }
 
@@ -1496,7 +1606,6 @@ class appmonitorserver_gui extends appmonitorserver
                             <li><a target="_blank" href="https://getbootstrap.com/">Bootstrap</a></li>
                             <li><a target="_blank" href="https://www.chartjs.org/">ChartJs</a></li>
                             <li><a target="_blank" href="https://visjs.org/">Vis.js</a></li>
-                            <li><a target="_blank" href="https://github.com/axelhahn/ahcache/">AhCache</a></li>
                             <li><a target="_blank" href="https://github.com/axelhahn/php-abstract-dbo">Axels PDO-DB class</a></li>
                             <li><a target="_blank" href="https://github.com/axelhahn/cdnorlocal">CdnorLocal</a></li>
                         </ul>'
@@ -1544,13 +1653,13 @@ class appmonitorserver_gui extends appmonitorserver
                 . '<a href="#divwebs"'
                 . '> ' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps-header')
                 . '</a> > '
-                . '<span class="divhost bg-' . $this->_getAdminLteColorByResult($aEntries["result"]["result"]) . '">'
+                // . '<span class="divhost bg-' . $this->_getAdminLteColorByResult($aEntries["result"]["result"]) . '">'
                 . '<nobr>'
                 . $this->_tr('Resulttype-' . $aEntries["result"]["result"]) . ': '
                 . $this->_aIco['webapp'] . ' '
                 . $this->_getAppLabel($sAppId)
                 . '&nbsp;</nobr>'
-                . '</span>'
+                // . '</span>'
             );
 
 
@@ -1654,7 +1763,8 @@ class appmonitorserver_gui extends appmonitorserver
                     );
             }
 
-            // --- http status code
+            // ----------------------------------------------------------------------
+            // http status code
             $sStatusIcon = ($aEntries['result']['httpstatus']
                 ? ($aEntries['result']['httpstatus'] >= 400
                     ? $this->_aIco['error']
@@ -1688,76 +1798,12 @@ class appmonitorserver_gui extends appmonitorserver
                 );
 
 
-            // --- notifications & uptime for this webapp
-            $aLogs = $this->oNotification->getLogdata([
-                'appid' => $sAppId,
-                'count' => 100           // max number of entries
-            ]);
+            // ----------------------------------------------------------------------
+            // Notifications & uptime for this webapp
+            $sHtml.= ''.$this->getPartWebappUptimeAndNotification(['appid'=>$sAppId]);
 
-            $aUptime = $this->_getUptime($aLogs);
-            // echo '<pre>'.print_r($aUptime, 1).'</pre>';
-
-            $aChartData = [
-                'label' => [],
-                'value' => [],
-                'color' => [],
-            ];
-            foreach ($aUptime['counter'] as $iResult => $iResultCount) {
-                if ($iResultCount) {
-                    array_unshift($aChartData['label'], $this->_tr('Resulttype-' . $iResult));
-                    array_unshift($aChartData['value'], $iResultCount);
-                    array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($iResult));
-                }
-            }
-
-            $aChartUptime = [
-                'type' => 'pie',
-                // 'xLabel'=>$this->_tr('Chart-time'),
-                // 'yLabel'=>$this->_tr('Chart-responsetime'),
-                'data' => $aChartData,
-            ];
-            $iFirstentry = count($aLogs) ? $aLogs[count($aLogs) - 1]['timestamp'] : date('U');
-
-            $sUptime = '';
-            if ($aUptime['total']) {
-                $sUptime .= '<table class="table">';
-                foreach ($this->_getResultDefs() as $i) {
-
-                    $sUptime .= $aUptime['counter'][$i]
-                        ?
-                        '<tr class="result' . $i . '">'
-                        . '<td class="result' . $i . '">' . $this->_tr('Resulttype-' . $i) . '</td>'
-                        . '<td style="text-align: right">' . round($aUptime['counter'][$i] / 60) . ' min</td>'
-                        . '<td style="text-align: right"> ' . number_format($aUptime['counter'][$i] * 100 / $aUptime['total'], 3) . ' %</td>'
-                        . '</tr>'
-                        : '';
-                }
-                $sUptime .= '</table><br>'
-                    . $this->_renderGraph($aChartUptime);
-            }
-
-            // Notification + Uptime + Http-results
-            $sHtml .= $oA->getSectionRow(
-                $oA->getSectionColumn(
-                    $oA->getBox([
-                        'title' => $this->_tr('Notifications'),
-                        'text' => $this->_generateNotificationlog($aLogs, 'datatable-notifications-webapp', true)
-                    ]),
-                    9,
-                    'right'
-                )
-                . $oA->getSectionColumn(
-                    $oA->getBox([
-                        'title' => $this->_tr('Uptime') . ' (' . $this->_tr('since') . ' ' . date('Y-m-d', $iFirstentry) . '; ~' . round((date('U') - $iFirstentry) / 60 / 60 / 24) . ' d)',
-                        'text' => $sUptime
-                    ]),
-                    3
-                ),
-                $this->_tr('row-history')
-            );
-
-
-            // --- debug infos 
+            // ----------------------------------------------------------------------
+            // debug infos 
             if ($this->_aCfg['debug'] && $this->hasRole('ui-debug')) {
                 $this->oNotification->setApp($sAppId);
                 $sDebugContent = '';
@@ -2823,8 +2869,8 @@ class appmonitorserver_gui extends appmonitorserver
                     ? "result2"
                     : ''
                 );
-            $iMaxTime = max($iMaxTime, $aQuery["time"]);
-            $iMaxRecords = max($iMaxRecords, $aQuery["records"]);
+            $iMaxTime = max($iMaxTime, $aQuery["time"]??false);
+            $iMaxRecords = max($iMaxRecords, $aQuery["records"]??false);
 
             $sData = print_r(($aQuery["data"] ?? false), 1);
             if (strlen($sData) > 2000) {
@@ -2833,8 +2879,8 @@ class appmonitorserver_gui extends appmonitorserver
 
             $sQerytable .= "<tr class=\"$sClass\">
                 <td>$iCount</td>
-                <td>$aQuery[time]</td>
-                <td>$aQuery[records]</td>
+                <td>".($aQuery['time']??"-")."</td>
+                <td>".($aQuery['records']??"-")."</td>
                 <td>"
                 . htmlentities($aQuery["sql"])
                 . ($sError ? htmlentities($sError) : '')
