@@ -432,9 +432,9 @@ class appmonitorserver_gui extends appmonitorserver
                 continue;
             switch ($key) {
                 case 'appstatus':
-                    $aLast = $this->oNotification->getAppLastResult();
-                    $sSince = (isset($aLast['result']['ts']) && $aLast['result']['ts'] > 0)
-                        ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['result']['ts'])
+                    $aLast = $this->oNotification->getAppLastNotification();                    
+                    $sSince = (isset($aLast['timestamp']) && $aLast['timestamp'] > 0)
+                        ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['timestamp'])
                         : ''
                     ;
                     $sReturn .= (isset($aHostdata['result']) && $bVisibility
