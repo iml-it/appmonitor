@@ -305,7 +305,7 @@ class appmonitorserver_gui extends appmonitorserver
         }
         $aEntries = $this->_data[$sAppId];
         $sWebapp = $aEntries["result"]["website"];
-        $sVHost = parse_url($aEntries["result"]["url"], PHP_URL_HOST);
+        $sVHost = parse_url($aEntries["result"]["url"]??'', PHP_URL_HOST);
         $sHost = isset($aEntries["result"]["host"]) && $aEntries["result"]["host"]
             ? $this->_aIco['host'] . ' ' . $aEntries["result"]["host"]
             : "@$sVHost";
@@ -1627,6 +1627,15 @@ class appmonitorserver_gui extends appmonitorserver
         // $this->loadClientData();
         $oA = new renderadminlte();
         $sHtml = '';
+
+        $aSearch=$this->_oWebapps->search(
+            [
+                'columns' =>['lastresult', 'appid'],
+            ],
+        ); 
+        $this->_data[$sAppId]= json_decode($aSearch[0]['lastresult']??[], 1);
+            // $this->_data[$aRow['appid']]["result"]["fromdb"] = true;
+
         if (!isset($this->_data[$sAppId])) {
             return 'ERROR: appid does not exist: ' . htmlentities($sAppId);
         }

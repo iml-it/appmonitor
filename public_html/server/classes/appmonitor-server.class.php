@@ -770,10 +770,10 @@ class appmonitorserver
         }
 
         $curl_arr = [];
-        foreach ($aUrls as $sKey => $sUrl) {
-            $curl_arr[$sKey] = curl_init($sUrl);
-            curl_setopt_array($curl_arr[$sKey], $this->curl_opts);
-            curl_multi_add_handle($master, $curl_arr[$sKey]);
+        foreach ($aUrls as $sAppid => $sUrl) {
+            $curl_arr[$sAppid] = curl_init($sUrl);
+            curl_setopt_array($curl_arr[$sAppid], $this->curl_opts);
+            curl_multi_add_handle($master, $curl_arr[$sAppid]);
         }
 
         // make all requests
@@ -786,23 +786,23 @@ class appmonitorserver
         } while ($running);
 
         // get results
-        foreach ($aUrls as $sKey => $sUrl) {
+        foreach ($aUrls as $sAppid => $sUrl) {
             $sHeader = '';
             $sBody = '';
-            $aResponse = explode("\r\n\r\n", curl_multi_getcontent($curl_arr[$sKey]), 2);
+            $aResponse = explode("\r\n\r\n", curl_multi_getcontent($curl_arr[$sAppid]), 2);
             list($sHeader, $sBody) = count($aResponse) > 1
                 ? $aResponse
                 : [$aResponse[0], ''];
 
-            $aResult[$sKey] = [
+            $aResult[$sAppid] = [
                 'url' => $sUrl,
                 'response_header' => $sHeader,
                 'response_body' => $sBody,
-                'curlinfo' => curl_getinfo($curl_arr[$sKey]),
-                'curlerrorcode' => curl_errno($curl_arr[$sKey]),
-                'curlerrormsg' => curl_error($curl_arr[$sKey]),
+                'curlinfo' => curl_getinfo($curl_arr[$sAppid]),
+                'curlerrorcode' => curl_errno($curl_arr[$sAppid]),
+                'curlerrormsg' => curl_error($curl_arr[$sAppid]),
             ];
-            curl_multi_remove_handle($master, $curl_arr[$sKey]);
+            curl_multi_remove_handle($master, $curl_arr[$sAppid]);
         }
         curl_multi_close($master);
         return $aResult;
@@ -866,48 +866,46 @@ class appmonitorserver
     }
 
     /**
-     * Get all client data; it fetches all given urls
+     * Refresh outdated app data
      * 
      * 
      * @param boolean  $ForceCache  flag: use cache; default: false (=automatic selection by source and config "servicecache")
      * @return boolean
      */
-    protected function _getClientData(bool $ForceCache = false): bool
+    public function refreshClientData(bool $ForceCache = false): bool
     {
         if (!$ForceCache) {
             $ForceCache = isset($_SERVER['REQUEST_METHOD']) && ($this->_aCfg['servicecache']??false);
         }
-        $this->_data = [];
-        $aUrls2Refresh = [];
-        
-        foreach ($this->_urls as $sKey => $sUrl){
-            $aResult=$this->_oWebapps->search([
-                'columns' =>['lastresult'],
-                "where" => "appid = :appid",
-                ],
-            
-                [
-                "appid" => $sKey,
-                ]
-            );
-            // echo "<pre>"; print_r($aResult); die();
-            $aLastResult=json_decode($aResult[0]['lastresult']??[], 1);
-            // echo "<pre>".print_r($aLastResult['result']['result'], 1) . '</pre>'; // die();
-            $this->_data[$sKey] = $aLastResult;
-            $this->_data[$sKey]["result"]["fromdb"] = true;
-
-            if($this->_isResultExpired($aLastResult)){
-                $aUrls2Refresh[$sKey] = $sUrl;
-                $this->_data[$sKey]["result"]["outdated"] = true;
-            }
+        if($ForceCache){
+            return true;
         }
 
-        // fetch all non cached items
-        if (count($aUrls2Refresh)) {
-            $aAllHttpdata = $this->_multipleHttpGet($aUrls2Refresh);
-            foreach ($aAllHttpdata as $sKey => $aResult) {
+        $aUrls2Refresh = [];
 
-                $this->_oWebapps->readByFields(['appid' => $sKey]);
+        // --- find out dated apps
+        foreach($this->_oWebapps->search(
+            [
+                'columns' =>['lastresult', 'appid'],
+            ],
+        ) as $aRow){
+            $aResult[$aRow['appid']]=$aRow;
+        }
+        
+        foreach ($this->_urls as $sAppid => $sUrl){
+            $aLastResult=json_decode($aResult[$sAppid]['lastresult']??[], 1);
+            if($this->_isResultExpired($aLastResult)){
+                $aUrls2Refresh[$sAppid] = $sUrl;
+            }
+        }
+        
+        // --- fetch new data from outdated apps and store its status to database
+        if (count($aUrls2Refresh)) {
+            // $this->send("URLs to refresh: ". print_r($aUrls2Refresh, 1));
+            $aAllHttpdata = $this->_multipleHttpGet($aUrls2Refresh);
+            foreach ($aAllHttpdata as $sAppid => $aResult) {
+
+                $this->_oWebapps->readByFields(['appid' => $sAppid]);
 
                 // detect http error
                 $iHttpStatus = $this->_getHttpStatus($aResult['response_header']);
@@ -974,8 +972,6 @@ class appmonitorserver
                     // $aClientData["result"] = $this->_generateResultArray($aClientData);
                 }
                 $aClientData["result"] = $this->_generateResultArray($aClientData);
-                $aClientData["result"]["ts"] = date('U');
-
 
                 $iTtl = $sError
                     ? $this->_iTtlOnError
@@ -997,8 +993,9 @@ class appmonitorserver
                         : RESULT_UNKNOWN;
                 }
 
+                $aClientData["result"]["ts"] = time();
+                $aClientData["result"]["url"] = $this->_urls[$sAppid];
                 $aClientData["result"]["ttl"] = $iTtl ?? $this->_iTtl;
-                $aClientData["result"]["url"] = $aResult['url'];
                 $aClientData["result"]["header"] = $aResult['response_header'];
                 $aClientData["result"]["headerarray"] = $this->_getHttpStatusArray($aResult['response_header']);
                 $aClientData["result"]["httpstatus"] = $iHttpStatus;
@@ -1012,6 +1009,7 @@ class appmonitorserver
 
                 // $aClientData["result"]["curlinfo"] = $aResult['curlinfo'];
 
+                // --- counters
                 $aCounters = [];
                 $aCounters['_responsetime'] = [
                     'title' => $this->_tr('Chart-responsetime'),
@@ -1020,7 +1018,6 @@ class appmonitorserver
                     'value' => floor($aResult['curlinfo']['total_time'] * 1000),
                 ];
 
-                // find counters in a check result
                 if (isset($aClientData['checks']) && count($aClientData['checks'])) {
                     // echo '<pre>'.print_r($aClientData['checks'], 1).'</pre>';
                     foreach ($aClientData['checks'] as $aCheck) {
@@ -1043,7 +1040,9 @@ class appmonitorserver
                         }
                     }
                 }
-                $rrd = new simpleRrd($sKey);
+
+                // --- check counter for current result
+                $rrd = new simpleRrd($sAppid);
                 foreach ($aCounters as $sCounterKey => $aCounter) {
                     $rrd->setId($sCounterKey);
                     $rrd->add([
@@ -1077,15 +1076,12 @@ class appmonitorserver
                     . " $sError $aResult[curlerrormsg]"
                 );
 
-                // $aClientData["result"]["fromcache"] = false;
-                $this->_data[$sKey] = $aClientData;
-
                 // TODO
                 // Flap detection
                 // via counter der Responsetime kann ich den letzten Status
                 // der letzten N requests abgreifen und den bisherigen Counter
                 // abbilden
-                // $rrd = new simpleRrd($sKey);
+                // $rrd = new simpleRrd($sAppid);
                 // $rrd->setId('_responsetime');
                 // $aResponses=$rrd->get(3);
 
@@ -1096,7 +1092,7 @@ class appmonitorserver
 
                 //     print_r($aResponses);
 
-                $this->oNotification->setApp($sKey, $aClientData);
+                $this->oNotification->setApp($sAppid, $aClientData);
                 $this->oNotification->notify();
 
                 // store in database
@@ -1109,6 +1105,29 @@ class appmonitorserver
             }
         }
 
+        return true;
+    }
+
+    /**
+     * Get all client data; it fetches all given urls
+     * Used in service.php
+     * 
+     * @param boolean  $ForceCache  flag: use cache; default: false (=automatic selection by source and config "servicecache")
+     * @return boolean
+     */
+    protected function _getClientData(bool $ForceCache = false): bool
+    {
+        $this->refreshClientData();
+
+        $this->_data = [];
+        foreach($this->_oWebapps->search(
+            [
+                'columns' =>['lastresult', 'appid'],
+            ],
+        ) as $aRow){
+            $this->_data[$aRow['appid']] = json_decode($aRow['lastresult']??[], 1);
+            $this->_data[$aRow['appid']]["result"]["fromdb"] = true;
+        }
         return true;
     }
 
@@ -1143,8 +1162,8 @@ class appmonitorserver
      */
     public function addUrl($sUrl): bool
     {
-        $sKey = $this->_generateUrlKey($sUrl);
-        $this->_urls[$sKey] = $sUrl;
+        $sAppid = $this->_generateUrlKey($sUrl);
+        $this->_urls[$sAppid] = $sUrl;
         return true;
     }
 
@@ -1196,7 +1215,7 @@ class appmonitorserver
         $aResults = [0, 0, 0, 0];
         $aCheckResults = [0, 0, 0, 0];
         $aServers = [];
-        foreach ($this->_data as $sKey => $aEntries) {
+        foreach ($this->_data as $sAppid => $aEntries) {
             $iCountApps++; // count of webapps
             $aResults[$aEntries['result']['result']]++; // counter by result of app
             if (isset($aEntries['result']['host']) && $aEntries['result']['host']) {
@@ -1204,8 +1223,8 @@ class appmonitorserver
             }
 
             // count of checks
-            if (isset($this->_data[$sKey]["result"]["summary"])) {
-                $aChecks = $this->_data[$sKey]["result"]["summary"];
+            if (isset($this->_data[$sAppid]["result"]["summary"])) {
+                $aChecks = $this->_data[$sAppid]["result"]["summary"];
                 $iCountChecks += $aChecks["total"];
                 for ($i = 0; $i < 4; $i++) {
                     $aCheckResults[$i] += $aChecks[$i];
@@ -1284,7 +1303,7 @@ class appmonitorserver
         }
 
         // loop over all webapps
-        foreach ($this->_data as $sKey => $aEntries) {
+        foreach ($this->_data as $sAppid => $aEntries) {
 
             // filter if a host was given
             if (
