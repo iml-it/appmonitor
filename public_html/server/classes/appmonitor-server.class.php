@@ -872,7 +872,7 @@ class appmonitorserver
      * @param boolean  $ForceCache  flag: use cache; default: false (=automatic selection by source and config "servicecache")
      * @return boolean
      */
-    public function refreshClientData(bool $ForceCache = false): bool
+    public function refreshClientData(bool $ForceCache = false): bool|array
     {
         if (!$ForceCache) {
             $ForceCache = isset($_SERVER['REQUEST_METHOD']) && ($this->_aCfg['servicecache']??false);
@@ -881,7 +881,6 @@ class appmonitorserver
             return true;
         }
 
-        $aUrls2Refresh = [];
 
         // --- find out dated apps
         foreach($this->_oWebapps->search(
@@ -892,8 +891,9 @@ class appmonitorserver
             $aResult[$aRow['appid']]=$aRow;
         }
         
+        $aUrls2Refresh=[];
         foreach ($this->_urls as $sAppid => $sUrl){
-            $aLastResult=json_decode($aResult[$sAppid]['lastresult']??[], 1);
+            $aLastResult=json_decode($aResult[$sAppid]['lastresult']??'', 1)??[];
             if($this->_isResultExpired($aLastResult)){
                 $aUrls2Refresh[$sAppid] = $sUrl;
             }
