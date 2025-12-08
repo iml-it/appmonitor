@@ -1631,8 +1631,14 @@ class appmonitorserver_gui extends appmonitorserver
         $aSearch=$this->_oWebapps->search(
             [
                 'columns' =>['lastresult', 'appid'],
+                "where" => "appid = :appid",
             ],
+            [
+                "appid" => $sAppId,
+            ]
+
         ); 
+        // print_r($aSearch); die();
         $this->_data[$sAppId]= json_decode($aSearch[0]['lastresult']??[], 1);
             // $this->_data[$aRow['appid']]["result"]["fromdb"] = true;
 
