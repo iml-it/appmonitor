@@ -68,6 +68,7 @@ class simpleRrd
 
     /**
      * Helper function - limit log to N entries
+     * called in add() before saving data
      * @return boolean
      */
     protected function _cutLogitems(): bool
@@ -242,7 +243,7 @@ class simpleRrd
             $this->_oSimplerrd->set('countername', $sCountername);
         }
 
-        $this->_getLogs();
+        // $this->_getLogs();
         return true;
     }
 }
