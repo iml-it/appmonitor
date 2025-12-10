@@ -16,7 +16,7 @@ class simpleRrd
      * Maximum number of kept data items
      * @var integer
      */
-    protected int $_iMaxLogentries = 1000;
+    protected int $_iMaxLogentries = 100;
 
     /**
      * Logdata for detected changes and sent notifications
@@ -175,12 +175,14 @@ class simpleRrd
         if (!count($aTmp)) {
             return [];
         }
-        $iMax = $iMax ? $iMax : count($aTmp);
-        $iMax = min($iMax, count($aTmp));
-        for ($i = 0; $i < $iMax; $i++) {
-            $aReturn[] = array_pop($aTmp);
-        }
-        return $aReturn;
+        rsort($aTmp);
+        return array_slice($aTmp, 0, min($iMax, count($aTmp)));
+
+        // $iMax = min($iMax, count($aTmp));
+        // for ($i = 0; $i < $iMax; $i++) {
+        //     $aReturn[] = array_pop($aTmp);
+        // }
+        // return $aReturn;
     }
 
     /**
@@ -206,6 +208,34 @@ class simpleRrd
         $aReturn = [];
         foreach ($aSearchresult as $aRow) {
             $aReturn[] = $aRow['id'];
+        }
+        return $aReturn;
+    }
+
+    /**
+     * Get array of all counters
+     * 
+     * @return array
+     */
+    public function getAllCounters(array $aFilter=[]): array
+    {
+
+        $aSearchresult = $this->_oSimplerrd->search(
+            [
+                "columns" => ["id", "appid", "countername", "data"],
+                "where" => "appid like :appid AND countername like :countername",
+            ],
+            [
+                "appid" => $aFilter['appid']??'%',
+                "countername" => $aFilter['countername']??'%',
+            ]
+        );
+        $aReturn = [];
+
+        $sSortKey1="appid";
+        $sSortKey2="countername";
+        foreach ($aSearchresult as $aRow) {
+            $aReturn[$aRow[$sSortKey1]][$aRow[$sSortKey2]] = $aRow['data'];
         }
         return $aReturn;
     }

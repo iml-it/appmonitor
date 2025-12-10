@@ -4,6 +4,7 @@ require_once 'cache.class.php';
 require_once 'lang.class.php';
 require_once 'simplerrd.class.php';
 require_once 'notificationhandler.class.php';
+require_once 'app.class.php';
 require __DIR__ . '/../vendor/php-abstract-dbo/src/pdo-db.class.php';
 require_once 'dbobjects/webapps.php';
 
@@ -107,6 +108,13 @@ class appmonitorserver
      */
     protected array $_aMessages = [];
 
+
+    /**
+     * WIP: Application getter object 
+     * @var app object
+     */
+    protected app $oApp;
+
     /**
      * language texts object
      * @var lang object
@@ -180,6 +188,7 @@ class appmonitorserver
 
         $this->loadConfig($bReadonly);
         $this->_loadLangTexts();
+        $this->oApp = new app();
 
         if (!$bReadonly) {
             // remark: $oDB is initialized in loadConfig()
@@ -877,9 +886,9 @@ class appmonitorserver
         if (!$ForceCache) {
             $ForceCache = isset($_SERVER['REQUEST_METHOD']) && ($this->_aCfg['servicecache']??false);
         }
-        if($ForceCache){
-            return true;
-        }
+        // if($ForceCache){
+        //     return true;
+        // }
 
 
         // --- find out dated apps
@@ -892,10 +901,16 @@ class appmonitorserver
         }
         
         $aUrls2Refresh=[];
+        $this->_data=[];
+
         foreach ($this->_urls as $sAppid => $sUrl){
             $aLastResult=json_decode($aResult[$sAppid]['lastresult']??'', 1)??[];
-            if($this->_isResultExpired($aLastResult)){
+            $this->oApp->set($aLastResult);
+            // if($this->_isResultExpired($aLastResult) && !$ForceCache ){
+            if(!$ForceCache && $this->oApp->isOutdated()){
                 $aUrls2Refresh[$sAppid] = $sUrl;
+            } else {
+                $this->_data[$sAppid] = $aLastResult;
             }
         }
         
@@ -1040,6 +1055,7 @@ class appmonitorserver
                         }
                     }
                 }
+                $aClientData["counters"] = $aCounters;
 
                 // --- check counter for current result
                 $rrd = new simpleRrd($sAppid);
@@ -1056,6 +1072,7 @@ class appmonitorserver
                         $LastInDB = json_decode($sLastWritten, true);
                 }
 
+                // --- update result counter: how often the current result was seen?
                 $iCurrentCounter=($LastInDB["result"]["resultcounter"][$aClientData["result"]["result"]]??0);
                 $aResultCounter=[
                     RESULT_OK=>0,
@@ -1065,6 +1082,8 @@ class appmonitorserver
                 ];
                 $aResultCounter[$aClientData["result"]["result"]]=$iCurrentCounter+1;
                 $aClientData["result"]["resultcounter"] = $aResultCounter;
+
+                $this->_data[$sAppid] = $aClientData;
 
                 $this->send(
                     ""
@@ -1104,6 +1123,9 @@ class appmonitorserver
 
             }
         }
+        if(!$ForceCache){
+            $this->_data=[];
+        }
 
         return true;
     }
@@ -1119,15 +1141,15 @@ class appmonitorserver
     {
         $this->refreshClientData();
 
-        $this->_data = [];
-        foreach($this->_oWebapps->search(
-            [
-                'columns' =>['lastresult', 'appid'],
-            ],
-        ) as $aRow){
-            $this->_data[$aRow['appid']] = json_decode($aRow['lastresult']??[], 1);
-            $this->_data[$aRow['appid']]["result"]["fromdb"] = true;
-        }
+        // $this->_data = [];
+        // foreach($this->_oWebapps->search(
+        //     [
+        //         'columns' =>['lastresult', 'appid'],
+        //     ],
+        // ) as $aRow){
+        //     $this->_data[$aRow['appid']] = json_decode($aRow['lastresult']??[], 1);
+        //     $this->_data[$aRow['appid']]["result"]["fromdb"] = true;
+        // }
         return true;
     }
 

@@ -303,13 +303,10 @@ class appmonitorserver_gui extends appmonitorserver
         if (!isset($this->_data[$sAppId])) {
             return '??';
         }
-        $aEntries = $this->_data[$sAppId];
-        $sWebapp = $aEntries["result"]["website"];
-        $sVHost = parse_url($aEntries["result"]["url"]??'', PHP_URL_HOST);
-        $sHost = isset($aEntries["result"]["host"]) && $aEntries["result"]["host"]
-            ? $this->_aIco['host'] . ' ' . $aEntries["result"]["host"]
-            : "@$sVHost";
-        return '<span title="' . $sWebapp . "\n" . $aEntries["result"]["url"] . '">' . $sWebapp . ' ' . $sHost . '</span>';
+        $sHost = $this->oApp->host()
+            ? $this->_aIco['host'] . ' ' . $this->oApp->host()
+            : "@".$this->oApp->vhost();
+        return '<span title="' . $this->oApp->label() . "\n" . $this->oApp->url() . '">' . $this->oApp->label() . ' ' . $sHost . '</span>';
     }
 
     /**
@@ -437,11 +434,11 @@ class appmonitorserver_gui extends appmonitorserver
                         ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['timestamp'])
                         : ''
                     ;
-                    $sReturn .= (isset($aHostdata['result']) && $bVisibility
+                    $sReturn .= ($this->oApp->status()>=0 && $bVisibility
                         ? $this->_getTile([
-                            'result' => $aHostdata['result'],
+                            'result' => $this->oApp->status(),
                             'label' => $this->_tr('Appstatus'),
-                            'count' => $this->_tr('Resulttype-' . $aHostdata['result']),
+                            'count' => $this->_tr('Resulttype-' . $this->oApp->status()),
                             'more' => $sSince
                         ])
                         : ''
@@ -457,19 +454,18 @@ class appmonitorserver_gui extends appmonitorserver
                     ]);
                     break;
                 case 'age':
-                    $bOutdated = isset($aHostdata["outdated"]) && $aHostdata["outdated"];
                     $sReturn .= $this->_getTile([
-                        'result' => $bOutdated ? RESULT_ERROR : RESULT_OK,
+                        'result' => $this->oApp->isOutdated(true),
                         'icon' => $this->_aIco['age'],
                         'label' => $this->_tr('age-of-result'),
-                        'count' => '<span class="timer-age-in-sec">' . (time() - $aHostdata['ts']) . '</span>s',
-                        'more' => $this->_tr('TTL') . '=' . $aHostdata['ttl'] . 's',
+                        'count' => '<span class="timer-age-in-sec">' . ($this->oApp->age()) . '</span>s',
+                        'more' => $this->_tr('TTL') . '=' . $this->oApp->ttl() . 's',
                     ]);
                     break;
                 case 'checks':
                     $sReturn .= $bVisibility && isset($aHostdata['summary']['total'])
                         ? $this->_getTile([
-                            'result' => $aHostdata['result'],
+                            'result' => $this->oApp->status(),
                             'icon' => $this->_aIco['check'],
                             'label' => $this->_tr('Checks-on-webapp'),
                             'count' => $aHostdata['summary']['total'] . ($aHostdata['summary']['total'] === $aHostdata['summary'][0] ? '' : ' ' . $sMoreChecks),
@@ -873,18 +869,18 @@ class appmonitorserver_gui extends appmonitorserver
             $aNodes[] = [
                 'id' => 1,
                 'title' => ''
-                    . '<div class="result' . $aEntries['meta']["result"] . '">'
-                    . '<img src="images/icons/check-' . $aEntries['meta']["result"] . '.png">'
-                    . $this->_tr('Resulttype-' . $aEntries['meta']["result"])
+                    . '<div class="result' . $this->oApp->status() . '">'
+                    . '<img src="images/icons/check-' . $this->oApp->label() . '.png">'
+                    . $this->_tr('Resulttype-' . $this->oApp->label())
                     . ' - '
                     . '<strong>' . ($aEntries['meta']['website']??'[no-meta-website]') . '</strong><br>'
 
                     . '</div>',
-                'label' => $aEntries['meta']['website']??'[no-meta-website]',
+                'label' => $this->oApp->label()?:'[no-meta-website]',
                 'shape' => 'box',
                 'widthConstraint' => ['maximum' => 300],
                 'font' => ['size' => 18, 'color' => '#ffffff'],
-                'color' => $aShapes[$aEntries['meta']['result']]['color'],
+                'color' => $aShapes[$this->oApp->status()]['color'],
 
                 // 'margin' =>[ 'top' => 120, 'right' => 50, 'bottom' => 20, 'left' => 50 ] ,
                 'margin' => 20,
@@ -893,7 +889,7 @@ class appmonitorserver_gui extends appmonitorserver
             //
             // --- add check nodes
             //
-            foreach ($aEntries["checks"] as $aCheck) {
+            foreach ($this->oApp->checks() as $aCheck) {
                 $iCounter++;
                 $iCheckId = $iCounter;
                 $iParent = 1;
@@ -1067,13 +1063,13 @@ class appmonitorserver_gui extends appmonitorserver
                 !$sUrl
                 || (isset($aEntries["result"]["url"]) && $sUrl == $aEntries["result"]["url"])
             ) {
+                $this->oApp->set($aEntries);
 
-                foreach ($aEntries["checks"] ?? [] as $aCheck) {
-                    $aTags = $aEntries["meta"]["tags"] ?? false;
+                foreach ($this->oApp->checks() as $aCheck) {
                     if ($bHideOk && $aCheck["result"] == RESULT_OK) {
                         continue;
                     }
-                    $sReturn .= '<tr class="result' . $aCheck["result"] . ' tags ' . $this->_getCssclassForTag($aTags) . '">';
+                    $sReturn .= '<tr class="result' . $aCheck["result"] . ' tags ' . $this->_getCssclassForTag($this->oApp->tags()) . '">';
                     if (!$sUrl) {
                         $sReturn .=
                             '<td class="result result' . $aCheck["result"] . '"><span style="display: none;">' . $aCheck['result'] . '</span>' . $this->_tr('Resulttype-' . $aCheck["result"]) . '</td>'
@@ -1478,7 +1474,6 @@ class appmonitorserver_gui extends appmonitorserver
     protected function _renderCounter(string $sAppId, string $sCounterId, array $aOptions = []): string
     {
         $oA = new renderadminlte();
-        $rrd = new simpleRrd($sAppId, $sCounterId);
 
         $aOptions['type'] = $aOptions['type'] ? $aOptions['type'] : 'bar';
         $aOptions['label'] = $aOptions['label'] ?? '';
@@ -1486,8 +1481,17 @@ class appmonitorserver_gui extends appmonitorserver
         $aOptions['items'] = isset($aOptions['items']) && (int) $aOptions['items'] ? (int) $aOptions['items'] : $aOptions['size'] * 10;
         $aOptions['graphonly'] = isset($aOptions['graphonly']) ? !!$aOptions['graphonly'] : false;
 
-        $aResponseTimeData = $rrd->get($aOptions['items']);
 
+        if($aOptions['data']??false) {
+            $aAll = json_decode($aOptions['data'], true)??[];
+            rsort($aAll);
+            $aResponseTimeData=array_slice($aAll, 0, $aOptions['items']);
+        } else {
+            $rrd = new simpleRrd($sAppId, $sCounterId);
+            $aResponseTimeData = $rrd->get($aOptions['items']);
+        }
+
+        // echo "<pre>". print_r($aResponseTimeData, true)."</pre>";
         $aChartData = [
             'label' => [],
             'value' => [],
@@ -1648,6 +1652,9 @@ class appmonitorserver_gui extends appmonitorserver
 
         $iCounter = 0;
         $aEntries = $this->_data[$sAppId];
+
+        $this->oApp->set($this->_data[$sAppId]);
+
         $iCounter++;
         $sValidationContent = '';
         $sDivMoredetails = 'div-http-' . $sAppId;
@@ -1668,13 +1675,13 @@ class appmonitorserver_gui extends appmonitorserver
                 . '<a href="#divwebs"'
                 . '> ' . $this->_aIco['allwebapps'] . ' ' . $this->_tr('All-webapps-header')
                 . '</a> > '
-                // . '<span class="divhost bg-' . $this->_getAdminLteColorByResult($aEntries["result"]["result"]) . '">'
+                . '<span class="divhost bg-' . $this->_getAdminLteColorByResult($aEntries["result"]["result"]) . '">'
                 . '<nobr>'
-                . $this->_tr('Resulttype-' . $aEntries["result"]["result"]) . ': '
+                . $this->_tr('Resulttype-' . $this->oApp->status()) 
+                . '</span> '
                 . $this->_aIco['webapp'] . ' '
                 . $this->_getAppLabel($sAppId)
-                . '&nbsp;</nobr>'
-                // . '</span>'
+                . '</nobr>'
             );
 
 
@@ -1682,12 +1689,12 @@ class appmonitorserver_gui extends appmonitorserver
             $aValidatorResult = $this->_checkClientResponse($sAppId);
 
             // check if request failed
-            if (isset($aEntries['result']['error']) && $aEntries['result']['error']) {
+            if ($this->oApp->http_error()) {
                 $sValidationContent .= $oA->getAlert([
                     'type' => 'danger',
                     'dismissible' => false,
                     'title' => $this->_aIco['error'] . ' ' . $this->_tr('Validator-request-error'),
-                    'text' => $aEntries['result']['error']
+                    'text' => $this->oApp->http_error()
                 ]);
             }
 
@@ -1715,36 +1722,41 @@ class appmonitorserver_gui extends appmonitorserver
             }
             $sValidationContent = $sValidationContent ? $oA->getSectionRow($sValidationContent) : '';
 
-            if (isset($aEntries["result"]["host"])) {
 
-                // --- Counter and graphs
+            // --- Counter and graphs
 
-                $aCounters = $this->_data[$sAppId]["counters"] ?? [];
+            $aCounters = $this->_data[$sAppId]["counters"] ?? [];
 
-                $sCounters = '';
-                if (count($aCounters)) {
-                    foreach ($aCounters as $sCounterId => $aMeta) {
-                        if (strpos($sCounterId, needle: 'time') !== 0) {
+            $rrd = new simpleRrd();
+            $aCounterData=$rrd->getAllCounters(['appid' => $sAppId]);
+            // echo "<pre>".print_r($aCounters, 1)."</pre>";
+            // echo "<pre>".print_r($aCounterData, 1)."</pre>";
 
-                            $aMeta['visual'] = $aMeta['visual'] ?? 'bar';
-                            $aTmp = explode(',', $aMeta['visual']);
+            $sCounters = '';
+            if (count($aCounters)) {
+                foreach ($aCounters as $sCounterId => $aMeta) {
+                    if (strpos($sCounterId, needle: 'time') !== 0) {
 
-                            $sCounters .= $this->_renderCounter(
-                                $sAppId,
-                                $sCounterId,
-                                [
-                                    'type' => $aTmp[0] ?? 'bar',
-                                    'size' => $aTmp[1] ?? false,
-                                    'items' => $aTmp[2] ?? false,
-                                    'label' => $aMeta['title'] ?? $sCounterId,
-                                ]
-                            );
-                        }
+                        $aTmp = explode(',', $aMeta['visual']);
+
+                        $sCounters .= $this->_renderCounter(
+                            $sAppId,
+                            $sCounterId,
+                            [
+                                'type' => $aTmp[0] ?? 'bar',
+                                'size' => $aTmp[1] ?? false,
+                                'items' => $aTmp[2] ?? false,
+                                'label' => $aMeta['title'] ?? $sCounterId,
+                                'data' => $aCounterData[$sAppId][$sCounterId]
+                            ]
+                        );
                     }
                 }
+            }
 
+            $sHtml .= $oA->getSectionRow($sCounters, $this->_tr('row-appcounters'));
 
-                $sHtml .= $oA->getSectionRow($sCounters, $this->_tr('row-appcounters'));
+            if ($this->oApp->host()>''){
 
                 // --- visual graph
                 $sHtml .=
@@ -1780,10 +1792,10 @@ class appmonitorserver_gui extends appmonitorserver
 
             // ----------------------------------------------------------------------
             // http status code
-            $sStatusIcon = ($aEntries['result']['httpstatus']
-                ? ($aEntries['result']['httpstatus'] >= 400
+            $sStatusIcon = ($this->oApp->http_status()
+                ? ($this->oApp->http_status() >= 400
                     ? $this->_aIco['error']
-                    : ($aEntries['result']['httpstatus'] >= 300
+                    : ($this->oApp->http_status() >= 300
                         ? $this->_aIco['warning']
                         : $this->_aIco['ok']
                     )
@@ -1795,17 +1807,17 @@ class appmonitorserver_gui extends appmonitorserver
                     $oA->getSectionColumn(
                         $oA->getBox([
                             'title' => $this->_tr('Http-details'),
-                            'text' => ($aEntries['result']['error']
+                            'text' => ($this->oApp->http_error()
                                 ? $oA->getAlert([
                                     'type' => 'danger',
                                     'dismissible' => false,
-                                    'text' => $aEntries['result']['error']
+                                    'text' => $this->oApp->http_error()
                                 ])
                                 : ''
                             )
-                                . ($aEntries['result']['url'] ? $this->_tr('Url') . ': <a href="' . $aEntries['result']['url'] . '" target="_blank">' . $aEntries['result']['url'] . '</a><br>' : '')
-                                . ($aEntries['result']['httpstatus'] ? $this->_tr('Http-status') . ': <strong>' . $sStatusIcon . ' ' . $aEntries['result']['httpstatus'] . '</strong><br>' : '')
-                                . ($aEntries['result']['header'] ? $this->_tr('Http-header') . ': <pre>' . $aEntries['result']['header'] . '</pre>' : '')
+                                . ($this->oApp->url() ? $this->_tr('Url') . ': <a href="' . $this->oApp->url() . '" target="_blank">' . $this->oApp->url() . '</a><br>' : '')
+                                . ($this->oApp->http_status() ? $this->_tr('Http-status') . ': <strong>' . $sStatusIcon . ' ' . $this->oApp->http_status() . '</strong><br>' : '')
+                                . ($this->oApp->http_header() ? $this->_tr('Http-header') . ': <pre>' . $this->oApp->http_header() . '</pre>' : '')
                         ]),
                         12
                     ),
@@ -2409,53 +2421,60 @@ class appmonitorserver_gui extends appmonitorserver
         $oA = new renderadminlte();
         $aAllWebapps = [];
 
+        $rrd = new simpleRrd();
+        $aCounterData=$rrd->getAllCounters(['countername'=>'_responsetime']);
+        // $aLastNotify=$this->getLogdata(['appid'=>$this->_sAppId, 'count'=>1]);
+
+        $aLastNotify = $this->oNotification->getLastNotificationOfEachApp();
+            
         $aOptions['mode'] = $aOptions['mode'] ?? 'default';
         foreach ($this->_data as $sAppId => $aEntries) {
             $bHasData = true;
-            if (!isset($aEntries["result"]["host"])) {
+            if ($this->oApp->host()) {
                 $bHasData = false;
             }
-            if ($bSkipOk && $aEntries["result"]["result"] == RESULT_OK) {
+            $this->oApp->set($aEntries);
+            $iAppStatus = $this->oApp->status();
+
+            if ($bSkipOk && $iAppStatus == RESULT_OK) {
                 continue;
             }
             // echo 'DEBUG <pre>'.print_r($aEntries, 1).'</pre>';
 
-            $sBgColor = $this->_getAdminLteColorByResult($aEntries["result"]["result"]);
+            $sBgColor = $this->_getAdminLteColorByResult($iAppStatus);
             $sIcon = $bHasData
                 ? $this->_getIconClass($this->_aIco['webapp'])
                 : $this->_getIconClass($this->_aIco['host']);
             $sAppLabel = str_replace('.', '.&shy;', $this->_getAppLabel($sAppId));
-
+            
             $bShowWarnings = !!$this->_aCfg['view']['validationwarnings'] ?? true;
-            $aValidaion = $this->_checkClientResponse($sAppId);
+            $aValidation = $this->_checkClientResponse($sAppId);
             $sValidatorinfo = '';
-            if ($aValidaion) {
-                foreach ($aValidaion as $sSection => $aMessages) {
+            if ($aValidation) {
+                foreach ($aValidation as $sSection => $aMessages) {
                     if (
-                        count($aValidaion[$sSection])
+                        count($aValidation[$sSection])
                         && ($sSection == 'error' || ($sSection == 'warning' && $bShowWarnings))
                     ) {
                         $sValidatorinfo .= '<span class="ico' . $sSection . '" title="' . sprintf($this->_tr('Validator-' . $sSection . '-title'), count($aMessages)) . '">' . $this->_aIco[$sSection] . '</span> ' . count($aMessages);
                     }
                 }
             }
-            $sWebapp = $aEntries["result"]["website"];
-            $sTilekey = 'result-' . (999 - $aEntries["result"]["result"]) . '-' . $sWebapp . $sAppId;
+            $sWebapp = $this->oApp->label();
+            $sTilekey = 'result-' . (999 - $this->oApp->status()) . '-' . $sWebapp . $sAppId;
 
             $sDivId = $this->_getDivIdForApp($sAppId);
             $sOnclick = 'setTab(\'' . $sDivId . '\'); return false;';
 
-            $aTags = $aEntries["meta"]["tags"] ?? false;
+            $aTags = $this->oApp->tags();
+            
             $sTaglist = $aTags ? $this->_getTaglist($aTags) : '';
 
-            $this->oNotification->setApp($sAppId);
-
-            $aLastStatus = $this->oNotification->getAppLastResult();
-            $sSinceTs = $aLastStatus['result']['ts'] ?? '';
+            $sSinceTs = $aLastNotify[$sAppId]['timestamp']??'';
 
             $sSince = $sSinceTs
                 ? date('Y-m-d', $sSinceTs) . '<br>' . date('H:i', $sSinceTs)
-                : 'since start';
+                : '-';
 
             // $sOut = '<div class="divhost result' . $aEntries["result"]["result"] . ' tags '.$this->_getCssclassForTag($aTags).'">'
             switch ($aOptions['mode']) {
@@ -2496,6 +2515,7 @@ class appmonitorserver_gui extends appmonitorserver
                     break;
                     ;
                 default:
+
                     $sOut = '<div 
                         class="col-md-12 divhost divhost-outer tags ' . $this->_getCssclassForTag($aTags) . ' bg-' . $sBgColor . '" 
                         style=""
@@ -2508,13 +2528,22 @@ class appmonitorserver_gui extends appmonitorserver
                         . '<strong>
                             <a href="' . $sDivId . '">
                                 <i class="' . $sIcon . '"></i> '
-                        . $sAppLabel
-                        . '</a>
+                            . $sAppLabel
+                            . '</a>
                             </strong><br>'
                         . '</div>'
                         . '<div class="col-md-1">'
-                        . '<span style="text-align: right; width: 5em; display: inline-block;">' . $this->_renderBadgesForWebsite($sAppId, true) . '<br>'
-                        . $sValidatorinfo . '</span>'
+                        . '<span style="text-align: right; width: 5em; display: inline-block;">' 
+                            . ($this->oApp->isOutdated()
+                                ? " " . $oA->getBadge([
+                                    'type'=>'danger',
+                                    'text'=>$this->_aIco['age']
+                                    ]).'<br>'
+                                : ''
+                            )
+                            . $this->_renderBadgesForWebsite($sAppId, true) . '<br>'
+                            . $sValidatorinfo 
+                        . '</span>'
                         . '</div>'
                         . '<div class="col-md-2">' . $sTaglist . '</div>'
                         . '<div class="col-md-4" style="background: rgba(255,255,255,0.4);">' . $this->_renderCounter(
@@ -2526,6 +2555,7 @@ class appmonitorserver_gui extends appmonitorserver
                                     'size' => 10,
                                     'items' => 75,
                                     'graphonly' => true,
+                                    'data' => $aCounterData[$sAppId]['_responsetime'],
                                 ]
                             ) . '</div>'
 

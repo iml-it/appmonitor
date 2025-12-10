@@ -491,6 +491,24 @@ class notificationhandler
     }
 
     // ----------------------------------------------------------------------
+    // last notifcation of all apps (for overview page)
+    // ----------------------------------------------------------------------
+
+    public function getLastNotificationOfEachApp(): array{
+        $aReturn=[];
+        $aResult=$this->_oNotifications->makeQuery(
+            'SELECT t1.* FROM objnotifications t1
+            JOIN (SELECT appid, MAX(timestamp) timestamp FROM objnotifications GROUP BY appid) t2
+                ON t1.appid = t2.appid AND t1.timestamp = t2.timestamp;'
+            
+        );
+        foreach($aResult as $aItem){
+            $aReturn[$aItem['appid']]=$aItem;
+        }
+        return $aReturn;
+    }
+
+    // ----------------------------------------------------------------------
     // functions for notifcation 
     // ----------------------------------------------------------------------
 
@@ -533,10 +551,7 @@ class notificationhandler
         }
 
         // last OK state
-        $aLastOK = json_decode($this->_oWebapps->get('lastok'), 1);
-        if(!is_array($aLastOK)){
-            $aLastOK=[];
-        }
+        $aLastOK = json_decode($this->_oWebapps->get('lastok')??'', 1);
 
         // last notification message
         $aLastNotify = $this->getAppLastNotification();

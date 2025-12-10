@@ -71,22 +71,14 @@ switch ($sAction){
 if (!$oService->canStart()) {
     die("CANNOT START ... another process seems to run.\n");
 }
-// $oService->setSleeptime($iSleep);
-echo "----------\n";
-$oService->send("STARTUP: init appmonitor-server", true);
 
 // -----------------------------------------------------------------------------
 // INIT APPMONITOR SERVER
 // -----------------------------------------------------------------------------
 
+echo "\n\n";
+$oService->send("STARTUP: load class file for appmonitor-server", true);
 require_once('classes/appmonitor-server.class.php');
-$oMonitor = new appmonitorserver();
-
-$oService->send("STARTUP: setLogging()", true);
-
-// @since v0.98: show fetched urls in stdout
-$oMonitor->setLogging(true);
-
 
 // -----------------------------------------------------------------------------
 // LOOP
@@ -96,10 +88,13 @@ $oService->send("STARTUP: start loop ... ", true);
 // $oService->setDebug(true);
 $iLastInfo=time();
 while (true) {
+    $oMonitor = new appmonitorserver();
+    $oMonitor->setLogging(true);
     $oService->send("RUNNING: reload appmonitor server config");
-    $oMonitor->loadConfig(); // to get changed hosts during runtime
-    $oService->send("RUNNING: refreshClientData()");
+    // $oMonitor->loadConfig(); // to get changed hosts during runtime
+    // $oService->send("RUNNING: refreshClientData()");
     $oMonitor->refreshClientData();
+    unset($oMonitor);
     $oService->sleep();
     if (time() - $iLastInfo > $iShowRunning){
         $iLastInfo=time();
