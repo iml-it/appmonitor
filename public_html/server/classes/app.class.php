@@ -108,16 +108,19 @@ class app
 
     /**
      * Return the hostname of the application
+     * -> result -> host
+     * @see vhost()
      *
      * @return string  the hostname
      */
     public function host(): string
     {
-        return $this->_a["result"]["host"];
+        return $this->_a["result"]["host"] ?? '';
     }
 
     /**
      * Return the name of the application
+     * -> result -> website
      * 
      * @return string
      */
@@ -129,6 +132,7 @@ class app
     /**
      * Return the status of the application
      * as integer eg. RESULT_OK, ...
+     * -> result -> result
      * 
      * @return int
      */
@@ -139,16 +143,41 @@ class app
 
     /**
      * Return array of tags
+     * meta -> tags
      * 
-     * @return array
+     * @return array list of tags
      */
     public function tags(): array
     {
-        return $this->_a['result']['tags'] ?? [];
+        return $this->_a['meta']['tags'] ?? [];
+    }
+
+    /**
+     * Return timestamp of the last check request as unix timestamp
+     * timestamp
+     * 
+     * @return int unix timestamp
+     */
+    public function timestamp(): int
+    {
+        return $this->_a['timestamp'] ?? -1;
+    }
+
+    /**
+     * Get ttl of the application in seconds
+     * -> result -> ttl
+     * If it is not defined it will return the default ttl value
+     * 
+     * @return int ttl
+     */
+    public function ttl(): int
+    {
+        return $this->_a['result']['ttl']??$this->_iMinTTL;
     }
 
     /**
      * Return the monitoring url of the application
+     * -> result -> url
      * 
      * @return string
      */
@@ -157,18 +186,68 @@ class app
         return $this->_a["result"]["url"] ?? '';
     }
 
+    /**
+     * Return the hostname taken from the monitoring url of the application
+     * @see host()
+     * @return string
+     */
+    public function vhost(): string
+    {
+        return parse_url($this->url(), PHP_URL_HOST);
+    }
+
     // ----------------------------------------------------------------------
     // GETTER * CHECKS
     // ----------------------------------------------------------------------
 
     /**
      * Get array of the checks
+     * -> checks
      * 
      * @return array of perfomed checks
      */
     public function checks(): array
     {
-        return $this->_a['result']['checks'];
+        return $this->_a['checks'];
+    }
+
+    // ----------------------------------------------------------------------
+    // GETTER * HTTP
+    // ----------------------------------------------------------------------
+
+    /**
+     * Get the error message and curl error message of a failed request.
+     * It is empty if the query was successful
+     * -> result -> error
+     * 
+     * @return string message
+     */
+    public function http_error(): string 
+    {
+        return $this->_a['result']['error'] ?? '';
+    }
+
+    /**
+     * Get the http response header
+     * It is empty if the query failed
+     * -> result -> header
+     * 
+     * @return string message
+     */
+    public function http_header(): string 
+    {
+        return $this->_a['result']['header'] ?? '';
+    }
+
+    /**
+     * Get the http status code. It is 200 if the request was successful.
+     * -> result -> httpstatus
+     * 
+     * @return int http status code
+     */
+    public function http_status(): int 
+    {
+        return $this->_a['result']['httpstatus'] ?? -1;
     }
 
     // ----------------------------------------------------------------------
@@ -177,8 +256,9 @@ class app
 
     /**
      * get the age of the last result in seconds
+     * -> result -> ts
      * 
-     * @return int
+     * @return int age in seconds
      */
     public function age(): int
     {
@@ -191,6 +271,7 @@ class app
     /**
      * Get bool if the result is outdated = last check is older ttl
      * By default it returns false or true.
+     * 
      * If $bAsStatus = true it returns RESULT_...
      * - RESULT_OK:      age < ttl
      * - RESULT_WARNING: age < 2*ttl
@@ -198,20 +279,20 @@ class app
      * 
      * @param bool $bAsStatus flag: resturn as integer for status RESULT_...
      *                        default false (return bool)
-     * @return bool
+     * @return bool|int
      */
     public function isOutdated($bAsStatus = false): bool|int
     {
         if(!$bAsStatus){
-            return $this->age() > $this->_a['result']['ttl'] ?? false;
+            return $this->age() > $this->ttl();
         }
 
         // ... or as result status
 
-        if ($this->age() < $this->_a['result']['ttl'] ?? 0) {
+        if ($this->age() < $this->ttl()) {
             return RESULT_OK;
         }
-        if ($this->age() < 2*max($this->_a['result']['ttl']??0, $this->_iMinTTL)) {
+        if ($this->age() < 2 * $this->ttl()) {
             return RESULT_WARNING;
         }
         return RESULT_ERROR;
