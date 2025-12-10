@@ -2537,7 +2537,7 @@ class appmonitorserver_gui extends appmonitorserver
                         . '</div>'
                         . '<div class="col-md-1">'
                         . '<span style="text-align: right; width: 5em; display: inline-block;">' 
-                            . ($this->oApp->isOutdated()
+                            . ($this->oApp->isOutdated(true)==RESULT_ERROR
                                 ? " " . $oA->getBadge([
                                     'type'=>'danger',
                                     'text'=>$this->_aIco['age']
