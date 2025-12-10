@@ -890,13 +890,14 @@ class appmonitorserver
         //     return true;
         // }
 
+        // echo "ForceCache = ".($ForceCache ? "ON" : "OFF")."<br>";
 
         // --- find out dated apps
         foreach($this->_oWebapps->search(
             [
                 'columns' =>['lastresult', 'appid'],
             ],
-        ) as $aRow){
+        )?:[] as $aRow){
             $aResult[$aRow['appid']]=$aRow;
         }
         
@@ -909,8 +910,10 @@ class appmonitorserver
             // if($this->_isResultExpired($aLastResult) && !$ForceCache ){
             if(!$ForceCache && $this->oApp->isOutdated()){
                 $aUrls2Refresh[$sAppid] = $sUrl;
+                // echo "ADD $sUrl<br>";
             } else {
                 $this->_data[$sAppid] = $aLastResult;
+                // echo "from DB $sUrl<br>";
             }
         }
         
@@ -1123,9 +1126,9 @@ class appmonitorserver
 
             }
         }
-        if(!$ForceCache){
-            $this->_data=[];
-        }
+        // if(!$ForceCache){
+        //     $this->_data=[];
+        // }
 
         return true;
     }
@@ -1239,9 +1242,12 @@ class appmonitorserver
         $aServers = [];
         foreach ($this->_data as $sAppid => $aEntries) {
             $iCountApps++; // count of webapps
-            $aResults[$aEntries['result']['result']]++; // counter by result of app
-            if (isset($aEntries['result']['host']) && $aEntries['result']['host']) {
-                $aServers[$aEntries['result']['host']] = true; // helper array to count hosts
+            $this->oApp->set($aEntries);
+            if($this->oApp->status()>=0){
+                $aResults[$this->oApp->status()]++; // counter by result of app
+            }
+            if ($this->oApp->host()) {
+                $aServers[$this->oApp->host()] = true; // helper array to count hosts
             }
 
             // count of checks

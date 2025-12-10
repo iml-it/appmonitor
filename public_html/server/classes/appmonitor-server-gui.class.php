@@ -1643,11 +1643,11 @@ class appmonitorserver_gui extends appmonitorserver
 
         ); 
         // print_r($aSearch); die();
-        $this->_data[$sAppId]= json_decode($aSearch[0]['lastresult']??[], 1);
+        $this->_data[$sAppId]= json_decode($aSearch[0]['lastresult']??'', 1);
             // $this->_data[$aRow['appid']]["result"]["fromdb"] = true;
 
         if (!isset($this->_data[$sAppId])) {
-            return 'ERROR: appid does not exist: ' . htmlentities($sAppId);
+            return 'ERROR: appid has no data yet: ' . htmlentities($sAppId);
         }
 
         $iCounter = 0;
@@ -2196,10 +2196,13 @@ class appmonitorserver_gui extends appmonitorserver
         // list of all clients
         $sHostlist = '';
         $aHostlist=[];
-        foreach ($this->_data as $sAppId => $aData) {
-            $iResult = $aData["result"]["result"] ?? 3;
-            $sUrl = $aData["result"]["url"];
-            $sHost = $aData["result"]["host"] ?? $this->_tr('unknown');
+        foreach($this->_urls as $sAppId => $sUrl){
+            $aData=$this->_data[$sAppId]??[];
+            
+            $this->oApp->set($aData);
+            $iResult = $this->oApp->status();
+            // $sUrl = $aData["result"]["url"];
+            // $sHost = $aData["result"]["host"] ?? $this->_tr('unknown');
 
             $aTags = $aData["meta"]["tags"] ?? false;
             $sSortKey=strtolower( strip_tags($this->_getAppLabel($sAppId)));
@@ -2217,10 +2220,10 @@ class appmonitorserver_gui extends appmonitorserver
 
             $aHostlist[$sSortKey]=$oA->getSectionRow(
                 $oA->getSectionColumn(
-                    '<div class="divhost result' . $iResult . ' tags ' . $this->_getCssclassForTag($aTags) . '" style="float: none; ">'
+                    '<div class="divhost result' . $this->oApp->status() . ' tags ' . $this->_getCssclassForTag($aTags) . '" style="float: none; ">'
                     . $oA->getBox([
                         'title' => ''
-                            . $aData["result"]["website"],
+                            . $this->oApp->label(),
                             // . $this->_getAppLabel($sAppId),
                         'text' => ''
                             // Button DELETE
@@ -2237,7 +2240,7 @@ class appmonitorserver_gui extends appmonitorserver
                             // /DELETE
 
                             . $this->_aIco['url'] . ' <a href="' . $sUrl . '" target="_blank">' . $sUrl . '</a><br>'
-                            . $this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $sHost . '<br>'
+                            . $this->_aIco['host'] . ' ' . $this->_tr('Host') . ' ' . $this->oApp->host() . '<br>'
                     ])
                     . '</div>',
                     12
@@ -2245,10 +2248,10 @@ class appmonitorserver_gui extends appmonitorserver
             );
 
             $aHostlist[$sSortKey]="<tr class=\"tr-app\">
-                <td><strong>".$aData['result']['website']."</strong></td>
+                <td><strong>".$this->oApp->label()."</strong></td>
                 <td>
                     ".$this->_aIco['url']." <a href=\"$sUrl\" target=\"_blank\">$sUrl</a><br>
-                    ".$this->_aIco['host']." ".$this->_tr('Host')." $sHost<br>
+                    ".$this->_aIco['host']." ".$this->_tr('Host')." ".$this->oApp->host()."<br>
                 </td>
                 <td>$sDelBtn</td>
                 </tr>";
@@ -2555,7 +2558,7 @@ class appmonitorserver_gui extends appmonitorserver
                                     'size' => 10,
                                     'items' => 75,
                                     'graphonly' => true,
-                                    'data' => $aCounterData[$sAppId]['_responsetime'],
+                                    'data' => $aCounterData[$sAppId]['_responsetime']??[],
                                 ]
                             ) . '</div>'
 
