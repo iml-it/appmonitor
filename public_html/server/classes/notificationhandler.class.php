@@ -543,7 +543,7 @@ class notificationhandler
         if($this->_aAppResult){
             $aCurrent = $this->_aAppResult;
         } else {
-            $aCurrent = json_decode($this->_oWebapps->get('lastresult'), 1);
+            $aCurrent = json_decode($this->_oWebapps->get('lastresult')??[], 1);
             if(!is_array($aCurrent)){
                 $aCurrent=[];
             }

@@ -234,7 +234,7 @@ class simpleRrd
 
         $sSortKey1="appid";
         $sSortKey2="countername";
-        foreach ($aSearchresult as $aRow) {
+        foreach ($aSearchresult?:[] as $aRow) {
             $aReturn[$aRow[$sSortKey1]][$aRow[$sSortKey2]] = $aRow['data'];
         }
         return $aReturn;

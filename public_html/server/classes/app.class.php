@@ -193,7 +193,7 @@ class app
      */
     public function vhost(): string
     {
-        return parse_url($this->url(), PHP_URL_HOST);
+        return parse_url($this->url(), PHP_URL_HOST)??'';
     }
 
     // ----------------------------------------------------------------------
@@ -208,7 +208,7 @@ class app
      */
     public function checks(): array
     {
-        return $this->_a['checks'];
+        return $this->_a['checks']??[];
     }
 
     // ----------------------------------------------------------------------
@@ -264,7 +264,7 @@ class app
     {
         return $this->_a['result']['ts']??false
             ? time() - $this->_a['result']['ts'] 
-            : 0
+            : -1
         ;
     }
 
@@ -284,11 +284,17 @@ class app
     public function isOutdated($bAsStatus = false): bool|int
     {
         if(!$bAsStatus){
-            return $this->age() > $this->ttl();
+            return $this->age() <0
+                ? true
+                : $this->age() > $this->ttl()
+                ;
         }
 
         // ... or as result status
 
+        if($this->age() <0){
+            return RESULT_UNKNOWN;
+        }
         if ($this->age() < $this->ttl()) {
             return RESULT_OK;
         }
