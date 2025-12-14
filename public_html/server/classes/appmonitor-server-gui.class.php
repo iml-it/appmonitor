@@ -2085,6 +2085,19 @@ class appmonitorserver_gui extends appmonitorserver
             ) . '
                 </section>';
     }
+
+    /**
+     * get status of running service
+     * @return bool
+     */
+    public function serviceIsRunning(): bool
+    {
+        require_once 'classes/tinyservice.class.php';
+        $oService = new tinyservice(dirname(__DIR__).'/service.php', 5, dirname(__DIR__) . '/tmp');
+        return !$oService->canStart(true);
+
+    }
+
     /**
      * Get html code for notification page
      * @return string
@@ -2110,10 +2123,11 @@ class appmonitorserver_gui extends appmonitorserver
             // : '<strong>'.$this->_aIco['check'].' '. $this->_tr('Problems-webapps-ok').'</strong>';
         }
 
-        $sChecksHtml = $sTable
-            ? $sTable
-            : '<strong>' . $this->_aIco['check'] . ' ' . $this->_tr('Problems-checks-ok') . '</strong>';
-
+        $sChecksHtml = $sTable ?: $oA->getAlert([
+            "type" => "success",
+            'text' => $this->_aIco['check'] . ' ' . $this->_tr('Problems-checks-ok')
+        ])
+        ;
 
         return $oA->getSectionHead($this->_aIco["problems"] . ' ' . $this->_tr('Problems'))
             . '<section class="content">'
@@ -2158,7 +2172,7 @@ class appmonitorserver_gui extends appmonitorserver
                 )
             )
             . '
-                </section>';
+            </section>';
     }
 
     /**
@@ -2169,15 +2183,12 @@ class appmonitorserver_gui extends appmonitorserver
     public function _access_denied(string $sMessage): string
     {
         $oA = new renderadminlte();
-        if (!$this->hasRole('ui-config')) {
-            return $oA->getAlert([
-                'type' => 'danger',
-                'dismissible' => false,
-                'title' => $this->_aIco['error'] . ' ' . $this->_tr('msgErr-access-denied'),
-                'text' => $sMessage,
-            ]);
-        }
-        return '';
+        return $oA->getAlert([
+            'type' => 'danger',
+            'dismissible' => false,
+            'title' => $this->_aIco['error'] . ' ' . $this->_tr('msgErr-access-denied'),
+            'text' => $sMessage,
+        ]);
     }
 
     /**
@@ -2191,6 +2202,23 @@ class appmonitorserver_gui extends appmonitorserver
 
         if (!$this->hasRole('ui-config')) {
             return $this->_access_denied(sprintf($this->_tr('msgErr-access-denied-role-not-found'), $this->getUserid(), 'ui-config'));
+        }
+
+        $bStateRunning=$this->serviceIsRunning();
+        $sState = $oA->getBadge([
+            "type" => $bStateRunning ? "success" : "warning",
+            'text' => $bStateRunning ? $this->_tr('settings-service-running') : $this->_tr('settings-service-stopped')
+        ]);
+        
+        $sStatusService = sprintf($this->_tr('settings-service'), $sState)
+            .' servicecache = <code>'.($this->_aCfg['servicecache']?'true':'false').'</code><br>'
+            ;
+
+        if($bStateRunning && $this->_aCfg['servicecache']==false){
+            $sStatusService.='<strong>'.$this->_tr("hint").':</strong> '.$this->_tr("settings-hint-cache-running");
+        }
+        if(!$bStateRunning && $this->_aCfg['servicecache']==true){
+            $sStatusService.='<strong>'.$this->_tr("hint").':</strong> '.$this->_tr("settings-hint-cache-stopped");
         }
 
         // list of all clients
@@ -2371,6 +2399,7 @@ class appmonitorserver_gui extends appmonitorserver
                         'title' => $this->_tr('Setup-configuration'),
                         'text' => ''
                             . $sSetup.'<br>'
+                            . $sStatusService.'<br><br>'
                             . '<div id="divsetupconfigfilter"></div><br>'
                             . '<div id="divsetupconfig">'
                             . $sTable

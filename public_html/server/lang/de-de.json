@@ -19,7 +19,7 @@
         "Problems": "Aktuelle Probleme",
         "Problems-checks-header": "Liste aller Checks",
         "Problems-checks-hints": "Die Liste zeigt alle Checks aller Applikationen, die nicht den Status OK aufweisen.",
-        "Problems-checks-ok": "Es gibt keine Probleme bei Checks.",
+        "Problems-checks-ok": "Es gibt keine bekannten Probleme.",
         "Problems-webapps-header": "Applikations-Status",
         "Problems-webapps-hints": "Von nachfolgenden Applikationen liegen entweder keine Monitoring Daten vor oder sie melden einen Status &lt;&gt; OK. Beschreibung der Icons:",
         "Problems-webapps-hints-host": "Von der Applikationen wurden keine Monitoring-Daten bezogen. Entweder ist die Monitoring-URL nicht erreichbar oder die Antwort war kein g&uuml;ltiges JSON.",
@@ -147,6 +147,13 @@
         "settings-mfa-hint": "Zum MFA Server wechseln, um dort den 2. Faktor zu konfigurieren.",
         "settings-mfa-setup": "MFA Setup",
         "settings-mfa-setup-na": "Das MFA Setup ist für Ihren Benutzer nicht verf&uuml;gbar.",
+
+        "settings-service": "Service ist %s.",
+        "settings-service-running": "gestartet",
+        "settings-service-stopped": "angehalten",
+        "settings-hint-cache-running": "Wenn der Service permanent läuft, dann setzen Sie das Caching auf <code>true</code>.",
+        "settings-hint-cache-stopped": "Wenn der Service nicht gestartet ist, dann setzen Sie das Caching auf <code>true</code> umd die Zust&auml;nde der Applikationen zu aktualisieren.",
+
         "settings-hint": "Sie k&ouml;nnen die Datei <code>server/config/appmonitor-server-config.json</code> direkt editieren<br>ODER<br>auf der Kommandozeile wechseln Sie zu [approot]/server/ und verwenden <code>php ./cli.php</code> um Werte anzusehen oder anzupassen.",
             "settings-thene": "Skin",
             "settings-lang": "Sprache",
