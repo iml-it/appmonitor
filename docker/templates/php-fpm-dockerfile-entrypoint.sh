@@ -8,17 +8,20 @@ function _h1(){
     echo
 }
 
+function _run(){
+    $* &
+}
 # ----------------------------------------------------------------------
 # MAIN
 # ----------------------------------------------------------------------
 
-
-if [ -z "{{APP_ONSTARTUP}}" ]; then
+startup="{{APP_ONSTARTUP}}"
+if [ -z "$startup" ]; then
     echo "SKIP: No service script was set as APP_ONSTARTUP"
 else
     _h1 "Start service script"
-    echo {{APP_ONSTARTUP}}
-    {{APP_ONSTARTUP}} &
+    echo $startup
+    _run "$startup"
 fi
 
 # ----------------------------------------------------------------------
