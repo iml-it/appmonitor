@@ -2087,18 +2087,6 @@ class appmonitorserver_gui extends appmonitorserver
     }
 
     /**
-     * get status of running service
-     * @return bool
-     */
-    public function serviceIsRunning(): bool
-    {
-        require_once 'classes/tinyservice.class.php';
-        $oService = new tinyservice(dirname(__DIR__).'/service.php', 5, dirname(__DIR__) . '/tmp');
-        return !$oService->canStart(true);
-
-    }
-
-    /**
      * Get html code for notification page
      * @return string
      */
@@ -2210,6 +2198,10 @@ class appmonitorserver_gui extends appmonitorserver
             'text' => $bStateRunning ? $this->_tr('settings-service-running') : $this->_tr('settings-service-stopped')
         ]);
         
+        $sFormStartService=$sFormOpenTag
+            .'<input type="hidden" name="action" value="startservice">'
+            .'<button class="btn btn-primary"><i class="fa-solid fa-play"></i> starten</button>'
+            .'</form>';
         $sStatusService = sprintf($this->_tr('settings-service'), $sState)
             .' servicecache = <code>'.($this->_aCfg['servicecache']?'true':'false').'</code><br>'
             ;
@@ -2220,6 +2212,9 @@ class appmonitorserver_gui extends appmonitorserver
         if(!$bStateRunning && $this->_aCfg['servicecache']==true){
             $sStatusService.='<strong>'.$this->_tr("hint").':</strong> '.$this->_tr("settings-hint-cache-stopped");
         }
+        $sStatusService.= !$bStateRunning ? $sFormStartService : '';
+        
+            // $sStatusService.=$sFormStartService;
 
         // list of all clients
         $sHostlist = '';
@@ -2399,7 +2394,7 @@ class appmonitorserver_gui extends appmonitorserver
                         'title' => $this->_tr('Setup-configuration'),
                         'text' => ''
                             . $sSetup.'<br>'
-                            . $sStatusService.'<br><br>'
+                            . $sStatusService.'<br><hr>'
                             . '<div id="divsetupconfigfilter"></div><br>'
                             . '<div id="divsetupconfig">'
                             . $sTable
