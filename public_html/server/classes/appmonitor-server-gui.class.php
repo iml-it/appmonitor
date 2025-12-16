@@ -121,6 +121,11 @@ class appmonitorserver_gui extends appmonitorserver
         'plus' => '<i class="fa-solid fa-plus"></i>',
         'close' => '<i class="fa-solid fa-times"></i>',
         'save' => '<i class="fa-solid fa-paper-plane"></i>',
+
+        'service' => '<i class="fa-solid fa-gear"></i>',
+        'service_stopped' => '<i class="fa-solid fa-pause"></i>',
+        'service_start' => '<i class="fa-solid fa-play"></i>',
+
         'totalstatus' => '<i class="fa-regular fa-flag"></i>',
         'totalstatus0' => '<i class="fa-solid fa-umbrella-beach"></i>',
         'totalstatus1' => '<i class="fa-solid fa-ghost"></i>',
@@ -2195,15 +2200,20 @@ class appmonitorserver_gui extends appmonitorserver
         $bStateRunning=$this->serviceIsRunning();
         $sState = $oA->getBadge([
             "type" => $bStateRunning ? "success" : "warning",
-            'text' => $bStateRunning ? $this->_tr('settings-service-running') : $this->_tr('settings-service-stopped')
+            'text' => $bStateRunning 
+                ? $this->_aIco['service_start'] .' '. $this->_tr('settings-service-running') 
+                : $this->_aIco['service_stopped'] .' '. $this->_tr('settings-service-stopped')
         ]);
         
         $sFormStartService=$sFormOpenTag
             .'<input type="hidden" name="action" value="startservice">'
-            .'<button class="btn btn-primary"><i class="fa-solid fa-play"></i> starten</button>'
+            .'<button class="btn btn-primary">'.$this->_aIco['service_start'].'</button>'
             .'</form>';
-        $sStatusService = sprintf($this->_tr('settings-service'), $sState)
-            .' servicecache = <code>'.($this->_aCfg['servicecache']?'true':'false').'</code><br>'
+        $sStatusService = '<h4>'
+                .$this->_aIco['service'] .' '
+                .sprintf($this->_tr('settings-service'), $sState)
+            .'</h4>'
+            .'servicecache = <code>'.($this->_aCfg['servicecache']?'true':'false').'</code><br>'
             ;
 
         if($bStateRunning && $this->_aCfg['servicecache']==false){

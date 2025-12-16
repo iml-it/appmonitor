@@ -574,9 +574,8 @@ class appmonitorserver
         if($this->serviceIsRunning()) {
             return false;
         }
-        echo "Starting service ...\n";
-        exec("php '" . dirname(__DIR__) . "/service.php' &");
-        echo "Started\n";
+        exec("php '" . dirname(__DIR__) . "/service.php' > /dev/null 2>&1 &");
+        sleep(1);
         return true;
     }
     // ----------------------------------------------------------------------
