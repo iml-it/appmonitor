@@ -121,6 +121,11 @@ class appmonitorserver_gui extends appmonitorserver
         'plus' => '<i class="fa-solid fa-plus"></i>',
         'close' => '<i class="fa-solid fa-times"></i>',
         'save' => '<i class="fa-solid fa-paper-plane"></i>',
+
+        'service' => '<i class="fa-solid fa-gear"></i>',
+        'service_stopped' => '<i class="fa-solid fa-pause"></i>',
+        'service_start' => '<i class="fa-solid fa-play"></i>',
+
         'totalstatus' => '<i class="fa-regular fa-flag"></i>',
         'totalstatus0' => '<i class="fa-solid fa-umbrella-beach"></i>',
         'totalstatus1' => '<i class="fa-solid fa-ghost"></i>',
@@ -2085,6 +2090,7 @@ class appmonitorserver_gui extends appmonitorserver
             ) . '
                 </section>';
     }
+
     /**
      * Get html code for notification page
      * @return string
@@ -2110,10 +2116,11 @@ class appmonitorserver_gui extends appmonitorserver
             // : '<strong>'.$this->_aIco['check'].' '. $this->_tr('Problems-webapps-ok').'</strong>';
         }
 
-        $sChecksHtml = $sTable
-            ? $sTable
-            : '<strong>' . $this->_aIco['check'] . ' ' . $this->_tr('Problems-checks-ok') . '</strong>';
-
+        $sChecksHtml = $sTable ?: $oA->getAlert([
+            "type" => "success",
+            'text' => $this->_aIco['check'] . ' ' . $this->_tr('Problems-checks-ok')
+        ])
+        ;
 
         return $oA->getSectionHead($this->_aIco["problems"] . ' ' . $this->_tr('Problems'))
             . '<section class="content">'
@@ -2158,7 +2165,7 @@ class appmonitorserver_gui extends appmonitorserver
                 )
             )
             . '
-                </section>';
+            </section>';
     }
 
     /**
@@ -2169,15 +2176,12 @@ class appmonitorserver_gui extends appmonitorserver
     public function _access_denied(string $sMessage): string
     {
         $oA = new renderadminlte();
-        if (!$this->hasRole('ui-config')) {
-            return $oA->getAlert([
-                'type' => 'danger',
-                'dismissible' => false,
-                'title' => $this->_aIco['error'] . ' ' . $this->_tr('msgErr-access-denied'),
-                'text' => $sMessage,
-            ]);
-        }
-        return '';
+        return $oA->getAlert([
+            'type' => 'danger',
+            'dismissible' => false,
+            'title' => $this->_aIco['error'] . ' ' . $this->_tr('msgErr-access-denied'),
+            'text' => $sMessage,
+        ]);
     }
 
     /**
@@ -2192,6 +2196,35 @@ class appmonitorserver_gui extends appmonitorserver
         if (!$this->hasRole('ui-config')) {
             return $this->_access_denied(sprintf($this->_tr('msgErr-access-denied-role-not-found'), $this->getUserid(), 'ui-config'));
         }
+
+        $bStateRunning=$this->serviceIsRunning();
+        $sState = $oA->getBadge([
+            "type" => $bStateRunning ? "success" : "warning",
+            'text' => $bStateRunning 
+                ? $this->_aIco['service_start'] .' '. $this->_tr('settings-service-running') 
+                : $this->_aIco['service_stopped'] .' '. $this->_tr('settings-service-stopped')
+        ]);
+        
+        $sFormStartService=$sFormOpenTag
+            .'<input type="hidden" name="action" value="startservice">'
+            .'<button class="btn btn-primary">'.$this->_aIco['service_start'].'</button>'
+            .'</form>';
+        $sStatusService = '<h4>'
+                .$this->_aIco['service'] .' '
+                .sprintf($this->_tr('settings-service'), $sState)
+            .'</h4>'
+            .'servicecache = <code>'.($this->_aCfg['servicecache']?'true':'false').'</code><br>'
+            ;
+
+        if($bStateRunning && $this->_aCfg['servicecache']==false){
+            $sStatusService.='<strong>'.$this->_tr("hint").':</strong> '.$this->_tr("settings-hint-cache-running");
+        }
+        if(!$bStateRunning && $this->_aCfg['servicecache']==true){
+            $sStatusService.='<strong>'.$this->_tr("hint").':</strong> '.$this->_tr("settings-hint-cache-stopped");
+        }
+        $sStatusService.= !$bStateRunning ? $sFormStartService : '';
+        
+            // $sStatusService.=$sFormStartService;
 
         // list of all clients
         $sHostlist = '';
@@ -2371,6 +2404,7 @@ class appmonitorserver_gui extends appmonitorserver
                         'title' => $this->_tr('Setup-configuration'),
                         'text' => ''
                             . $sSetup.'<br>'
+                            . $sStatusService.'<br><hr>'
                             . '<div id="divsetupconfigfilter"></div><br>'
                             . '<div id="divsetupconfig">'
                             . $sTable

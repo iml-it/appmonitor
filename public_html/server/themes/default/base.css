@@ -173,14 +173,14 @@ tr.result3{background:rgba(240,220,220,0.4) !important; color:#924;}
 .sidebar-menu .active .allwebapps i{color: rgb(160, 174, 255);}
 .sidebar-menu .active .problems i{color: rgb(229, 201, 74);}
 .sidebar-menu .active .checks i{color: rgb(92, 209, 222);}
-.sidebar-menu .active .setup i{color: rgb(98, 204, 210);}
-.sidebar-menu .active .about i{color: rgb(104, 214, 142);}
+.sidebar-menu .active .setup i{color: rgb(104, 214, 142);}
+.sidebar-menu .active .about i{color: rgb(214, 166, 104);}
 .sidebar-menu .active .debug i{color: rgb(255, 36, 105);}
 
 .sidebar-menu .reload i{color: rgb(100, 207, 128);}
 
 .sidebar li.active a{
-	background: #36345f !important;
+	background: #303053 !important;
 }
 
 .box, .info-box{box-shadow: 0 0.2em 1em rgba(0,0,0,0.2);}

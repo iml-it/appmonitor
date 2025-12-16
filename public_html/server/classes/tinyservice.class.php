@@ -181,21 +181,21 @@ class tinyservice
      *
      * @return boolean
      */
-    function canStart(): bool
+    function canStart($bSilent=false): bool
     {
         // echo "INFO: Run file is $this->sTouchfile\n";
         if (!file_exists($this->sTouchfile)) {
-            echo "STATUS: Not running.\n";
+            echo $bSilent ? "" : "STATUS: Not running.\n";
             return true;
         }
         $iTS = filemtime($this->sTouchfile);
         $iAge = date('U') - $iTS;
         // echo "INFO: Its age is " . $iAge . "s (sleep time is $this->iSleep s)\n";
         if ($iAge > $this->iSleep) {
-            echo "STATUS: Not running. Run file is outdated.\n";
+            echo $bSilent ? "" : "STATUS: Not running. Run file is outdated.\n";
             return true;
         }
-        echo "STATUS: A service process is running.\n";
+        echo $bSilent ? "" : "STATUS: A service process is running.\n";
         return false;
     }
 

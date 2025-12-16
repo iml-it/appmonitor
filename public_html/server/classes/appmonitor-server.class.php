@@ -547,6 +547,37 @@ class appmonitorserver
         return false;
     }
 
+
+    /**
+     * get status of running service
+     * @return bool
+     */
+    public function serviceIsRunning(): bool
+    {
+        require_once 'classes/tinyservice.class.php';
+        $oService = new tinyservice(dirname(__DIR__).'/service.php', 5, dirname(__DIR__) . '/tmp');
+        return !$oService->canStart(true);
+
+    }
+
+    /**
+     * Start service (WIP)
+     * If the service is already running return false
+     * Otherwise start service.
+     * 
+     * TODO: when starting service in background it doesn't continue request
+     * 
+     * @return bool
+     */
+    public function actionStartservice(): bool
+    {
+        if($this->serviceIsRunning()) {
+            return false;
+        }
+        exec("php '" . dirname(__DIR__) . "/service.php' > /dev/null 2>&1 &");
+        sleep(1);
+        return true;
+    }
     // ----------------------------------------------------------------------
     // USER FUNCTIONS
     // ----------------------------------------------------------------------
@@ -666,13 +697,16 @@ class appmonitorserver
         switch ($sAction) {
             case "addurl":
                 $this->actionAddUrl($_POST["url"]);
-
                 break;
 
             case "deleteurl":
                 $this->actionDeleteUrl($_POST["url"]);
-
                 break;
+
+            case "startservice":
+                $this->actionStartservice();
+                break;
+
             default:
                 break;
         }
