@@ -2197,6 +2197,7 @@ class appmonitorserver_gui extends appmonitorserver
             return $this->_access_denied(sprintf($this->_tr('msgErr-access-denied-role-not-found'), $this->getUserid(), 'ui-config'));
         }
 
+        // -- check if service is running
         $bStateRunning=$this->serviceIsRunning();
         $sState = $oA->getBadge([
             "type" => $bStateRunning ? "success" : "warning",
@@ -2209,12 +2210,7 @@ class appmonitorserver_gui extends appmonitorserver
             .'<input type="hidden" name="action" value="startservice">'
             .'<button class="btn btn-primary">'.$this->_aIco['service_start'].'</button>'
             .'</form>';
-        $sStatusService = '<h4>'
-                .$this->_aIco['service'] .' '
-                .sprintf($this->_tr('settings-service'), $sState)
-            .'</h4>'
-            .'servicecache = <code>'.($this->_aCfg['servicecache']?'true':'false').'</code><br>'
-            ;
+        $sStatusService = 'servicecache = <code>'.($this->_aCfg['servicecache']?'true':'false').'</code><br>';
 
         if($bStateRunning && $this->_aCfg['servicecache']==false){
             $sStatusService.='<strong>'.$this->_tr("hint").':</strong> '.$this->_tr("settings-hint-cache-running");
@@ -2224,9 +2220,33 @@ class appmonitorserver_gui extends appmonitorserver
         }
         $sStatusService.= !$bStateRunning ? $sFormStartService : '';
         
-            // $sStatusService.=$sFormStartService;
+        // -- mfa setup
+        $sMfaBtn="";
+        if (
+            ($this->_aCfg["mfa"]["include"]??false)
+            && ($this->_aCfg["mfa"]["role"]??false)
+        ) {
+            $sMfaBtn=$this->_tr("settings-mfa-setup-na").'<br><br>';
+            if (
+                $this->hasRole($this->_aCfg["mfa"]["role"]??false)
+                && $this->getUserid()!=="*"
+            ){
 
-        // list of all clients
+                require __DIR__."/../vendor/mfa-client/mfaclient.class.php";
+                $oMfa = new mfaclient();
+                // $oMfa->debug(true);
+                $oMfa->setUser($this->getUserid());
+
+                $sMfaBtn=$this->_tr('settings-mfa-hint').'<br>'
+                    . $oMfa->getButtonSetup(
+                    "<button class=\"btn btn-default btn-primary\" >".$this->_aIco['mfa']." ".$this->_tr('settings-mfa-setup') . "</button>",
+                    $this->_aCfg["serverurl"]."#divsetup"
+                    )."<br>";
+                    // "<button class=\"btn btn-default\" >".$this->_aIco['mfa']." ".$this->_tr('MFA') . "</button>";
+            }
+        }
+
+        // -- list of all clients
         $sHostlist = '';
         $aHostlist=[];
         foreach($this->_urls as $sAppId => $sUrl){
@@ -2298,46 +2318,7 @@ class appmonitorserver_gui extends appmonitorserver
                 ;
         }
 
-        $sMfaBtn="";
-        if (
-            ($this->_aCfg["mfa"]["include"]??false)
-            && ($this->_aCfg["mfa"]["role"]??false)
-        ) {
-            $sMfaBtn=$this->_tr("settings-mfa-setup-na").'<br><br>';
-            if (
-                $this->hasRole($this->_aCfg["mfa"]["role"]??false)
-                && $this->getUserid()!=="*"
-            ){
-
-                require __DIR__."/../vendor/mfa-client/mfaclient.class.php";
-                $oMfa = new mfaclient();
-                // $oMfa->debug(true);
-                $oMfa->setUser($this->getUserid());
-
-                $sMfaBtn=$this->_tr('settings-mfa-hint').'<br>'
-                    . $oMfa->getButtonSetup(
-                    "<button class=\"btn btn-default btn-primary\" >".$this->_aIco['mfa']." ".$this->_tr('settings-mfa-setup') . "</button>",
-                    $this->_aCfg["serverurl"]."#divsetup"
-                    )."<br>";
-                    // "<button class=\"btn btn-default\" >".$this->_aIco['mfa']." ".$this->_tr('MFA') . "</button>";
-            }
-        }
-
-
-        $sSetup = (
-            $sMfaBtn 
-                ? ''
-                    .'<h4>' . $this->_tr('settings-mfa') . '</h4><p>'
-                    . $sMfaBtn
-                    .'</p>'
-                : ''
-            )
-            .'<h4>' . $this->_tr('hint') . '</h4><p>'
-            . $this->_tr('settings-hint')
-            . '</p>';
-
-        $sAppId = $sAppId ?? 'no-app-id';
-
+        // -- settings
         $aTmp=$this->_aCfg;
         $sTable="<table class=\"table table-striped\">";
         foreach([
@@ -2397,22 +2378,46 @@ class appmonitorserver_gui extends appmonitorserver
             . '<section class="content">'
 
             . $oA->getSectionRow(
-                $oA->getSectionColumn(
-                    // box for adding new client url
-                    // box for adding new client url
-                    $oA->getBox([
-                        'title' => $this->_tr('Setup-configuration'),
-                        'text' => ''
-                            . $sSetup.'<br>'
-                            . $sStatusService.'<br><hr>'
-                            . '<div id="divsetupconfigfilter"></div><br>'
-                            . '<div id="divsetupconfig">'
-                            . $sTable
-                            .'</div>'
 
-                    ]),
+                $oA->getSectionColumn(
+                            // boxes service + mfa
+                            ""
+                            .$oA->getSectionRow(
+                                $oA->getSectionColumn(
+                                    // box for adding new client url
+                                    $oA->getBox([
+                                        'title' => $this->_aIco['service'] .' '.sprintf($this->_tr('settings-service'), $sState),
+                                        'text' => $sStatusService
+                                    ]),
+                                    6
+                                )
+                                . $oA->getSectionColumn(
+                                    // box for adding new client url
+                                    $oA->getBox([
+                                        'title' => $sMfaBtn ? $this->_tr('settings-mfa') : $this->_tr('hint'),
+                                        'text' =>  $sMfaBtn ?: $this->_tr('settings-hint')
+                                    ]),
+                                    6
+                                )
+                            )
+                            // box settings
+                            .$oA->getSectionRow(
+                                $oA->getSectionColumn(
+                                $oA->getBox([
+                                    'title' => $this->_tr('Setup-configuration'),
+                                    'text' => ''
+                                        . '<p>'.$this->_tr('settings-hint').'</p>'
+                                        . '<div id="divsetupconfigfilter"></div><br>'
+                                        . '<div id="divsetupconfig">'
+                                        . $sTable
+                                        .'</div>'
+                                ]),
+                                12
+                                )
+                            ),
                     6
                 )
+                // box webapps
                 . $oA->getSectionColumn(
                     $oA->getBox([
                         'title' => $this->_tr('Setup-client-list'),
@@ -2444,6 +2449,7 @@ class appmonitorserver_gui extends appmonitorserver
             )
             . '</section>';
     }
+
 
 
     /**

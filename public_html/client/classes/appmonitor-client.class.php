@@ -52,7 +52,7 @@ if (!class_exists('appmonitorcheck')) {
  * 2025-04-35  0.158  axel.hahn@unibe.ch      validate count in simple check as string (before: float)
  * 2025-04-35  0.161  axel.hahn@unibe.ch      validate parent values if they match a name of another check
  * --------------------------------------------------------------------------------<br>
- * @version 0.158
+ * @version 0.171
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -66,7 +66,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.164';
+    protected string $_sVersion = '0.171';
 
     /**
      * config: default ttl for server before requesting the client check again

@@ -250,26 +250,26 @@ class checkHttpContent extends appmonitorcheck
         $sOut .= "Http status: $aInfos[http_code] - ";
         if (isset($aParams["status"])) {
             if ($aInfos['http_code'] == $aParams["status"]) {
-                $sOut .= "as expected - OK<br>";
+                $sOut .= "as expected - OK";
             } else {
-                $sOut .= "compare failed - not eaqual $aParams[status]<br>";
+                $sOut .= "compare failed - not equal $aParams[status]";
                 $bError = true;
             }
         } else {
             if ($aInfos['http_code'] >= 400) {
-                $sOut .= "Error page detected<br>";
+                $sOut .= "Error page detected";
                 $bError = true;
             } else {
-                $sOut .= "request successful<br>";
+                $sOut .= "request successful";
             }
         }
         // --- http header
         if (isset($aParams["headercontains"]) && $aParams["headercontains"]) {
             $sOut .= "Http header contains '$aParams[headercontains]' - ";
             if (!strstr($sHttpHeader, $aParams["headercontains"]) === false) {
-                $sOut .= "compare OK<br>";
+                $sOut .= "compare OK";
             } else {
-                $sOut .= "compare failed<br>";
+                $sOut .= "compare failed";
                 $bError = true;
             }
         }
@@ -278,7 +278,7 @@ class checkHttpContent extends appmonitorcheck
             if (strstr($sHttpHeader, $aParams["headernotcontains"]) === false) {
                 $sOut .= "compare OK<br>";
             } else {
-                $sOut .= "compare failed<br>";
+                $sOut .= "compare failed";
                 $bError = true;
             }
         }
@@ -287,9 +287,9 @@ class checkHttpContent extends appmonitorcheck
             try {
                 $bRegex = preg_match($aParams["headerregex"], $sHttpHeader);
                 if ($bRegex) {
-                    $sOut .= "compare OK<br>";
+                    $sOut .= "compare OK";
                 } else {
-                    $sOut .= "compare failed<br>";
+                    $sOut .= "compare failed";
                     $bError = true;
                 }
             } catch (Exception $e) {
@@ -301,18 +301,18 @@ class checkHttpContent extends appmonitorcheck
         if (isset($aParams["bodycontains"]) && $aParams["bodycontains"]) {
             $sOut .= "Http body contains '$aParams[bodycontains]' - ";
             if (!strstr($sHttpBody, $aParams["bodycontains"]) === false) {
-                $sOut .= "compare OK<br>";
+                $sOut .= "compare OK";
             } else {
-                $sOut .= "compare failed<br>";
+                $sOut .= "compare failed";
                 $bError = true;
             }
         }
         if (isset($aParams["bodynotcontains"]) && $aParams["bodynotcontains"]) {
             $sOut .= "Http body does not contain '$aParams[bodynotcontains]' - ";
             if (strstr($sHttpBody, $aParams["bodynotcontains"]) === false) {
-                $sOut .= "compare OK<br>";
+                $sOut .= "compare OK";
             } else {
-                $sOut .= "compare failed<br>";
+                $sOut .= "compare failed";
                 $bError = true;
             }
         }
@@ -321,9 +321,9 @@ class checkHttpContent extends appmonitorcheck
             try {
                 $bRegex = preg_match($aParams["bodyregex"], $sHttpBody);
                 if ($bRegex) {
-                    $sOut .= "compare OK<br>";
+                    $sOut .= "compare OK";
                 } else {
-                    $sOut .= "compare failed<br>";
+                    $sOut .= "compare failed";
                     $bError = true;
                 }
             } catch (Exception $e) {
