@@ -149,7 +149,7 @@
         "settings-mfa-setup": "MFA setup",
         "settings-mfa-setup-na": "The MFA setup is not available for your user.",
 
-        "settings-service": "Service is %s.",
+        "settings-service": "Service is %s",
         "settings-service-running": "started",
         "settings-service-stopped": "stopped",
         "settings-hint-cache-running": "If the service is running permanently you can set the cache to <code>true</code>.",
