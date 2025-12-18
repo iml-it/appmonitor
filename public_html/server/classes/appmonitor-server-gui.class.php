@@ -833,7 +833,7 @@ class appmonitorserver_gui extends appmonitorserver
     protected function _findNodeId($sNeedle, $sKey, $aNodes): bool|string
     {
         foreach ($aNodes as $aNode) {
-            if (isset($aNode[$sKey]) && $aNode[$sKey] === $sNeedle) {
+            if ($aNode[$sKey]??false === $sNeedle) {
                 return $aNode['id'];
             }
         }
@@ -1466,7 +1466,7 @@ class appmonitorserver_gui extends appmonitorserver
     /**
      * Get html code to render a counter tile with bars / line / simple
      * 
-     * @param string  $sAppId      name of the app
+     * @param string  $sAppId      id of the app
      * @param string  $sCounterId  name of the counter
      * @param array   $aOptions    rendering options with these keys
      *                             - type       string   one of bar|line|simple
@@ -1480,11 +1480,11 @@ class appmonitorserver_gui extends appmonitorserver
     {
         $oA = new renderadminlte();
 
-        $aOptions['type'] = $aOptions['type'] ? $aOptions['type'] : 'bar';
+        $aOptions['type'] = $aOptions['type'] ?: 'bar';
         $aOptions['label'] = $aOptions['label'] ?? '';
-        $aOptions['size'] = isset($aOptions['size']) && (int) $aOptions['size'] ? (int) $aOptions['size'] : 2;
-        $aOptions['items'] = isset($aOptions['items']) && (int) $aOptions['items'] ? (int) $aOptions['items'] : $aOptions['size'] * 10;
-        $aOptions['graphonly'] = isset($aOptions['graphonly']) ? !!$aOptions['graphonly'] : false;
+        $aOptions['size'] = (int) $aOptions['size'] ?: 2;
+        $aOptions['items'] = (int) $aOptions['items']??false ?: $aOptions['size'] * 10;
+        $aOptions['graphonly'] = !!($aOptions['graphonly']??false);
 
 
         if($aOptions['data']??false) {

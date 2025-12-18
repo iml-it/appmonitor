@@ -24,6 +24,7 @@
  * 2024-11-22  <axel.hahn@unibe.ch>      Return unknown if curl module is not active
  * 2025-03-17  <axel.hahn@unibe.ch>      Fix check for http status code
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2025-12-18  <axel.hahn@unibe.ch>      fix typo; remove final '<br>' in output
  */
 class checkHttpContent extends appmonitorcheck
 {
@@ -276,7 +277,7 @@ class checkHttpContent extends appmonitorcheck
         if (isset($aParams["headernotcontains"]) && $aParams["headernotcontains"]) {
             $sOut .= "Http header does not contain '$aParams[headernotcontains]' - ";
             if (strstr($sHttpHeader, $aParams["headernotcontains"]) === false) {
-                $sOut .= "compare OK<br>";
+                $sOut .= "compare OK";
             } else {
                 $sOut .= "compare failed";
                 $bError = true;
@@ -293,7 +294,7 @@ class checkHttpContent extends appmonitorcheck
                     $bError = true;
                 }
             } catch (Exception $e) {
-                $sOut .= "Wrong REGEX<br>" . print_r($e, 1) . '<br>';
+                $sOut .= "Wrong REGEX<br>" . print_r($e, 1);
                 $bError = true;
             }
         }

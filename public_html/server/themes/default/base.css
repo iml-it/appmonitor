@@ -44,8 +44,8 @@ h1 .divhost{padding: 0.3em 0.5em;}
 #totalstatus{font-size: 140%;;}
 .result0{background:#ccedde; color:#284}
 .result1{background:#dfdeee; color:#657;}
-.result2{background:#fdebd0; color:#862;}
-.result3{background:#f8dbd7; color:#822;}
+div.alert-warning, .result2{background:#fde3bb !important; color:#862 !important;}
+div.alert-danger, .result3{background:#f8dbd7 !important; color:#822 !important;}
 
 tr.result0{background: #e8f8f4 !important;}
 tr.result1{background: #f4f0f8 !important;}
@@ -106,7 +106,6 @@ tr.result3{background: #f8f0f0 !important;}
 .item-disabled {
 	opacity: 50%;
 }
-
 label.result{min-width:10em; text-align: center; margin: 0 1em;}
 /*
 tr.result0{background:rgba(220,240,220,0.4) !important; color:#385;}
