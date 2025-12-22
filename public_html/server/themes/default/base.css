@@ -34,6 +34,8 @@ padding: 1em;}
 .divhost b{color:#fff;}
 #divsetup .divhost{width: auto; height: auto;}
 
+.box-body{min-height: 16em;}
+
 .divhost-outer{padding: 0 0 0 0.5em ; margin-bottom: 0.1em;}
 .divhost-inner{background: rgba(255,255,255,0.9); display: flow-root;}
 .divhost-inner>div{padding: 0.1em; color: #000; color: rgba(0,0,0,0.7); padding-top: 1.2em;}

@@ -833,7 +833,7 @@ class appmonitorserver_gui extends appmonitorserver
     protected function _findNodeId($sNeedle, $sKey, $aNodes): bool|string
     {
         foreach ($aNodes as $aNode) {
-            if ($aNode[$sKey]??false === $sNeedle) {
+            if (($aNode[$sKey]??false) == $sNeedle) {
                 return $aNode['id'];
             }
         }
@@ -1566,7 +1566,7 @@ class appmonitorserver_gui extends appmonitorserver
             : $oA->getSectionColumn(
 
                 '<div class="box counter"'
-                . (($iAge > $iTtl * 2) ? ' style="opacity: ' . (0.9 - ($iAge / $iTtl) * 0.05) . '"' : '')
+                . (($iAge > $iTtl * 2) ? ' style="opacity: ' . max((0.9 - ($iAge / $iTtl) * 0.05), 0.1) . '"' : '')
                 . '>'
                 . '<div class="box-body">'
                 . $sInnerTile
@@ -1605,8 +1605,8 @@ class appmonitorserver_gui extends appmonitorserver
                 )
                 . $oA->getSectionColumn(
                     $oA->getBox([
-                        // 'title' => '', 
-                        'text' => $this->_tr('About-vendor') . '<ul>
+                        'title' => $this->_tr('About-vendor'), 
+                        'text' =>  '<ul>
                             <li><a target="_blank" href="https://adminlte.io/">AdminLTE</a></li>                
                             <li><a target="_blank" href="https://developer.snapappointments.com/bootstrap-select/">Bootstrap-Select</a></li>
                             <li><a target="_blank" href="https://datatables.net/">datatables.net</a></li>
