@@ -39,11 +39,12 @@
 # 2025-09-18  v1.32 <axel.hahn@unibe.ch>      add select menu
 # 2025-12-19  v1.33 <axel.hahn@unibe.ch>      Fix linter when using proxy + php-fpm, more select menus
 # 2025-12-19  v1.34 <axel.hahn@unibe.ch>      2x esc or 'q' abort menu selection
+# 2025-12-22  v1.35 <axel.hahn@unibe.ch>      Select menus: single esc to abort; suport home + end
 # ======================================================================
 
 cd "$( dirname "$0" )" || exit 1
 
-_version="1.34"
+_version="1.35"
 
 # init used vars
 gittarget=
@@ -208,33 +209,62 @@ function input.select {
     get_cursor_row()        { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo ${ROW#*[}; }
 
     key_input() {
-        local key
+
+        typeset -A input_aKeymap
+
+        input_aKeymap['#00']='enter'
+        input_aKeymap['#1b']='esc'
+        input_aKeymap['#1b5b41']='up'
+        input_aKeymap['#1b5b42']='down'
+        input_aKeymap['#1b5b43']='right'
+        input_aKeymap['#1b5b44']='left'
+
+        input_aKeymap['#1b5b327e']='insert'
+        input_aKeymap['#1b5b337e']='del'
+        input_aKeymap['#1b5b48']='home'
+        input_aKeymap['#1b5b46']='end'
+        input_aKeymap['#1b5b357e']='pgup'
+        input_aKeymap['#1b5b367e']='pgdown'
+
+        input_aKeymap['#1b4f50']='f1'
+        input_aKeymap['#1b4f51']='f2'
+        input_aKeymap['#1b4f52']='f3'
+        input_aKeymap['#1b4f53']='f4'
+        input_aKeymap['#1b5b31357e']='f5'
+        input_aKeymap['#1b5b31377e']='f6'
+        input_aKeymap['#1b5b31387e']='f7'
+        input_aKeymap['#1b5b31397e']='f8'
+        input_aKeymap['#1b5b32307e']='f9'
+        input_aKeymap['#1b5b32317e']='f10'
+        input_aKeymap['#1b5b32337e']='f11' # could be mapped to full screen
+        input_aKeymap['#1b5b32347e']='f12'
+
+        input_aKeymap['#7f']='backspace'
+
         local input
+        local input2
+        local input3
+        local input4
+        local input5
         local hex='#'
-        # read 3 chars, 1 at a time
-        for ((i=0; i < 3; ++i)); do
-            read -s -n1 input 2>/dev/null >&2
-            # concatenate chars together
-            key+="$input"
-            hex+=$(printf "%02x" "'$input")
-            # if a number is encountered, echo it back
-            if [[ $input =~ ^[1-9q]$ ]]; then
-                echo $input; return;
 
-            # if enter, early return
-            elif [[ $input = "" ]]; then
-                echo enter; return;
-            # if we encounter something other than [1-9] or "" or the escape sequence
-            # then consider it an invalid input and exit without echoing back
-            elif [[ ! $input = $ESC && i -eq 0 ]]; then
-                return
-            elif [[ $hex = '#1b1b' ]]; then
-                echo "esc"; return
-            fi
-        done
+        read -s -r -n1 input >/dev/null 2>&1
+        hex+=$(printf "%02x" "'$input")
+        if [ "$hex" = '#1b' ]; then
+            # read four more chars (needed for f5 ..f12)
+            read -s -r -n1 -t 0.01 input2 >/dev/null 2>&1
+            read -s -r -n1 -t 0.01 input3 >/dev/null 2>&1
+            read -s -r -n1 -t 0.01 input4 >/dev/null 2>&1
+            read -s -r -n1 -t 0.01 input5 >/dev/null 2>&1
+            hex+=$(printf "%02x%02x%02x%02x" "'$input2" "'$input3" "'$input4" "'$input5")
+            hex="$( echo "$hex" | sed 's/00$//g' | sed 's/00$//g' | sed 's/00$//g' | sed 's/00$//g')"
+        fi
 
-        if [[ $key = $ESC[A ]]; then echo up; fi;
-        if [[ $key = $ESC[B ]]; then echo down; fi;
+        if [ -n "${input_aKeymap[$hex]}" ] ; then
+            echo "${input_aKeymap[$hex]}"
+        else
+            echo "$input"
+        fi
 
     }
 
@@ -258,6 +288,7 @@ function input.select {
     local lastrow=$( get_cursor_row )
     local startrow=$(($lastrow - $#))
     local selected=0
+    typeset -i selected
 
     # ensure cursor and input echoing back on upon a ctrl+c during read -s
     trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
@@ -282,7 +313,7 @@ function input.select {
         input=$(key_input)
 
         case $input in
-            esc) selected=-1; break;;
+            esc|q) selected=-1; break;;
             enter) break;;
             [1-9])
                 # If a digit is encountered, consider it a selection (if within range)
@@ -295,6 +326,8 @@ function input.select {
                 if [ $selected -lt 0 ]; then selected=$(($# - 1)); fi;;
             down)  ((selected++));
                 if [ $selected -ge $# ]; then selected=0; fi;;
+            home) selected=0;;
+            end) selected=$#-1;;
         esac
     done
 
@@ -334,7 +367,7 @@ function _selectFromList(){
     if [ "${#lines[@]}" -eq 1 ]; then
         inputval="${lines[0]}"
     else
-        lines+=( "<< back" )
+        # lines+=( "<< back" )
         input.select "${lines[@]}"
         inputval="${lines[$?]}"
         test "$inputval" = "<< back" && return
@@ -821,7 +854,7 @@ function _dbImport(){
 
     local dumpfile
 
-    echo "--- Available dumps (newest first):"
+    echo "--- Available dumps, newest first (Use cursor and return; ESC to abort):"
     _selectFromList "$( ls -lt ${DC_DUMP_DIR}/*.gz )" "last"
     dumpfile="$SELECTED"
 
@@ -942,7 +975,7 @@ while true; do
             ;;
         c)
             h2 "Console"
-            echo "Select a container:"
+            echo "Select a container (Use cursor and return; ESC to abort):"
             _selectFromList "$DC_PS"
             dockerid="$SELECTED"
 
@@ -958,7 +991,7 @@ while true; do
             # dockerid="${APP_NAME}-web"
             # grep -q "$dockerid" <<< "$DC_PS" || dockerid="${APP_NAME}-php-fpm"
 
-            echo "Select a container:"
+            echo "Select a container (Use cursor and return; ESC to abort):"
             _selectFromList "$( echo "$DC_PS" | grep -v ">3306/tcp" )"
             dockerid="$SELECTED"
 
