@@ -127,12 +127,6 @@ class notificationhandler
     protected array $_aAppResult = [];
 
     /**
-     * Last fetched result of an web application
-     * @var array
-    protected array $_aAppLastResult = [];
-     */
-
-    /**
      * delay sending a notification n times based on a result value
      * @var array
      */
@@ -289,27 +283,19 @@ class notificationhandler
      * @param  array   $aClientData  optional: application response of a fresh request; default: read 'lastresult' column from database
      * @return boolean
      */
-    public function setApp(string $sAppId, $aClientData = []): bool
+    public function setApp(string $sAppId, array $aClientData = []): bool
     {
         if($this->_sAppId == $sAppId){
-            // we keep current data
+            $this->_aAppResult = count($aClientData) ? $aClientData : $this->_aAppResult;
             return false;
         }
         $this->_sAppId = $sAppId;
-
         $this->_oWebapps->readByFields(['appid' => $this->_sAppId]);
-
-        $this->_aAppResult = count($aClientData) 
-            ? $aClientData 
-            : []
-        ;
-
+        $this->_aAppResult = $aClientData;
         $this->_iAppResultChange = -1;
-        // $this->_aAppLastResult = $this->getAppLastResult();
 
         $aLastNotify=$this->getLogdata(['appid'=>$this->_sAppId, 'count'=>1]);
         $this->_aLastNotification = $aLastNotify[0] ?? [];
-        // echo "DEBUG: ".__METHOD__ . " current data = <pre>".print_r($this->_aAppResult, 1)."</pre>";
         return true;
     }
 
@@ -751,11 +737,8 @@ class notificationhandler
 
         // got from client
         $aClientNotifications = $this->_getAppNotifications();
-        // echo '<pre>'.print_r($aClientNotifications, 1).'</pre>';
-
 
         // take data from web app ... meta -> notifications
-        // $aMergeMeta=isset($this->_aAppLastResult['meta']['notifications']) ? $this->_aAppLastResult['meta']['notifications'] : [];
         foreach ($aArray_keys as $sNotificationType) {
             // echo "DEBUG: $sNotificationType\n<pre>" . print_r($aClientNotifications[$sNotificationType], 1) . '</pre>';
             if (isset($aClientNotifications[$sNotificationType]) && count($aClientNotifications[$sNotificationType])) {
