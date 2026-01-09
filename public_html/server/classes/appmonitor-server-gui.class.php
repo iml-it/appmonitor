@@ -487,7 +487,7 @@ class appmonitorserver_gui extends appmonitorserver
                         : '';
                     break;
                 case 'receiver':
-                    $this->oNotification->setApp($sAppId);
+                    $this->oNotification->setApp($sAppId, $this->_data[$sAppId]);
                     $aEmailNotifiers = $this->oNotification->getAppNotificationdata('email');
                     $aSlackChannels = $this->oNotification->getAppNotificationdata('slack');
 
