@@ -439,7 +439,7 @@ class appmonitorserver_gui extends appmonitorserver
                         ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['timestamp'])
                         : ''
                     ;
-                    $sReturn .= ($this->oApp->status()>=0 && $bVisibility
+                    $sReturn .= ($this->oApp->status()>=0
                         ? $this->_getTile([
                             'result' => $this->oApp->status(),
                             'label' => $this->_tr('Appstatus'),
@@ -468,7 +468,7 @@ class appmonitorserver_gui extends appmonitorserver
                     ]);
                     break;
                 case 'checks':
-                    $sReturn .= $bVisibility && isset($aHostdata['summary']['total'])
+                    $sReturn .= isset($aHostdata['summary']['total'])
                         ? $this->_getTile([
                             'result' => $this->oApp->status(),
                             'icon' => $this->_aIco['check'],
@@ -478,7 +478,7 @@ class appmonitorserver_gui extends appmonitorserver
                         : '';
                     break;
                 case 'times':
-                    $sReturn .= $bVisibility && isset($this->_data[$sAppId]['meta']['time'])
+                    $sReturn .= isset($this->_data[$sAppId]['meta']['time'])
                         ? $this->_getTile([
                             'icon' => $this->_aIco['time'],
                             'label' => $this->_tr('Time-for-all-checks'),

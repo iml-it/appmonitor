@@ -138,7 +138,7 @@ switch ($sItem){
             'tags'=>$aTags,
         ];
 
-        $sOutmode=isset($callback['outmode']) ? $callback['outmode'] : false;
+        $sOutmode=$callback['outmode'] ?? false;
 
         $aData=$oMonitor->$sAction($aFilter, $sOutmode);
         /*

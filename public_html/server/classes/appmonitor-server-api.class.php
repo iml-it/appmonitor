@@ -259,9 +259,14 @@ class appmonitorserver_api extends appmonitorserver
                             $aTmp[$sAppName][$sKey] = $aData;
                         }
                         // get infos from database
-                        $this->_oWebapps->readByFields(['appid' => $sKey]);
-                        $sTsLast = $this->_oWebapps->get("timeupdated") ?? $this->_oWebapps->get("timecreated");
-                        $aTmp[$sAppName][$sKey]['since'] = date("U", strtotime($sTsLast));
+
+                        // $this->_oWebapps->readByFields(['appid' => $sKey]);
+                        // $sTsLast = $this->_oWebapps->get("timeupdated") ?? $this->_oWebapps->get("timecreated" );
+                        // $aTmp[$sAppName][$sKey]['timestamp'] = (int)date("U", strtotime($sTsLast));
+
+                        $this->oNotification->setApp( $sKey);
+                        $aTmp[$sAppName][$sKey]['since'] = $this->oNotification->getAppLastNotification()['timestamp']??0; 
+
                         ;
                     default:
                         ;
