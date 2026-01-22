@@ -43,6 +43,7 @@
  * 2025-03-03  <axel.hahn@unibe.ch>      comment block for host check in DND names
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  * 2025-09-17  <axel.hahn@unibe.ch>      show issuer "None (self signed)" if empty
+ * 2026-01-09  <axel.hahn@unibe.ch>      use default from $_aDoc
  */
 class checkCert extends appmonitorcheck
 {
@@ -122,9 +123,9 @@ class checkCert extends appmonitorcheck
     public function run(array $aParams): array
     {
         $sUrl = $aParams["url"] ?? 'http' . ($_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'];
-        $bVerify = isset($aParams["verify"]) ? !!$aParams["verify"] : true;
-        $iWarn = isset($aParams["warning"]) ? (int) ($aParams["warning"]) : 21;
-        $iCrtitcal = isset($aParams["critical"]) ? (int) ($aParams["critical"]) : 5;
+        $bVerify = isset($aParams["verify"]) ? !!$aParams["verify"] : $this->_aDoc['parameters']['verify']['default'];
+        $iWarn = isset($aParams["warning"]) ? (int) ($aParams["warning"]) : $this->_aDoc['parameters']['warning']['default'];
+        $iCrtitcal = isset($aParams["critical"]) ? (int) ($aParams["critical"]) : $this->_aDoc['parameters']['critical']['default'];
 
         $sMessage = "Checked url: $sUrl ... ";
         $certinfo = $this->_certGetInfos($sUrl, $bVerify);

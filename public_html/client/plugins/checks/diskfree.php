@@ -21,6 +21,7 @@
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-01-02  <www.axel-hahn.de>        update output
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2026-01-09  <axel.hahn@unibe.ch>      fix defaults
  */
 class checkDiskfree extends appmonitorcheck
 {
@@ -45,14 +46,14 @@ class checkDiskfree extends appmonitorcheck
                 'type' => 'string',
                 'required' => false,
                 'description' => 'size for warning level',
-                'default' => 21,
+                'default' => null,
                 'example' => "1.25GB",
             ],
             'critical' => [
                 'type' => 'string',
                 'required' => true,
                 'description' => 'size for critical level',
-                'default' => 5,
+                'default' => null,
                 'example' => "500.7MB",
             ],
         ],

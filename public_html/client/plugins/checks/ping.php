@@ -22,6 +22,7 @@
  * 2022-11-22  <axel.hahn@iml.unibe.ch>  Use exec with detecting MS Win for the ping parameter for count of pings
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2026-01-09  <axel.hahn@unibe.ch>      add timout parameter -W in ping command; use default from $_aDoc
  */
 class checkPing extends appmonitorcheck
 {
@@ -44,6 +45,16 @@ class checkPing extends appmonitorcheck
                 'default' => "127.0.0.1",
                 'example' => 'www.example.com',
             ],
+            'timeout' => [
+                'type' => 'int',
+                'required' => false,
+                'description' => 'Timeout for -W parameter; in seconds (on MS Windows in milliseconds); default: 3',
+                'regex' => '/^[0-9]*/i',
+
+                // doc
+                'default' => 5,
+                'example' => 2,
+            ],
         ],
     ];
 
@@ -61,25 +72,30 @@ class checkPing extends appmonitorcheck
      * @param array $aParams
      * [
      *     host                string   optional hostname to connect; default: 127.0.0.1
-     *     timeout             integer  OBSOLET (because using exec): optional timeout in sec; default: 5
+     *     timeout             integer  Timeout for -W parameter; in seconds (float) on MS Windows in milliseconds); default: 5
      * ]
      * @return array
      */
     public function run(array $aParams): array
     {
-        $sHost = $aParams['host'] ?? '127.0.0.1';
+        $sHost = $aParams['host'] ?? $this->_aDoc["parameters"]["host"]["default"];
 
         $sParamCount = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? "n" : "c";
         $iRepeat = 1;
 
-        $sCommand = "ping -$sParamCount $iRepeat $sHost 2>&1";
+        $iTimeout= $aParams['timeout']??$this->_aDoc["parameters"]["timeout"]["default"];
+        $sParamTimeout = "-W $iTimeout";
+        $sCommand = "ping -$sParamCount $iRepeat $sParamTimeout $sHost 2>&1";
         exec($sCommand, $aOut, $iRc);
         $sOut = implode("\n", $aOut);
 
         if ($iRc > 0) {
-            return [RESULT_ERROR, "ERROR: ping to $sHost failed.\n" . $sOut];
+            if($iRc==127){
+                return [RESULT_UNKNOWN, "ping is not installed.\n$sOut"];
+            }
+            return [RESULT_ERROR, "ERROR: $iRc ping to $sHost failed ($sCommand).\n$sOut"];
         }
-        return [RESULT_OK, "OK: ping to $sHost\n" . $sOut];
+        return [RESULT_OK, "OK: ping to $sHost ($sCommand)\n$sOut"];
 
         /*
             Socket functions require root :-/
