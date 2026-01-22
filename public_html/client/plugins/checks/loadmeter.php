@@ -46,6 +46,7 @@
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2024-07-25  <axel.hahn@unibe.ch>      float return with 2 digits behind comma
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2025-01-09  <axel.hahn@unibe.ch>      shorten check for warning and critical
  */
 class checkLoadmeter extends appmonitorcheck
 {
@@ -87,10 +88,12 @@ class checkLoadmeter extends appmonitorcheck
 
     /**
      * Detect load of a machine and return a float value
+     * It returns false when COM class is not available (on Windows only)
      * windows part was taken from https://stackoverflow.com/questions/5588616/how-do-you-calculate-server-load-in-php
-     * @return float
+     * 
+     * @return float|bool
      */
-    protected function _getLoad(): float
+    protected function _getLoad(): float|bool
     {
         if (function_exists('sys_getloadavg')) {
             $load = sys_getloadavg();
@@ -124,13 +127,6 @@ class checkLoadmeter extends appmonitorcheck
      */
     public function run(array $aParams): array
     {
-
-        // --- (1) verify if array key(s) exist:
-        // $this->_checkArrayKeys($aParams, "...");
-
-        // --- (2) do something magic
-        // $fLoad=rand(0, 1.3);
-        // $fLoad=$this->_getServerLoad();
         $fLoad = $this->_getLoad();
 
         // set result code
@@ -138,10 +134,10 @@ class checkLoadmeter extends appmonitorcheck
             $iResult = RESULT_UNKNOWN;
         } else {
             $iResult = RESULT_OK;
-            if (isset($aParams['warning']) && $aParams['warning'] && $fLoad > $aParams['warning']) {
+            if (($aParams['warning']??0) > 0 && $fLoad > $aParams['warning']) {
                 $iResult = RESULT_WARNING;
             }
-            if (isset($aParams['error']) && $aParams['error'] && $fLoad > $aParams['error']) {
+            if (($aParams['error']??0) > 0 && $fLoad > $aParams['error']) {
                 $iResult = RESULT_ERROR;
             }
         }

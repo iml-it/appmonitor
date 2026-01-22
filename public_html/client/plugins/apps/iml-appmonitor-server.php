@@ -189,14 +189,14 @@ $aCfg=$oServer->getConfigVars();
 $oMonitor->addCheck(
     [
         "name" => "db-config",
-        "description" => "Check if the service is running",
+        "description" => "Check dsn value",
         // "group" => "service",
         "parent" => "check custom config file",
         "check" => [
             "function" => "Simple",
             "params" => [
-                "result" => ($aCfg['db']['dsn'] ? RESULT_OK : RESULT_ERROR),
-                "value" => ($aCfg['db']['dsn']
+                "result" => (($aCfg['db']['dsn']??false) ? RESULT_OK : RESULT_ERROR),
+                "value" => (($aCfg['db']['dsn']??false)
                     ? "OK: dsn was set"
                     :"Error: database dsn was not found in config."
                 )

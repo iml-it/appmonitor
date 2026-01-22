@@ -51,8 +51,9 @@ if (!class_exists('appmonitorcheck')) {
  * 2025-03-24  0.157  axel.hahn@unibe.ch      update validator for bool check in ini files
  * 2025-04-35  0.158  axel.hahn@unibe.ch      validate count in simple check as string (before: float)
  * 2025-04-35  0.161  axel.hahn@unibe.ch      validate parent values if they match a name of another check
+ * 2026-01-22  0.175  axel.hahn@unibe.ch      checks use defaults from $aDocs
  * --------------------------------------------------------------------------------<br>
- * @version 0.171
+ * @version 0.175
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -66,7 +67,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.171';
+    protected string $_sVersion = '0.175';
 
     /**
      * config: default ttl for server before requesting the client check again
