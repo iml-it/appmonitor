@@ -219,15 +219,16 @@ The object below the user id contains
 key       | description
 ----------|---------------------------
 comment   | additional comments
-password  | password hash for api user
+password  | for api users; alternative to "secret": password hash
 roles     | flat list of roles
+secret    | for api users; secret for HMAC authentication
 username  | Users display name
 
 Remark:
 
-The password hash will be verified by api requests only. It is optional for non protected api directory - then the user and password will be verified by the api itself.
-
-To create a password hash on command line you can use
+- The "secret" and "password" hash will be verified by api requests only. It is optional for non protected api directory - then the user and password will be verified by the api itself.
+- For api requests you should prefer using a secret. For a client implementation in Bash and PHP see <https://github.com/iml-it/appmonitor-api-client>
+- To create a password hash on command line you can use
 
 ```txt
 php -r 'echo password_hash("your-password-here", PASSWORD_BCRYPT);'
@@ -259,6 +260,11 @@ Example:
             "roles": [ "ui" ]
         },
         "api": {
+            "secret": "Put-a-secret-here",
+            "comment": "API test user",
+            "roles": [ "api" ]
+        },
+        "api2": {
             "password": "$2y$10$5E4ZWyul.VdZjpP1.Ff6Le0z0kxu3ix7jnbYhv0Zg5vhvhjdJTOm6",
             "comment": "api user for Axels Dashboard",
             "roles": [ "api" ]
