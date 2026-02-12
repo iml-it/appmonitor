@@ -25,6 +25,7 @@
  * 2025-03-17  <axel.hahn@unibe.ch>      Fix check for http status code
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  * 2025-12-18  <axel.hahn@unibe.ch>      fix typo; remove final '<br>' in output
+ * 2026-02-12  <axel.hahn@unibe.ch>      fix flag sslverify => false
  */
 class checkHttpContent extends appmonitorcheck
 {
@@ -183,8 +184,13 @@ class checkHttpContent extends appmonitorcheck
         curl_setopt($ch, CURLOPT_NOBODY, isset($aParams["headeronly"]) && $aParams["headeronly"]);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, isset($aParams["follow"]) && $aParams["follow"]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, isset($aParams["sslverify"]) ? !!$aParams["sslverify"] : 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, (isset($aParams["timeout"]) && (int) $aParams["timeout"]) ? (int) $aParams["timeout"] : $this->_iTimeoutTcp);
+
+        if(!($aParams["sslverify"] ?? true)){
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        }
+
         if (isset($aParams["userpwd"])) {
             curl_setopt($ch, CURLOPT_USERPWD, $aParams["userpwd"]);
         }
