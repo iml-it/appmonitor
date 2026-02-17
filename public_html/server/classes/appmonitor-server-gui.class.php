@@ -436,7 +436,7 @@ class appmonitorserver_gui extends appmonitorserver
                 case 'appstatus':
                     $aLast = $this->oNotification->getAppLastNotification();                    
                     $sSince = (isset($aLast['timestamp']) && $aLast['timestamp'] > 0)
-                        ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['timestamp'])
+                        ? $this->_tr('since') . ' ' . date("Y-m-d H:i", $aLast['timestamp']) ." (". time::hrDelta(time() - $aLast['timestamp']).")"
                         : ''
                     ;
                     $sReturn .= ($this->oApp->status()>=0
@@ -1182,7 +1182,7 @@ class appmonitorserver_gui extends appmonitorserver
             $sTable .= '<tr class="result' . $aLogentry['status'] . ' tags ' . $this->_getCssclassForTag($aTags) . ($sAppName ? "" : " item-disabled").'">'
                 . '<td class="result' . $aLogentry['status'] . '"><span style="display: none;">' . $aLogentry['status'] . '</span>' . $this->_tr('Resulttype-' . $aLogentry['status']) . '</td>'
                 . '<td>' . date("Y-m-d H:i:s", $aLogentry['timestamp']) . '</td>'
-                . ($bShowDuration ? '<td>' . round($iDelta / 60) . ' min</td>' : '')
+                . ($bShowDuration ? '<td>' . time::hrDelta($iDelta) . '</td>' : '')
                 . '<td>' . $this->_tr('changetype-' . $aLogentry['changetype']) . '</td>'
                 . '<td>' . ($sAppName
                         ? '<a href="' . $this->_getDivIdForApp($aLogentry['appid']) . '">' . $sAppName . '</a>'
@@ -1416,7 +1416,7 @@ class appmonitorserver_gui extends appmonitorserver
                     ?
                     '<tr class="result' . $i . '">'
                     . '<td class="result' . $i . '">' . $this->_tr('Resulttype-' . $i) . '</td>'
-                    . '<td style="text-align: right">' . round($aUptime['counter'][$i] / 60) . ' min</td>'
+                    . '<td style="text-align: right">' . time::hrDelta($aUptime['counter'][$i]) . '</td>'
                     . '<td style="text-align: right"> ' . number_format($aUptime['counter'][$i] * 100 / $aUptime['total'], 1) . ' %</td>'
                     . '</tr>'
                     : '';
