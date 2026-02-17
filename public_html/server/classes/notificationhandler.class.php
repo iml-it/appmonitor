@@ -4,6 +4,7 @@ require_once 'cache.class.php';
 require_once 'lang.class.php';
 require_once 'dbobjects/notifications.php';
 require_once 'dbobjects/webapps.php';
+require_once 'time.class.php';
 
 define("CHANGETYPE_NOCHANGE", 0);
 define("CHANGETYPE_NEW", 1);
@@ -562,9 +563,8 @@ class notificationhandler
                 ? date("Y-m-d H:i:s", $aLastNotify['timestamp']) : $sMiss,
 
             '__LAST-RESULT__' => isset($aLastNotify['status']) ? $this->_tr('Resulttype-' . $aLastNotify['status']) : $sMiss,
-            '__DELTA-TIME__' => $aLastNotify['timestamp']??false ?
-                round((time() - $aLastNotify['timestamp']) / 60) . " min "
-                . "(" . round((time() - $aLastNotify['timestamp']) / 60 / 60 * 4) / 4 . " h)"
+            '__DELTA-TIME__' => $aLastNotify['timestamp']??false 
+                ? time::hrDelta(time() - $aLastNotify['timestamp'])
                 : $sMiss,
             '__CURLERROR__' => $aCurrent['result']['curlerrormsg']??false
                 ? sprintf($this->_tr('Curl-error'), $aCurrent['result']['curlerrormsg'], $aCurrent['result']['curlerrorcode'])

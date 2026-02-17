@@ -7,6 +7,7 @@ require_once 'notificationhandler.class.php';
 require_once 'app.class.php';
 require __DIR__ . '/../vendor/php-abstract-dbo/src/pdo-db.class.php';
 require_once 'dbobjects/webapps.php';
+require_once 'time.class.php';
 
 /**
  * ____________________________________________________________________________
@@ -1240,27 +1241,6 @@ class appmonitorserver
     // ----------------------------------------------------------------------
     // output
     // ----------------------------------------------------------------------
-
-    /**
-     * Get a human readable time of a given age in seconds
-     * @param int $iSec  seconds
-     * @return string
-     */
-    protected function _hrTime(int $iSec): string
-    {
-        $sReturn = '';
-        $sReturn = $iSec . " sec";
-        if ($iSec > 60) {
-            $sReturn = round($iSec / 60) . " min";
-        }
-        if ($iSec > 60 * 60 * 2) {
-            $sReturn = round($iSec / (60 * 60)) . " h";
-        }
-        if ($iSec > 60 * 60 * 24 * 2) {
-            $sReturn = round($iSec / (60 * 60 * 24)) . " d";
-        }
-        return $sReturn;
-    }
 
     /**
      * Helper function for counters for overview over all web apps
