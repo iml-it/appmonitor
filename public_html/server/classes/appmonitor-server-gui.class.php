@@ -1373,7 +1373,7 @@ class appmonitorserver_gui extends appmonitorserver
      * @return string
      */
     public function getPartWebappUptimeAndNotification(array $aFilter): string {
-        $iAge=$aFilter['age']??90;
+        $iAge=(int) ($aFilter['age']??90);
         $aUptimeRanges=[1, 7, 28, 90, 365];
 
         $oA = new renderadminlte();
@@ -1391,11 +1391,11 @@ class appmonitorserver_gui extends appmonitorserver
             'value' => [],
             'color' => [],
         ];
-        foreach ($aUptime['counter'] as $iResult => $iResultCount) {
+        foreach ((array) $aUptime['counter'] as $iResult => $iResultCount) {
             if ($iResultCount) {
                 array_unshift($aChartData['label'], $this->_tr('Resulttype-' . $iResult));
                 array_unshift($aChartData['value'], $iResultCount);
-                array_unshift($aChartData['color'], $this->_getAdminLteColorByResult($iResult));
+                array_unshift($aChartData['color'], $this->_getAdminLteColorByResult((int) $iResult));
             }
         }
 
@@ -1405,7 +1405,7 @@ class appmonitorserver_gui extends appmonitorserver
             // 'yLabel'=>$this->_tr('Chart-responsetime'),
             'data' => $aChartData,
         ];
-        $iFirstentry = count($aLogs) ? $aLogs[count($aLogs) - 1]['timestamp'] : date('U');
+        // $iFirstentry = count($aLogs) ? $aLogs[count($aLogs) - 1]['timestamp'] : date('U');
 
         $sUptime = '';
         if ($aUptime['total']) {
@@ -1414,10 +1414,10 @@ class appmonitorserver_gui extends appmonitorserver
 
                 $sUptime .= $aUptime['counter'][$i]
                     ?
-                    '<tr class="result' . $i . '">'
-                    . '<td class="result' . $i . '">' . $this->_tr('Resulttype-' . $i) . '</td>'
-                    . '<td style="text-align: right">' . time::hrDelta($aUptime['counter'][$i]) . '</td>'
-                    . '<td style="text-align: right"> ' . number_format($aUptime['counter'][$i] * 100 / $aUptime['total'], 1) . ' %</td>'
+                    '<tr class="result' . (string) $i . '">'
+                    . '<td class="result' . (string) $i . '">' . $this->_tr('Resulttype-' . (int) $i) . '</td>'
+                    . '<td style="text-align: right">' . time::hrDelta((int) $aUptime['counter'][$i]) . '</td>'
+                    . '<td style="text-align: right"> ' . number_format(((int) $aUptime['counter'][$i] * 100 / (int) $aUptime['total']), 1) . ' %</td>'
                     . '</tr>'
                     : '';
             }

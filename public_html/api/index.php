@@ -83,7 +83,7 @@ $oMonitor->setUser($oApi->checkUser());
 
 // ----------------------------------------------------------------------
 // init router
-$sApiUrl=isset($_GET['request']) && $_GET['request'] ? $_GET['request'] : false;
+$sApiUrl=$_GET['request'] ?? false;
 $oRouter=new tinyrouter($aRoutes, $sApiUrl);
 
 $aFoundRoute=$oRouter->getRoute();
@@ -117,7 +117,7 @@ if($callback=='_help_'){
     die();
 }
 
-$sAction=isset($callback['method']) ? $callback['method'] : false;
+$sAction=isset($callback['method']) ? $callback['method'] : '';
 
 // ----------------------------------------------------------------------
 // get return data

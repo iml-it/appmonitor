@@ -39,6 +39,7 @@ require_once 'appmonitor-server.class.php';
  * 2024-07-17  0.137  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-11-14  0.141  axel.hahn@unibe.ch  API access with basic auth and hmac hash key
  * 2025-03-11  0.154  axel.hahn@unibe.ch  add routes wth public keyword in API
+ * 2026-02-18  0.178  axel.hahn@unibe.ch  add hard state and last application reposnses
  */
 class appmonitorserver_api extends appmonitorserver
 {
@@ -53,7 +54,7 @@ class appmonitorserver_api extends appmonitorserver
      */
     public function getApiConfig(): array
     {
-        return $this->_aCfg['api'] ?? [];
+        return (array) ($this->_aCfg['api'] ?? []);
     }
 
     /**
@@ -89,19 +90,19 @@ class appmonitorserver_api extends appmonitorserver
     public function getApiUsers(): array
     {
         $aReturn = [];
-        foreach ($this->_aCfg['users'] as $sLoopuser => $aUserdata) {
+        foreach ((array) ($this->_aCfg['users']??[]) as $sLoopuser => $aUserdata) {
             if (
-                array_search('api', $aUserdata['roles']) !== false
-                || array_search('*', $aUserdata['roles']) !== false
+                array_search('api', (array)($aUserdata['roles']??[])) !== false
+                || array_search('*', (array) ($aUserdata['roles']??[])) !== false
             ) {
-                $aReturn[$sLoopuser]['password'] = $aUserdata['password'] ?? false;
+                $aReturn[$sLoopuser]['password'] = $aUserdata['password'] ?? '';
             }
             // $aReturn[$sLoopuser] = $aUserdata['password'] ?? false;
-            if (isset($aUserdata['passwordhash']) && $aUserdata['passwordhash']) {
-                $aReturn[$sLoopuser]['passwordhash'] = $aUserdata['passwordhash'];
+            if ($aUserdata['passwordhash']??false) {
+                $aReturn[$sLoopuser]['passwordhash'] = $aUserdata['passwordhash']??'';
             }
-            if (isset($aUserdata['secret']) && $aUserdata['secret']) {
-                $aReturn[$sLoopuser]['secret'] = $aUserdata['secret'];
+            if ($aUserdata['secret']??false) {
+                $aReturn[$sLoopuser]['secret'] = $aUserdata['secret']??'';
             }
         }
         // print_r($aReturn);
@@ -133,13 +134,13 @@ class appmonitorserver_api extends appmonitorserver
         if (isset($aData['return'])) {
             $aReturn['monitoring'] = [
                 'status' => $aData['return'],
-                'statusmessage' => $this->getResultValue($aData["return"]),
+                'statusmessage' => $this->getResultValue((int) $aData["return"]),
                 'apps' => [
-                    'count' => $aData["results"]["total"],
-                    0 => ['count' => $aData["results"][0], 'label' => $this->getResultValue(0)],
-                    1 => ['count' => $aData["results"][1], 'label' => $this->getResultValue(1)],
-                    2 => ['count' => $aData["results"][2], 'label' => $this->getResultValue(2)],
-                    3 => ['count' => $aData["results"][3], 'label' => $this->getResultValue(3)],
+                    'count' => $aData["results"]["total"]??0,
+                    0 => ['count' => (int) ($aData["results"][0]??0), 'label' => $this->getResultValue(0)],
+                    1 => ['count' => (int) ($aData["results"][1]??0), 'label' => $this->getResultValue(1)],
+                    2 => ['count' => (int) ($aData["results"][2]??0), 'label' => $this->getResultValue(2)],
+                    3 => ['count' => (int) ($aData["results"][3]??0), 'label' => $this->getResultValue(3)],
                 ]
             ];
         }
@@ -189,7 +190,7 @@ class appmonitorserver_api extends appmonitorserver
             }
 
             if (isset($aFilter['appid'])) {
-                if ($sKey == $aFilter['appid']) {
+                if ($sKey === $aFilter['appid']) {
                     $iAdd++;
                 } else {
                     $iRemove++;
@@ -199,8 +200,8 @@ class appmonitorserver_api extends appmonitorserver
             // tags
             if (isset($aFilter['tags'])) {
                 if (isset($aData['meta']['tags'])) {
-                    foreach ($aFilter['tags'] as $sMustMatch) {
-                        if (in_array($sMustMatch, $aData['meta']['tags'])) {
+                    foreach ((array) $aFilter['tags'] as $sMustMatch) {
+                        if (in_array($sMustMatch, (array) $aData['meta']['tags'])) {
                             $iAdd++;
                         } else {
                             $iRemove++;
@@ -212,7 +213,7 @@ class appmonitorserver_api extends appmonitorserver
             }
 
             if (isset($aFilter['website'])) {
-                if (strstr($aData['meta']['website'], $aFilter['website'])) {
+                if (strstr((string) ($aData['meta']['website']??''), (string) $aFilter['website'])) {
                     $iAdd++;
                 } else {
                     $iRemove++;
@@ -223,10 +224,10 @@ class appmonitorserver_api extends appmonitorserver
 
                 // generate a key to sort apps
                 // reverse status code to bring errors on top
-                $iAppResult = RESULT_ERROR - ($aData['result']['result'] ?? 1);
+                $iAppResult = RESULT_ERROR - (int)($aData['result']['result'] ?? 1);
 
                 // ... and add appname
-                $sAppName = $iAppResult . '__' . strtoupper($aData['result']['website'] ?? 'zzz') . '__' . $sKey;
+                $sAppName = $iAppResult . '__' . strtoupper((string) ($aData['result']['website'] ?? 'zzz')) . '__' . $sKey;
 
                 switch ($outmode) {
 
@@ -252,7 +253,7 @@ class appmonitorserver_api extends appmonitorserver
                             $aTmp[$sAppName][$sKey]['meta']=[
                                 'host' => $aData['meta']['host'] ?? false,
                                 'website' => $aData['meta']['website'] ?? false,
-                                'result' => $aData['meta']['result'] ?? false,
+                                'result' => $aData['meta']['result'] ?? false,  // soft state
                                 'ttl' => $aData['meta']['ttl'] ?? false,
                             ];
                         } else {
@@ -264,9 +265,20 @@ class appmonitorserver_api extends appmonitorserver
                         // $sTsLast = $this->_oWebapps->get("timeupdated") ?? $this->_oWebapps->get("timecreated" );
                         // $aTmp[$sAppName][$sKey]['timestamp'] = (int)date("U", strtotime($sTsLast));
 
-                        $this->oNotification->setApp( $sKey);
-                        $aTmp[$sAppName][$sKey]['since'] = $this->oNotification->getAppLastNotification()['timestamp']??0; 
+                        $this->oNotification->setApp( (string) $sKey);
+                        $aLastNotification=$this->oNotification->getAppLastNotification(); 
+                        $aTmp[$sAppName][$sKey]['since'] = $aLastNotification['timestamp']??0; 
 
+                        $rrd = new simpleRrd();
+
+                        // ticket #8697
+                        $aTmp[$sAppName][$sKey]['state'] = [
+                            'result-soft' => $aData['meta']['result'] ?? false,
+                            'result-hard' => $aLastNotification['status'],
+                            'result-hard-since' => $aLastNotification['timestamp'],
+                            // 'resultcounter' => $aData['result']['resultcounter']??false,
+                            'lastresponses' => $rrd->getAllCounters(['appid'=>$sKey, 'countername'=>'_responsetime', 'limit'=>5], true)[$sKey]['_responsetime'],
+                        ]
                         ;
                     default:
                         ;
@@ -275,8 +287,8 @@ class appmonitorserver_api extends appmonitorserver
         }
         ksort($aTmp);
         foreach ($aTmp as $aApp) {
-            $sKey = array_keys($aApp)[0];
-            $aReturn[$sKey] = $aApp[$sKey];
+            $sKey = array_keys((array) $aApp)[0];
+            $aReturn[$sKey] = $aApp[(string) $sKey];
         }
 
         return $aReturn;

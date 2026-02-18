@@ -25,6 +25,7 @@
  * 2024-07-18  axel.hahn@unibe.ch  php 8 only: use typed variables
  * 2024-11-14  axel.hahn@unibe.ch  API access with basic auth and hmac hash key
  * 2024-11-15  axel.hahn@unibe.ch  Update hmac hash key; send 401 on authenttication error (before: 403)
+ * 2026-02-18  axel.hahn@unibe.ch  do not force http1.1 in response; linting stuff
  **/
 
 namespace iml;
@@ -81,7 +82,7 @@ class tinyapi
 
     /**
      * Prettyfy json
-     * @var  string
+     * @var  bool
      */
     protected bool $_bPretty = false;
 
@@ -94,16 +95,16 @@ class tinyapi
     public function __construct(array $aRequirements = [])
     {
         if (isset($aRequirements['methods'])) {
-            $this->allowMethods($aRequirements['methods']);
+            $this->allowMethods((array) $aRequirements['methods']);
         }
         if (isset($aRequirements['ips'])) {
-            $this->allowIPs($aRequirements['ips']);
+            $this->allowIPs((array) $aRequirements['ips']);
         }
         if (isset($aRequirements['users'])) {
-            $this->allowUsers($aRequirements['users']);
+            $this->allowUsers((array) $aRequirements['users']);
         }
         if (isset($aRequirements['pretty'])) {
-            $this->setPretty($aRequirements['pretty']);
+            $this->setPretty((bool) $aRequirements['pretty']);
         }
         header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Headers: *");
@@ -128,21 +129,21 @@ class tinyapi
 
     /**
      * Set allowed http methods
-     * @param  array  aMethods  array of strings containing GET, PUT, POST, DELETE, OPTIONS
+     * @param array  $aMethods  array of strings containing GET, PUT, POST, DELETE, OPTIONS
      * @return bool
      */
     public function allowMethods(array $aMethods): bool
     {
         $this->_aAllowedMethods = $aMethods;
         if (count($aMethods)) {
-            header("Access-Control-Allow-Methods: " . implode(", ", $this->_aAllowedMethods));
+            header("Access-Control-Allow-Methods: " . implode(", ", $aMethods));
         }
         return true;
     }
 
     /**
      * Set allowed ip addresses by a given list of regex
-     * @param  array  aIpRegex  array of regex
+     * @param  array  $aIpRegex  array of regex
      * @return bool
      */
     public function allowIPs(array $aIpRegex): bool
@@ -153,7 +154,7 @@ class tinyapi
 
     /**
      * Set allowed users
-     * @param  array  aUsers  array of allowed users; key= username ('*' or userid); subkeys: 
+     * @param  array  $aUsers  array of allowed users; key= username ('*' or userid); subkeys: 
      *                        - 'password'; value = password hash (BASIC AUTH) and/ or 
      *                        - 'secret'; clear text for hmac
      * @return bool
@@ -168,12 +169,12 @@ class tinyapi
 
     /**
      * Check allowed http methods
-     * @param  array  aMethods  optional: array of strings containing GET, PUT, POST, DELETE, OPTIONS
+     * @param  array  $aMethods  optional: array of strings containing GET, PUT, POST, DELETE, OPTIONS
      * @return bool
      */
     public function checkMethod(array $aMethods = []): bool
     {
-        $this->_sMethod = $_SERVER['REQUEST_METHOD'] ?? false;
+        $this->_sMethod = $_SERVER['REQUEST_METHOD'] ?? '';
 
         if (!$this->_sMethod) {
             die("ABORT: http request required.");
@@ -236,14 +237,14 @@ class tinyapi
      * @example:
      * $oYourApp->setUser($oTinyApi->checkUser());
      * 
-     * @return void|string
+     * @return string
      */
     public function checkUser(): string
     {
         if (
             isset($this->_aAllowedUsers['*'])
             && isset($this->_aAllowedUsers['*']['password'])
-            && $this->_aAllowedUsers['*']['password'] == false
+            && ($this->_aAllowedUsers['*']['password']??'....') === false
         ) {
             return '*';
         }
@@ -263,7 +264,7 @@ class tinyapi
                 }
             }
 
-            $aAuth = explode(':', $sAuthline);
+            $aAuth = explode(':', (string) $sAuthline);
             // $this->_addDebug("auth line -> $sAuthline");
 
             if (is_array($aAuth) && count($aAuth) == 2) {
@@ -321,11 +322,12 @@ class tinyapi
         // check if a user ist set with basic auth
         foreach (['PHP_AUTH_USER'] as $sUserkey) {
             if (isset($_SERVER[$sUserkey]) && $this->_aAllowBasicAuth) {
-                return $_SERVER[$sUserkey];
+                return (string) $_SERVER[$sUserkey];
             }
         }
 
         $this->sendError(401, 'ERROR: A valid user is required.');
+        return 'no-return-value';
     }
 
     // ----------------------------------------------------------------------
@@ -355,7 +357,7 @@ class tinyapi
      * If no key as 2nd param is given the given array will be added as new array element.
      * With a given key the key will be used to set data (existing key will be replaced)
      * 
-     * @param  mixed   $data   additional response data
+     * @param  mixed   $aData  additional response data
      * @param  string  $sKey   optional: use key 
      * @return boolean
      */
@@ -370,13 +372,13 @@ class tinyapi
     }
 
     /**
-     * Set response data; "should" be an array
-     * @param  array  $aData  response data
+     * Prettyfy JSON response
+     * @param  bool  $bPretty  flag: bool to prettyfy; true=yes; false=send compressed data
      * @return boolean
      */
     public function setPretty(bool $bPretty): bool
     {
-        return $this->_bPretty = !!$bPretty;
+        return $this->_bPretty = $bPretty;
     }
 
     // ----------------------------------------------------------------------
@@ -430,7 +432,7 @@ class tinyapi
         if (isset($this->_aData['http'])) {
             $iStatusCode = $this->_aData['http'];
             if (isset($_aHeader[$iStatusCode]['header'])) {
-                $this->_aData['_header'] = 'HTTP/1.1 ' . $iStatusCode . ' ' . $_aHeader[$iStatusCode]['header'];
+                $this->_aData['_header'] = $_SERVER['SERVER_PROTOCOL'] . " $iStatusCode ".(string) $_aHeader[$iStatusCode]['header'];
                 // do not send non 200 header if method is OPTIONS
                 if ($this->_sMethod !== 'OPTIONS') {
                     header($this->_aData['_header']);

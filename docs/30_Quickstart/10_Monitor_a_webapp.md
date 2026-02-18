@@ -2,7 +2,12 @@
 
 This is an overview about needed installations or actions.
 
-``` mermaid
+```mermaid
+---
+config:
+  look: handDrawn
+  theme: base
+---
 flowchart TD
 
     %% ----- STYLING
@@ -39,7 +44,7 @@ flowchart TD
     MOREAPPS{One more<br>webapp?}
 
 
-    %% ----- NODES
+    %% ----- CONNECTORS
 
     START --> SRV:::ok --> AddAppminitorCheck --> LOOPSTART
     LOOPSTART --> WannaMonitor

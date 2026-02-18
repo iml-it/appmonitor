@@ -9,7 +9,7 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
- * 2025-02-25  ___  ah  last changes
+ * 2025-08-19  ___  ah  last changes
  * ======================================================================
  */
 
@@ -173,7 +173,7 @@ class pdo_db
     public function _wd(string $s, string $sTable = ''): bool
     {
         if ($this->_bDebug) {
-            $sMsg = "DEBUG: ".  ($sTable ? "{ $sTable } - " : '') . " $s";
+            $sMsg = "DEBUG: " . ($sTable ? "{ $sTable } - " : '') . " $s";
             echo $this->_bHtml
                 ? "<div style=\"color: #888; background: #f8f8f8;\">$sMsg</div>"
                 : "$sMsg\n"
@@ -322,7 +322,7 @@ class pdo_db
      */
     public function error(): string
     {
-        if ($this->_iLastError >=0 ) {
+        if ($this->_iLastError >= 0) {
             return $this->_aLogmessages[$this->_iLastError]['message'];
         }
         return '';
@@ -532,7 +532,7 @@ class pdo_db
      * @param array  $aTables   optional: array of tables to dump; default: false (dumps all tables)
      * @return mixed  array of data on success or false on error
      */
-    public function dump(string $sOutfile = '', array $aTables = []): array|bool
+    public function dump_old(string $sOutfile = '', array $aTables = []): array|bool
     {
 
         $aResult = [];
@@ -589,6 +589,145 @@ class pdo_db
     }
 
     /**
+     * Helper function for dump(): append a line to a given file
+     * @param string  $sFile     filename to write
+     * @param string  $sContent  textline to write (without trailing "\n") 
+     * @param integer $flags     optional: file_put_contents flags; default: 0 (= create new file or overwrite it)
+     * @return bool
+     */
+    protected function _write2File($sFile, $sContent, $flags = 0)
+    {
+        if (!file_put_contents($sFile, "$sContent\n", $flags)) {
+            $this->_log(PB_LOGLEVEL_ERROR, '[DB]', "dump", "Unable to write /append to file '$sFile'.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Dump a database to an array.
+     * Optional it can write a json file to disk
+     * 
+     * @see import()
+     * @param string $sOutfile  optional: output file name
+     * @param array  $aTables   optional: array of tables to dump; default: false (dumps all tables)
+     * @return mixed  array of data on success or false on error
+     */
+    public function dump(string $sOutfile = '', array $aTables = []): array|bool
+    {
+        $this->_wd(__METHOD__ . ' Writing to ' . $sOutfile . ' ' . (count($aTables) ? 'tables: ' . implode(', ', $aTables) : '(all tables)'));
+
+        // ----- checks
+        if (!$this->db) {
+            $this->_log(PB_LOGLEVEL_WARN, '[DB]', __METHOD__, 'Cannot dump. Database was not set yet.');
+            return false;
+        }
+        $_sDriver = $this->driver();
+        if (!isset($this->_aSql[$_sDriver])) {
+            $this->_log(PB_LOGLEVEL_WARN, '[DB]', __METHOD__, 'Cannot dump. Unknown database driver "' . $_sDriver . '".');
+            return false;
+        }
+
+        if (!is_dir(dirname($sOutfile))) {
+            $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, 'Directory "' . dirname($sOutfile) . '" does not exist. Output file cannot be written.');
+            return false;
+        }
+
+        // ----- get all tables
+        $_aTableList = count($aTables) ? $aTables : $this->showTables();
+        if (!$_aTableList || !count($_aTableList)) {
+            $this->_log(PB_LOGLEVEL_WARN, '[DB]', __METHOD__, 'Cannot dump. No tables were found.');
+            return false;
+        }
+
+        // ----- start
+        $aMeta = [
+            ':meta:' => [
+                'timestamp' => date("Y-m-d H:i:s"),
+                'driver' => $this->driver(),
+                'tables' => $_aTableList
+            ]
+        ];
+        if (!$this->_write2File($sOutfile, json_encode($aMeta))) {
+            return false;
+        }
+
+        // ----- read each table
+        foreach ($_aTableList as $sTablename) {
+            $this->_wd(__METHOD__ . ' Reading table ' . $sTablename);
+
+            $sSqlCreate = sprintf($this->_aSql[$this->driver()]['getcreate'], $sTablename, 1);
+            $oCreate = $this->db->query($sSqlCreate);
+            $sCreateStatement = $oCreate->fetchAll(PDO::FETCH_COLUMN)[0];
+            if (!preg_match('/^CREATE TABLE/i', $sCreateStatement)) {
+                if (!$this->_write2File($sOutfile, "; Table [$sTablename] does not exist yet.", FILE_APPEND)) {
+                    return false;
+                }
+
+            } else {
+
+                $aMeta = [
+                    $sTablename => [
+                        'create' => $sCreateStatement,
+                    ],
+                ];
+                // file_put_contents($sOutfile, json_encode($aMeta)."\n", FILE_APPEND);
+                if (!$this->_write2File($sOutfile, json_encode($aMeta), FILE_APPEND)) {
+                    return false;
+                }
+
+
+                $odbtables = $this->db->query('SELECT * FROM `' . $sTablename . '` ');
+                $iRow = 0;
+                foreach ($odbtables->fetchAll(PDO::FETCH_ASSOC) as $aRow) {
+                    $iRow++;
+                    if ($iRow == 1) {
+                        $aMeta = [
+                            $sTablename => [
+                                'columns' => array_keys($aRow),
+                            ],
+                        ];
+                        // file_put_contents($sOutfile, json_encode($aMeta)."\n", FILE_APPEND);
+                        if (!$this->_write2File($sOutfile, json_encode($aMeta), FILE_APPEND)) {
+                            return false;
+                        }
+
+                    }
+                    $aMeta = [
+                        $sTablename => [
+                            'data' => array_values($aRow),
+                        ],
+                    ];
+                    // file_put_contents($sOutfile, str_replace(PHP_EOL,"\n", json_encode($aMeta))."\n", FILE_APPEND);
+                    if (!$this->_write2File($sOutfile, json_encode($aMeta), FILE_APPEND)) {
+                        return false;
+                    }
+
+                }
+            }
+
+        }
+
+        // ----- finish
+        $aMeta = [
+            ':done:' => [
+                'timestamp' => date("Y-m-d H:i:s"),
+            ]
+        ];
+        // file_put_contents($sOutfile, json_encode($aMeta)."\n", FILE_APPEND);
+        if (!$this->_write2File($sOutfile, json_encode($aMeta), FILE_APPEND)) {
+            return false;
+        }
+
+        // echo '<pre>';
+        // echo file_get_contents($sOutfile);
+        // echo '</pre>';
+        // unlink($sOutfile);
+
+        return true;
+    }
+
+    /**
      * Import data from a json file; reverse function of dump()
      * TODO: handle options array
      * 
@@ -596,7 +735,7 @@ class pdo_db
      * $aOptions = [
      *     'global' => [
      *         'drop' => false,
-     *         'create-if-not-exists' => true,
+     *         'create' => true, // create table if it does not exist
      *         'import' => true,
      *     ],
      *     // when given, only these tables will be imported
@@ -618,7 +757,7 @@ class pdo_db
      *                               - 'tables' {array}  options for all tables 
      * @return boolean
      */
-    public function import(string $sFile, array $aOptions = []): bool
+    public function import_old(string $sFile, array $aOptions = []): bool
     {
         $this->_wd(__METHOD__);
         if (!$this->db) {
@@ -662,6 +801,337 @@ class pdo_db
             }
         }
         return true;
+    }
+
+    /**
+     * helper function for import() method to handle the bolk import
+     * 
+     * @param string $sAction     Name of action; one of reset|add|flush
+     * @param array  $aRow        for add: new data row
+     * @param int    $iLimit      limit of rows before starting INSERT statement
+     * @param string $sSqlInsert  sql base statement without values
+     * @return bool
+     */
+    protected function _importBulk($sAction, $aRow=[], $iLimit=1, $sSqlInsert=""){
+        static $sSqlData;
+        static $aData;
+        static $iRows;
+        switch ($sAction){
+            case 'reset':
+                $sSqlData = '';
+                $aData = [];
+                $iRows = 0;
+                break;
+            case 'add':
+                // $aData[] = $aRow;
+                $sSqlData.= ($sSqlData ? ', ' : '') . '(';
+                $id=$aRow[0];
+                $iCol=0;
+                $sSqlRow='';
+                foreach($aRow as $val){
+                    $iCol++;
+                    $datakey="id_{$id}__col_{$iCol}";
+                    $sSqlRow.= ($sSqlRow ? ", ": "") . ":$datakey";
+                    $aData[$datakey]=$val;
+                }
+                $sSqlData.=$sSqlRow . ") ";
+                $iRows++;
+                break;
+            case 'flush':
+                break;
+            default:
+                $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, " Unknown action $sAction");
+                return false;
+        }
+
+        if(( $iRows>=$iLimit || $sAction=='flush') && count($aData)){
+            $this->_log(PB_LOGLEVEL_INFO, '[DB]', __METHOD__, " Flushing / importing bulk data after $iRows datasets - $sAction");
+            $sSql="$sSqlInsert $sSqlData";
+            $aReturn = $this->makeQuery($sSql, $aData);
+            if ($aReturn === false) {
+                return false;
+            }
+
+            $this->_importBulk('reset');
+
+            return true;
+        }
+        return true;
+    }
+
+    /**
+     * Import data from a json file; reverse function of dump()
+     * TODO: handle options array
+     * 
+     * @example:
+     * $aOptions = [
+     *     'global' => [
+     *         'drop' => true,
+     *         'create' => true,
+     *         'import' => true,
+     *         'rows2instert' => 30
+     *     ],
+     *     // TODO: add options for each table
+     *     // when given, only these tables will be imported
+     *     'tables' => [
+     *         'table1' => [
+     *              // optionally: override global settings
+     *             'drop' => false,
+     *             'create' => true,
+     *             'import' => true,
+     *         ],
+     *         'tableN' => [
+     *             ...
+     *         ]
+     ]
+     * @see dump()
+     * @param  string   $sFile     json file to import
+     * @param  array    $aOptions  UNUSED optional: options array with these keys
+     *                               - 'global' {array}  options for all tables 
+     *                                       'drop'   bool  Drop a table before input; default: true
+     *                                       'create' bool  Create a table if not exists; default: true
+     *                                       'import' bool  Import data; default: true
+     *                               - 'tables' {array}  options for all tables - TODO
+     * @return boolean
+     */
+    public function import(string $sFile, array $aOptions = []): bool
+    {
+        $this->_wd(__METHOD__);
+        if (!$this->db) {
+            $this->_log(PB_LOGLEVEL_WARN, '[DB]', __METHOD__, 'Cannot import. Database was not set yet.');
+            return false;
+        }
+        if (!file_exists($sFile)) {
+            $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, 'Cannot import. Given file does not extist [' . $sFile . '].');
+            return false;
+        }
+
+        $aOpt = [
+            'global' => [
+                'drop' => $aOptions['global']['drop'] ?? true,
+                'create' => $aOptions['global']['create'] ?? true,
+                'import' => $aOptions['global']['import'] ?? true,
+                'rows2instert' => $aOptions['global']['rows2instert'] ?? 30,
+            ],
+            // when given, only these tables will be imported
+            'tables' => [],
+        ];
+
+        $aColumns = [];
+        $iLine = 0;
+        $iRows2insert = $aOpt['global']['rows2instert'];
+        $bCheckUpdateOrInsert = false;
+        $sSqlInsertBase='';
+        foreach (file($sFile) as $jsonLine) {
+            $iLine++;
+            $aTmp = json_decode($jsonLine, true);
+            if (!is_array($aTmp)) {
+                continue;
+            }
+            $sTablename = array_key_first($aTmp);
+            $aData = $aTmp[$sTablename];
+
+            switch ($sTablename) {
+                case ':meta:':
+                    $this->_wd(__METHOD__ . ": Metadata $jsonLine");
+                    break;
+                case ':done:':
+                    $this->_wd(__METHOD__ . ": Last line was reached. $jsonLine");
+                    $this->_log(PB_LOGLEVEL_INFO, '[DB]', __METHOD__, "Last line was reached. $jsonLine.");
+
+                    if(!$this->_importBulk('flush', [], 1, $sSqlInsertBase)){
+                        $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, " Import failed. Stopped on <br>query $sSql <br>Line: $iLine: $jsonLine<br>" . $this->error());
+                        return false;
+                    }
+
+                    break;
+                default:
+                    $sType = array_key_first($aData);
+
+                    $this->_wd(__METHOD__ . ": table $sTablename ($sType)");
+                    switch ($sType) {
+                        case 'create':
+
+                            // get Create statement for current object with current database driver
+                            $sSqlCreate = sprintf($this->_aSql[$this->driver()]['getcreate'], $sTablename, 1);
+                            $oCreate = $this->db->query($sSqlCreate);
+                            $sSqlCreateTable = $oCreate->fetchAll(PDO::FETCH_COLUMN)[0]??'';
+
+                            if(!$sSqlCreateTable){
+                                $sSqlCreateTable = $aData[$sType];
+                            }
+
+                            if ($aOpt['global']['drop'] ?? false) {
+                                if ($this->makeQuery('DROP TABLE IF EXISTS `' . $sTablename . '`') === false) {
+                                    $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, "Dropping of table $sTablename failed.");
+                                    return false;
+                                }
+                            }
+
+                            if ($this->tableExists($sTablename)) {
+                                $this->_wd(__METHOD__ . "Table [$sTablename] already exists. Skipping.");
+                                $iRows2insert=1;
+                                $bCheckUpdateOrInsert=true;
+                            } else {
+                                if ($aOpt['global']['create'] ?? false) {
+
+                                    if ($this->makeQuery($sSqlCreateTable) === false) {
+                                        $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, "Creation of missing table [$sTablename] failed.");
+                                        return false;
+                                    }
+                                } else {
+                                    $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, "Table [$sTablename] does not exist and creation flag 'global'->'create' was not set to true.");
+                                    return false;
+                                }
+                            }
+                            break;
+                        case 'columns':
+                            $this->_wd(__METHOD__ . "Table [$sTablename] set columns " . print_r($aData[$sType], 1));
+
+                            if($sSqlInsertBase){
+                                if(!$this->_importBulk('flush', $aData[$sType], 1, $sSqlInsertBase)){
+                                    $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, " Import failed. Stopped on <br>query $sSql <br>Line: $iLine: $jsonLine<br>" . $this->error());
+                                    return false;
+                                }
+                                $sSqlInsertBase='';
+                            }
+
+                            $aColumns = $aData[$sType];
+                            $sSqlInsertBase='INSERT INTO `' . $sTablename . '` '
+                                            .'(' . implode(',', $aColumns) . ') VALUES '
+                                            ;
+                            if(!$this->_importBulk('reset', [], 1, "")){
+                            }
+                            break;
+                        case 'data':
+                            if ($aOpt['global']['import'] ?? false) {
+                                if($iRows2insert==1){
+                                    
+                                    $aRow = [];
+                                    $iCol = 0;
+                                    foreach ($aColumns as $sColname) {
+                                        $aRow[$sColname] = $aData[$sType][$iCol];
+                                        $iCol++;
+                                    }                                
+
+                                    $sSql = $sSqlInsertBase
+                                        .' (:' . implode(', :', $aColumns) . ')'
+                                        ;
+                                    if($bCheckUpdateOrInsert) {
+                                        $sSqlTest = "SELECT id FROM `$sTablename` WHERE id=:id;";
+                                        if ($this->makeQuery($sSqlTest, [':id' => $aRow['id']])) {
+                                            // id exists ... we need to update
+                                            $sValues = '';
+                                            $aUpdateColumns = $aColumns;
+                                            unset($aUpdateColumns[0]);// remove "id"
+                                            foreach ($aUpdateColumns as $sColname) {
+                                                $sValues .= ($sValues ? ', ' : '') . "`$sColname` = :$sColname";
+                                            }
+                                            $sSql = "UPDATE `$sTablename` SET $sValues WHERE `id` = :id";
+                                        }
+                                    }
+                                    $aReturn = $this->makeQuery($sSql, $aRow);
+                                    if ($aReturn === false) {
+                                        $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, " Import failed. Stopped on <br>query $sSql <br>Line: $iLine: $jsonLine<br>" . $this->error());
+                                        return false;
+                                    }
+                                } else {
+                                    if(!$this->_importBulk('add', $aData[$sType], $iRows2insert, $sSqlInsertBase)){
+                                        $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, " Import failed. Stopped on <br>query $sSql <br>Line: $iLine: $jsonLine<br>" . $this->error());
+                                        return false;
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, " unknown type $sType <br>Line: $iLine: $jsonLine");
+                    }
+                    break;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Analyze given backup file and generate a summary
+     * If an error occured then the key 'error' will be set
+     * If OK you get the list of tables and count of datasets to import
+     * The returned array is like this:
+     * 
+     * [
+     *     'file' => <filename>,
+     *     'completed' => <bool>,
+     *     'meta' => <array>,
+     *     'rows' => [
+     *         <table1> => <rowcount>,
+     *         <tableN> => <rowcount>,
+     *      ],
+     *     'counters' => [
+     *         'tables' => <number_of_tables>,
+     *         'roes' => <number_of_rows_total>,
+     *      ],
+     * ]
+     * 
+     * ... or if an error occured:
+     * [
+     *     'file' => <filename>,
+     *     'completed' => false,
+     *     'error' => <string>,
+     * ]
+     * 
+     * @param string $sFile
+     * @return array
+     */
+    public function dumpAnalyzer(string $sFile): array
+    {
+        $aReturn = [
+            'file' => $sFile,
+            'completed' => false,
+        ];
+        $this->_wd(__METHOD__);
+        if (!$this->db) {
+            $aReturn['error'] = 'Database was not set yet.';
+            $this->_log(PB_LOGLEVEL_WARN, '[DB]', __METHOD__, $aReturn['error']);
+            return $aReturn;
+        }
+        if (!file_exists($sFile)) {
+            $aReturn['error'] = 'File does not extist.';
+            $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, 'Given file does not extist [' . $sFile . '].');
+            return $aReturn;
+        }
+
+        $iRows = 0;
+        foreach (file($sFile) as $jsonLine) {
+            $aTmp = json_decode($jsonLine, true);
+            if (!is_array($aTmp)) {
+                continue;
+            }
+            $sTablename = array_key_first($aTmp);
+            $aData = $aTmp[$sTablename];
+            switch ($sTablename) {
+                case ':meta:':
+                    $this->_wd(__METHOD__ . ": Metadata $jsonLine");
+                    $aReturn['meta'] = $aData;
+                    break;
+                case ':done:':
+                    $aReturn['completed'] = $aData;
+                default:
+                    $sType = array_key_first($aData);
+                    if ($sType == 'create') {
+                        $aReturn['rows'][$sTablename] = 0;
+                    }
+                    if ($sType == 'data') {
+                        $aReturn['rows'][$sTablename]++;
+                        $iRows++;
+                    }
+                    break;
+            }
+        }
+        $aReturn['counters']=[
+            'tables'=>count($aReturn['rows']??[]),
+            'rows'=>$iRows,
+        ];
+        return $aReturn;
     }
 }
 
