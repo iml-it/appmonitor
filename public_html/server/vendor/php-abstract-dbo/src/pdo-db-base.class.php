@@ -19,6 +19,7 @@
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
  * 2025-05-22  ___  ah  add input type "range"
+ * 2026-02-17  ___  ah  change _pdo private -> protected
  * ======================================================================
  */
 
@@ -48,7 +49,7 @@ class pdo_db_base
      * object of pdo database instance
      * @var object
      */
-    private object $_pdo;
+    protected object $_pdo;
 
     /**
      * a single object

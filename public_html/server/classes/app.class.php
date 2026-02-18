@@ -20,6 +20,7 @@
  * @author hahn
  * 
  * 2025-12-10  axel.hahn@unibe.ch  first lines
+ * 2026-02-18  axel.hahn@unibe.ch  Lint check using Mago
  */
 
 class app
@@ -29,9 +30,9 @@ class app
      * array from objwebapps.lastresult
      * @var array
      */
-    protected $_a = [];
+    protected array $_a = [];
 
-    protected $_iMinTTL = 60;
+    protected int $_iMinTTL = 60;
 
     public function __construct(array $aLastresult = [])
     {
@@ -44,7 +45,7 @@ class app
      * @param array $aLastresult  array from objwebapps.lastresult
      * @return void
      */
-    public function set(array $aLastresult)
+    public function set(array $aLastresult): void
     {
         $this->_a = $aLastresult;
     }
@@ -99,7 +100,7 @@ class app
     /**
      * Return set application data
      *
-     * @return string  the hostname
+     * @return array  the hostname
      */
     public function get(): array
     {
@@ -115,7 +116,7 @@ class app
      */
     public function host(): string
     {
-        return $this->_a["result"]["host"] ?? '';
+        return (string) ($this->_a["result"]["host"] ?? '');
     }
 
     /**
@@ -126,7 +127,7 @@ class app
      */
     public function label(): string
     {
-        return $this->_a["result"]["website"] ?? '';
+        return (string) ($this->_a["result"]["website"] ?? '');
     }
 
     /**
@@ -138,7 +139,7 @@ class app
      */
     public function status(): int
     {
-        return $this->_a['result']['result'] ?? -1;
+        return (int) ($this->_a['result']['result'] ?? -1);
     }
 
     /**
@@ -149,7 +150,7 @@ class app
      */
     public function tags(): array
     {
-        return $this->_a['meta']['tags'] ?? [];
+        return (array) ($this->_a['meta']['tags'] ?? []);
     }
 
     /**
@@ -160,7 +161,7 @@ class app
      */
     public function timestamp(): int
     {
-        return $this->_a['timestamp'] ?? -1;
+        return (int) ($this->_a['timestamp'] ?? -1);
     }
 
     /**
@@ -172,7 +173,7 @@ class app
      */
     public function ttl(): int
     {
-        return $this->_a['result']['ttl']??$this->_iMinTTL;
+        return (int) ($this->_a['result']['ttl']??$this->_iMinTTL);
     }
 
     /**
@@ -183,7 +184,7 @@ class app
      */
     public function url(): string
     {
-        return $this->_a["result"]["url"] ?? '';
+        return (string) ($this->_a["result"]["url"] ?? '');
     }
 
     /**
@@ -208,7 +209,7 @@ class app
      */
     public function checks(): array
     {
-        return $this->_a['checks']??[];
+        return (array) ($this->_a['checks']??[]);
     }
 
     // ----------------------------------------------------------------------
@@ -224,7 +225,7 @@ class app
      */
     public function http_error(): string 
     {
-        return $this->_a['result']['error'] ?? '';
+        return (string) ($this->_a['result']['error'] ?? '');
     }
 
     /**
@@ -236,7 +237,7 @@ class app
      */
     public function http_header(): string 
     {
-        return $this->_a['result']['header'] ?? '';
+        return (string) ($this->_a['result']['header'] ?? '');
     }
 
     /**
@@ -247,7 +248,7 @@ class app
      */
     public function http_status(): int 
     {
-        return $this->_a['result']['httpstatus'] ?? -1;
+        return (int) ($this->_a['result']['httpstatus'] ?? -1);
     }
 
     // ----------------------------------------------------------------------
@@ -256,6 +257,7 @@ class app
 
     /**
      * get the age of the last result in seconds
+     * It returns -1 if -> result -> ts does not exist
      * -> result -> ts
      * 
      * @return int age in seconds
@@ -263,7 +265,7 @@ class app
     public function age(): int
     {
         return $this->_a['result']['ts']??false
-            ? time() - $this->_a['result']['ts'] 
+            ? time() - (int) ($this->_a['result']['ts']??0)
             : -1
         ;
     }

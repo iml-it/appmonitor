@@ -215,9 +215,12 @@ class simpleRrd
     /**
      * Get array of all counters
      * 
+     * @param array  $aFilter  filter rrd data; keys are:
+     *                         - appid
+     *                         - countername
      * @return array
      */
-    public function getAllCounters(array $aFilter=[]): array
+    public function getAllCounters(array $aFilter=[], $bAsArray=false): array
     {
 
         $aSearchresult = $this->_oSimplerrd->search(
@@ -235,7 +238,13 @@ class simpleRrd
         $sSortKey1="appid";
         $sSortKey2="countername";
         foreach ($aSearchresult?:[] as $aRow) {
-            $aReturn[$aRow[$sSortKey1]][$aRow[$sSortKey2]] = $aRow['data'];
+            $aAlldata=json_decode($aRow['data'], true);
+            if ((int) ($aFilter['limit']??0)){
+                $data=array_slice((array) $aAlldata, count((array) $aAlldata)-(int) $aFilter['limit']-1, (int) $aFilter['limit']);
+            } else {
+                $data=$aAlldata;
+            }
+            $aReturn[$aRow[$sSortKey1]][$aRow[$sSortKey2]] = $bAsArray ? $data : json_encode($data);
         }
         return $aReturn;
     }

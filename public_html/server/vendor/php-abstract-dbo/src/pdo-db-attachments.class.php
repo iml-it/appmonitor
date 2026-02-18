@@ -1,4 +1,17 @@
 <?php
+/**
+ * ======================================================================
+ * 
+ * PDO OBJECT :: Attachment
+ * 
+ * ----------------------------------------------------------------------
+ * Author: Axel Hahn
+ * Licence: GNU GPL 3.0
+ * ----------------------------------------------------------------------
+ * 2025-11-17  ___  ah  last changes
+ * ======================================================================
+ */
+
 namespace axelhahn;
 
 require_once 'pdo-db-base.class.php';
@@ -85,7 +98,13 @@ class pdo_db_attachments extends pdo_db_base{
      */
     public function uploadFile(array $aFile = []): bool|int{
         // print_r($aFile);
+        $this->_wd(__METHOD__.'('.print_r($aFile, true).')');
         if(!($aFile['tmp_name']??false)){
+            $this->_log(
+                PB_LOGLEVEL_ERROR, 
+                __METHOD__, 
+                "Parameter array has no key 'tmp_name'."
+            );
             return false;
         }
         
@@ -94,6 +113,7 @@ class pdo_db_attachments extends pdo_db_base{
         $target_file=$this->_sUploadDir.'/'.$sTargetFolder. '/'.$sTargetFilemae;
         if($aFile['error']==0){
             if(!is_dir($this->_sUploadDir.'/'.$sTargetFolder)){
+                $this->_wd(__METHOD__." Create $this->_sUploadDir.'/'.$sTargetFolder");
                 if(!mkdir($this->_sUploadDir.'/'.$sTargetFolder, 0750, true)){
                     $this->_log(
                         PB_LOGLEVEL_ERROR, 
@@ -102,7 +122,9 @@ class pdo_db_attachments extends pdo_db_base{
                     );
                 }
             }
+            $this->_wd(__METHOD__." Move tmpname to $target_file");
             if (move_uploaded_file($aFile["tmp_name"], $target_file)) {
+                $this->_wd(__METHOD__." Create item for uploaded file");
                 $this->new();
                 $this->setItem([
                     'label'=>basename($aFile["name"]),
@@ -113,6 +135,7 @@ class pdo_db_attachments extends pdo_db_base{
                     'width'=>NULL,
                     'height'=>NULL,
                 ]);
+                $this->_wd(__METHOD__." save()");
                 if($this->save()){
                     return $this->id();
                 } else {

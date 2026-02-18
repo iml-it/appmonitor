@@ -26,23 +26,38 @@ To use pretty urls like `https://www.example.com/[API-URL]` you need a rewrite r
 ## How does it work?
 
 ```mermaid
-graph TD;
-  Start((Start))
-  --> chkMethod{Method enabled?}
-  --> |yes|chkIp{IP allowed?}
-  --> |yes|chkUser{if Authorization detected: auth is valid?}
-  --> |yes|chkRoute{Find matching route}
-  --> |yes|chkList{Is a listing?}
-  --> |yes|sendHeader
-  --> GetData
-  --> |yes|sendJson
-  --> End((End))
+---
+config:
+  look: handDrawn
+  theme: base
+---
+sequenceDiagram
+    
+    rect rgb(250, 247, 240)
+        note right of Test: Pre checks
+        Test->>+Check: Method allowed?
+        Check->>+Error: no - 400: Bad request - GET only
+        Check-->>-Test: yes
 
-  chkMethod-->|no|onlyGet[ERROR 400: GET only]-->stop1((Stop))
-  chkIp-->|no|denyIp[ERROR 403: access denied]-->stop2((Stop))
-  chkUser-->|no|denyUser[ERROR 401: access denied]-->stop3((Stop))
-  chkRoute-->|no|onlyNoRoute[ERROR 400: no Route]-->stop5((Stop))
-  chkList-->|yes|showSubitems-->End
+        Test->>+Check: IP allowed?
+        Check->>+Error: no - 403: Access denied
+        Check-->>-Test: yes
+
+        Test->>+Check: Authentication is valid?
+        Check->>+Error: no - 401: Unauthorized
+        Check-->>-Test: yes
+
+        Test->>+Check: Find matching route
+        Check->>+Error: no - 400: Bad request - no valid Route
+        Check-->>-Test: yes
+    end
+
+    rect rgb(240, 250, 240)
+        note right of Test: Send data
+        Test->>+Check: Is it a listing?
+        Check->>+OK: yes - 200: Show subitems
+        Check->>-OK: no - 200: Send JSON data
+    end
 ```
 
 ## Usage
@@ -393,9 +408,72 @@ Key               | Type   | Description
             "httpstatus": 200,
             "error": false,
             "curlerrorcode": 0,
-            "curlerrormsg": ""
+            "curlerrormsg": "",
+            "resultcounter": [
+                30,
+                0,
+                0,
+                0
+            ]
         },
-        "since": "1740560976"
+        "counters": {
+            "_responsetime": {
+                "title": "Antwortzeit [ms]",
+                "visual": "bar",
+                "status": 0,
+                "value": 50
+            },
+            "time-PHPmodules-eea780ac76569f8b84b31309df945505": {
+                "title": "timer for[Check needed PHP modules] in [ms]",
+                "visual": "bar",
+                "status": 0,
+                "value": "0.120"
+            },
+            ...
+        },
+        "since": "1740560976",
+        "state": {
+            "result-soft": 0,
+            "result-hard": 0,
+            "result-hard-since": 1765365475,
+            "lastresponses": [
+                {
+                    "timestamp": 1771417408,
+                    "data": {
+                        "status": 0,
+                        "value": 51
+                    }
+                },
+                {
+                    "timestamp": 1771417709,
+                    "data": {
+                        "status": 0,
+                        "value": 54
+                    }
+                },
+                {
+                    "timestamp": 1771418010,
+                    "data": {
+                        "status": 0,
+                        "value": 57
+                    }
+                },
+                {
+                    "timestamp": 1771418311,
+                    "data": {
+                        "status": 0,
+                        "value": 66
+                    }
+                },
+                {
+                    "timestamp": 1771418612,
+                    "data": {
+                        "status": 0,
+                        "value": 57
+                    }
+                }
+            ]
+        }
     }
 }
 ```
@@ -406,9 +484,14 @@ Key            | Type   | Description
 `meta`         | array  | Key for metadata
 `checks`       | array  | Key for checks for this app
 `result`       | array  | Key for response infos
-`since`        | int    | Unix timestamp when the change to the current status was
+`counters`     | array  | Key for app specific counters
+`since`        | int    | DEPRECATED: Unix timestamp when the change to the current status was
+`state`        | array  | Key for appplication state
 
-Subkeys in `"meta"` section:
+!!! warning "Deprected"
+    Do not use `'since '` anymore. It was replaced by `state -> hard-state-since`.
+
+##### Subkeys in `"meta"` section:
 
 These are the metadata for this application (like described in appmonitor client).
 
@@ -417,12 +500,12 @@ Key             | Type   | Description
 `host`          | string | hostname
 `website`       | string | Name of the application
 `ttl`           | int    | TTL in seconds sent from application for caching on the appmonitor server
-`result`        | int    | total status of the website; 0=OK ... 4=Error
+`result`        | int    | total status from last check of the website (soft state); 0=OK ... 4=Error
 `time`          | string | optional: time spent for performing checks on application side, eg "3.868ms"
 `version`       | string | optional: Used client and version
 `tags`          | array  | optional: list of tags
 
-Items in `"checks"` section:
+##### Items in `"checks"` section:
 
 The section checks contains a list of single checks for this application.
 Each check contains the client data for this check (like described in appmonitor client).
@@ -440,7 +523,7 @@ Key             | Type   | Description
 `count`         | float  | optional: value to render in a tile
 `visual`        | string | optional: output style for rendering data in a tile, eg "simple", "line"
 
-Subkeys in `"result"` section:
+##### Subkeys in `"result"` section:
 
 This section contains a total status and http response informations.
 
@@ -460,7 +543,35 @@ Key             | Type   | Description
 `curlerrorcode` | int    | Curl error code
 `curlerrormsg`  | string | Curl error message; for more details see see <https://curl.se/libcurl/c/libcurl-errors.html>
 
+##### Subkeys in `"counters"` section:
+
+Each app has a counter for response time. In dependency of the response they can have additional counters coming from its checks.
+Every counter has a key (id of the counter) and data.
+
+Key             | Type   | Description
+----------------|--------|--------------
+`title`         | string | Title of the counter
+`visual`        | string | visualisation style, eg. "bar"
+`status`        | int    | result of the corresponding check
+`value`         | string | value of the counter.
+
+##### Value `since`
+
 Value in `"since"` key is a unix timestamp when the change to the current state was.
+
+!!! warning "Deprected"
+    Do not use `'since '`. It was replaced by `state -> hard-state-since`.
+
+##### Subkeys in `"state"` section:
+
+The state section has information about application state and last short history.
+
+Key                 | Type   | Description
+--------------------|--------|--------------
+`result-soft`       | int    | Result of last applicatoin response
+`result-hard`       | int    | Result of applicatoin - hard state; replacement for 'since'
+`result-hard-since` | int    | Unix timestamp of last change of the hard state
+`lastresponses`     | array  | Array of last 5 results and their response times in ms
 
 #### /api/v1/apps/id/\<id\>/appid
 
@@ -481,7 +592,7 @@ See request to `/all` data ... get meta section only.
 
 #### /api/v1/apps/id/\<id\>/public
 
-Get a set of non sensitive meta information and value "since".
+Get a set of non sensitive meta information, the value "since" (DEPRECATED) and "state".
 
 ```json
 {
@@ -492,7 +603,49 @@ Get a set of non sensitive meta information and value "since".
             "result": 0,
             "ttl": 300
         },
-        "since": "1740560976"
+        "since": "1740560976",
+        "state": {
+            "result-soft": 0,
+            "result-hard": 0,
+            "result-hard-since": 1765365475,
+            "lastresponses": [
+                {
+                    "timestamp": 1771417408,
+                    "data": {
+                        "status": 0,
+                        "value": 51
+                    }
+                },
+                {
+                    "timestamp": 1771417709,
+                    "data": {
+                        "status": 0,
+                        "value": 54
+                    }
+                },
+                {
+                    "timestamp": 1771418010,
+                    "data": {
+                        "status": 0,
+                        "value": 57
+                    }
+                },
+                {
+                    "timestamp": 1771418311,
+                    "data": {
+                        "status": 0,
+                        "value": 66
+                    }
+                },
+                {
+                    "timestamp": 1771418612,
+                    "data": {
+                        "status": 0,
+                        "value": 57
+                    }
+                }
+            ]
+        }
     }
 }
 ```
@@ -547,7 +700,8 @@ The output is the same like described in **/api/v1/apps/id/\<id\>/all** - but wi
         "meta": { ... },
         "checks": [ ... ],
         "result": { ... },
-        "since": <Unix timestamp>
+        "since": <Unix timestamp>,
+        "state": { ... },
     },
     "<id-2>": { ... },
     "<id-N>": { ... }
@@ -577,7 +731,7 @@ See request to `/all` data ... get meta section only.
 
 #### /api/v1/apps/tags/\<tag\>/public
 
-Get a set of non sensitive meta information and value "since".
+Get a set of non sensitive meta information, the value "since" (DEPRECATED) and "state".
 
 #### /api/v1/tags
 

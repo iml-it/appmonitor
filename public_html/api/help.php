@@ -15,8 +15,8 @@ foreach($aRoutes as $aRoute){
     $oCallback=$aRoute[1];
     $sHelp.='<tr>
     <td><strong>'.$sPath.'</strong></td>
-    <td>'.($aRoute[2] ?? '-').'</td>
-    <td><pre>'.print_r($oCallback, 1).'</pre></td>
+    <td>'.(string) ($aRoute[2] ?? '-').'</td>
+    <td><pre>'.print_r($oCallback, true).'</pre></td>
     </tr>
     ';
 }
