@@ -30,7 +30,6 @@ function signal_handler($signo)
 // INIT SERVICE
 // -----------------------------------------------------------------------------
 echo "\n===== APPMONITOR :: service =====\n\n";
-echo "Refresh outdated monitoring data.\n\n";
 require_once('classes/tinyservice.class.php');
 global $oService;
 $oService = new tinyservice(__FILE__, $iSleep, __DIR__ . '/tmp');
@@ -58,7 +57,7 @@ switch ($sAction){
     //     exit(0);
     case "status":
         $oService->send("STATUS: ".
-            $oService->canStart()
+            (string) $oService->canStart()
                 ? "running"
                 : "stopped"
         );
@@ -69,14 +68,21 @@ switch ($sAction){
 }
 
 if (!$oService->canStart()) {
-    die("CANNOT START ... another process seems to run.\n");
+    echo "Sleeping $iSleep sec to ceck again...\n";
+    sleep($iSleep);
+    echo "\n";
+    if (!$oService->canStart()) {
+        echo "CANNOT START ... another process seems to run.\n";
+        exit(2);
+    }
 }
 
 // -----------------------------------------------------------------------------
 // INIT APPMONITOR SERVER
 // -----------------------------------------------------------------------------
 
-echo "\n\n";
+echo "START service for permanently refresh of outdated monitoring data.\n\n";
+
 $oService->send("STARTUP: load class file for appmonitor-server", true);
 require_once('classes/appmonitor-server.class.php');
 

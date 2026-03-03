@@ -61,7 +61,6 @@ class tinyservice
      * @param $sAppname       string   app id to prevent starting a script multiuple times
      * @param $iNewSleeptime  integer  idle time between loops
      * @param $sTmpdir        string   custom temp dir
-     * @return boolean
      */
     public function __construct(string $sAppname, int $iNewSleeptime = 10, string $sTmpdir = '')
     {
@@ -116,7 +115,7 @@ class tinyservice
                 // fclose($fd_log); // close the log-file
                 $this->send("removing touchfile and exiting.");
                 unlink($this->sTouchfile); // destroy touch file
-                $this->sTouchfile = false;
+                $this->sTouchfile = '';
                 echo "Bye.\n";
                 exit;
                 break;
@@ -189,7 +188,7 @@ class tinyservice
             return true;
         }
         $iTS = filemtime($this->sTouchfile);
-        $iAge = date('U') - $iTS;
+        $iAge = (int) date('U') - $iTS;
         // echo "INFO: Its age is " . $iAge . "s (sleep time is $this->iSleep s)\n";
         if ($iAge > $this->iSleep) {
             echo $bSilent ? "" : "STATUS: Not running. Run file is outdated.\n";
@@ -208,7 +207,7 @@ class tinyservice
     public function touch(string $sMessage): bool
     {
         $this->_checkTouchfile();
-        return file_put_contents($this->sTouchfile, $sMessage);
+        return (bool) file_put_contents($this->sTouchfile, $sMessage);
     }
 
     /**
