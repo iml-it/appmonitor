@@ -26,6 +26,7 @@
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  * 2025-12-18  <axel.hahn@unibe.ch>      fix typo; remove final '<br>' in output
  * 2026-02-12  <axel.hahn@unibe.ch>      fix flag sslverify => false
+ * 2026-03-13  <axel.hahn@unibe.ch>      remove curl_close() - depreated in PHP 8.5
  */
 class checkHttpContent extends appmonitorcheck
 {
@@ -200,7 +201,6 @@ class checkHttpContent extends appmonitorcheck
         if (!$res) {
             $iErrorCode = curl_errno($ch);
             $sErrorMsg = curl_error($ch);
-            curl_close($ch);
             return [
                 RESULT_ERROR,
                 'ERROR: failed to fetch ' . $aParams["url"] . ' - curl error #' . $iErrorCode . ': ' . $sErrorMsg
@@ -244,8 +244,6 @@ class checkHttpContent extends appmonitorcheck
                 [local_port] => 63597
             )
          */
-
-        curl_close($ch);
 
         $aTmp = explode("\r\n\r\n", $res, 2);
         $sHttpHeader = $aTmp[0];
