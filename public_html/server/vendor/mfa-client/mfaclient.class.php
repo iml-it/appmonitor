@@ -13,11 +13,12 @@
  * 2025-06-11  <axel.hahn@unibe.ch>  initial version
  * 2025-06-30  <axel.hahn@unibe.ch>  set version 1.0.1 in user agenmt in http requests
  * 2025-07-07  <axel.hahn@unibe.ch>  1.0.2 handle executed setUser() before ensure()
+ * 2026-03-13  <axel.hahn@unibe.ch>  1.0.3 php8.5: remove curl_close; harden code using mago
  */
 class mfaclient
 {
 
-    protected string $_sVersion = "1.0.2";
+    protected string $_sVersion = "1.0.3";
 
     protected array $aConfig = [];
     // protected string $sSessionvarname = "mfaclient";
@@ -45,7 +46,7 @@ class mfaclient
         if ($aConfig) {
             $this->setConfig($aConfig);
         }
-        $this->setUser($this->aConfig['user']??'');
+        $this->setUser((string) $this->aConfig['user']??'');
     }
 
 
@@ -75,7 +76,12 @@ class mfaclient
         }
         // $aConfig = $this->getConfig();
 
-        $ch = curl_init($aRequest['url']);
+        $ch = curl_init((string) $aRequest['url']);
+        if(!$ch) {
+            return [
+                'error' => "Failed to initialize curl request."
+            ];
+        }
 
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $aRequest['method']);
         if ($aRequest['method'] === 'POST') {
@@ -101,7 +107,6 @@ class mfaclient
         if (!$res) {
             $iErrorCode = curl_errno($ch);
             $sErrorMsg = curl_error($ch);
-            curl_close($ch);
             return [
                 'error' => "Failed to fetch $aRequest[url] - curl error #$iErrorCode: $sErrorMsg"
             ];
@@ -109,11 +114,10 @@ class mfaclient
 
         $aReturn = ['info' => curl_getinfo($ch)];
         $aReturn = [];
-        curl_close($ch);
 
-        $sHeader = substr($res, 0, curl_getinfo($ch)['header_size']);
+        $sHeader = substr((string) $res, 0, (int)curl_getinfo($ch)['header_size']??0);
         $aReturn['header'] = explode("\n", $sHeader);
-        $aReturn['body'] = str_replace($sHeader, "", $res);
+        $aReturn['body'] = str_replace($sHeader, "", (string) $res);
 
         // print_r($aReturn);
         return $aReturn;
@@ -132,7 +136,7 @@ class mfaclient
         return base64_encode(hash_hmac(
             "sha1",
             "{$sMethod}\n{$sRequest}\n{$sTimestamp}",
-            $this->aConfig['shared_secret']
+            (string) $this->aConfig['shared_secret']
         ));
     }
 
@@ -147,7 +151,7 @@ class mfaclient
         // $sTimestamp = date("r");
         $sTimestamp = microtime(true);
 
-        $sUrl = $this->aConfig['api'] . "/";
+        $sUrl = (string) $this->aConfig['api'] . "/";
         $sRequest = parse_url($sUrl, PHP_URL_PATH) . '' . parse_url($sUrl, PHP_URL_QUERY);
 
         $aRequest = [
@@ -168,6 +172,7 @@ class mfaclient
             ]
         ];
 
+        $aReturn = [];
         $aReturn['request'] = $aRequest;
         $aReturn = [
             'request' => $aRequest,
@@ -202,7 +207,7 @@ class mfaclient
         $sFormId = $sFormId ?: "mfa-form";
         $sReturn = "<form method=\"POST\" id=\"$sFormId\" action=\"$sUrl\">
                     <input type=\"hidden\" name=\"username\" value=\"" . $this->sUser . "\">
-                    <input type=\"hidden\" name=\"appid\" value=\"" . $this->aConfig['appid'] . "\">
+                    <input type=\"hidden\" name=\"appid\" value=\"" . (string) $this->aConfig['appid'] . "\">
                     <input type=\"hidden\" name=\"ip\" value=\"" . $this->getClientIp() . "\">
 
                     <input type=\"hidden\" name=\"request\" value=\"$sRequest\">
@@ -288,7 +293,7 @@ class mfaclient
         $sCfgfile= __DIR__ . '/mfaconfig.php';
         if (file_exists($sCfgfile)) {
             $aTmp = include $sCfgfile;
-            $this->aConfig = $aTmp??[];
+            $this->aConfig = (array) $aTmp;
         }
     }
     /**
@@ -320,7 +325,9 @@ class mfaclient
      */
     public function logout()
     {
-        unset($_SESSION['mfa']['user']);
+        if(isset($_SESSION['mfa']['user'])){
+            unset($_SESSION['mfa']['user']);
+        }
     }
 
     // ----------------------------------------------------------------------
@@ -376,7 +383,7 @@ class mfaclient
         if (!isset($_SESSION) || !count($_SESSION)) {
             session_start();
         }
-        if (($_SESSION['mfa']['user'] ?? '') == $this->sUser) {
+        if ((string) $_SESSION['mfa']['user'] ?? '' == $this->sUser) {
             $this->aStatus[] = 'User still has a valid session after solving a challenge.';
             return 200;
         } else {
@@ -398,26 +405,26 @@ class mfaclient
 
 
         $aMfaReturn = $this->check();
-        $this->_wd(__METHOD__ . "<br>Http request to mfa api<pre>" . print_r($aMfaReturn, 1) . "</pre>");
-        $aBody = json_decode($aMfaReturn['response']['body'] ?? '', 1);
-        $iHttpStatus = $aBody['status'] ?? -1;
+        $this->_wd(__METHOD__ . "<br>Http request to mfa api<pre>" . print_r($aMfaReturn, true) . "</pre>");
+        $aBody = json_decode((string) $aMfaReturn['response']['body'] ?? '', true);
+        $iHttpStatus = (int) $aBody['status'] ?? -1;
 
         if ($iHttpStatus == 401) {
             $this->showHtml(
                 $iHttpStatus,
                 "<h1>MFA server</h1>"
-                . "⚠️ " . $aBody['message'] . '<br><br>'
-                . $this->_jump($aBody['url'], '<button>Follow me</button>', )
+                . "⚠️ " . (string) ($aBody['message']??'') . '<br><br>'
+                . $this->_jump((string) ($aBody['url']??''), '<button>Follow me</button>', )
             );
         }
         if ($iHttpStatus != 200) {
             $this->showHtml(
                 $iHttpStatus,
                 "<h1>MFA server - Error $iHttpStatus</h1>"
-                . "❌ <strong>" . ($aBody['error'] ?? 'Invalid API response') . "</strong><br>"
-                . ($aBody['message'] ?? 'No valid JSON response was sent back.') . '<br>'
-                . ($aMfaReturn['response']['header'][0] ?? '') . '<br>'
-                . (($aMfaReturn['response']['error'] ?? '') ? '<br><strong>Curl error:</strong><br>' . $aMfaReturn['response']['error'] . '<br>' : '')
+                . "❌ <strong>" . ((string) $aBody['error'] ?? 'Invalid API response') . "</strong><br>"
+                . ((string) $aBody['message'] ?? 'No valid JSON response was sent back.') . '<br>'
+                . ((string) $aMfaReturn['response']['header'][0] ?? '') . '<br>'
+                . (($aMfaReturn['response']['error'] ?? '') ? '<br><strong>Curl error:</strong><br>' . (string) ($aMfaReturn['response']['error']??'') . '<br>' : '')
                 . '<br><br><a href="">Try again</a>'
                 //.'<br><pre>'.print_r($aMfaReturn, 1).'</pre>'
             );
@@ -425,6 +432,9 @@ class mfaclient
 
         $this->aStatus[] = 'User solved the session now.';
 
+        if(!isset($_SESSION['mfa'])){
+            $_SESSION['mfa'] = [];
+        }
         $_SESSION['mfa']['user'] = $this->sUser;
         session_write_close();
 
@@ -437,18 +447,18 @@ class mfaclient
      * 
      * @param string $sSubmitBtn  optional: html code for a submit button; default: '<button>MFA Setup</button>'
      * @param string $sBackUrl    optional: url to return from mfa server to the application; default: current url
-     * @return void
+     * @return string
      */
     public function getButtonSetup(string $sSubmitBtn = '<button>MFA Setup</button>', $sBackUrl = ''): string
     {
-        $aBody = json_decode($this->_api("urls")['response']['body'], 1);
+        $aBody = json_decode((string) $this->_api("urls")['response']['body']??'', true);
         // print_r($aBody);
-        $sUrl = $aBody['setup'] ?? '';
+        $sUrl = (string) ($aBody['setup'] ?? '');
         if ($sUrl) {
             $sBackUrl = $sBackUrl ?: ( "http".(($_SERVER['HTTPS']??'') === 'on' ? "s" : "")."://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
-            return $this->jumpform($sUrl, $sSubmitBtn, $sBackUrl);
+            return $this->jumpform($sUrl, (string) $sSubmitBtn, $sBackUrl);
         } else {
-            return $aBody['message']??'';
+            return (string) $aBody['message']??'';
         }
     }
 

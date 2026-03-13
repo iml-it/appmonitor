@@ -9,10 +9,10 @@
 require_once __DIR__.'/mfaclient.class.php';
 $mfa = new mfaclient();
 
-$mfa->debug($aConfig['debug']??false);
+$mfa->debug((bool) $aConfig['debug']??false);
 
 // if user was not set in config, set it manually
-$mfa->setUser($this->getUserid());
+// $mfa->setUser(<your-function-to-fetch-userid>);
 
 $iHttpStatus=$mfa->ensure();
 
