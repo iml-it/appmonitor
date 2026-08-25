@@ -54,7 +54,7 @@ if (!class_exists('appmonitorcheck')) {
  * 2026-01-22  0.175  axel.hahn@unibe.ch      checks use defaults from $aDocs
  * 2026-03-13  0.180  axel.hahn@unibe.ch      fixes for PHP8.5 in httpcontent
  * --------------------------------------------------------------------------------<br>
- * @version 0.176
+ * @version 0.181
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -68,14 +68,14 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.180';
+    protected string $_sVersion = '0.181';
 
     /**
      * config: default ttl for server before requesting the client check again
      * value is in seconds
      * @var int
      */
-    protected int $_iDefaultTtl = 300;
+    protected int $_iDefaultTtl = 3;
 
     /**
      * internal counter: greatest return value of all checks
