@@ -57,8 +57,9 @@ if (!defined('RESULT_OK')) {
  * 2025-03-03  0.153  axel.hahn@unibe.ch      getSize() preg_replace did not work in compiled binary
  * 2025-03-04  0.154  axel.hahn@unibe.ch      finish with existcode instead of die()
  * 2025-03-18  0.156  axel.hahn@unibe.ch      add validation class
+ * 2026-08-25  0.181  axel.hahn@unibe.ch      prevent php warnings from stream_socket_client()
  * --------------------------------------------------------------------------------<br>
- * @version 0.156-dev
+ * @version 0.181
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -497,7 +498,13 @@ class appmonitorcheck
         }
         $errno = -1;
         $errstr = "stream_socket_client failed.";
+
+        // prevent php warnings of stream_socket_client()
+        $oldErrorReporting = error_reporting(); // save error reporting level
+        error_reporting(0); // disable warnings
         $read = stream_socket_client("ssl://$sHost:$iPort", $errno, $errstr, $iTimeout, STREAM_CLIENT_CONNECT, $get);
+        error_reporting($oldErrorReporting); // restore error reporting level
+
         if (!$read) {
             return ['_error' => "Error $errno: $errstr; cannot create stream_socket_client with given stream_context to ssl://$sHost:$iPort; you can try to set the flag [verify] to false to check expiration date only."];
         }
