@@ -53,8 +53,9 @@ if (!class_exists('appmonitorcheck')) {
  * 2025-04-35  0.161  axel.hahn@unibe.ch      validate parent values if they match a name of another check
  * 2026-01-22  0.175  axel.hahn@unibe.ch      checks use defaults from $aDocs
  * 2026-03-13  0.180  axel.hahn@unibe.ch      fixes for PHP8.5 in httpcontent
+ * 2026-09-02  0.182  axel.hahn@unibe.ch      undo too small default TTL
  * --------------------------------------------------------------------------------<br>
- * @version 0.181
+ * @version 0.182
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -68,14 +69,14 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.181';
+    protected string $_sVersion = '0.182';
 
     /**
      * config: default ttl for server before requesting the client check again
      * value is in seconds
      * @var int
      */
-    protected int $_iDefaultTtl = 3;
+    protected int $_iDefaultTtl = 300;
 
     /**
      * internal counter: greatest return value of all checks
