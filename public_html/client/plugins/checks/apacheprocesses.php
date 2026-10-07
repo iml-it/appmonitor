@@ -107,7 +107,7 @@ class checkApacheProcesses extends appmonitorcheck
      * as array i.e. [total] => 256 \n    [free] => 247\n    [waiting] => 7\n    [active] => 2
      * It returns false if the url is not reachable
      * It returns an empty array if the server status could not be parsed from http response
-     * @return array
+     * @return bool|array
      */
     protected function _getApacheProcesses(): bool|array
     {
@@ -149,8 +149,8 @@ class checkApacheProcesses extends appmonitorcheck
 
         // --- (1) verify if array key(s) exist:
         // $this->_checkArrayKeys($aParams, "...");
-        if (isset($aParams['url']) && $aParams['url']) {
-            $this->_sServerStatusUrl = $aParams['url'];
+        if (isset($aParams['url']) && ((bool) $aParams['url']??false)) {
+            $this->_sServerStatusUrl = (string) $aParams['url'];
         }
         if (isset($aParams['warning']) && (int) $aParams['warning']) {
             $this->_iWarn = (int) $aParams['warning'];
@@ -161,14 +161,14 @@ class checkApacheProcesses extends appmonitorcheck
 
         // --- (2) do something magic
         $aProcesses = $this->_getApacheProcesses();
-        $iActive = $aProcesses ? $aProcesses['active'] : false;
+        $iTotal = $aProcesses ? (int) $aProcesses['total'] : 0;
+        $iActive = $aProcesses ? (int) $aProcesses['active'] : 0;
         $sComment = '';
 
         // set result code
-        if ($iActive === false) {
+        if ($iActive === 0) {
             $iResult = RESULT_UNKNOWN;
         } else {
-            $iTotal = $aProcesses['total'];
             $iResult = RESULT_OK;
             if (($iActive / $iTotal * 100) > $this->_iWarn) {
                 $iResult = RESULT_WARNING;
@@ -195,7 +195,7 @@ class checkApacheProcesses extends appmonitorcheck
         //           
         return [
             $iResult,
-            ($iActive === false ? 'Apache httpd server status is not available' : 'apache processes: ' . print_r($aProcesses, 1)) . ' ' . $sComment,
+            ($iActive === false ? 'Apache httpd server status is not available' : 'apache processes: ' . print_r($aProcesses, true)) . ' ' . $sComment,
             ($iActive === false
                 ? []
                 : [

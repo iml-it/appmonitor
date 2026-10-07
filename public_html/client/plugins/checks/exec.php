@@ -22,7 +22,8 @@
  * 2022-09-19  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
- */
+ * 2026-10-06  <axel.hahn@unibe.ch>      fix output param definition; fix linter warnings
+  */
 class checkExec extends appmonitorcheck
 {
 
@@ -45,9 +46,9 @@ class checkExec extends appmonitorcheck
             'output' => [
                 'type' => 'bool',
                 'required' => false,
-                'description' => 'size for warning level',
-                'default' => 21,
-                'example' => "1.25GB",
+                'description' => 'flag: show output; default: true',
+                'default' => true,
+                'example' => false,
             ],
             'exitOk' => [
                 'type' => 'array',
@@ -103,18 +104,20 @@ class checkExec extends appmonitorcheck
     public function run(array $aParams): array
     {
         $this->_checkArrayKeys($aParams, "command");
-        $_sCmd = $aParams['command'];
+        $_sCmd = (string) $aParams['command'];
         $_bShowOutput = isset($aParams['output']) ? !!$aParams['output'] : true;
 
-        $_aRcOK = isset($aParams['exitOK']) ? $aParams['exitOK'] : [];
-        $_aRcWarning = isset($aParams['exitWarn']) ? $aParams['exitWarn'] : [];
-        $_aRcCritical = isset($aParams['exitCritical']) ? $aParams['exitCritical'] : [];
+        $_aRcOK = isset($aParams['exitOK']) ?  (array) $aParams['exitOK'] : [];
+        $_aRcWarning = isset($aParams['exitWarn']) ? (array) $aParams['exitWarn'] : [];
+        $_aRcCritical = isset($aParams['exitCritical']) ?  (array) $aParams['exitCritical'] : [];
 
         $_sMode = 'default';
         if (count($_aRcOK) + count($_aRcWarning) + count($_aRcCritical)) {
             $_sMode = 'exitcode';
         }
 
+        $aOutput=[];
+        $iRc=0;
         exec($_sCmd, $aOutput, $iRc);
         $_sOut = $_bShowOutput ? '<br>' . implode("<br>", $aOutput) : '';
 
@@ -170,7 +173,7 @@ class checkExec extends appmonitorcheck
             default:
                 return [
                     RESULT_UNKNOWN,
-                    'UNKNOWN mode [' . htmlentities($_sMode) . '].'
+                    'UNKNOWN mode [' . htmlentities((string) $_sMode) . '].'
                 ];
         } // switch($_sMode)
     }

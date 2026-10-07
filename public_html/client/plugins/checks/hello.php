@@ -42,6 +42,7 @@
  * 2019-06-05  <axel.hahn@iml.unibe.ch>
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2026-10-07  <axel.hahn@unibe.ch>      fix linter warnings
  */
 class checkHello extends appmonitorcheck
 {
@@ -92,7 +93,7 @@ class checkHello extends appmonitorcheck
         //           
         return [
             RESULT_OK,
-            'Hello world! My message is: ' . $aParams['message']
+            'Hello world! My message is: ' . (string) $aParams['message']
         ];
     }
 }

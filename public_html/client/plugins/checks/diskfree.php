@@ -22,6 +22,7 @@
  * 2025-01-02  <www.axel-hahn.de>        update output
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  * 2026-01-09  <axel.hahn@unibe.ch>      fix defaults
+ * 2026-10-06  <axel.hahn@unibe.ch>      fix linter warnings
  */
 class checkDiskfree extends appmonitorcheck
 {
@@ -82,7 +83,7 @@ class checkDiskfree extends appmonitorcheck
     {
         $this->_checkArrayKeys($aParams, "directory,critical");
 
-        $sDirectory = $aParams["directory"];
+        $sDirectory = (string) $aParams["directory"];
         if (!is_dir($sDirectory)) {
             return [
                 RESULT_ERROR,
@@ -90,9 +91,9 @@ class checkDiskfree extends appmonitorcheck
             ];
         }
 
-        $iWarn = isset($aParams["warning"]) ? $this->_getSize($aParams["warning"]) : false;
-        $iCritical = $this->_getSize($aParams["critical"]);
-        $iSpaceLeft = disk_free_space($sDirectory);
+        $iWarn = isset($aParams["warning"]) ? $this->_getSize((string) $aParams["warning"]) : false;
+        $iCritical = $this->_getSize((string) $aParams["critical"]??"");
+        $iSpaceLeft = (int) disk_free_space($sDirectory);
 
         $sMessage = $this->_getHrSize($iSpaceLeft) . ' left in [' . $sDirectory . '].';
 

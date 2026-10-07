@@ -47,6 +47,7 @@
  * 2024-07-25  <axel.hahn@unibe.ch>      float return with 2 digits behind comma
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  * 2025-01-09  <axel.hahn@unibe.ch>      shorten check for warning and critical
+ * 2026-10-07  <axel.hahn@unibe.ch>      fix linter warnings
  */
 class checkLoadmeter extends appmonitorcheck
 {
@@ -97,7 +98,7 @@ class checkLoadmeter extends appmonitorcheck
     {
         if (function_exists('sys_getloadavg')) {
             $load = sys_getloadavg();
-            return $load[0];
+            return (float) $load[0]??0;
         } else {
             // Only MS Windows has not implemented sys_getloadavg
             // try something else
@@ -107,11 +108,11 @@ class checkLoadmeter extends appmonitorcheck
                 $load = 0;
                 if (version_compare('4.50.0', PHP_VERSION) == 1) {
                     while ($cpu = $cpus->Next()) {
-                        $load += $cpu->LoadPercentage;
+                        $load += (float) ($cpu->LoadPercentage??0);
                     }
                 } else {
                     foreach ($cpus as $cpu) {
-                        $load += $cpu->LoadPercentage;
+                        $load += (float) ($cpu->LoadPercentage??0);
                     }
                 }
                 return $load;
@@ -127,17 +128,17 @@ class checkLoadmeter extends appmonitorcheck
      */
     public function run(array $aParams): array
     {
-        $fLoad = $this->_getLoad();
+        $fLoad = (float) $this->_getLoad();
 
         // set result code
         if ($fLoad === false) {
             $iResult = RESULT_UNKNOWN;
         } else {
             $iResult = RESULT_OK;
-            if (($aParams['warning']??0) > 0 && $fLoad > $aParams['warning']) {
+            if ((float) ($aParams['warning']??0) > 0 && $fLoad > (float) $aParams['warning']) {
                 $iResult = RESULT_WARNING;
             }
-            if (($aParams['error']??0) > 0 && $fLoad > $aParams['error']) {
+            if ((float) ($aParams['error']??0) > 0 && $fLoad > (float) $aParams['error']) {
                 $iResult = RESULT_ERROR;
             }
         }
@@ -156,7 +157,7 @@ class checkLoadmeter extends appmonitorcheck
         //           
         return [
             $iResult,
-            ($fLoad === false ? 'load value is not available' : 'current load is: ' . round($fLoad, 2)),
+            ($fLoad === false ? 'load value is not available' : 'current load is: ' . (string) round($fLoad, 2)),
             ($fLoad === false
                 ? []
                 : [

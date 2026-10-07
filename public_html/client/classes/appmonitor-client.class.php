@@ -54,8 +54,9 @@ if (!class_exists('appmonitorcheck')) {
  * 2026-01-22  0.175  axel.hahn@unibe.ch      checks use defaults from $aDocs
  * 2026-03-13  0.180  axel.hahn@unibe.ch      fixes for PHP8.5 in httpcontent
  * 2026-09-02  0.182  axel.hahn@unibe.ch      undo too small default TTL
+ * 2026-10-06  0.183  <axel.hahn@unibe.ch>    fix linter warnings
  * --------------------------------------------------------------------------------<br>
- * @version 0.182
+ * @version 0.183
  * @author Axel Hahn
  * @link TODO
  * @license GPL
@@ -69,7 +70,7 @@ class appmonitor
      * Name and Version number
      * @var string
      */
-    protected string $_sVersion = '0.182';
+    protected string $_sVersion = '0.183';
 
     /**
      * config: default ttl for server before requesting the client check again
@@ -185,12 +186,13 @@ class appmonitor
      * @param int $iTTl TTL value in sec
      * @return boolean
      */
-    public function setTTL($iTTl = 0)
+    public function setTTL(int $iTTl = 0): bool
     {
         if ($iTTl == 0) {
             $iTTl = $this->_iDefaultTtl;
         }
-        return $this->_aMeta["ttl"] = $iTTl;
+        $this->_aMeta["ttl"] = $iTTl;
+        return true;;
     }
 
     /**
@@ -247,8 +249,8 @@ class appmonitor
             : $aCheck["result"]
         ;
 
-        if (!$this->_iMaxResult || $iMyResult > $this->_iMaxResult) {
-            $this->_iMaxResult = $iMyResult;
+        if (!$this->_iMaxResult || (int) $iMyResult > $this->_iMaxResult) {
+            $this->_iMaxResult = (int) $iMyResult;
         }
         $this->_aChecks[] = $aCheck;
         return true;
@@ -336,7 +338,7 @@ class appmonitor
         }
         $sIP = $_SERVER['REMOTE_ADDR'];
         foreach ($aAllowedIps as $sIp2Check) {
-            if (strpos($sIP, $sIp2Check) === 0) {
+            if (strpos($sIP, (string) $sIp2Check) === 0) {
                 return true;
             }
         }
@@ -353,10 +355,10 @@ class appmonitor
      * On deny this method exits with 403 response
      * 
      * @param string  $sVarname  name of GET variable
-     * @param string  $sToken    value
+     * @param string  $sToken    value 
      * @return boolean
      */
-    public function checkToken(string $sVarname, string $sToken): bool
+    public function checkToken(string $sVarname, #[\SensitiveParameter] string $sToken): bool
     {
         if (!isset($_GET)) {
             return true;

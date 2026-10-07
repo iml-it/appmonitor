@@ -24,6 +24,7 @@
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-01  <axel.hahn@unibe.ch>      fix check for files that must be absent
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2026-10-07  <axel.hahn@unibe.ch>      fix linter warnings
  */
 class checkFile extends appmonitorcheck
 {
@@ -134,7 +135,7 @@ class checkFile extends appmonitorcheck
         $aOK = [];
         $aErrors = [];
         $this->_checkArrayKeys($aParams, "filename");
-        $sFile = $aParams["filename"];
+        $sFile = (string) $aParams["filename"];
 
         if (isset($aParams['exists'])) {
             $sMyflag = 'exists=' . ($aParams['exists'] ? 'yes' : 'no');
@@ -157,8 +158,8 @@ class checkFile extends appmonitorcheck
                 }
             }
         }
-        $sMessage = (count($aOK) ? ' flags OK: ' . implode('|', $aOK) : '')
-            . ' ' . (count($aErrors) ? ' flags FAILED: ' . implode('|', $aErrors) : '')
+        $sMessage = (count($aErrors) ? ' flags FAILED: ' . implode(' ... ', $aErrors) : '')."<br>"
+            .(count($aOK) ? ' flags OK: ' . implode(' ... ', $aOK) : '')."<br>"
         ;
         if (count($aErrors)) {
             return [
