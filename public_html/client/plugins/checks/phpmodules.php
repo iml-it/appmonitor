@@ -20,6 +20,7 @@
  * 2022-05-06  <axel.hahn@iml.unibe.ch>  first lines
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2026-10-07  <axel.hahn@unibe.ch>      fix linter warnings
  */
 class checkPhpmodules extends appmonitorcheck
 {
@@ -79,10 +80,10 @@ class checkPhpmodules extends appmonitorcheck
         $aAllMods = get_loaded_extensions(false);
 
         // --- check required modules
-        if (isset($aParams['required']) && count($aParams['required'])) {
+        if (isset($aParams['required']) && count((array) $aParams['required'])) {
             $sOut .= 'Required: ';
-            foreach ($aParams['required'] as $sMod) {
-                $sOut .= $sMod . '=';
+            foreach ((array) $aParams['required'] as $sMod) {
+                $sOut .= "$sMod=";
                 if (!array_search($sMod, $aAllMods) === false) {
                     $sOut .= 'OK;';
                 } else {
@@ -92,10 +93,10 @@ class checkPhpmodules extends appmonitorcheck
             }
         }
         // --- check optional modules
-        if (isset($aParams['optional']) && count($aParams['optional'])) {
+        if (isset($aParams['optional']) && count((array) $aParams['optional'])) {
             $sOut .= ($sOut ? '|' : '') . 'Optional: ';
-            foreach ($aParams['optional'] as $sMod) {
-                $sOut .= $sMod . '=';
+            foreach ((array) $aParams['optional'] as $sMod) {
+                $sOut .= "$sMod=";
                 if (!array_search($sMod, $aAllMods) === false) {
                     $sOut .= 'OK;';
                 } else {
@@ -107,12 +108,12 @@ class checkPhpmodules extends appmonitorcheck
 
         // --- return result
         if ($bHasError) {
-            return [RESULT_ERROR, "ERROR: " . $sOut];
+            return [RESULT_ERROR, "ERROR: $sOut"];
         }
         if ($bHasWarning) {
-            return [RESULT_WARNING, "WARNING: " . $sOut];
+            return [RESULT_WARNING, "WARNING: $sOut"];
         }
-        return [RESULT_OK, "OK: " . $sOut];
+        return [RESULT_OK, "OK: $sOut"];
     }
 
 }

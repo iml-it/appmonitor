@@ -27,6 +27,7 @@
  * 2025-12-18  <axel.hahn@unibe.ch>      fix typo; remove final '<br>' in output
  * 2026-02-12  <axel.hahn@unibe.ch>      fix flag sslverify => false
  * 2026-03-13  <axel.hahn@unibe.ch>      remove curl_close() - depreated in PHP 8.5
+ * 2026-10-07  <axel.hahn@unibe.ch>      fix linter warnings; ad "content"
  */
 class checkHttpContent extends appmonitorcheck
 {
@@ -131,6 +132,13 @@ class checkHttpContent extends appmonitorcheck
                 'default' => null,
                 'example' => "",
             ],
+            'content' => [
+                'type' => 'bool',
+                'required' => false,
+                'description' => 'Show http response body; WARNING: set true for really small output only',
+                'default' => false,
+                'example' => "false",
+            ],
         ],
     ];
 
@@ -144,7 +152,7 @@ class checkHttpContent extends appmonitorcheck
     public function getGroup(array $aParams = []): string
     {
         $sReturn = 'service';
-        if (isset($aParams['status']) && $aParams['status'] > 300 && $aParams['status'] < 500) {
+        if (isset($aParams['status']) && (int) $aParams['status'] > 300 && (int) $aParams['status'] < 500) {
             $sReturn = 'deny';
         }
         return $sReturn;
@@ -170,6 +178,7 @@ class checkHttpContent extends appmonitorcheck
      *     bodycontains        string   test for a string in the http response body; it returns OK if the text was found
      *     bodynotcontains     string   test for a string in the http response body; it returns OK if the text was not found
      *     bodyregex           string   test for a regex in the http response body; it returns OK if the regex matches; example: "headerregex"=>"/lowercasematch/i"
+     *     content             bool     flag: show http response body; WARNING: set true for really small output only
      * ]
      */
     public function run(array $aParams)
@@ -178,12 +187,12 @@ class checkHttpContent extends appmonitorcheck
         if (!function_exists("curl_init")) {
             return [RESULT_UNKNOWN, "UNKNOWN: Unable to perform http test. The php-curl module is not active."];
         }
-        $bShowContent = (isset($aParams["content"]) && $aParams["content"]) ? true : false;
-        $ch = curl_init($aParams["url"]);
+        $bShowContent = (isset($aParams["content"]) && (bool) $aParams["content"]??false) ? true : false;
+        $ch = curl_init((string) $aParams["url"]);
 
         curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_NOBODY, isset($aParams["headeronly"]) && $aParams["headeronly"]);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, isset($aParams["follow"]) && $aParams["follow"]);
+        curl_setopt($ch, CURLOPT_NOBODY, isset($aParams["headeronly"]) && (bool) $aParams["headeronly"]??false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, isset($aParams["follow"]) && (bool) $aParams["follow"]??false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, (isset($aParams["timeout"]) && (int) $aParams["timeout"]) ? (int) $aParams["timeout"] : $this->_iTimeoutTcp);
 
@@ -193,7 +202,7 @@ class checkHttpContent extends appmonitorcheck
         }
 
         if (isset($aParams["userpwd"])) {
-            curl_setopt($ch, CURLOPT_USERPWD, $aParams["userpwd"]);
+            curl_setopt($ch, CURLOPT_USERPWD, (string) $aParams["userpwd"]);
         }
 
         $res = curl_exec($ch);
@@ -203,7 +212,7 @@ class checkHttpContent extends appmonitorcheck
             $sErrorMsg = curl_error($ch);
             return [
                 RESULT_ERROR,
-                'ERROR: failed to fetch ' . $aParams["url"] . ' - curl error #' . $iErrorCode . ': ' . $sErrorMsg
+                'ERROR: failed to fetch ' . (string) $aParams["url"] . ' - curl error #' . $iErrorCode . ': ' . $sErrorMsg
             ];
         }
         $sOut = '';
@@ -247,14 +256,14 @@ class checkHttpContent extends appmonitorcheck
 
         $aTmp = explode("\r\n\r\n", $res, 2);
         $sHttpHeader = $aTmp[0];
-        $sHttpBody = $aTmp[1] ?? false;
+        $sHttpBody = (string) $aTmp[1] ?? "";
 
         // ---------- check functions
 
         // --- http status code
         $sOut .= "Http status: $aInfos[http_code] - ";
         if (isset($aParams["status"])) {
-            if ($aInfos['http_code'] == $aParams["status"]) {
+            if ($aInfos['http_code'] == (int) $aParams["status"]) {
                 $sOut .= "as expected - OK";
             } else {
                 $sOut .= "compare failed - not equal $aParams[status]";
@@ -336,6 +345,8 @@ class checkHttpContent extends appmonitorcheck
                 $bError = true;
             }
         }
+
+        $sOut.=$bShowContent ? "<br>Body:<br>" . htmlentities($sHttpBody) : "";
 
         if (!$bError) {
             return [

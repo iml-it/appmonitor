@@ -23,6 +23,7 @@
  * 2022-12-05  <axel.hahn@unibe.ch>      add @ sign at socket functions to prevent warning
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
+ * 2026-10-07  <axel.hahn@unibe.ch>      fix linter warnings
  */
 class checkPortTcp extends appmonitorcheck
 {
@@ -85,7 +86,7 @@ class checkPortTcp extends appmonitorcheck
     {
         $this->_checkArrayKeys($aParams, "port");
 
-        $sHost = $aParams['host'] ?? '127.0.0.1';
+        $sHost = (string) $aParams['host'] ?? '127.0.0.1';
         $iPort = (int) $aParams['port'];
 
         if (!function_exists('socket_create')) {

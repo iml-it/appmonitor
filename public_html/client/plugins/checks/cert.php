@@ -124,8 +124,8 @@ class checkCert extends appmonitorcheck
     {
         $sUrl = $aParams["url"] ?? 'http' . ($_SERVER['HTTPS'] ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT'];
         $bVerify = isset($aParams["verify"]) ? !!$aParams["verify"] : $this->_aDoc['parameters']['verify']['default'];
-        $iWarn = isset($aParams["warning"]) ? (int) ($aParams["warning"]) : $this->_aDoc['parameters']['warning']['default'];
-        $iCrtitcal = isset($aParams["critical"]) ? (int) ($aParams["critical"]) : $this->_aDoc['parameters']['critical']['default'];
+        $iWarn = isset($aParams["warning"])  ? (int) ($aParams["warning"]) : ((int) $this->_aDoc['parameters']['warning']['default']??0);
+        $iCrtitcal = (int) (isset($aParams["critical"]) ? (int) ($aParams["critical"]) : $this->_aDoc['parameters']['critical']['default']);
 
         $sMessage = "Checked url: $sUrl ... ";
         $certinfo = $this->_certGetInfos($sUrl, $bVerify);
@@ -151,10 +151,10 @@ class checkCert extends appmonitorcheck
         }
         */
 
-        $iDaysleft = round(($certinfo['validTo_time_t'] - date('U')) / 60 / 60 / 24);
-        $sMessage .= 'Issuer: ' . ($certinfo['issuer']['O']??'None (self signed)')
-            . '; valid from: ' . date("Y-m-d H:i", $certinfo['validFrom_time_t'])
-            . ' to ' . date("Y-m-d H:i", $certinfo['validTo_time_t']) . ' '
+        $iDaysleft = (int) round(($certinfo['validTo_time_t']??0 - date('U')) / 60 / 60 / 24);
+        $sMessage .= 'Issuer: ' . (string) ($certinfo['issuer']['O']??'None (self signed)')
+            . '; valid from: ' . (string) (date("Y-m-d H:i", $certinfo['validFrom_time_t']??null))
+            . ' to ' . (string) date("Y-m-d H:i", $certinfo['validTo_time_t']??null) . ' '
             . ($iDaysleft ? "($iDaysleft days left)" : "expired since " . (-$iDaysleft) . " days.")
         ;
         if ($iDaysleft <= 0) {

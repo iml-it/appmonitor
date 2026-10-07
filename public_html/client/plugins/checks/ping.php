@@ -23,6 +23,7 @@
  * 2024-07-23  <axel.hahn@unibe.ch>      php 8 only: use typed variables
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  * 2026-01-09  <axel.hahn@unibe.ch>      add timout parameter -W in ping command; use default from $_aDoc
+ * 2026-10-07  <axel.hahn@unibe.ch>      fix linter warnings
  */
 class checkPing extends appmonitorcheck
 {
@@ -78,14 +79,16 @@ class checkPing extends appmonitorcheck
      */
     public function run(array $aParams): array
     {
-        $sHost = $aParams['host'] ?? $this->_aDoc["parameters"]["host"]["default"];
+        $sHost = $aParams['host'] ?? ($this->_aDoc["parameters"]["host"]["default"]??"");
 
         $sParamCount = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? "n" : "c";
         $iRepeat = 1;
 
-        $iTimeout= $aParams['timeout']??$this->_aDoc["parameters"]["timeout"]["default"];
+        $iTimeout= $aParams['timeout']??$this->_aDoc["parameters"]["timeout"]["default"]??0;
         $sParamTimeout = "-W $iTimeout";
         $sCommand = "ping -$sParamCount $iRepeat $sParamTimeout $sHost 2>&1";
+        $aOut=[];
+        $iRc=-1;
         exec($sCommand, $aOut, $iRc);
         $sOut = implode("\n", $aOut);
 

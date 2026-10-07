@@ -23,6 +23,7 @@
  * 2025-03-01  <axel.hahn@unibe.ch>      add try catch 
  * 2025-03-19  <axel.hahn@unibe.ch>      add validation rules and parameter description
  * 2025-04-25  <www.axel-hahn.de>        update port + timeout validation rule
+ * 2026-10-07  <axel.hahn@unibe.ch>      fix linter warnings
  */
 class checkMysqlConnect extends appmonitorcheck
 {
@@ -123,23 +124,23 @@ class checkMysqlConnect extends appmonitorcheck
 
         try{
 
-            $db = (isset($aParams["port"]) && $aParams["port"])
-                ? $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"], $aParams["port"])
-                : $mysqli->real_connect($aParams["server"], $aParams["user"], $aParams["password"], $aParams["db"])
+            $db = (isset($aParams["port"]) && (int) $aParams["port"])
+                ? $mysqli->real_connect((string) $aParams["server"], (string) $aParams["user"], (string) $aParams["password"], (string) $aParams["db"], (int) $aParams["port"])
+                : $mysqli->real_connect((string) $aParams["server"], (string) $aParams["user"], (string) $aParams["password"], (string) $aParams["db"])
             ;
             if ($db) {
                 $mysqli->close();
-                return [RESULT_OK, "OK: Mysql database " . $aParams["db"] . " was connected"];
+                return [RESULT_OK, "OK: Mysql database " . (string) $aParams["db"] . " was connected"];
             } else {
                 return [
                     RESULT_ERROR,
-                    "ERROR: Mysql database " . $aParams["db"] . " was not connected. Error " . mysqli_connect_errno() . ": " . mysqli_connect_error()
+                    "ERROR: Mysql database " . (string) $aParams["db"] . " was not connected. Error " . mysqli_connect_errno() . ": " . mysqli_connect_error()
                 ];
             }
         } catch (Exception $e) {
             return [
                 RESULT_ERROR,
-                "ERROR: Mysql database " . $aParams["db"] . " was not connected. Error " . mysqli_connect_errno() . ": " . mysqli_connect_error()
+                "ERROR: Mysql database " . (string) $aParams["db"] . " was not connected. Error " . mysqli_connect_errno() . ": " . mysqli_connect_error()
             ];
         }
     }
