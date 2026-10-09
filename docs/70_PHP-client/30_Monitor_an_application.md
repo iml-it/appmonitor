@@ -164,15 +164,13 @@ Set a name for this website or application and its environment (dev, test, prod)
 If you have several application in subdirectories, i.e. /blog,  /shop...
 then you should the path or any description to identify them too
 
-If no argument is given the name of HTTP_HOST will be used.
-
 ```php
 // set the application manually
-$oMonitor->setHost("www.example.com - My Wordpress blog");
-$oMonitor->setHost("dev.example.com/shop");
+$oMonitor->setWebsite('www.example.com - My Wordpress blog');
+$oMonitor->setWebsite("dev.example.com/shop");
 
 // set the application  domain manually
-$oMonitor->setHost("Wordpress blog");
+$oMonitor->setWebsite("Wordpress blog");
 ```
 
 **Suggestion**:
