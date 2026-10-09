@@ -327,13 +327,21 @@ foreach($aAvailableChecks as $sCheck){
         main{
             display: block;
         }
+        details{
+            clear: both;
+        }
+        details[open] summary ~ * {
+            animation: sweep .2s ease-in-out;
+        }
+        @keyframes sweep {
+            0%    {opacity: 0; margin-left: -20px}
+            100%  {opacity: 1; margin-left: 0px}
+        }
         details > summary {
-            padding: 4px;
-            display: block;
-            background-color: #eeeeee;
-            border: none;
-            box-shadow: 1px 1px 0.5em #bbbbbb;
+            border: 1px solid #ccc;
+            padding: 0.5em;
             cursor: pointer;
+            margin-bottom: 0.2em;
         }
 
         footer{
@@ -381,6 +389,7 @@ foreach($aAvailableChecks as $sCheck){
             width: 25%;
         }
 
+        #meta-description{margin-left: 1em;}
         .plugin-name {color: #900;}
         .param-name{color: #266;}
         .param-type{color: #626;}
@@ -420,9 +429,7 @@ foreach($aAvailableChecks as $sCheck){
         </p>
 
             <main>
-                <div id="meta-intro">
-                    I am an intro text.<br>
-                </div>
+                <div id="meta-intro"></div>
                 <div id="meta-description" class="description"></div>
                 <div>
                     <div id="meta-php" class="php"></div>
@@ -430,7 +437,6 @@ foreach($aAvailableChecks as $sCheck){
                 </div>
             </main>
         </div>
-        <div sytle="clear:both"></div>
             
 </details>
 <details>
